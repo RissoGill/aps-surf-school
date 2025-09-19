@@ -9,9 +9,13 @@ import AthleteLogin from "./pages/auth/AthleteLogin";
 import GuardianLogin from "./pages/auth/GuardianLogin";
 import AdministrationLogin from "./pages/auth/AdministrationLogin";
 import CoachDashboard from "./pages/coach/CoachDashboard";
+import AthleteDetails from "./pages/coach/AthleteDetails";
 import AthleteDashboard from "./pages/athlete/AthleteDashboard";
 import GuardianDashboard from "./pages/guardian/GuardianDashboard";
 import AdministrationDashboard from "./pages/admin/AdministrationDashboard";
+import UserManagement from "./pages/admin/UserManagement";
+import AthleteManagement from "./pages/admin/AthleteManagement";
+import PaymentManagement from "./pages/admin/PaymentManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,9 +37,15 @@ const App = () => (
           
           {/* Dashboard Routes */}
           <Route path="/dashboard/coach" element={<CoachDashboard />} />
+          <Route path="/athlete/:id" element={<AthleteDetails />} />
           <Route path="/dashboard/athlete" element={<AthleteDashboard />} />
           <Route path="/dashboard/guardian" element={<GuardianDashboard />} />
           <Route path="/dashboard/administration" element={<AdministrationDashboard />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/athletes" element={<AthleteManagement />} />
+          <Route path="/admin/payments" element={<PaymentManagement />} />
           
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, User, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ const mockAthletes = [
 ];
 
 const CoachDashboard = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredAthletes, setFilteredAthletes] = useState(mockAthletes);
 
@@ -122,6 +124,7 @@ const CoachDashboard = () => {
                   <div
                     key={athlete.id}
                     className="p-4 border-b border-border last:border-b-0 hover:bg-accent/50 transition-colors cursor-pointer active:bg-accent"
+                    onClick={() => navigate(`/athlete/${athlete.id}`)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">

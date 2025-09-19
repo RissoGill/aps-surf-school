@@ -1,5 +1,10 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
+import AppHeader from "@/components/shared/AppHeader";
+import AppFooter from "@/components/shared/AppFooter";
 
 const NotFound = () => {
   const location = useLocation();
@@ -9,14 +14,33 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-gray-600">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 underline hover:text-blue-700">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen bg-gradient-surface">
+      <AppHeader title="Page Not Found" />
+      
+      <main className="mobile-container py-16">
+        <Card className="shadow-medium text-center">
+          <CardContent className="p-8">
+            <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+            </div>
+            
+            <h1 className="text-4xl font-bold text-foreground mb-4">404</h1>
+            <p className="text-xl text-muted-foreground mb-6">Oops! Page not found</p>
+            <p className="text-sm text-muted-foreground mb-8">
+              The page you're looking for doesn't exist or has been moved.
+            </p>
+            
+            <Button 
+              onClick={() => window.location.href = "/"}
+              className="touch-friendly gradient-primary"
+            >
+              Return to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </main>
+
+      <AppFooter />
     </div>
   );
 };

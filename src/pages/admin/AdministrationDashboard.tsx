@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Settings, Users, DollarSign, Calendar, UserPlus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
 const AdministrationDashboard = () => {
+  const navigate = useNavigate();
+
   const adminActions = [
     {
       title: "Manage Users",
@@ -79,7 +82,25 @@ const AdministrationDashboard = () => {
           <h3 className="text-lg font-semibold text-foreground mb-4">Management Tools</h3>
           
           {adminActions.map((action, index) => (
-            <Card key={index} className="shadow-soft hover:shadow-medium transition-shadow">
+            <Card 
+              key={index} 
+              className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+              onClick={() => {
+                switch(action.title) {
+                  case "Manage Users":
+                    navigate("/admin/users");
+                    break;
+                  case "Athlete Management":
+                    navigate("/admin/athletes");
+                    break;
+                  case "Payment Administration":
+                    navigate("/admin/payments");
+                    break;
+                  default:
+                    break;
+                }
+              }}
+            >
               <CardContent className="p-0">
                 <div className="flex items-center p-4">
                   <div className={`w-12 h-12 rounded-full bg-${action.color}/10 flex items-center justify-center mr-4 flex-shrink-0`}>
