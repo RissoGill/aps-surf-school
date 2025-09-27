@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,6 +65,7 @@ const AthleteDetails = () => {
   const { toast } = useToast();
   const [attendance, setAttendance] = useState(mockAttendance);
   const [editingAttendance, setEditingAttendance] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
 
   const coaches = ["Coach Maria", "Coach John", "Coach Alex", "Coach Sarah"];
   const beaches = ["Main Beach", "North Beach", "South Beach", "Training Pool"];
@@ -99,6 +100,42 @@ const AthleteDetails = () => {
       case "Justified absence": return "bg-warning/10 text-warning";
       case "Absent": return "bg-destructive/10 text-destructive";
       default: return "bg-secondary/10 text-secondary-foreground";
+    }
+  };
+
+  const getMonthName = (month: number, year: number) => {
+    const date = new Date(year, month);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setSelectedMonth(prev => {
+      const newMonth = direction === 'prev' ? prev.month - 1 : prev.month + 1;
+      if (newMonth < 0) {
+        return { month: 11, year: prev.year - 1 };
+      } else if (newMonth > 11) {
+        return { month: 0, year: prev.year + 1 };
+      }
+      return { month: newMonth, year: prev.year };
+    });
+  };
+
+  const getAttendanceForMonth = (month: number, year: number) => {
+    // Mock data - in real app, this would filter by selected month
+    if (month === 8 && year === 2024) { // September 2024
+      return mockAttendance;
+    } else if (month === 7 && year === 2024) { // August 2024
+      return [
+        { date: "2024-08-21", status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Good session" },
+        { date: "2024-08-19", status: "Present", coach: "Coach John", beach: "North Beach", observations: "Worked on technique" },
+        { date: "2024-08-16", status: "Absent", coach: "Coach Maria", beach: "-", observations: "Sick day" },
+        { date: "2024-08-14", status: "Present", coach: "Coach John", beach: "Main Beach", observations: "Great improvement" },
+      ];
+    } else {
+      return [
+        { date: `2024-${String(month + 1).padStart(2, '0')}-15`, status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Regular session" },
+        { date: `2024-${String(month + 1).padStart(2, '0')}-12`, status: "Present", coach: "Coach John", beach: "North Beach", observations: "Training session" },
+      ];
     }
   };
 
@@ -256,17 +293,37 @@ const AthleteDetails = () => {
           <TabsContent value="attendance" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  September 2024 Attendance
-                </CardTitle>
+                <div className="flex items-center justify-between mb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    {getMonthName(selectedMonth.month, selectedMonth.year)} Attendance
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigateMonth('prev')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigateMonth('next')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
                 <CardDescription className="text-primary font-medium">
                   ✏️ Editable by Coach
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {attendance.map((session, index) => (
+                  {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session, index) => (
                     <div key={index} className="border border-border rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="font-medium">{session.date}</h4>

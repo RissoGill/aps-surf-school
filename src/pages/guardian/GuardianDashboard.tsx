@@ -1,4 +1,5 @@
-import { Heart, CreditCard, AlertCircle, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,8 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
 const GuardianDashboard = () => {
+  const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
+  
   const payments = [
     { month: "September 2024", amount: 180, dueDate: "Sep 5", status: "Paid", paidDate: "Sep 3" },
     { month: "August 2024", amount: 180, dueDate: "Aug 5", status: "Paid", paidDate: "Aug 2" },
@@ -30,6 +33,48 @@ const GuardianDashboard = () => {
   const totalOutstanding = payments
     .filter(p => p.status === "Unpaid")
     .reduce((sum, p) => sum + p.amount, 0);
+
+  const getMonthName = (month: number, year: number) => {
+    const date = new Date(year, month);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setSelectedMonth(prev => {
+      const newMonth = direction === 'prev' ? prev.month - 1 : prev.month + 1;
+      if (newMonth < 0) {
+        return { month: 11, year: prev.year - 1 };
+      } else if (newMonth > 11) {
+        return { month: 0, year: prev.year + 1 };
+      }
+      return { month: newMonth, year: prev.year };
+    });
+  };
+
+  const getAttendanceForMonth = (month: number, year: number) => {
+    // Mock data - in real app, this would filter by selected month
+    if (month === 8 && year === 2024) { // September 2024
+      return [
+        { date: "Sep 18", status: "Present", coach: "Coach Maria" },
+        { date: "Sep 16", status: "Present", coach: "Coach John" },
+        { date: "Sep 13", status: "Justified", coach: "Coach Maria" },
+        { date: "Sep 11", status: "Present", coach: "Coach John" },
+        { date: "Sep 9", status: "Present", coach: "Coach Maria" }
+      ];
+    } else if (month === 7 && year === 2024) { // August 2024
+      return [
+        { date: "Aug 21", status: "Present", coach: "Coach Maria" },
+        { date: "Aug 19", status: "Present", coach: "Coach John" },
+        { date: "Aug 16", status: "Absent", coach: "Coach Maria" },
+        { date: "Aug 14", status: "Present", coach: "Coach John" },
+      ];
+    } else {
+      return [
+        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 15`, status: "Present", coach: "Coach Maria" },
+        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 12`, status: "Present", coach: "Coach John" },
+      ];
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -185,22 +230,36 @@ const GuardianDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Attendance Tab - Similar to Athlete Dashboard */}
+          {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle>September 2024 Attendance</CardTitle>
+                <div className="flex items-center justify-between mb-2">
+                  <CardTitle>{getMonthName(selectedMonth.month, selectedMonth.year)} Attendance</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigateMonth('prev')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigateMonth('next')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
                 <CardDescription>Emma's training session record</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[
-                    { date: "Sep 18", status: "Present", coach: "Coach Maria" },
-                    { date: "Sep 16", status: "Present", coach: "Coach John" },
-                    { date: "Sep 13", status: "Justified", coach: "Coach Maria" },
-                    { date: "Sep 11", status: "Present", coach: "Coach John" },
-                    { date: "Sep 9", status: "Present", coach: "Coach Maria" }
-                  ].map((session, index) => (
+                  {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session, index) => (
                     <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg">
                       <div>
                         <p className="font-medium">{session.date}</p>
@@ -209,7 +268,9 @@ const GuardianDashboard = () => {
                       <Badge className={
                         session.status === "Present" 
                           ? "bg-success/10 text-success" 
-                          : "bg-warning/10 text-warning"
+                          : session.status === "Justified"
+                          ? "bg-warning/10 text-warning"
+                          : "bg-destructive/10 text-destructive"
                       }>
                         {session.status}
                       </Badge>
