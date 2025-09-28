@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import apsLogo from "@/assets/aps-logo.png";
+import ProcessedLogo from "@/components/ProcessedLogo";
 
 interface AppHeaderProps {
   title?: string;
@@ -26,10 +26,12 @@ const AppHeader = ({ title, showBack = false, backTo = "/" }: AppHeaderProps) =>
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <img 
-            src={apsLogo} 
-            alt="APS Surf School" 
-            className="h-8 w-auto"
+          <ProcessedLogo
+            containerClassName="h-8 w-8"
+            className="h-full w-full object-contain"
+            alt="APS Surf School"
+            process={false}
+            rounded
           />
         </div>
         

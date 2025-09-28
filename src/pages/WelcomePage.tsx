@@ -57,9 +57,12 @@ const WelcomePage = () => {
             />
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
               <div className="text-white text-center">
-                <ProcessedLogo 
-                  className="h-20 w-auto mx-auto mb-4 drop-shadow-lg"
+                <ProcessedLogo
+                  containerClassName="h-20 w-20 mx-auto mb-4 drop-shadow-lg"
+                  className="h-full w-full object-contain"
                   alt="APS Surf School"
+                  process={false}
+                  rounded
                 />
                 <h1 className="text-3xl font-bold mb-2">Welcome to APS</h1>
                 <p className="text-lg opacity-90">Surf School Management</p>
