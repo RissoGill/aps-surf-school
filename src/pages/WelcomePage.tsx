@@ -6,6 +6,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import surfHero from "@/assets/surf-hero.jpg";
+import apsLogo from "@/assets/aps-logo.png";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
@@ -55,7 +56,12 @@ const WelcomePage = () => {
               className="w-full h-48 object-cover"
             />
             <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-              <div className="text-white">
+              <div className="text-white text-center">
+                <img 
+                  src={apsLogo} 
+                  alt="APS Surf School" 
+                  className="h-16 w-auto mx-auto mb-4 drop-shadow-lg"
+                />
                 <h1 className="text-3xl font-bold mb-2">Welcome to APS</h1>
                 <p className="text-lg opacity-90">Surf School Management</p>
               </div>
