@@ -51,10 +51,10 @@ const WelcomePage = () => {
           <div className="rounded-xl mb-6 h-48 bg-card flex items-center justify-center">
             <div className="text-center">
               <ProcessedLogo
-                containerClassName="h-20 w-20 mx-auto mb-4 drop-shadow-lg"
+                containerClassName="h-32 w-32 mx-auto mb-4 drop-shadow-lg"
                 className="h-full w-full object-contain"
                 alt="APS Surf School"
-                rounded
+                rounded={false}
               />
               <h1 className="text-3xl font-bold text-foreground">Welcome to APS</h1>
             </div>
