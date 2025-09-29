@@ -1,4 +1,6 @@
 import sponsorsBanner from "@/assets/sponsors-banner.png";
+import joaquimChavesLogo from "@/assets/joaquim-chaves-logo.jpg";
+import swappieLogo from "@/assets/swappie-logo.png";
 
 const SponsorBanner = () => {
   return (
@@ -10,12 +12,16 @@ const SponsorBanner = () => {
             Main Sponsors
           </h3>
           <div className="flex justify-center items-center gap-8">
-            <div className="h-16 w-32 bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">Logo 1</span>
-            </div>
-            <div className="h-16 w-32 bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">Logo 2</span>
-            </div>
+            <img 
+              src={joaquimChavesLogo} 
+              alt="Joaquim Chaves Saúde" 
+              className="h-16 w-auto object-contain"
+            />
+            <img 
+              src={swappieLogo} 
+              alt="Swappie" 
+              className="h-16 w-auto object-contain"
+            />
           </div>
         </div>
 
