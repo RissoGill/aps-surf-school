@@ -1,6 +1,6 @@
 import sponsorsBanner from "@/assets/sponsors-banner.png";
 import joaquimChavesLogo from "@/assets/joaquim-chaves-logo.png";
-import swappieLogo from "@/assets/swappie-logo.png";
+import hurleyLogo from "@/assets/hurley-logo.png";
 
 const SponsorBanner = () => {
   return (
@@ -18,8 +18,8 @@ const SponsorBanner = () => {
               className="h-20 w-auto object-contain"
             />
             <img 
-              src={swappieLogo} 
-              alt="Swappie" 
+              src={hurleyLogo} 
+              alt="Hurley" 
               className="h-12 w-auto object-contain"
             />
           </div>
