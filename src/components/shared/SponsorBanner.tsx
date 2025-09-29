@@ -1,6 +1,11 @@
 import sponsorsBanner from "@/assets/sponsors-banner.png";
 import joaquimChavesLogo from "@/assets/joaquim-chaves-logo.png";
 import hurleyLogo from "@/assets/hurley-logo.png";
+import oceanEarthLogo from "@/assets/ocean-earth-logo.png";
+import surfersLogo from "@/assets/surfers-logo.png";
+import eqLogo from "@/assets/eq-logo.png";
+import quintaMarinhaLogo from "@/assets/quinta-marinha-logo.png";
+import cultoImagemLogo from "@/assets/culto-imagem-logo.png";
 
 const SponsorBanner = () => {
   return (
@@ -31,11 +36,34 @@ const SponsorBanner = () => {
             Our Partners
           </h3>
           <div className="grid grid-cols-3 gap-4">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-12 w-full bg-muted rounded-lg flex items-center justify-center">
-                <span className="text-xs text-muted-foreground">Partner {i + 1}</span>
-              </div>
-            ))}
+            <img 
+              src={oceanEarthLogo} 
+              alt="Ocean & Earth" 
+              className="h-12 w-auto object-contain mx-auto"
+            />
+            <img 
+              src={surfersLogo} 
+              alt="Surfers" 
+              className="h-12 w-auto object-contain mx-auto"
+            />
+            <img 
+              src={eqLogo} 
+              alt="EQ" 
+              className="h-12 w-auto object-contain mx-auto"
+            />
+            <img 
+              src={quintaMarinhaLogo} 
+              alt="Quinta da Marinha Health Club" 
+              className="h-12 w-auto object-contain mx-auto"
+            />
+            <img 
+              src={cultoImagemLogo} 
+              alt="Culto da Imagem" 
+              className="h-12 w-auto object-contain mx-auto"
+            />
+            <div className="h-12 w-full bg-muted rounded-lg flex items-center justify-center">
+              <span className="text-xs text-muted-foreground">Partner 6</span>
+            </div>
           </div>
         </div>
 
