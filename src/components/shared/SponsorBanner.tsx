@@ -1,5 +1,5 @@
 import sponsorsBanner from "@/assets/sponsors-banner.png";
-import joaquimChavesLogo from "@/assets/joaquim-chaves-logo.jpg";
+import joaquimChavesLogo from "@/assets/joaquim-chaves-logo.png";
 import swappieLogo from "@/assets/swappie-logo.png";
 
 const SponsorBanner = () => {
