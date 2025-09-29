@@ -15,7 +15,7 @@ const SponsorBanner = () => {
             <img 
               src={joaquimChavesLogo} 
               alt="Joaquim Chaves Saúde" 
-              className="h-16 w-auto object-contain"
+              className="h-20 w-auto object-contain"
             />
             <img 
               src={swappieLogo} 
