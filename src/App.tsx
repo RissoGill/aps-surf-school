@@ -16,6 +16,7 @@ import AdministrationDashboard from "./pages/admin/AdministrationDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AthleteManagement from "./pages/admin/AthleteManagement";
 import PaymentManagement from "./pages/admin/PaymentManagement";
+import AthletesList from "./pages/attendance/AthletesList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,9 @@ const App = () => (
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/athletes" element={<AthleteManagement />} />
           <Route path="/admin/payments" element={<PaymentManagement />} />
+          
+          {/* Attendance Routes */}
+          <Route path="/attendance/athletes" element={<AthletesList />} />
           
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
