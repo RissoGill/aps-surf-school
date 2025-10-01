@@ -1,51 +1,51 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, User, Calendar, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
-// Mock data for demonstration
-const mockAthletes = [
-  {
-    id: 1,
-    name: "Emma Johnson",
-    level: "Intermediate",
-    lastTraining: "2024-09-18",
-    nextTraining: "2024-09-20"
-  },
-  {
-    id: 2,
-    name: "Liam Smith",
-    level: "Beginner",
-    lastTraining: "2024-09-17",
-    nextTraining: "2024-09-19"
-  },
-  {
-    id: 3,
-    name: "Sofia Rodriguez",
-    level: "Advanced",
-    lastTraining: "2024-09-18",
-    nextTraining: "2024-09-21"
-  }
-];
+interface Athlete {
+  Athlete_Id: string;
+  first_name: string | null;
+  last_name: string | null;
+  surf_level: string | null;
+  training_days: string | null;
+}
 
 const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredAthletes, setFilteredAthletes] = useState(mockAthletes);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const filtered = mockAthletes.filter(athlete =>
-      athlete.name.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredAthletes(filtered);
-  };
+  const { data: athletes, isLoading } = useQuery({
+    queryKey: ['athletes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('Athlete_Id, first_name, last_name, surf_level, training_days')
+        .order('first_name', { ascending: true });
+      
+      if (error) throw error;
+      return data as Athlete[];
+    },
+  });
+
+  const filteredAthletes = useMemo(() => {
+    if (!athletes) return [];
+    if (!searchQuery) return athletes;
+    
+    return athletes.filter(athlete => {
+      const fullName = `${athlete.first_name} ${athlete.last_name}`.toLowerCase();
+      return fullName.includes(searchQuery.toLowerCase());
+    });
+  }, [athletes, searchQuery]);
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -77,7 +77,7 @@ const CoachDashboard = () => {
           <Input
             placeholder="Search athletes by name..."
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 touch-friendly shadow-soft"
           />
         </div>
@@ -87,7 +87,11 @@ const CoachDashboard = () => {
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <User className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">12</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-foreground">{athletes?.length || 0}</p>
+              )}
               <p className="text-sm text-muted-foreground">Total Athletes</p>
             </CardContent>
           </Card>
@@ -95,7 +99,7 @@ const CoachDashboard = () => {
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">8</p>
+              <p className="text-2xl font-bold text-foreground">-</p>
               <p className="text-sm text-muted-foreground">Today's Sessions</p>
             </CardContent>
           </Card>
@@ -114,38 +118,55 @@ const CoachDashboard = () => {
           </CardHeader>
           
           <CardContent className="p-0">
-            {filteredAthletes.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-0">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="p-4 border-b border-border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <Skeleton className="h-5 w-32 mb-2" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
+                      <Skeleton className="h-6 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredAthletes.length === 0 ? (
               <div className="p-6 text-center">
-                <p className="text-muted-foreground">No athletes found</p>
+                <p className="text-muted-foreground">
+                  {searchQuery ? "No athletes found matching your search" : "No athletes found"}
+                </p>
               </div>
             ) : (
               <div className="space-y-0">
                 {filteredAthletes.map((athlete) => (
                   <div
-                    key={athlete.id}
+                    key={athlete.Athlete_Id}
                     className="p-4 border-b border-border last:border-b-0 hover:bg-accent/50 transition-colors cursor-pointer active:bg-accent"
-                    onClick={() => navigate(`/athlete/${athlete.id}`)}
+                    onClick={() => navigate(`/athlete/${athlete.Athlete_Id}`)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <h3 className="font-medium text-foreground mb-1">
-                          {athlete.name}
+                          {athlete.first_name} {athlete.last_name}
                         </h3>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            Last: {athlete.lastTraining}
-                          </span>
+                        {athlete.training_days && (
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {athlete.training_days}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {athlete.surf_level && (
+                        <div className="text-right">
+                          <Badge className={`${getLevelColor(athlete.surf_level)} mb-1`}>
+                            {athlete.surf_level}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={`${getLevelColor(athlete.level)} mb-1`}>
-                          {athlete.level}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground">
-                          Next: {athlete.nextTraining}
-                        </p>
-                      </div>
+                      )}
                     </div>
                   </div>
                 ))}
