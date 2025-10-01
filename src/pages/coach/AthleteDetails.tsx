@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save, ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,54 +10,38 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
-// Mock athlete data
-const athleteData = {
-  id: "1",
-  name: "Emma Johnson",
-  dateOfBirth: "March 15, 2010",
-  healthNumber: "APS-2024-058",
-  address: "123 Ocean View Drive, Beach City",
-  phone: "(555) 123-4567",
-  level: "Intermediate",
-  mother: {
-    name: "Sarah Johnson",
-    phone: "(555) 123-4567",
-    email: "sarah.johnson@email.com"
-  },
-  father: {
-    name: "Mike Johnson", 
-    phone: "(555) 987-6543",
-    email: "mike.johnson@email.com"
-  },
-  training: {
-    weeklyCount: 3,
-    schedule: "Mon 18:00, Wed 18:00, Fri 18:00",
-    days: ["Monday", "Wednesday", "Friday"]
-  },
-  transportation: {
-    provided: true,
-    pickup: {
-      address: "123 Ocean View Drive",
-      days: "Mon, Wed, Fri",
-      time: "17:30"
-    },
-    dropoff: {
-      address: "123 Ocean View Drive", 
-      days: "Mon, Wed, Fri",
-      time: "19:30"
-    }
-  }
-};
+interface Athlete {
+  Athlete_Id: string;
+  first_name: string | null;
+  last_name: string | null;
+  date_of_birth: string | null;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  surf_level: string | null;
+  mother_name: string | null;
+  mother_phone: number | null;
+  mother_email: string | null;
+  father_name: string | null;
+  father_phone: string | null;
+  father_email: string | null;
+  trainings_per_week: number | null;
+  training_days: string | null;
+  transport: boolean | null;
+  pickup_address: string | null;
+  dropoff_address: string | null;
+}
 
 const mockAttendance = [
   { date: "2024-09-18", status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Great progress on turns" },
   { date: "2024-09-16", status: "Present", coach: "Coach John", beach: "North Beach", observations: "Working on balance" },
-  { date: "2024-13", status: "Justified", coach: "Coach Maria", beach: "-", observations: "Family vacation" },
+  { date: "2024-09-13", status: "Justified", coach: "Coach Maria", beach: "-", observations: "Family vacation" },
   { date: "2024-09-11", status: "Present", coach: "Coach John", beach: "Main Beach", observations: "Excellent session" },
 ];
 
@@ -66,6 +52,24 @@ const AthleteDetails = () => {
   const [attendance, setAttendance] = useState(mockAttendance);
   const [editingAttendance, setEditingAttendance] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
+
+  const { data: athlete, isLoading, error } = useQuery({
+    queryKey: ['athlete', id],
+    queryFn: async () => {
+      if (!id) throw new Error('No athlete ID provided');
+      
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('*')
+        .eq('Athlete_Id', id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      if (!data) throw new Error('Athlete not found');
+      return data as Athlete;
+    },
+    enabled: !!id,
+  });
 
   const coaches = ["Coach Maria", "Coach John", "Coach Alex", "Coach Sarah"];
   const beaches = ["Main Beach", "North Beach", "South Beach", "Training Pool"];
@@ -144,16 +148,45 @@ const AthleteDetails = () => {
       <AppHeader title="Athlete Details" showBack backTo="/dashboard/coach" />
       
       <main className="mobile-container py-6">
-        {/* Athlete Header */}
-        <Card className="shadow-medium mb-6">
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">{athleteData.name}</h2>
-            <Badge className={getLevelColor(athleteData.level)}>{athleteData.level}</Badge>
-          </CardContent>
-        </Card>
+        {isLoading && (
+          <div className="space-y-4">
+            <Card className="shadow-medium">
+              <CardContent className="p-6 text-center">
+                <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
+                <Skeleton className="h-6 w-32 mx-auto mb-2" />
+                <Skeleton className="h-5 w-24 mx-auto" />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {error && (
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <p className="text-destructive text-center">Error loading athlete data: {error.message}</p>
+              <Button onClick={() => navigate('/dashboard/coach')} className="mt-4 mx-auto block">
+                Back to Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {athlete && (
+          <>
+            {/* Athlete Header */}
+            <Card className="shadow-medium mb-6">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground mb-2">
+                  {athlete.first_name} {athlete.last_name}
+                </h2>
+                {athlete.surf_level && (
+                  <Badge className={getLevelColor(athlete.surf_level)}>{athlete.surf_level}</Badge>
+                )}
+              </CardContent>
+            </Card>
 
         {/* Tabs */}
         <Tabs defaultValue="personal" className="w-full">
@@ -177,23 +210,27 @@ const AthleteDetails = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Date of Birth</p>
-                    <p className="font-medium">{athleteData.dateOfBirth}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Health Number</p>
-                    <p className="font-medium">{athleteData.healthNumber}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-muted-foreground">Address</p>
-                    <p className="font-medium">{athleteData.address}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Phone</p>
-                    <p className="font-medium">{athleteData.phone}</p>
+                    <p className="font-medium">{athlete.date_of_birth || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Level</p>
-                    <Badge className={getLevelColor(athleteData.level)}>{athleteData.level}</Badge>
+                    {athlete.surf_level ? (
+                      <Badge className={getLevelColor(athlete.surf_level)}>{athlete.surf_level}</Badge>
+                    ) : (
+                      <p className="font-medium">N/A</p>
+                    )}
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">Address</p>
+                    <p className="font-medium">{athlete.address || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone</p>
+                    <p className="font-medium">{athlete.phone || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Email</p>
+                    <p className="font-medium">{athlete.email || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -209,9 +246,9 @@ const AthleteDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
-                  <p><span className="text-muted-foreground">Name:</span> {athleteData.mother.name}</p>
-                  <p><span className="text-muted-foreground">Phone:</span> {athleteData.mother.phone}</p>
-                  <p><span className="text-muted-foreground">Email:</span> {athleteData.mother.email}</p>
+                  <p><span className="text-muted-foreground">Name:</span> {athlete.mother_name || 'N/A'}</p>
+                  <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone || 'N/A'}</p>
+                  <p><span className="text-muted-foreground">Email:</span> {athlete.mother_email || 'N/A'}</p>
                 </CardContent>
               </Card>
 
@@ -224,9 +261,9 @@ const AthleteDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
-                  <p><span className="text-muted-foreground">Name:</span> {athleteData.father.name}</p>
-                  <p><span className="text-muted-foreground">Phone:</span> {athleteData.father.phone}</p>
-                  <p><span className="text-muted-foreground">Email:</span> {athleteData.father.email}</p>
+                  <p><span className="text-muted-foreground">Name:</span> {athlete.father_name || 'N/A'}</p>
+                  <p><span className="text-muted-foreground">Phone:</span> {athlete.father_phone || 'N/A'}</p>
+                  <p><span className="text-muted-foreground">Email:</span> {athlete.father_email || 'N/A'}</p>
                 </CardContent>
               </Card>
             </div>
@@ -245,19 +282,21 @@ const AthleteDetails = () => {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
-                  <p className="font-medium">{athleteData.training.weeklyCount} sessions per week</p>
+                  <p className="font-medium">{athlete.trainings_per_week || 0} sessions per week</p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-muted-foreground mb-3">Training Days</p>
-                  <div className="space-y-2">
-                    {athleteData.training.days.map((day, index) => (
-                      <div key={index} className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
+                  {athlete.training_days ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
                         <Clock className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{day} 18:00</span>
+                        <span className="font-medium">{athlete.training_days}</span>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ) : (
+                    <p className="font-medium">Not specified</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -272,18 +311,24 @@ const AthleteDetails = () => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-success/10 text-success">Service Provided</Badge>
+                    {athlete.transport ? (
+                      <Badge className="bg-success/10 text-success">Service Provided</Badge>
+                    ) : (
+                      <Badge variant="secondary">No Service</Badge>
+                    )}
                   </div>
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <p className="text-muted-foreground">Pickup</p>
-                      <p className="font-medium">{athleteData.transportation.pickup.address} - {athleteData.transportation.pickup.days} at {athleteData.transportation.pickup.time}</p>
+                  {athlete.transport && (
+                    <div className="text-sm space-y-2">
+                      <div>
+                        <p className="text-muted-foreground">Pickup</p>
+                        <p className="font-medium">{athlete.pickup_address || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Drop-off</p>
+                        <p className="font-medium">{athlete.dropoff_address || 'N/A'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Drop-off</p>
-                      <p className="font-medium">{athleteData.transportation.dropoff.address} - {athleteData.transportation.dropoff.days} at {athleteData.transportation.dropoff.time}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -471,6 +516,8 @@ const AthleteDetails = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </>
+      )}
       </main>
 
       <SponsorBanner />
