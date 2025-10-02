@@ -38,18 +38,19 @@ interface Athlete {
   dropoff_address: string | null;
 }
 
-const mockAttendance = [
-  { date: "2024-09-18", status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Great progress on turns" },
-  { date: "2024-09-16", status: "Present", coach: "Coach John", beach: "North Beach", observations: "Working on balance" },
-  { date: "2024-09-13", status: "Justified", coach: "Coach Maria", beach: "-", observations: "Family vacation" },
-  { date: "2024-09-11", status: "Present", coach: "Coach John", beach: "Main Beach", observations: "Excellent session" },
-];
+interface AttendanceRecord {
+  Id: string;
+  Date: string | null;
+  status: string | null;
+  treinador: string | null;
+  praia: string | null;
+  notas: string | null;
+}
 
 const AthleteDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [attendance, setAttendance] = useState(mockAttendance);
   const [editingAttendance, setEditingAttendance] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
 
@@ -71,6 +72,23 @@ const AthleteDetails = () => {
     enabled: !!id,
   });
 
+  const { data: attendanceRecords = [], isLoading: isLoadingAttendance } = useQuery({
+    queryKey: ['attendance', id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data, error } = await supabase
+        .from('Attendance')
+        .select('*')
+        .eq('Athlete', id)
+        .order('Date', { ascending: false });
+      
+      if (error) throw error;
+      return (data || []) as AttendanceRecord[];
+    },
+    enabled: !!id,
+  });
+
   const coaches = ["Coach Maria", "Coach John", "Coach Alex", "Coach Sarah"];
   const beaches = ["Main Beach", "North Beach", "South Beach", "Training Pool"];
   const statusOptions = ["Present", "Justified absence", "Absent"];
@@ -83,10 +101,13 @@ const AthleteDetails = () => {
     });
   };
 
-  const updateAttendanceField = (date: string, field: string, value: string) => {
-    setAttendance(prev => prev.map(record => 
-      record.date === date ? { ...record, [field]: value } : record
-    ));
+  const updateAttendanceField = (recordId: string, field: string, value: string) => {
+    // This would update the attendance record in Supabase
+    // For now, just close the editing mode
+    toast({
+      title: "Update Pending",
+      description: "Attendance update functionality will be implemented.",
+    });
   };
 
   const getLevelColor = (level: string) => {
@@ -125,22 +146,11 @@ const AthleteDetails = () => {
   };
 
   const getAttendanceForMonth = (month: number, year: number) => {
-    // Mock data - in real app, this would filter by selected month
-    if (month === 8 && year === 2024) { // September 2024
-      return mockAttendance;
-    } else if (month === 7 && year === 2024) { // August 2024
-      return [
-        { date: "2024-08-21", status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Good session" },
-        { date: "2024-08-19", status: "Present", coach: "Coach John", beach: "North Beach", observations: "Worked on technique" },
-        { date: "2024-08-16", status: "Absent", coach: "Coach Maria", beach: "-", observations: "Sick day" },
-        { date: "2024-08-14", status: "Present", coach: "Coach John", beach: "Main Beach", observations: "Great improvement" },
-      ];
-    } else {
-      return [
-        { date: `2024-${String(month + 1).padStart(2, '0')}-15`, status: "Present", coach: "Coach Maria", beach: "Main Beach", observations: "Regular session" },
-        { date: `2024-${String(month + 1).padStart(2, '0')}-12`, status: "Present", coach: "Coach John", beach: "North Beach", observations: "Training session" },
-      ];
-    }
+    return attendanceRecords.filter(record => {
+      if (!record.Date) return false;
+      const recordDate = new Date(record.Date);
+      return recordDate.getMonth() === month && recordDate.getFullYear() === year;
+    });
   };
 
   return (
@@ -367,128 +377,142 @@ const AthleteDetails = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session, index) => (
-                    <div key={index} className="border border-border rounded-lg p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">{session.date}</h4>
-                        {editingAttendance === session.date ? (
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleSaveAttendance(session.date)}
-                            className="touch-friendly"
-                          >
-                            <Save className="h-4 w-4 mr-1" />
-                            Save
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setEditingAttendance(session.date)}
-                            className="touch-friendly"
-                          >
-                            Edit
-                          </Button>
-                        )}
-                      </div>
+                {isLoadingAttendance ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-24 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).length === 0 ? (
+                      <p className="text-center text-muted-foreground py-6">
+                        No attendance records found for this month
+                      </p>
+                    ) : (
+                      getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session) => (
+                        <div key={session.Id} className="border border-border rounded-lg p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium">{session.Date || 'N/A'}</h4>
+                            {editingAttendance === session.Id ? (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleSaveAttendance(session.Id)}
+                                className="touch-friendly"
+                              >
+                                <Save className="h-4 w-4 mr-1" />
+                                Save
+                              </Button>
+                            ) : (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setEditingAttendance(session.Id)}
+                                className="touch-friendly"
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          </div>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Status</p>
-                          {editingAttendance === session.date ? (
-                            <Select
-                              value={session.status}
-                              onValueChange={(value) => updateAttendanceField(session.date, 'status', value)}
-                            >
-                              <SelectTrigger className="touch-friendly">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {statusOptions.map(status => (
-                                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <Badge className={getStatusColor(session.status)}>
-                              {session.status}
-                            </Badge>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Status</p>
+                              {editingAttendance === session.Id ? (
+                                <Select
+                                  value={session.status || ''}
+                                  onValueChange={(value) => updateAttendanceField(session.Id, 'status', value)}
+                                >
+                                  <SelectTrigger className="touch-friendly">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {statusOptions.map(status => (
+                                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <Badge className={getStatusColor(session.status || '')}>
+                                  {session.status || 'N/A'}
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Trainer</p>
+                              {editingAttendance === session.Id ? (
+                                <Select
+                                  value={session.treinador || ''}
+                                  onValueChange={(value) => updateAttendanceField(session.Id, 'treinador', value)}
+                                >
+                                  <SelectTrigger className="touch-friendly">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {coaches.map(coach => (
+                                      <SelectItem key={coach} value={coach}>{coach}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <p className="font-medium">{session.treinador || 'N/A'}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-1">Beach Location</p>
+                            {editingAttendance === session.Id ? (
+                              <Select
+                                value={session.praia || ''}
+                                onValueChange={(value) => updateAttendanceField(session.Id, 'praia', value)}
+                              >
+                                <SelectTrigger className="touch-friendly">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {beaches.map(beach => (
+                                    <SelectItem key={beach} value={beach}>{beach}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <p className="font-medium">{session.praia || 'N/A'}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-1">Coach Observations</p>
+                            {editingAttendance === session.Id ? (
+                              <Textarea
+                                value={session.notas || ''}
+                                onChange={(e) => updateAttendanceField(session.Id, 'notas', e.target.value)}
+                                placeholder="Add your observations about this session..."
+                                className="touch-friendly"
+                              />
+                            ) : (
+                              <p className="text-sm bg-muted/50 p-2 rounded">{session.notas || 'No notes'}</p>
+                            )}
+                          </div>
+
+                          {editingAttendance === session.Id && (
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="flex-1 touch-friendly">
+                                <Camera className="h-4 w-4 mr-1" />
+                                Upload Photo
+                              </Button>
+                              <Button variant="outline" size="sm" className="flex-1 touch-friendly">
+                                <Camera className="h-4 w-4 mr-1" />
+                                Upload Video
+                              </Button>
+                            </div>
                           )}
                         </div>
-
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Coach</p>
-                          {editingAttendance === session.date ? (
-                            <Select
-                              value={session.coach}
-                              onValueChange={(value) => updateAttendanceField(session.date, 'coach', value)}
-                            >
-                              <SelectTrigger className="touch-friendly">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {coaches.map(coach => (
-                                  <SelectItem key={coach} value={coach}>{coach}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <p className="font-medium">{session.coach}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Beach Location</p>
-                        {editingAttendance === session.date ? (
-                          <Select
-                            value={session.beach}
-                            onValueChange={(value) => updateAttendanceField(session.date, 'beach', value)}
-                          >
-                            <SelectTrigger className="touch-friendly">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {beaches.map(beach => (
-                                <SelectItem key={beach} value={beach}>{beach}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <p className="font-medium">{session.beach}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Coach Observations</p>
-                        {editingAttendance === session.date ? (
-                          <Textarea
-                            value={session.observations}
-                            onChange={(e) => updateAttendanceField(session.date, 'observations', e.target.value)}
-                            placeholder="Add your observations about this session..."
-                            className="touch-friendly"
-                          />
-                        ) : (
-                          <p className="text-sm bg-muted/50 p-2 rounded">{session.observations}</p>
-                        )}
-                      </div>
-
-                      {editingAttendance === session.date && (
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1 touch-friendly">
-                            <Camera className="h-4 w-4 mr-1" />
-                            Upload Photo
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1 touch-friendly">
-                            <Camera className="h-4 w-4 mr-1" />
-                            Upload Video
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
