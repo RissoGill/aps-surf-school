@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Clock } from "lucide-react";
+import { Search, User, Calendar, Clock, ClipboardList } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,18 @@ const CoachDashboard = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 touch-friendly shadow-soft"
           />
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => navigate('/attendance/records')}
+            className="w-full touch-friendly shadow-soft"
+            size="lg"
+          >
+            <ClipboardList className="h-5 w-5 mr-2" />
+            View Attendance Records
+          </Button>
         </div>
 
         {/* Quick Stats */}
