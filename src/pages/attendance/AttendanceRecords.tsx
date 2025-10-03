@@ -28,44 +28,41 @@ const AttendanceRecords = () => {
   const { data: attendanceRecords, isLoading, error } = useQuery({
     queryKey: ["attendance-records"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("Attendance")
-        .select(`
-          Id,
-          Date,
-          status,
-          treinador,
-          praia,
-          notas,
-          Athlete_id
-        `)
-        .order("Date", { ascending: false });
+      const [attendanceRes, athletesRes] = await Promise.all([
+        supabase
+          .from("Attendance")
+          .select(`
+            Id,
+            Date,
+            status,
+            treinador,
+            praia,
+            notas,
+            Athlete_id
+          `)
+          .order("Date", { ascending: false }),
+        supabase
+          .from("Atletas")
+          .select("Athlete_Id, first_name, last_name")
+      ]);
 
-      if (error) throw error;
+      if (attendanceRes.error) throw attendanceRes.error;
+      if (athletesRes.error) {
+        console.warn("Error fetching athletes:", athletesRes.error.message);
+      }
 
-      // Fetch athlete names for each record
-      const recordsWithNames = await Promise.all(
-        (data || []).map(async (record) => {
-          if (record.Athlete_id) {
-            const { data: athlete } = await supabase
-              .from("Atletas")
-              .select("first_name, last_name")
-              .eq("Athlete_Id", record.Athlete_id)
-              .maybeSingle();
-
-            return {
-              ...record,
-              athlete_name: athlete
-                ? `${athlete.first_name || ""} ${athlete.last_name || ""}`.trim()
-                : "Unknown Athlete",
-            };
-          }
-          return {
-            ...record,
-            athlete_name: "Unknown Athlete",
-          };
-        })
+      const athletes = athletesRes.data || [];
+      const nameById = new Map(
+        athletes.map((a: any) => [
+          a.Athlete_Id,
+          ("" + `${a.first_name || ""} ${a.last_name || ""}`.trim()) || "Unknown Athlete",
+        ])
       );
+
+      const recordsWithNames = (attendanceRes.data || []).map((record: any) => ({
+        ...record,
+        athlete_name: record.Athlete_id ? nameById.get(record.Athlete_id) || "Unknown Athlete" : "Unknown Athlete",
+      }));
 
       return recordsWithNames as AttendanceRecord[];
     },

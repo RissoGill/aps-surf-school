@@ -32,6 +32,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           pickup_address: string | null
+          SQL_Line: string | null
           surf_level: string | null
           training_days: string | null
           trainings_per_week: number | null
@@ -54,6 +55,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pickup_address?: string | null
+          SQL_Line?: string | null
           surf_level?: string | null
           training_days?: string | null
           trainings_per_week?: number | null
@@ -76,12 +78,51 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pickup_address?: string | null
+          SQL_Line?: string | null
           surf_level?: string | null
           training_days?: string | null
           trainings_per_week?: number | null
           transport?: boolean | null
         }
         Relationships: []
+      }
+      Attendance: {
+        Row: {
+          Athlete_id: string | null
+          Date: string | null
+          Id: string
+          notas: string | null
+          praia: string | null
+          status: string | null
+          treinador: string | null
+        }
+        Insert: {
+          Athlete_id?: string | null
+          Date?: string | null
+          Id: string
+          notas?: string | null
+          praia?: string | null
+          status?: string | null
+          treinador?: string | null
+        }
+        Update: {
+          Athlete_id?: string | null
+          Date?: string | null
+          Id?: string
+          notas?: string | null
+          praia?: string | null
+          status?: string | null
+          treinador?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Attendance_Athlete_id_fkey"
+            columns: ["Athlete_id"]
+            isOneToOne: false
+            referencedRelation: "Atletas"
+            referencedColumns: ["Athlete_Id"]
+          },
+        ]
       }
     }
     Views: {
