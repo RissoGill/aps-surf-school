@@ -1,15 +1,79 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
+interface Athlete {
+  Athlete_Id: string;
+  first_name: string | null;
+  last_name: string | null;
+  date_of_birth: string | null;
+  address: string | null;
+  phone: string | null;
+  surf_level: string | null;
+  mother_name: string | null;
+  mother_phone: number | null;
+  mother_email: string | null;
+  father_name: string | null;
+  father_phone: string | null;
+  father_email: string | null;
+  trainings_per_week: number | null;
+  training_days: string | null;
+  transport: boolean | null;
+  pickup_address: string | null;
+  dropoff_address: string | null;
+}
+
+interface AttendanceRecord {
+  Id: string;
+  Date: string | null;
+  status: string | null;
+  treinador: string | null;
+  praia: string | null;
+  notas: string | null;
+}
+
 const AthleteDashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
+  const { id } = useParams();
+  const athleteId = id || 'A01'; // Default to A01 for testing if no ID in route
+  const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+
+  const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
+    queryKey: ['athlete', athleteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('*')
+        .eq('Athlete_Id', athleteId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data as Athlete | null;
+    },
+  });
+
+  const { data: attendanceRecords = [], isLoading: isLoadingAttendance } = useQuery({
+    queryKey: ['attendance', athleteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Attendance')
+        .select('*')
+        .eq('Athlete_id', athleteId)
+        .order('Date', { ascending: false });
+      
+      if (error) throw error;
+      return (data || []) as AttendanceRecord[];
+    },
+  });
 
   const getMonthName = (month: number, year: number) => {
     const date = new Date(year, month);
@@ -29,28 +93,28 @@ const AthleteDashboard = () => {
   };
 
   const getAttendanceForMonth = (month: number, year: number) => {
-    // Mock data - in real app, this would filter by selected month
-    if (month === 8 && year === 2024) { // September 2024
-      return [
-        { date: "Sep 18", status: "Present", coach: "Coach Maria" },
-        { date: "Sep 16", status: "Present", coach: "Coach John" },
-        { date: "Sep 13", status: "Justified", coach: "Coach Maria" },
-        { date: "Sep 11", status: "Present", coach: "Coach John" },
-        { date: "Sep 9", status: "Present", coach: "Coach Maria" }
-      ];
-    } else if (month === 7 && year === 2024) { // August 2024
-      return [
-        { date: "Aug 21", status: "Present", coach: "Coach Maria" },
-        { date: "Aug 19", status: "Present", coach: "Coach John" },
-        { date: "Aug 16", status: "Absent", coach: "Coach Maria" },
-        { date: "Aug 14", status: "Present", coach: "Coach John" },
-      ];
-    } else {
-      return [
-        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 15`, status: "Present", coach: "Coach Maria" },
-        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 12`, status: "Present", coach: "Coach John" },
-      ];
-    }
+    return attendanceRecords.filter(record => {
+      if (!record.Date) return false;
+      const recordDate = new Date(record.Date);
+      return recordDate.getMonth() === month && recordDate.getFullYear() === year;
+    });
+  };
+
+  const getStatusColor = (status: string | null) => {
+    if (!status) return "bg-secondary/10 text-secondary-foreground";
+    const normalizedStatus = status.toLowerCase();
+    if (normalizedStatus.includes("present")) return "bg-success/10 text-success";
+    if (normalizedStatus.includes("justified")) return "bg-warning/10 text-warning";
+    if (normalizedStatus.includes("absent")) return "bg-destructive/10 text-destructive";
+    return "bg-secondary/10 text-secondary-foreground";
+  };
+
+  const calculateMonthlySummary = () => {
+    const currentMonthRecords = getAttendanceForMonth(selectedMonth.month, selectedMonth.year);
+    const present = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("present")).length;
+    const justified = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("justified")).length;
+    const absent = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("absent")).length;
+    return { present, justified, absent };
   };
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -60,14 +124,28 @@ const AthleteDashboard = () => {
         {/* Athlete Info Header */}
         <Card className="shadow-medium mb-6">
           <CardContent className="p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="h-8 w-8 text-success" />
+            {isLoadingAthlete ? (
+              <div className="text-center">
+                <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
+                <Skeleton className="h-6 w-32 mx-auto mb-2" />
+                <Skeleton className="h-5 w-24 mx-auto" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Emma Johnson</h2>
-              <Badge className="bg-primary/10 text-primary mb-2">Intermediate Level</Badge>
-              <p className="text-sm text-muted-foreground">Member since March 2024</p>
-            </div>
+            ) : athlete ? (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="h-8 w-8 text-success" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground mb-2">
+                  {athlete.first_name} {athlete.last_name}
+                </h2>
+                {athlete.surf_level && (
+                  <Badge className="bg-primary/10 text-primary mb-2">{athlete.surf_level}</Badge>
+                )}
+                <p className="text-sm text-muted-foreground">ID: {athlete.Athlete_Id}</p>
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground">Athlete not found</p>
+            )}
           </CardContent>
         </Card>
 
@@ -86,28 +164,38 @@ const AthleteDashboard = () => {
                 <CardTitle className="text-lg">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Date of Birth</p>
-                    <p className="font-medium">March 15, 2010</p>
+                {isLoadingAthlete ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Health Number</p>
-                    <p className="font-medium">APS-2024-058</p>
+                ) : athlete ? (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Date of Birth</p>
+                      <p className="font-medium">{athlete.date_of_birth || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Phone</p>
+                      <p className="font-medium">{athlete.phone || 'N/A'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground">Address</p>
+                      <p className="font-medium">{athlete.address || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Level</p>
+                      {athlete.surf_level ? (
+                        <Badge className="bg-primary/10 text-primary">{athlete.surf_level}</Badge>
+                      ) : (
+                        <p className="font-medium">N/A</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="col-span-2">
-                    <p className="text-muted-foreground">Address</p>
-                    <p className="font-medium">123 Ocean View Drive, Beach City</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Phone</p>
-                    <p className="font-medium">(555) 123-4567</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Level</p>
-                    <Badge className="bg-primary/10 text-primary">Intermediate</Badge>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-center text-muted-foreground">No data available</p>
+                )}
               </CardContent>
             </Card>
 
@@ -116,22 +204,30 @@ const AthleteDashboard = () => {
                 <CardTitle className="text-lg">Emergency Contacts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Mother</h4>
-                  <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">Name:</span> Sarah Johnson</p>
-                    <p><span className="text-muted-foreground">Phone:</span> (555) 123-4567</p>
-                    <p><span className="text-muted-foreground">Email:</span> sarah.johnson@email.com</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Father</h4>
-                  <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">Name:</span> Mike Johnson</p>
-                    <p><span className="text-muted-foreground">Phone:</span> (555) 987-6543</p>
-                    <p><span className="text-muted-foreground">Email:</span> mike.johnson@email.com</p>
-                  </div>
-                </div>
+                {isLoadingAthlete ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : athlete ? (
+                  <>
+                    <div>
+                      <h4 className="font-medium mb-2">Mother</h4>
+                      <div className="text-sm space-y-1">
+                        <p><span className="text-muted-foreground">Name:</span> {athlete.mother_name || 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone || 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Email:</span> {athlete.mother_email || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Father</h4>
+                      <div className="text-sm space-y-1">
+                        <p><span className="text-muted-foreground">Name:</span> {athlete.father_name || 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Phone:</span> {athlete.father_phone || 'N/A'}</p>
+                        <p><span className="text-muted-foreground">Email:</span> {athlete.father_email || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-center text-muted-foreground">No data available</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -146,28 +242,30 @@ const AthleteDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
-                  <p className="font-medium">3 sessions per week</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-muted-foreground mb-3">Training Days</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Monday 18:00</span>
+                {isLoadingAthlete ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : athlete ? (
+                  <>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
+                      <p className="font-medium">{athlete.trainings_per_week || 0} sessions per week</p>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Wednesday 18:00</span>
+                    
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-3">Training Days</p>
+                      {athlete.training_days ? (
+                        <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span className="font-medium">{athlete.training_days}</span>
+                        </div>
+                      ) : (
+                        <p className="font-medium">Not specified</p>
+                      )}
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Friday 18:00</span>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <p className="text-center text-muted-foreground">No data available</p>
+                )}
               </CardContent>
             </Card>
 
@@ -179,21 +277,33 @@ const AthleteDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-success/10 text-success">Service Provided</Badge>
-                  </div>
-                  <div className="text-sm space-y-2">
-                    <div>
-                      <p className="text-muted-foreground">Pickup</p>
-                      <p className="font-medium">Home - Monday, Wednesday, Friday at 17:30</p>
+                {isLoadingAthlete ? (
+                  <Skeleton className="h-24 w-full" />
+                ) : athlete ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {athlete.transport ? (
+                        <Badge className="bg-success/10 text-success">Service Provided</Badge>
+                      ) : (
+                        <Badge variant="secondary">No Service</Badge>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Drop-off</p>
-                      <p className="font-medium">Home - Monday, Wednesday, Friday at 19:30</p>
-                    </div>
+                    {athlete.transport && (
+                      <div className="text-sm space-y-2">
+                        <div>
+                          <p className="text-muted-foreground">Pickup</p>
+                          <p className="font-medium">{athlete.pickup_address || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Drop-off</p>
+                          <p className="font-medium">{athlete.dropoff_address || 'N/A'}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+                ) : (
+                  <p className="text-center text-muted-foreground">No data available</p>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -226,25 +336,45 @@ const AthleteDashboard = () => {
                 <CardDescription>Your training session record</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium">{session.date}</p>
-                        <p className="text-sm text-muted-foreground">{session.coach}</p>
-                      </div>
-                      <Badge className={
-                        session.status === "Present" 
-                          ? "bg-success/10 text-success" 
-                          : session.status === "Justified"
-                          ? "bg-warning/10 text-warning"
-                          : "bg-destructive/10 text-destructive"
-                      }>
-                        {session.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                {isLoadingAttendance ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).length === 0 ? (
+                      <p className="text-center text-muted-foreground py-6">
+                        No attendance records for this month
+                      </p>
+                    ) : (
+                      getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((record) => (
+                        <div key={record.Id} className="border border-border rounded-lg p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium">{record.Date || 'N/A'}</p>
+                            <Badge className={getStatusColor(record.status)}>
+                              {record.status || 'Unknown'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                            <div>
+                              <span className="font-medium">Trainer:</span> {record.treinador || 'N/A'}
+                            </div>
+                            <div>
+                              <span className="font-medium">Beach:</span> {record.praia || 'N/A'}
+                            </div>
+                            {record.notas && (
+                              <div className="col-span-2">
+                                <span className="font-medium">Notes:</span> {record.notas}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -253,20 +383,24 @@ const AthleteDashboard = () => {
                 <CardTitle>Monthly Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-2xl font-bold text-success">12</p>
-                    <p className="text-xs text-muted-foreground">Present</p>
+                {isLoadingAttendance ? (
+                  <Skeleton className="h-20 w-full" />
+                ) : (
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-success">{calculateMonthlySummary().present}</p>
+                      <p className="text-xs text-muted-foreground">Present</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-warning">{calculateMonthlySummary().justified}</p>
+                      <p className="text-xs text-muted-foreground">Justified</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-destructive">{calculateMonthlySummary().absent}</p>
+                      <p className="text-xs text-muted-foreground">Absent</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-warning">1</p>
-                    <p className="text-xs text-muted-foreground">Justified</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-destructive">0</p>
-                    <p className="text-xs text-muted-foreground">Absent</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
