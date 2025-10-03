@@ -37,7 +37,7 @@ const AttendanceRecords = () => {
           treinador,
           praia,
           notas,
-          Athlete
+          Athlete_id
         `)
         .order("Date", { ascending: false });
 
@@ -46,12 +46,12 @@ const AttendanceRecords = () => {
       // Fetch athlete names for each record
       const recordsWithNames = await Promise.all(
         (data || []).map(async (record) => {
-          if (record.Athlete) {
+          if (record.Athlete_id) {
             const { data: athlete } = await supabase
               .from("Atletas")
               .select("first_name, last_name")
-              .eq("Athlete_Id", record.Athlete)
-              .single();
+              .eq("Athlete_Id", record.Athlete_id)
+              .maybeSingle();
 
             return {
               ...record,
