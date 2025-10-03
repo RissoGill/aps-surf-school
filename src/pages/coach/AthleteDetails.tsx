@@ -80,7 +80,7 @@ const AthleteDetails = () => {
       const { data, error } = await supabase
         .from('Attendance')
         .select('*')
-        .eq('Athlete', id)
+        .eq('Athlete_id', id)
         .order('Date', { ascending: false });
       
       if (error) throw error;
