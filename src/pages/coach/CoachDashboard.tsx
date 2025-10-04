@@ -33,6 +33,21 @@ interface Athlete {
   last_name: string | null;
   surf_level: string | null;
   training_days: string | null;
+  trainings_per_week: number | null;
+  email: string | null;
+  phone: string | null;
+  mother_name: string | null;
+  mother_phone: number | null;
+  mother_email: string | null;
+  father_name: string | null;
+  father_phone: string | null;
+  father_email: string | null;
+  date_of_birth: string | null;
+  address: string | null;
+  transport: boolean | null;
+  pickup_address: string | null;
+  dropoff_address: string | null;
+  photo_url: string | null;
   attendance: AttendanceRecord[];
 }
 
@@ -56,7 +71,7 @@ const CoachDashboard = () => {
     queryFn: async () => {
       const { data: athletesData, error: athletesError } = await supabase
         .from('Atletas')
-        .select('Athlete_Id, first_name, last_name, surf_level, training_days')
+        .select('*')
         .order('first_name', { ascending: true });
       
       if (athletesError) throw athletesError;
@@ -230,26 +245,44 @@ const CoachDashboard = () => {
                 {filteredAthletes.map((athlete) => (
                   <Collapsible key={athlete.Athlete_Id} className="border-b border-border last:border-b-0">
                     <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className="font-medium text-foreground mb-1">
+                          <h3 className="font-medium text-foreground text-lg mb-2">
                             {athlete.first_name} {athlete.last_name}
                           </h3>
-                          {athlete.training_days && (
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
+                          <div className="grid grid-cols-1 gap-2 text-sm">
+                            {athlete.surf_level && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Level:</span>
+                                <Badge className={`${getLevelColor(athlete.surf_level)}`}>
+                                  {athlete.surf_level}
+                                </Badge>
+                              </div>
+                            )}
+                            {athlete.training_days && (
+                              <div className="flex items-center gap-2 text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
-                                {athlete.training_days}
-                              </span>
-                            </div>
-                          )}
+                                <span>Training Days: {athlete.training_days}</span>
+                              </div>
+                            )}
+                            {athlete.trainings_per_week && (
+                              <div className="text-muted-foreground">
+                                Trainings/Week: {athlete.trainings_per_week}
+                              </div>
+                            )}
+                            {athlete.email && (
+                              <div className="text-muted-foreground">
+                                Email: {athlete.email}
+                              </div>
+                            )}
+                            {athlete.phone && (
+                              <div className="text-muted-foreground">
+                                Phone: {athlete.phone}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {athlete.surf_level && (
-                            <Badge className={`${getLevelColor(athlete.surf_level)}`}>
-                              {athlete.surf_level}
-                            </Badge>
-                          )}
+                        <div className="flex items-start gap-2">
                           <Dialog open={isDialogOpen && selectedAthleteId === athlete.Athlete_Id} onOpenChange={(open) => {
                             setIsDialogOpen(open);
                             if (open) setSelectedAthleteId(athlete.Athlete_Id);
