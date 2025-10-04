@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save, ChevronLeft, ChevronRight } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +51,9 @@ const AthleteDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [editingAttendance, setEditingAttendance] = useState<string | null>(null);
+  const [editedRecord, setEditedRecord] = useState<Partial<AttendanceRecord>>({});
   const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
 
   const { data: athlete, isLoading, error } = useQuery({
@@ -93,20 +95,49 @@ const AthleteDetails = () => {
   const beaches = ["Main Beach", "North Beach", "South Beach", "Training Pool"];
   const statusOptions = ["Present", "Justified absence", "Absent"];
 
-  const handleSaveAttendance = (date: string) => {
-    setEditingAttendance(null);
-    toast({
-      title: "Attendance Saved",
-      description: "Attendance record has been updated successfully.",
-    });
+  const handleSaveAttendance = async (recordId: string) => {
+    try {
+      const { error } = await supabase
+        .from('Attendance')
+        .update(editedRecord)
+        .eq('Id', recordId);
+
+      if (error) throw error;
+
+      // Refetch the attendance data
+      queryClient.invalidateQueries({ queryKey: ['attendance', id] });
+      
+      setEditingAttendance(null);
+      setEditedRecord({});
+      
+      toast({
+        title: "Attendance Saved",
+        description: "Attendance record has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error saving attendance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save attendance record. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const updateAttendanceField = (recordId: string, field: string, value: string) => {
-    // This would update the attendance record in Supabase
-    // For now, just close the editing mode
-    toast({
-      title: "Update Pending",
-      description: "Attendance update functionality will be implemented.",
+  const updateAttendanceField = (field: string, value: string) => {
+    setEditedRecord(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const startEditing = (record: AttendanceRecord) => {
+    setEditingAttendance(record.Id);
+    setEditedRecord({
+      status: record.status,
+      treinador: record.treinador,
+      praia: record.praia,
+      notas: record.notas,
     });
   };
 
@@ -407,7 +438,7 @@ const AthleteDetails = () => {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => setEditingAttendance(session.Id)}
+                                onClick={() => startEditing(session)}
                                 className="touch-friendly"
                               >
                                 Edit
@@ -420,8 +451,8 @@ const AthleteDetails = () => {
                               <p className="text-sm text-muted-foreground mb-1">Status</p>
                               {editingAttendance === session.Id ? (
                                 <Select
-                                  value={session.status || ''}
-                                  onValueChange={(value) => updateAttendanceField(session.Id, 'status', value)}
+                                  value={editedRecord.status || session.status || ''}
+                                  onValueChange={(value) => updateAttendanceField('status', value)}
                                 >
                                   <SelectTrigger className="touch-friendly">
                                     <SelectValue />
@@ -443,8 +474,8 @@ const AthleteDetails = () => {
                               <p className="text-sm text-muted-foreground mb-1">Trainer</p>
                               {editingAttendance === session.Id ? (
                                 <Select
-                                  value={session.treinador || ''}
-                                  onValueChange={(value) => updateAttendanceField(session.Id, 'treinador', value)}
+                                  value={editedRecord.treinador || session.treinador || ''}
+                                  onValueChange={(value) => updateAttendanceField('treinador', value)}
                                 >
                                   <SelectTrigger className="touch-friendly">
                                     <SelectValue />
@@ -465,8 +496,8 @@ const AthleteDetails = () => {
                             <p className="text-sm text-muted-foreground mb-1">Beach Location</p>
                             {editingAttendance === session.Id ? (
                               <Select
-                                value={session.praia || ''}
-                                onValueChange={(value) => updateAttendanceField(session.Id, 'praia', value)}
+                                value={editedRecord.praia || session.praia || ''}
+                                onValueChange={(value) => updateAttendanceField('praia', value)}
                               >
                                 <SelectTrigger className="touch-friendly">
                                   <SelectValue />
@@ -486,8 +517,8 @@ const AthleteDetails = () => {
                             <p className="text-sm text-muted-foreground mb-1">Coach Observations</p>
                             {editingAttendance === session.Id ? (
                               <Textarea
-                                value={session.notas || ''}
-                                onChange={(e) => updateAttendanceField(session.Id, 'notas', e.target.value)}
+                                value={editedRecord.notas || session.notas || ''}
+                                onChange={(e) => updateAttendanceField('notas', e.target.value)}
                                 placeholder="Add your observations about this session..."
                                 className="touch-friendly"
                               />
