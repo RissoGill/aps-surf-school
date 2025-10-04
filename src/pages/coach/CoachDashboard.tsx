@@ -1,16 +1,31 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Clock, ClipboardList } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Search, User, Calendar, Plus, MapPin } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
+interface AttendanceRecord {
+  Id: string;
+  Date: string | null;
+  status: string | null;
+  treinador: string | null;
+  praia: string | null;
+  notas: string | null;
+}
 
 interface Athlete {
   Athlete_Id: string;
@@ -18,24 +33,95 @@ interface Athlete {
   last_name: string | null;
   surf_level: string | null;
   training_days: string | null;
+  attendance: AttendanceRecord[];
 }
 
 const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
+  const [newAttendance, setNewAttendance] = useState({
+    date: new Date().toISOString().split('T')[0],
+    status: "",
+    treinador: "",
+    praia: "",
+    notas: ""
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: athletes, isLoading } = useQuery({
-    queryKey: ['athletes'],
+    queryKey: ['athletes-with-attendance'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: athletesData, error: athletesError } = await supabase
         .from('Atletas')
         .select('Athlete_Id, first_name, last_name, surf_level, training_days')
         .order('first_name', { ascending: true });
       
-      if (error) throw error;
-      return data as Athlete[];
+      if (athletesError) throw athletesError;
+
+      const { data: attendanceData, error: attendanceError } = await supabase
+        .from('Attendance')
+        .select('*')
+        .order('Date', { ascending: false });
+
+      if (attendanceError) throw attendanceError;
+
+      const athletesWithAttendance = athletesData.map(athlete => ({
+        ...athlete,
+        attendance: attendanceData.filter(att => att.Athlete_id === athlete.Athlete_Id)
+      }));
+
+      return athletesWithAttendance as Athlete[];
     },
   });
+
+  const handleSaveAttendance = async () => {
+    if (!selectedAthleteId || !newAttendance.status) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('Attendance')
+      .insert({
+        Athlete_id: selectedAthleteId,
+        Date: newAttendance.date,
+        status: newAttendance.status,
+        treinador: newAttendance.treinador,
+        praia: newAttendance.praia,
+        notas: newAttendance.notas,
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save attendance",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Attendance recorded successfully",
+    });
+
+    setIsDialogOpen(false);
+    setNewAttendance({
+      date: new Date().toISOString().split('T')[0],
+      status: "",
+      treinador: "",
+      praia: "",
+      notas: ""
+    });
+    queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+  };
 
   const filteredAthletes = useMemo(() => {
     if (!athletes) return [];
@@ -82,17 +168,6 @@ const CoachDashboard = () => {
           />
         </div>
 
-        {/* Quick Actions */}
-        <div className="mb-6">
-          <Button 
-            onClick={() => navigate('/attendance/records')}
-            className="w-full touch-friendly shadow-soft"
-            size="lg"
-          >
-            <ClipboardList className="h-5 w-5 mr-2" />
-            View Attendance Records
-          </Button>
-        </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -122,10 +197,10 @@ const CoachDashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Recent Athletes
+              Athletes & Attendance
             </CardTitle>
             <CardDescription>
-              Select an athlete to view their details
+              View athletes and their attendance records
             </CardDescription>
           </CardHeader>
           
@@ -153,34 +228,150 @@ const CoachDashboard = () => {
             ) : (
               <div className="space-y-0">
                 {filteredAthletes.map((athlete) => (
-                  <div
-                    key={athlete.Athlete_Id}
-                    className="p-4 border-b border-border last:border-b-0 hover:bg-accent/50 transition-colors cursor-pointer active:bg-accent"
-                    onClick={() => navigate(`/athlete/${athlete.Athlete_Id}`)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground mb-1">
-                          {athlete.first_name} {athlete.last_name}
-                        </h3>
-                        {athlete.training_days && (
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {athlete.training_days}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      {athlete.surf_level && (
-                        <div className="text-right">
-                          <Badge className={`${getLevelColor(athlete.surf_level)} mb-1`}>
-                            {athlete.surf_level}
-                          </Badge>
+                  <Collapsible key={athlete.Athlete_Id} className="border-b border-border last:border-b-0">
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-foreground mb-1">
+                            {athlete.first_name} {athlete.last_name}
+                          </h3>
+                          {athlete.training_days && (
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {athlete.training_days}
+                              </span>
+                            </div>
+                          )}
                         </div>
+                        <div className="flex items-center gap-2">
+                          {athlete.surf_level && (
+                            <Badge className={`${getLevelColor(athlete.surf_level)}`}>
+                              {athlete.surf_level}
+                            </Badge>
+                          )}
+                          <Dialog open={isDialogOpen && selectedAthleteId === athlete.Athlete_Id} onOpenChange={(open) => {
+                            setIsDialogOpen(open);
+                            if (open) setSelectedAthleteId(athlete.Athlete_Id);
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Plus className="h-4 w-4 mr-1" />
+                                Add
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Record Attendance for {athlete.first_name} {athlete.last_name}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                  <Label>Date</Label>
+                                  <Input
+                                    type="date"
+                                    value={newAttendance.date}
+                                    onChange={(e) => setNewAttendance({ ...newAttendance, date: e.target.value })}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Status *</Label>
+                                  <Select value={newAttendance.status} onValueChange={(value) => setNewAttendance({ ...newAttendance, status: value })}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Present">Present</SelectItem>
+                                      <SelectItem value="Absent">Absent</SelectItem>
+                                      <SelectItem value="Late">Late</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Trainer</Label>
+                                  <Input
+                                    value={newAttendance.treinador}
+                                    onChange={(e) => setNewAttendance({ ...newAttendance, treinador: e.target.value })}
+                                    placeholder="Enter trainer name"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Beach Location</Label>
+                                  <Input
+                                    value={newAttendance.praia}
+                                    onChange={(e) => setNewAttendance({ ...newAttendance, praia: e.target.value })}
+                                    placeholder="Enter beach name"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Notes</Label>
+                                  <Textarea
+                                    value={newAttendance.notas}
+                                    onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
+                                    placeholder="Enter any notes"
+                                  />
+                                </div>
+                                <Button onClick={handleSaveAttendance} className="w-full">
+                                  Save Attendance
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </div>
+
+                      {athlete.attendance.length > 0 && (
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="w-full mt-2">
+                            <span className="text-sm text-muted-foreground">
+                              {athlete.attendance.length} attendance record(s) - Click to expand
+                            </span>
+                          </Button>
+                        </CollapsibleTrigger>
                       )}
+
+                      <CollapsibleContent>
+                        <div className="mt-3 space-y-2">
+                          {athlete.attendance.map((record) => (
+                            <Card key={record.Id} className="bg-accent/30">
+                              <CardContent className="p-3">
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                  <div>
+                                    <span className="text-muted-foreground">Date:</span>
+                                    <p className="font-medium">{record.Date || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Status:</span>
+                                    <p className="font-medium">{record.status || '-'}</p>
+                                  </div>
+                                  {record.treinador && (
+                                    <div>
+                                      <span className="text-muted-foreground">Trainer:</span>
+                                      <p className="font-medium">{record.treinador}</p>
+                                    </div>
+                                  )}
+                                  {record.praia && (
+                                    <div className="flex items-start gap-1">
+                                      <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
+                                      <div>
+                                        <span className="text-muted-foreground">Beach:</span>
+                                        <p className="font-medium">{record.praia}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {record.notas && (
+                                    <div className="col-span-2">
+                                      <span className="text-muted-foreground">Notes:</span>
+                                      <p className="font-medium">{record.notas}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
                     </div>
-                  </div>
+                  </Collapsible>
                 ))}
               </div>
             )}
