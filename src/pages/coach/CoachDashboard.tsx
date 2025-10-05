@@ -17,6 +17,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
 
 interface AttendanceRecord {
   Id: string;
@@ -244,51 +245,19 @@ const CoachDashboard = () => {
               <div className="space-y-0">
                 {filteredAthletes.map((athlete) => (
                   <Collapsible key={athlete.Athlete_Id} className="border-b border-border last:border-b-0">
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-3">
+                    <div className="p-4 space-y-4">
+                      {/* Athlete Profile Information */}
+                      <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <h3 className="font-medium text-foreground text-lg mb-2">
-                            {athlete.first_name} {athlete.last_name}
-                          </h3>
-                          <div className="grid grid-cols-1 gap-2 text-sm">
-                            {athlete.surf_level && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">Level:</span>
-                                <Badge className={`${getLevelColor(athlete.surf_level)}`}>
-                                  {athlete.surf_level}
-                                </Badge>
-                              </div>
-                            )}
-                            {athlete.training_days && (
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Calendar className="h-3 w-3" />
-                                <span>Training Days: {athlete.training_days}</span>
-                              </div>
-                            )}
-                            {athlete.trainings_per_week && (
-                              <div className="text-muted-foreground">
-                                Trainings/Week: {athlete.trainings_per_week}
-                              </div>
-                            )}
-                            {athlete.email && (
-                              <div className="text-muted-foreground">
-                                Email: {athlete.email}
-                              </div>
-                            )}
-                            {athlete.phone && (
-                              <div className="text-muted-foreground">
-                                Phone: {athlete.phone}
-                              </div>
-                            )}
-                          </div>
+                          <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
                         </div>
-                        <div className="flex items-start gap-2">
+                        <div className="flex-shrink-0">
                           <Dialog open={isDialogOpen && selectedAthleteId === athlete.Athlete_Id} onOpenChange={(open) => {
                             setIsDialogOpen(open);
                             if (open) setSelectedAthleteId(athlete.Athlete_Id);
                           }}>
                             <DialogTrigger asChild>
-                              <Button size="sm" variant="outline">
+                              <Button size="sm" variant="outline" className="touch-friendly">
                                 <Plus className="h-4 w-4 mr-1" />
                                 Add
                               </Button>
@@ -352,14 +321,18 @@ const CoachDashboard = () => {
                         </div>
                       </div>
 
+                      {/* Attendance History Section */}
                       {athlete.attendance.length > 0 && (
-                        <CollapsibleTrigger asChild>
-                          <Button variant="ghost" size="sm" className="w-full mt-2">
-                            <span className="text-sm text-muted-foreground">
-                              {athlete.attendance.length} attendance record(s) - Click to expand
-                            </span>
-                          </Button>
-                        </CollapsibleTrigger>
+                        <div className="pt-4 border-t border-border">
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="w-full">
+                              <Calendar className="h-4 w-4 mr-2" />
+                              <span className="text-sm font-medium">
+                                {athlete.attendance.length} attendance record(s) - Click to expand
+                              </span>
+                            </Button>
+                          </CollapsibleTrigger>
+                        </div>
                       )}
 
                       <CollapsibleContent>
