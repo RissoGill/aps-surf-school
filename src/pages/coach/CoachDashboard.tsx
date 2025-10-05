@@ -132,13 +132,20 @@ const CoachDashboard = () => {
 
       // Map attendance to athletes using Athlete_Id relationship
       const athletesWithAttendance = athletesData.map(athlete => {
-        const athleteAttendance = attendanceData.filter(
-          att => att.Athlete_id === athlete.Athlete_Id
-        );
+        const athleteAttendance = attendanceData
+          .filter(att => att.Athlete_id === athlete.Athlete_Id)
+          .map((att: any) => ({
+            Id: att.Id,
+            Date: att.Date,
+            status: att.status,
+            treinador: att?.Trainer ?? null,
+            praia: att?.["Beach Location"] ?? null,
+            notas: att?.Notes ?? null,
+          }));
         console.log(`Athlete ${athlete.Athlete_Id} has ${athleteAttendance.length} attendance records`);
         return {
           ...athlete,
-          attendance: athleteAttendance
+          attendance: athleteAttendance,
         };
       });
 
@@ -159,12 +166,13 @@ const CoachDashboard = () => {
     const { error } = await supabase
       .from('Attendance')
       .insert({
+        Id: `${selectedAthleteId}-${newAttendance.date}`,
         Athlete_id: selectedAthleteId,
         Date: newAttendance.date,
         status: newAttendance.status,
-        treinador: newAttendance.treinador,
-        praia: newAttendance.praia,
-        notas: newAttendance.notas,
+        Trainer: newAttendance.treinador || null,
+        "Beach Location": newAttendance.praia || null,
+        Notes: newAttendance.notas || null,
       });
 
     if (error) {
