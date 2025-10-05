@@ -105,24 +105,42 @@ const CoachDashboard = () => {
   const { data: athletes, isLoading } = useQuery({
     queryKey: ['athletes-with-attendance'],
     queryFn: async () => {
+      // Fetch all athletes
       const { data: athletesData, error: athletesError } = await supabase
         .from('Atletas')
         .select('*')
         .order('first_name', { ascending: true });
       
-      if (athletesError) throw athletesError;
+      if (athletesError) {
+        console.error('Error fetching athletes:', athletesError);
+        throw athletesError;
+      }
 
+      // Fetch all attendance records directly from Supabase
       const { data: attendanceData, error: attendanceError } = await supabase
         .from('Attendance')
         .select('*')
         .order('Date', { ascending: false });
 
-      if (attendanceError) throw attendanceError;
+      if (attendanceError) {
+        console.error('Error fetching attendance:', attendanceError);
+        throw attendanceError;
+      }
 
-      const athletesWithAttendance = athletesData.map(athlete => ({
-        ...athlete,
-        attendance: attendanceData.filter(att => att.Athlete_id === athlete.Athlete_Id)
-      }));
+      console.log('Fetched athletes:', athletesData?.length);
+      console.log('Fetched attendance records:', attendanceData?.length);
+
+      // Map attendance to athletes using Athlete_Id relationship
+      const athletesWithAttendance = athletesData.map(athlete => {
+        const athleteAttendance = attendanceData.filter(
+          att => att.Athlete_id === athlete.Athlete_Id
+        );
+        console.log(`Athlete ${athlete.Athlete_Id} has ${athleteAttendance.length} attendance records`);
+        return {
+          ...athlete,
+          attendance: athleteAttendance
+        };
+      });
 
       return athletesWithAttendance as Athlete[];
     },
