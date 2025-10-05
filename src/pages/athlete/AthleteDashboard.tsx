@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,44 @@ const AthleteDashboard = () => {
   const { id } = useParams();
   const athleteId = id || 'A01'; // Default to A01 for testing if no ID in route
   const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  const queryClient = useQueryClient();
+
+  // Real-time subscription for attendance updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('athlete-attendance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'Attendance',
+          filter: `Athlete_id=eq.${athleteId}`
+        },
+        () => {
+          // Invalidate and refetch attendance data when new record is added
+          queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'Attendance',
+          filter: `Athlete_id=eq.${athleteId}`
+        },
+        () => {
+          // Invalidate and refetch attendance data when record is updated
+          queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [athleteId, queryClient]);
 
   const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
     queryKey: ['athlete', athleteId],

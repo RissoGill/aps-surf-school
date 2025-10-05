@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, User, Calendar, Plus, MapPin } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,6 +66,41 @@ const CoachDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Real-time subscription for attendance updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('attendance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'Attendance'
+        },
+        () => {
+          // Invalidate and refetch athletes data when new attendance is added
+          queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'Attendance'
+        },
+        () => {
+          // Invalidate and refetch athletes data when attendance is updated
+          queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: athletes, isLoading } = useQuery({
     queryKey: ['athletes-with-attendance'],
