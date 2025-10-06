@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,35 +23,15 @@ const GuardianLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        toast({
-          title: "Login Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
+    // Simulate login - in real app, this would be an API call
+    setTimeout(() => {
+      setIsLoading(false);
       toast({
         title: "Login Successful",
         description: "Welcome back, Guardian!",
       });
       navigate("/dashboard/guardian");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
