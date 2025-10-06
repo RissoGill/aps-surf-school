@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, CreditCard, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,6 @@ import AppFooter from "@/components/shared/AppFooter";
 
 const GuardianDashboard = () => {
   const { toast } = useToast();
-  const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianEmail, setGuardianEmail] = useState<string | null>(null);
 
