@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { Heart, CreditCard, AlertCircle, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,72 +12,155 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
 const GuardianDashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState({ month: 8, year: 2024 }); // September = month 8 (0-indexed)
-  
-  const payments = [
-    { month: "September 2024", amount: 180, dueDate: "Sep 5", status: "Paid", paidDate: "Sep 3" },
-    { month: "August 2024", amount: 180, dueDate: "Aug 5", status: "Paid", paidDate: "Aug 2" },
-    { month: "October 2024", amount: 180, dueDate: "Oct 5", status: "Unpaid", paidDate: null },
-  ];
+  const { toast } = useToast();
+  const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [guardianEmail, setGuardianEmail] = useState<string | null>(null);
+
+  // Get guardian's email from auth session
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setGuardianEmail(session?.user?.email || null);
+    };
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setGuardianEmail(session?.user?.email || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch athletes linked to this guardian
+  const { data: athletes, isLoading: athletesLoading } = useQuery({
+    queryKey: ['guardian-athletes', guardianEmail],
+    queryFn: async () => {
+      if (!guardianEmail) return [];
+      
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('*')
+        .or(`mother_email.eq.${guardianEmail},father_email.eq.${guardianEmail}`);
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load athlete data",
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!guardianEmail,
+  });
+
+  // Fetch payments for all guardian's athletes
+  const { data: payments, isLoading: paymentsLoading } = useQuery({
+    queryKey: ['guardian-payments', athletes],
+    queryFn: async () => {
+      if (!athletes || athletes.length === 0) return [];
+      
+      const athleteIds = athletes.map(a => a.Athlete_Id);
+      
+      const { data, error } = await supabase
+        .from('Payments')
+        .select('*')
+        .in('athlete_id', athleteIds)
+        .order('year', { ascending: false })
+        .order('month', { ascending: false });
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load payment data",
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      return data || [];
+    },
+    enabled: !!athletes && athletes.length > 0,
+  });
+
+  // Filter payments by selected year if set
+  const filteredPayments = selectedYear 
+    ? payments?.filter(p => p.year === selectedYear) 
+    : payments;
+
+  // Get unique years for filtering
+  const availableYears = Array.from(new Set(payments?.map(p => p.year) || [])).sort((a, b) => b - a);
 
   const getPaymentStatus = (payment: any) => {
-    const today = new Date();
-    const dueDate = new Date(payment.dueDate + ", 2024");
-    
-    if (payment.status === "Paid") {
+    if (payment.status?.toLowerCase() === "paid" || payment.amount_paid >= payment.amount_due) {
       return { status: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
-    } else if (today > dueDate) {
-      return { status: "Overdue", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
+    } else if (payment.amount_paid > 0 && payment.amount_paid < payment.amount_due) {
+      return { status: "Partial", color: "bg-warning/10 text-warning", icon: AlertCircle };
     } else {
-      return { status: "Unpaid", color: "bg-warning/10 text-warning", icon: AlertCircle };
+      return { status: "Pending", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
     }
   };
 
-  const totalOutstanding = payments
-    .filter(p => p.status === "Unpaid")
-    .reduce((sum, p) => sum + p.amount, 0);
+  const totalDue = filteredPayments?.reduce((sum, p) => sum + (p.amount_due || 0), 0) || 0;
+  const totalPaid = filteredPayments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
+  const totalOutstanding = totalDue - totalPaid;
 
-  const getMonthName = (month: number, year: number) => {
-    const date = new Date(year, month);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(amount);
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setSelectedMonth(prev => {
-      const newMonth = direction === 'prev' ? prev.month - 1 : prev.month + 1;
-      if (newMonth < 0) {
-        return { month: 11, year: prev.year - 1 };
-      } else if (newMonth > 11) {
-        return { month: 0, year: prev.year + 1 };
-      }
-      return { month: newMonth, year: prev.year };
-    });
+  const getMonthName = (monthStr: string) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[parseInt(monthStr) - 1] || monthStr;
   };
 
-  const getAttendanceForMonth = (month: number, year: number) => {
-    // Mock data - in real app, this would filter by selected month
-    if (month === 8 && year === 2024) { // September 2024
-      return [
-        { date: "Sep 18", status: "Present", coach: "Coach Maria" },
-        { date: "Sep 16", status: "Present", coach: "Coach John" },
-        { date: "Sep 13", status: "Justified", coach: "Coach Maria" },
-        { date: "Sep 11", status: "Present", coach: "Coach John" },
-        { date: "Sep 9", status: "Present", coach: "Coach Maria" }
-      ];
-    } else if (month === 7 && year === 2024) { // August 2024
-      return [
-        { date: "Aug 21", status: "Present", coach: "Coach Maria" },
-        { date: "Aug 19", status: "Present", coach: "Coach John" },
-        { date: "Aug 16", status: "Absent", coach: "Coach Maria" },
-        { date: "Aug 14", status: "Present", coach: "Coach John" },
-      ];
-    } else {
-      return [
-        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 15`, status: "Present", coach: "Coach Maria" },
-        { date: `${getMonthName(month, year).split(' ')[0].slice(0,3)} 12`, status: "Present", coach: "Coach John" },
-      ];
-    }
-  };
+  const isLoading = athletesLoading || paymentsLoading;
+  const athlete = athletes?.[0]; // For now, display first athlete
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!guardianEmail) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader title="Guardian Dashboard" showBack backTo="/" />
+        <main className="mobile-container py-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">Please log in to view your dashboard.</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (!athlete) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader title="Guardian Dashboard" showBack backTo="/" />
+        <main className="mobile-container py-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">No athlete found linked to your account.</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -88,9 +174,15 @@ const GuardianDashboard = () => {
               <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-warning" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Emma Johnson</h2>
-              <Badge className="bg-primary/10 text-primary mb-2">Intermediate Level</Badge>
-              <p className="text-sm text-muted-foreground">Your Child's Progress</p>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                {athlete.first_name} {athlete.last_name}
+              </h2>
+              <Badge className="bg-primary/10 text-primary mb-2">
+                {athlete.surf_level || 'Beginner'} Level
+              </Badge>
+              <p className="text-sm text-muted-foreground">
+                {athlete.trainings_per_week || 0} sessions per week
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -107,32 +199,21 @@ const GuardianDashboard = () => {
           <TabsContent value="overview" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-lg">Recent Activity</CardTitle>
+                <CardTitle className="text-lg">Payment Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div>
-                      <p className="font-medium">Training Session</p>
-                      <p className="text-sm text-muted-foreground">Yesterday at 18:00</p>
-                    </div>
-                    <Badge className="bg-success/10 text-success">Present</Badge>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 bg-accent/50 rounded-lg">
+                    <p className="text-lg font-bold text-foreground">{formatCurrency(totalDue)}</p>
+                    <p className="text-xs text-muted-foreground">Total Due</p>
                   </div>
-                  
-                  <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div>
-                      <p className="font-medium">September Payment</p>
-                      <p className="text-sm text-muted-foreground">Processed on Sep 3</p>
-                    </div>
-                    <Badge className="bg-success/10 text-success">Paid</Badge>
+                  <div className="p-3 bg-success/10 rounded-lg">
+                    <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
+                    <p className="text-xs text-muted-foreground">Total Paid</p>
                   </div>
-                  
-                  <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-                    <div>
-                      <p className="font-medium">Next Training</p>
-                      <p className="text-sm text-muted-foreground">Tomorrow at 18:00</p>
-                    </div>
-                    <Badge className="bg-primary/10 text-primary">Scheduled</Badge>
+                  <div className="p-3 bg-destructive/10 rounded-lg">
+                    <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
+                    <p className="text-xs text-muted-foreground">Outstanding</p>
                   </div>
                 </div>
               </CardContent>
@@ -140,18 +221,30 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-lg">Quick Stats</CardTitle>
+                <CardTitle className="text-lg">Recent Payments</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <p className="text-2xl font-bold text-success">92%</p>
-                    <p className="text-xs text-muted-foreground">Attendance Rate</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-primary">24</p>
-                    <p className="text-xs text-muted-foreground">Sessions This Month</p>
-                  </div>
+                <div className="space-y-3">
+                  {filteredPayments?.slice(0, 3).map((payment) => {
+                    const statusInfo = getPaymentStatus(payment);
+                    const StatusIcon = statusInfo.icon;
+                    
+                    return (
+                      <div key={payment.payment_id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                        <div>
+                          <p className="font-medium">{getMonthName(payment.month)} {payment.year}</p>
+                          <p className="text-sm text-muted-foreground">{formatCurrency(payment.amount_due)}</p>
+                        </div>
+                        <Badge className={statusInfo.color}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {statusInfo.status}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                  {(!filteredPayments || filteredPayments.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -167,13 +260,17 @@ const GuardianDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="text-center p-3 bg-accent/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">$180</p>
-                    <p className="text-xs text-muted-foreground">Monthly Fee</p>
+                    <p className="text-lg font-bold text-foreground">{formatCurrency(totalDue)}</p>
+                    <p className="text-xs text-muted-foreground">Total Due</p>
+                  </div>
+                  <div className="text-center p-3 bg-success/10 rounded-lg">
+                    <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
+                    <p className="text-xs text-muted-foreground">Total Paid</p>
                   </div>
                   <div className="text-center p-3 bg-destructive/10 rounded-lg">
-                    <p className="text-lg font-bold text-destructive">${totalOutstanding}</p>
+                    <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
                     <p className="text-xs text-muted-foreground">Outstanding</p>
                   </div>
                 </div>
@@ -182,24 +279,34 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle>Payment History</CardTitle>
-                <CardDescription>Payments are due on the 5th of each month</CardDescription>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Payment History</CardTitle>
+                  <select
+                    className="text-sm border rounded px-2 py-1"
+                    value={selectedYear || ''}
+                    onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+                  >
+                    <option value="">All Years</option>
+                    {availableYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <CardDescription>All payment records sorted by date</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {payments.map((payment, index) => {
+                  {filteredPayments?.map((payment) => {
                     const statusInfo = getPaymentStatus(payment);
                     const StatusIcon = statusInfo.icon;
                     
                     return (
                       <div 
-                        key={index} 
-                        className={`p-4 border rounded-lg ${
-                          statusInfo.status === "Overdue" ? "border-destructive bg-destructive/5" : "border-border"
-                        }`}
+                        key={payment.payment_id} 
+                        className="p-4 border rounded-lg border-border"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{payment.month}</h4>
+                          <h4 className="font-medium">{getMonthName(payment.month)} {payment.year}</h4>
                           <Badge className={statusInfo.color}>
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {statusInfo.status}
@@ -207,24 +314,18 @@ const GuardianDashboard = () => {
                         </div>
                         
                         <div className="text-sm text-muted-foreground space-y-1">
-                          <p>Amount: <span className="font-medium">${payment.amount}</span></p>
-                          <p>Due Date: <span className="font-medium">{payment.dueDate}</span></p>
-                          {payment.paidDate && (
-                            <p>Paid On: <span className="font-medium text-success">{payment.paidDate}</span></p>
+                          <p>Amount Due: <span className="font-medium">{formatCurrency(payment.amount_due)}</span></p>
+                          <p>Amount Paid: <span className="font-medium text-success">{formatCurrency(payment.amount_paid || 0)}</span></p>
+                          {payment.payment_date && (
+                            <p>Payment Date: <span className="font-medium">{payment.payment_date}</span></p>
                           )}
                         </div>
-                        
-                        {payment.status === "Unpaid" && (
-                          <Button 
-                            className="w-full mt-3 touch-friendly"
-                            variant={statusInfo.status === "Overdue" ? "destructive" : "default"}
-                          >
-                            Pay Now - ${payment.amount}
-                          </Button>
-                        )}
                       </div>
                     );
                   })}
+                  {(!filteredPayments || filteredPayments.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -234,49 +335,13 @@ const GuardianDashboard = () => {
           <TabsContent value="attendance" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <CardTitle>{getMonthName(selectedMonth.month, selectedMonth.year)} Attendance</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => navigateMonth('prev')}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => navigateMonth('next')}
-                      className="h-8 w-8 p-0"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <CardDescription>Emma's training session record</CardDescription>
+                <CardTitle>Attendance Records</CardTitle>
+                <CardDescription>Training session attendance history</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium">{session.date}</p>
-                        <p className="text-sm text-muted-foreground">{session.coach}</p>
-                      </div>
-                      <Badge className={
-                        session.status === "Present" 
-                          ? "bg-success/10 text-success" 
-                          : session.status === "Justified"
-                          ? "bg-warning/10 text-warning"
-                          : "bg-destructive/10 text-destructive"
-                      }>
-                        {session.status}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Attendance tracking coming soon
+                </p>
               </CardContent>
             </Card>
           </TabsContent>

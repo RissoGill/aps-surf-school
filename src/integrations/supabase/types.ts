@@ -89,30 +89,30 @@ export type Database = {
       Attendance: {
         Row: {
           Athlete_id: string | null
+          beach_location: string | null
           Date: string | null
           Id: string
-          notas: string | null
-          praia: string | null
+          Notes: string | null
           status: string | null
-          treinador: string | null
+          trainer: string | null
         }
         Insert: {
           Athlete_id?: string | null
+          beach_location?: string | null
           Date?: string | null
           Id: string
-          notas?: string | null
-          praia?: string | null
+          Notes?: string | null
           status?: string | null
-          treinador?: string | null
+          trainer?: string | null
         }
         Update: {
           Athlete_id?: string | null
+          beach_location?: string | null
           Date?: string | null
           Id?: string
-          notas?: string | null
-          praia?: string | null
+          Notes?: string | null
           status?: string | null
-          treinador?: string | null
+          trainer?: string | null
         }
         Relationships: [
           {
@@ -124,12 +124,56 @@ export type Database = {
           },
         ]
       }
+      Payments: {
+        Row: {
+          amount_due: number | null
+          amount_paid: number | null
+          athlete_id: string | null
+          month: string | null
+          payment_date: string | null
+          payment_id: string
+          status: string | null
+          year: number | null
+        }
+        Insert: {
+          amount_due?: number | null
+          amount_paid?: number | null
+          athlete_id?: string | null
+          month?: string | null
+          payment_date?: string | null
+          payment_id: string
+          status?: string | null
+          year?: number | null
+        }
+        Update: {
+          amount_due?: number | null
+          amount_paid?: number | null
+          athlete_id?: string | null
+          month?: string | null
+          payment_date?: string | null
+          payment_id?: string
+          status?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Payments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "Atletas"
+            referencedColumns: ["Athlete_Id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_guardian_of_athlete: {
+        Args: { athlete_id_param: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
