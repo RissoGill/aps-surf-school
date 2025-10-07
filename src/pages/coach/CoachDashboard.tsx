@@ -18,6 +18,7 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
+import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSummary";
 
 interface AttendanceRecord {
   Id: string;
@@ -438,6 +439,13 @@ const CoachDashboard = () => {
                           </Dialog>
                         </div>
                       </div>
+
+                      {/* Monthly Summary */}
+                      {athlete.attendance.length > 0 && (
+                        <div className="pt-4">
+                          <MonthlyAttendanceSummary attendance={athlete.attendance} />
+                        </div>
+                      )}
 
                       {/* Attendance History Section */}
                       {athlete.attendance.length > 0 && (
