@@ -57,6 +57,7 @@ const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
+  const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>({});
   const [newAttendance, setNewAttendance] = useState({
     date: new Date().toISOString().split('T')[0],
     status: "",
@@ -277,6 +278,35 @@ const CoachDashboard = () => {
     }
   };
 
+  const getAvailableMonths = (attendance: AttendanceRecord[]) => {
+    const months = new Set<string>();
+    attendance.forEach(record => {
+      if (record.Date) {
+        const date = new Date(record.Date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        months.add(monthKey);
+      }
+    });
+    return Array.from(months).sort().reverse();
+  };
+
+  const filterAttendanceByMonth = (attendance: AttendanceRecord[], monthFilter: string) => {
+    if (monthFilter === "all") return attendance;
+    return attendance.filter(record => {
+      if (!record.Date) return false;
+      const date = new Date(record.Date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      return monthKey === monthFilter;
+    });
+  };
+
+  const formatMonthLabel = (monthKey: string) => {
+    if (monthKey === "all") return "All Months";
+    const [year, month] = monthKey.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -362,7 +392,12 @@ const CoachDashboard = () => {
               </div>
             ) : (
               <div className="space-y-0">
-                {filteredAthletes.map((athlete) => (
+                {filteredAthletes.map((athlete) => {
+                  const availableMonths = getAvailableMonths(athlete.attendance);
+                  const selectedMonth = selectedMonths[athlete.athlete_id] || "all";
+                  const filteredAttendance = filterAttendanceByMonth(athlete.attendance, selectedMonth);
+                  
+                  return (
                   <Collapsible key={athlete.athlete_id} open={athlete.attendance.length > 0} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       {/* Athlete Profile Information */}
@@ -440,21 +475,47 @@ const CoachDashboard = () => {
                         </div>
                       </div>
 
+                      {/* Month Filter */}
+                      {athlete.attendance.length > 0 && availableMonths.length > 0 && (
+                        <div className="pt-4 flex items-center gap-2">
+                          <Label className="text-sm font-medium">Filter by Month:</Label>
+                          <Select 
+                            value={selectedMonth} 
+                            onValueChange={(value) => setSelectedMonths(prev => ({
+                              ...prev,
+                              [athlete.athlete_id]: value
+                            }))}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Months</SelectItem>
+                              {availableMonths.map(month => (
+                                <SelectItem key={month} value={month}>
+                                  {formatMonthLabel(month)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
                       {/* Monthly Summary */}
-                      {athlete.attendance.length > 0 && (
+                      {filteredAttendance.length > 0 && (
                         <div className="pt-4">
-                          <MonthlyAttendanceSummary attendance={athlete.attendance} />
+                          <MonthlyAttendanceSummary attendance={filteredAttendance} />
                         </div>
                       )}
 
                       {/* Attendance History Section */}
-                      {athlete.attendance.length > 0 && (
+                      {filteredAttendance.length > 0 && (
                         <div className="pt-4 border-t border-border">
                           <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm" className="w-full">
                               <Calendar className="h-4 w-4 mr-2" />
                               <span className="text-sm font-medium">
-                                {athlete.attendance.length} attendance record(s) - Click to expand
+                                {filteredAttendance.length} attendance record(s) - Click to expand
                               </span>
                             </Button>
                           </CollapsibleTrigger>
@@ -463,7 +524,7 @@ const CoachDashboard = () => {
 
                       <CollapsibleContent forceMount>
                         <div className="mt-3 space-y-2">
-                          {athlete.attendance.map((record) => {
+                          {filteredAttendance.map((record) => {
                             const formattedDate = record.Date ? new Date(record.Date).toLocaleDateString('pt-PT', { 
                               year: 'numeric', 
                               month: 'short', 
@@ -512,7 +573,8 @@ const CoachDashboard = () => {
                       </CollapsibleContent>
                     </div>
                   </Collapsible>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
