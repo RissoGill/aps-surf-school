@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, User, Calendar, Plus, MapPin } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,6 +56,7 @@ interface Athlete {
 const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
   const [newAttendance, setNewAttendance] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -67,6 +68,19 @@ const CoachDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Real-time subscription for attendance updates
   useEffect(() => {
@@ -264,6 +278,11 @@ const CoachDashboard = () => {
     });
   }, [athletes, searchQuery]);
 
+  const handleSelectAthlete = (athlete: Athlete) => {
+    setSearchQuery(`${athlete.first_name} ${athlete.last_name}`);
+    setShowDropdown(false);
+  };
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case "Beginner": return "bg-warning/10 text-warning";
@@ -312,14 +331,41 @@ const CoachDashboard = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="relative mb-6">
+        <div ref={searchRef} className="relative mb-6">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search athletes by name..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
             className="pl-10 touch-friendly shadow-soft"
           />
+          
+          {/* Autocomplete Dropdown */}
+          {showDropdown && searchQuery && filteredAthletes.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {filteredAthletes.slice(0, 5).map((athlete) => (
+                <button
+                  key={athlete.athlete_id}
+                  onClick={() => handleSelectAthlete(athlete)}
+                  className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
+                >
+                  <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground truncate">
+                      {athlete.first_name} {athlete.last_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Athletes List - Only shown when searching */}
