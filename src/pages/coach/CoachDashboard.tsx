@@ -130,24 +130,37 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Map attendance to athletes using athlete_id relationship (case-insensitive, trimmed)
+      // Group attendance by athlete_id (case-insensitive, trimmed) for reliable mapping
+      const attendanceByAthlete: Record<string, AttendanceRecord[]> = {};
+      (attendanceData || []).forEach((att: any) => {
+        const key = String(att.athlete_id || '').trim().toLowerCase();
+        if (!attendanceByAthlete[key]) attendanceByAthlete[key] = [];
+        attendanceByAthlete[key].push({
+          Id: att.id,
+          Date: att.date,
+          status: att.status,
+          treinador: att?.trainer ?? null,
+          praia: att?.beach_location ?? null,
+          notas: att?.notes ?? null,
+        });
+      });
+
+      // Sort each athlete's attendance by date desc
+      Object.values(attendanceByAthlete).forEach((list) => {
+        list.sort((a, b) => {
+          const at = a.Date ? new Date(a.Date).getTime() : 0;
+          const bt = b.Date ? new Date(b.Date).getTime() : 0;
+          return bt - at;
+        });
+      });
+
       const athletesWithAttendance = athletesData.map((athlete: any) => {
         const aid = String(athlete.athlete_id || '').trim().toLowerCase();
-        const athleteAttendance = (attendanceData || [])
-          .filter((att: any) => String(att.athlete_id || '').trim().toLowerCase() === aid)
-          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .map((att: any) => ({
-            Id: att.id,
-            Date: att.date,
-            status: att.status,
-            treinador: att?.trainer ?? null,
-            praia: att?.beach_location ?? null,
-            notas: att?.notes ?? null,
-          }));
-        console.log(`Athlete ${athlete.athlete_id} has ${athleteAttendance.length} attendance records`);
+        const list = attendanceByAthlete[aid] || [];
+        console.log(`Athlete ${athlete.athlete_id} has ${list.length} attendance records`);
         return {
           ...athlete,
-          attendance: athleteAttendance,
+          attendance: [...list],
         } as Athlete;
       });
 
