@@ -17,7 +17,7 @@ export type Database = {
       Atletas: {
         Row: {
           address: string | null
-          Athlete_Id: string
+          athlete_id: string
           date_of_birth: string | null
           dropoff_address: string | null
           email: string | null
@@ -32,7 +32,7 @@ export type Database = {
           phone: string | null
           photo_url: string | null
           pickup_address: string | null
-          SQL_Line: string | null
+          sql_line: string | null
           surf_level: string | null
           training_days: string | null
           trainings_per_week: number | null
@@ -40,7 +40,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          Athlete_Id: string
+          athlete_id: string
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -55,7 +55,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pickup_address?: string | null
-          SQL_Line?: string | null
+          sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null
           trainings_per_week?: number | null
@@ -63,7 +63,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          Athlete_Id?: string
+          athlete_id?: string
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -78,7 +78,7 @@ export type Database = {
           phone?: string | null
           photo_url?: string | null
           pickup_address?: string | null
-          SQL_Line?: string | null
+          sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null
           trainings_per_week?: number | null
@@ -88,39 +88,39 @@ export type Database = {
       }
       Attendance: {
         Row: {
-          Athlete_id: string | null
+          athlete_id: string | null
           beach_location: string | null
-          Date: string | null
-          Id: string
-          Notes: string | null
+          date: string | null
+          id: string
+          notes: string | null
           status: string | null
           trainer: string | null
         }
         Insert: {
-          Athlete_id?: string | null
+          athlete_id?: string | null
           beach_location?: string | null
-          Date?: string | null
-          Id: string
-          Notes?: string | null
+          date?: string | null
+          id: string
+          notes?: string | null
           status?: string | null
           trainer?: string | null
         }
         Update: {
-          Athlete_id?: string | null
+          athlete_id?: string | null
           beach_location?: string | null
-          Date?: string | null
-          Id?: string
-          Notes?: string | null
+          date?: string | null
+          id?: string
+          notes?: string | null
           status?: string | null
           trainer?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "Attendance_Athlete_id_fkey"
-            columns: ["Athlete_id"]
+            foreignKeyName: "Attendance_athlete_id_fkey"
+            columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "Atletas"
-            referencedColumns: ["Athlete_Id"]
+            referencedColumns: ["athlete_id"]
           },
         ]
       }
@@ -161,7 +161,7 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "Atletas"
-            referencedColumns: ["Athlete_Id"]
+            referencedColumns: ["athlete_id"]
           },
         ]
       }
