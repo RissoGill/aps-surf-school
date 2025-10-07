@@ -109,7 +109,17 @@ const AthleteDashboard = () => {
         .order('Date', { ascending: false });
       
       if (error) throw error;
-      return (data || []) as AttendanceRecord[];
+      
+      // Filter: only records with status and from September 2025 onwards
+      const filteredData = (data || []).filter((record: any) => {
+        if (!record.status) return false; // Must have a status
+        if (!record.Date) return false; // Must have a date
+        const recordDate = new Date(record.Date);
+        const septemberCutoff = new Date('2025-09-01');
+        return recordDate >= septemberCutoff;
+      });
+      
+      return filteredData as AttendanceRecord[];
     },
   });
 

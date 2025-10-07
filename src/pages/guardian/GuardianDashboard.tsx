@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,120 @@ import { Button } from "@/components/ui/button";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+
+interface AttendanceRecord {
+  Id: string;
+  Date: string | null;
+  status: string | null;
+  trainer: string | null;
+  beach_location: string | null;
+  notes: string | null;
+}
+
+const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
+  const { data: attendanceRecords = [], isLoading } = useQuery({
+    queryKey: ['guardian-attendance', athleteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Attendance')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Filter: only records with status and from September 2025 onwards
+      const filteredData = (data || []).filter((record: any) => {
+        if (!record.status) return false;
+        if (!record.date) return false;
+        const recordDate = new Date(record.date);
+        const septemberCutoff = new Date('2025-09-01');
+        return recordDate >= septemberCutoff;
+      });
+      
+      return filteredData.map((record: any) => ({
+        Id: record.id,
+        Date: record.date,
+        status: record.status,
+        trainer: record.trainer,
+        beach_location: record.beach_location,
+        notes: record.notes,
+      })) as AttendanceRecord[];
+    },
+  });
+
+  const getStatusColor = (status: string | null) => {
+    if (!status) return "bg-secondary/10 text-secondary-foreground";
+    const normalizedStatus = status.toLowerCase();
+    if (normalizedStatus.includes("present")) return "bg-success/10 text-success";
+    if (normalizedStatus.includes("late")) return "bg-warning/10 text-warning";
+    if (normalizedStatus.includes("absent")) return "bg-destructive/10 text-destructive";
+    return "bg-secondary/10 text-secondary-foreground";
+  };
+
+  return (
+    <Card className="shadow-soft">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Attendance Records
+        </CardTitle>
+        <CardDescription>Training session attendance history (from September 2025)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          </div>
+        ) : attendanceRecords.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No attendance records found
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {attendanceRecords.map((record) => {
+              const formattedDate = record.Date 
+                ? new Date(record.Date).toLocaleDateString('pt-PT', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })
+                : '-';
+              
+              return (
+                <div key={record.Id} className="border border-border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium">{formattedDate}</p>
+                    <Badge className={getStatusColor(record.status)}>
+                      {record.status || 'Unknown'}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                    {record.trainer && (
+                      <div>
+                        <span className="font-medium">Trainer:</span> {record.trainer}
+                      </div>
+                    )}
+                    {record.beach_location && (
+                      <div>
+                        <span className="font-medium">Beach:</span> {record.beach_location}
+                      </div>
+                    )}
+                    {record.notes && (
+                      <div className="col-span-2">
+                        <span className="font-medium">Notes:</span> {record.notes}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 const GuardianDashboard = () => {
   const { toast } = useToast();
@@ -323,17 +437,7 @@ const GuardianDashboard = () => {
 
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle>Attendance Records</CardTitle>
-                <CardDescription>Training session attendance history</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Attendance tracking coming soon
-                </p>
-              </CardContent>
-            </Card>
+            <AttendanceTab athleteId={athlete.athlete_id} />
           </TabsContent>
         </Tabs>
       </main>

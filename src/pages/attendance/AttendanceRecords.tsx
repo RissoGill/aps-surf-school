@@ -32,18 +32,18 @@ const AttendanceRecords = () => {
         supabase
           .from("Attendance")
           .select(`
-            Id,
-            Date,
+            id,
+            date,
             status,
-            treinador,
-            praia,
-            notas,
-            Athlete_id
+            trainer,
+            beach_location,
+            notes,
+            athlete_id
           `)
-          .order("Date", { ascending: false }),
+          .order("date", { ascending: false }),
         supabase
           .from("Atletas")
-          .select("Athlete_Id, first_name, last_name")
+          .select("athlete_id, first_name, last_name")
       ]);
 
       if (attendanceRes.error) throw attendanceRes.error;
@@ -54,14 +54,28 @@ const AttendanceRecords = () => {
       const athletes = athletesRes.data || [];
       const nameById = new Map(
         athletes.map((a: any) => [
-          a.Athlete_Id,
+          a.athlete_id,
           ("" + `${a.first_name || ""} ${a.last_name || ""}`.trim()) || "Unknown Athlete",
         ])
       );
 
-      const recordsWithNames = (attendanceRes.data || []).map((record: any) => ({
-        ...record,
-        athlete_name: record.Athlete_id ? nameById.get(record.Athlete_id) || "Unknown Athlete" : "Unknown Athlete",
+      // Filter: only records with status and from September 2025 onwards
+      const filteredAttendance = (attendanceRes.data || []).filter((record: any) => {
+        if (!record.status) return false;
+        if (!record.date) return false;
+        const recordDate = new Date(record.date);
+        const septemberCutoff = new Date('2025-09-01');
+        return recordDate >= septemberCutoff;
+      });
+
+      const recordsWithNames = filteredAttendance.map((record: any) => ({
+        Id: record.id,
+        Date: record.date,
+        status: record.status,
+        treinador: record.trainer,
+        praia: record.beach_location,
+        notas: record.notes,
+        athlete_name: record.athlete_id ? nameById.get(record.athlete_id) || "Unknown Athlete" : "Unknown Athlete",
       }));
 
       return recordsWithNames as AttendanceRecord[];
@@ -78,7 +92,7 @@ const AttendanceRecords = () => {
           <CardHeader>
             <CardTitle>Attendance Records</CardTitle>
             <CardDescription>
-              View all attendance records with athlete information
+              View all attendance records with athlete information (from September 2025 onwards)
             </CardDescription>
           </CardHeader>
           <CardContent>
