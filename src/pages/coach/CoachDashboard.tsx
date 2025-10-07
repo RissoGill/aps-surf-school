@@ -130,10 +130,12 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Map attendance to athletes using athlete_id relationship
-      const athletesWithAttendance = athletesData.map(athlete => {
-        const athleteAttendance = attendanceData
-          .filter(att => att.athlete_id === athlete.athlete_id)
+      // Map attendance to athletes using athlete_id relationship (case-insensitive, trimmed)
+      const athletesWithAttendance = athletesData.map((athlete: any) => {
+        const aid = String(athlete.athlete_id || '').trim().toLowerCase();
+        const athleteAttendance = (attendanceData || [])
+          .filter((att: any) => String(att.athlete_id || '').trim().toLowerCase() === aid)
+          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .map((att: any) => ({
             Id: att.id,
             Date: att.date,
@@ -146,7 +148,7 @@ const CoachDashboard = () => {
         return {
           ...athlete,
           attendance: athleteAttendance,
-        };
+        } as Athlete;
       });
 
       return athletesWithAttendance as Athlete[];
