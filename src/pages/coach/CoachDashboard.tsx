@@ -399,17 +399,24 @@ const CoachDashboard = () => {
 
                       <CollapsibleContent>
                         <div className="mt-3 space-y-2">
-                          {athlete.attendance.map((record) => (
+                          {athlete.attendance.map((record) => {
+                            const formattedDate = record.Date ? new Date(record.Date).toLocaleDateString('pt-PT', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            }) : '-';
+                            
+                            return (
                             <Card key={record.Id} className="bg-accent/30">
                               <CardContent className="p-3">
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                   <div>
                                     <span className="text-muted-foreground">Date:</span>
-                                    <p className="font-medium">{record.Date || '-'}</p>
+                                    <p className="font-medium">{formattedDate}</p>
                                   </div>
                                   <div>
                                     <span className="text-muted-foreground">Status:</span>
-                                    <p className="font-medium">{record.status || '-'}</p>
+                                    <p className="font-medium">{record.status || 'Not set'}</p>
                                   </div>
                                   {record.treinador && (
                                     <div>
@@ -435,7 +442,8 @@ const CoachDashboard = () => {
                                 </div>
                               </CardContent>
                             </Card>
-                          ))}
+                            );
+                          })}
                         </div>
                       </CollapsibleContent>
                     </div>
