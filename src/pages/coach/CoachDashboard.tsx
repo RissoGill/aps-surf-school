@@ -308,7 +308,7 @@ const CoachDashboard = () => {
             ) : (
               <div className="space-y-0">
                 {filteredAthletes.map((athlete) => (
-                  <Collapsible key={athlete.athlete_id} defaultOpen={athlete.attendance.length > 0} className="border-b border-border last:border-b-0">
+                  <Collapsible key={athlete.athlete_id} open={athlete.attendance.length > 0} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       {/* Athlete Profile Information */}
                       <div className="flex items-start justify-between gap-4">
@@ -399,7 +399,7 @@ const CoachDashboard = () => {
                         </div>
                       )}
 
-                      <CollapsibleContent>
+                      <CollapsibleContent forceMount>
                         <div className="mt-3 space-y-2">
                           {athlete.attendance.map((record) => {
                             const formattedDate = record.Date ? new Date(record.Date).toLocaleDateString('pt-PT', { 
