@@ -110,13 +110,9 @@ const AthleteDashboard = () => {
       
       if (error) throw error;
       
-      // Filter: only records with status and from September 2025 onwards
+      // Only include attendance records that have a status
       const filteredData = (data || []).filter((record: any) => {
-        if (!record.status) return false; // Must have a status
-        if (!record.Date) return false; // Must have a date
-        const recordDate = new Date(record.Date);
-        const septemberCutoff = new Date('2025-09-01');
-        return recordDate >= septemberCutoff;
+        return record.status && record.status.trim() !== '';
       });
       
       return filteredData as AttendanceRecord[];
@@ -159,9 +155,9 @@ const AthleteDashboard = () => {
 
   const calculateMonthlySummary = () => {
     const currentMonthRecords = getAttendanceForMonth(selectedMonth.month, selectedMonth.year);
-    const present = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("present")).length;
-    const justified = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("justified")).length;
-    const absent = currentMonthRecords.filter(r => r.status?.toLowerCase().includes("absent")).length;
+    const present = currentMonthRecords.filter(r => r.status === "Present").length;
+    const justified = currentMonthRecords.filter(r => r.status === "Justified").length;
+    const absent = currentMonthRecords.filter(r => r.status === "Absent").length;
     return { present, justified, absent };
   };
   return (
@@ -445,7 +441,7 @@ const AthleteDashboard = () => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-destructive">{calculateMonthlySummary().absent}</p>
-                      <p className="text-xs text-muted-foreground">Absent</p>
+                      <p className="text-xs text-muted-foreground">Not Present</p>
                     </div>
                   </div>
                 )}
