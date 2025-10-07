@@ -29,7 +29,7 @@ interface AttendanceRecord {
 }
 
 interface Athlete {
-  Athlete_Id: string;
+  athlete_id: string;
   first_name: string | null;
   last_name: string | null;
   surf_level: string | null;
@@ -130,19 +130,19 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Map attendance to athletes using Athlete_Id relationship
+      // Map attendance to athletes using athlete_id relationship
       const athletesWithAttendance = athletesData.map(athlete => {
         const athleteAttendance = attendanceData
-          .filter(att => att.Athlete_id === athlete.Athlete_Id)
+          .filter(att => att.athlete_id === athlete.athlete_id)
           .map((att: any) => ({
-            Id: att.Id,
-            Date: att.Date,
+            Id: att.id,
+            Date: att.date,
             status: att.status,
-            treinador: att?.Trainer ?? null,
-            praia: att?.["Beach Location"] ?? null,
-            notas: att?.Notes ?? null,
+            treinador: att?.trainer ?? null,
+            praia: att?.beach_location ?? null,
+            notas: att?.notes ?? null,
           }));
-        console.log(`Athlete ${athlete.Athlete_Id} has ${athleteAttendance.length} attendance records`);
+        console.log(`Athlete ${athlete.athlete_id} has ${athleteAttendance.length} attendance records`);
         return {
           ...athlete,
           attendance: athleteAttendance,
@@ -166,13 +166,13 @@ const CoachDashboard = () => {
     const { error } = await supabase
       .from('Attendance')
       .insert({
-        Id: `${selectedAthleteId}-${newAttendance.date}`,
-        Athlete_id: selectedAthleteId,
-        Date: newAttendance.date,
+        id: `${selectedAthleteId}-${newAttendance.date}`,
+        athlete_id: selectedAthleteId,
+        date: newAttendance.date,
         status: newAttendance.status,
-        Trainer: newAttendance.treinador || null,
-        "Beach Location": newAttendance.praia || null,
-        Notes: newAttendance.notas || null,
+        trainer: newAttendance.treinador || null,
+        beach_location: newAttendance.praia || null,
+        notes: newAttendance.notas || null,
       });
 
     if (error) {
@@ -305,7 +305,7 @@ const CoachDashboard = () => {
             ) : (
               <div className="space-y-0">
                 {filteredAthletes.map((athlete) => (
-                  <Collapsible key={athlete.Athlete_Id} className="border-b border-border last:border-b-0">
+                  <Collapsible key={athlete.athlete_id} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       {/* Athlete Profile Information */}
                       <div className="flex items-start justify-between gap-4">
@@ -313,9 +313,9 @@ const CoachDashboard = () => {
                           <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
                         </div>
                         <div className="flex-shrink-0">
-                          <Dialog open={isDialogOpen && selectedAthleteId === athlete.Athlete_Id} onOpenChange={(open) => {
+                          <Dialog open={isDialogOpen && selectedAthleteId === athlete.athlete_id} onOpenChange={(open) => {
                             setIsDialogOpen(open);
-                            if (open) setSelectedAthleteId(athlete.Athlete_Id);
+                            if (open) setSelectedAthleteId(athlete.athlete_id);
                           }}>
                             <DialogTrigger asChild>
                               <Button size="sm" variant="outline" className="touch-friendly">
