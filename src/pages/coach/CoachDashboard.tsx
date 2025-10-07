@@ -261,11 +261,36 @@ const CoachDashboard = () => {
 
   const filteredAthletes = useMemo(() => {
     if (!athletes) return [];
-    if (!searchQuery) return athletes;
-    
-    return athletes.filter(athlete => {
-      const fullName = `${athlete.first_name} ${athlete.last_name}`.toLowerCase();
-      return fullName.includes(searchQuery.toLowerCase());
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return athletes;
+
+    const normalize = (s?: string | null) =>
+      (s ?? "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}+/gu, "");
+
+    return athletes.filter((athlete) => {
+      const first = normalize(athlete.first_name);
+      const last = normalize(athlete.last_name);
+      const full1 = `${first} ${last}`.trim();
+      const full2 = `${last} ${first}`.trim();
+      const id = normalize(athlete.athlete_id);
+      const email = normalize(athlete.email);
+      const phone = normalize(athlete.phone);
+      const query = q
+        .normalize("NFD")
+        .replace(/\p{Diacritic}+/gu, "");
+
+      return (
+        first.includes(query) ||
+        last.includes(query) ||
+        full1.includes(query) ||
+        full2.includes(query) ||
+        id.includes(query) ||
+        email.includes(query) ||
+        phone.includes(query)
+      );
     });
   }, [athletes, searchQuery]);
 
