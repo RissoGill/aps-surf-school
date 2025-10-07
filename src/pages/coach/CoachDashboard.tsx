@@ -116,16 +116,46 @@ const CoachDashboard = () => {
         throw athletesError;
       }
 
-      // Fetch all attendance records directly from Supabase
-      const { data: attendanceData, error: attendanceError } = await supabase
-        .from('Attendance')
-        .select('*')
-        .order('date', { ascending: false });
+      // Fetch all attendance records from Supabase with pagination to bypass 1000-row limit
+      const pageSize = 1000;
 
-      if (attendanceError) {
-        console.error('Error fetching attendance:', attendanceError);
-        throw attendanceError;
+      // Get total rows count first
+      const { count: attendanceCount, error: countError } = await supabase
+        .from('Attendance')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('Error counting attendance:', countError);
+        throw countError;
       }
+
+      const total = attendanceCount ?? 0;
+      let attendanceData: any[] = [];
+
+      if (total === 0) {
+        attendanceData = [];
+      } else {
+        const pagePromises: any[] = [];
+        for (let from = 0; from < total; from += pageSize) {
+          const to = Math.min(from + pageSize - 1, total - 1);
+          pagePromises.push(
+            supabase
+              .from('Attendance')
+              .select('*')
+              .order('date', { ascending: false })
+              .range(from, to)
+          );
+        }
+        const results = await Promise.all(pagePromises);
+        const pageError = results.find((r: any) => r.error)?.error;
+        if (pageError) {
+          console.error('Error fetching paginated attendance:', pageError);
+          throw pageError;
+        }
+        attendanceData = results.flatMap((r: any) => r.data || []);
+      }
+
+      console.log('Attendance total count:', total, 'Loaded:', attendanceData.length);
 
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
