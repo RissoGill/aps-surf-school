@@ -120,7 +120,7 @@ const CoachDashboard = () => {
       const { data: attendanceData, error: attendanceError } = await supabase
         .from('Attendance')
         .select('*')
-        .order('Date', { ascending: false });
+        .order('date', { ascending: false });
 
       if (attendanceError) {
         console.error('Error fetching attendance:', attendanceError);
