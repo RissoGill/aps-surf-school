@@ -57,7 +57,6 @@ const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
-  const [selectedMonths, setSelectedMonths] = useState<Record<string, string>>({});
   const [newAttendance, setNewAttendance] = useState({
     date: new Date().toISOString().split('T')[0],
     status: "",
@@ -261,36 +260,11 @@ const CoachDashboard = () => {
 
   const filteredAthletes = useMemo(() => {
     if (!athletes) return [];
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return athletes;
-
-    const normalize = (s?: string | null) =>
-      (s ?? "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/\p{Diacritic}+/gu, "");
-
-    return athletes.filter((athlete) => {
-      const first = normalize(athlete.first_name);
-      const last = normalize(athlete.last_name);
-      const full1 = `${first} ${last}`.trim();
-      const full2 = `${last} ${first}`.trim();
-      const id = normalize(athlete.athlete_id);
-      const email = normalize(athlete.email);
-      const phone = normalize(athlete.phone);
-      const query = q
-        .normalize("NFD")
-        .replace(/\p{Diacritic}+/gu, "");
-
-      return (
-        first.includes(query) ||
-        last.includes(query) ||
-        full1.includes(query) ||
-        full2.includes(query) ||
-        id.includes(query) ||
-        email.includes(query) ||
-        phone.includes(query)
-      );
+    if (!searchQuery) return athletes;
+    
+    return athletes.filter(athlete => {
+      const fullName = `${athlete.first_name} ${athlete.last_name}`.toLowerCase();
+      return fullName.includes(searchQuery.toLowerCase());
     });
   }, [athletes, searchQuery]);
 
@@ -301,35 +275,6 @@ const CoachDashboard = () => {
       case "Advanced": return "bg-success/10 text-success";
       default: return "bg-secondary/10 text-secondary-foreground";
     }
-  };
-
-  const getAvailableMonths = (attendance: AttendanceRecord[]) => {
-    const months = new Set<string>();
-    attendance.forEach(record => {
-      if (record.Date) {
-        const date = new Date(record.Date);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        months.add(monthKey);
-      }
-    });
-    return Array.from(months).sort().reverse();
-  };
-
-  const filterAttendanceByMonth = (attendance: AttendanceRecord[], monthFilter: string) => {
-    if (monthFilter === "all") return attendance;
-    return attendance.filter(record => {
-      if (!record.Date) return false;
-      const date = new Date(record.Date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      return monthKey === monthFilter;
-    });
-  };
-
-  const formatMonthLabel = (monthKey: string) => {
-    if (monthKey === "all") return "All Months";
-    const [year, month] = monthKey.split('-');
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
   return (
@@ -346,6 +291,18 @@ const CoachDashboard = () => {
             Manage your athletes and track their progress
           </p>
         </div>
+
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Search athletes by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 touch-friendly shadow-soft"
+          />
+        </div>
+
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -370,20 +327,8 @@ const CoachDashboard = () => {
           </Card>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search athletes by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 touch-friendly shadow-soft"
-          />
-        </div>
-
-        {/* Athletes List - Only show when searching */}
-        {searchQuery && (
-          <Card className="shadow-medium">
+        {/* Athletes List */}
+        <Card className="shadow-medium">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -417,12 +362,7 @@ const CoachDashboard = () => {
               </div>
             ) : (
               <div className="space-y-0">
-                {filteredAthletes.map((athlete) => {
-                  const availableMonths = getAvailableMonths(athlete.attendance);
-                  const selectedMonth = selectedMonths[athlete.athlete_id] || "all";
-                  const filteredAttendance = filterAttendanceByMonth(athlete.attendance, selectedMonth);
-                  
-                  return (
+                {filteredAthletes.map((athlete) => (
                   <Collapsible key={athlete.athlete_id} open={athlete.attendance.length > 0} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       {/* Athlete Profile Information */}
@@ -500,47 +440,21 @@ const CoachDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Month Filter */}
-                      {athlete.attendance.length > 0 && availableMonths.length > 0 && (
-                        <div className="pt-4 flex items-center gap-2">
-                          <Label className="text-sm font-medium">Filter by Month:</Label>
-                          <Select 
-                            value={selectedMonth} 
-                            onValueChange={(value) => setSelectedMonths(prev => ({
-                              ...prev,
-                              [athlete.athlete_id]: value
-                            }))}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all">All Months</SelectItem>
-                              {availableMonths.map(month => (
-                                <SelectItem key={month} value={month}>
-                                  {formatMonthLabel(month)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-
                       {/* Monthly Summary */}
-                      {filteredAttendance.length > 0 && (
+                      {athlete.attendance.length > 0 && (
                         <div className="pt-4">
-                          <MonthlyAttendanceSummary attendance={filteredAttendance} />
+                          <MonthlyAttendanceSummary attendance={athlete.attendance} />
                         </div>
                       )}
 
                       {/* Attendance History Section */}
-                      {filteredAttendance.length > 0 && (
+                      {athlete.attendance.length > 0 && (
                         <div className="pt-4 border-t border-border">
                           <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm" className="w-full">
                               <Calendar className="h-4 w-4 mr-2" />
                               <span className="text-sm font-medium">
-                                {filteredAttendance.length} attendance record(s) - Click to expand
+                                {athlete.attendance.length} attendance record(s) - Click to expand
                               </span>
                             </Button>
                           </CollapsibleTrigger>
@@ -549,7 +463,7 @@ const CoachDashboard = () => {
 
                       <CollapsibleContent forceMount>
                         <div className="mt-3 space-y-2">
-                          {filteredAttendance.map((record) => {
+                          {athlete.attendance.map((record) => {
                             const formattedDate = record.Date ? new Date(record.Date).toLocaleDateString('pt-PT', { 
                               year: 'numeric', 
                               month: 'short', 
@@ -598,15 +512,13 @@ const CoachDashboard = () => {
                       </CollapsibleContent>
                     </div>
                   </Collapsible>
-                  );
-                })}
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
-        )}
       </main>
-      
+
       <SponsorBanner />
       <AppFooter />
     </div>
