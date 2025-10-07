@@ -161,16 +161,10 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Filter attendance: only records with status and from September 2025 onwards
-      const filteredAttendance = (attendanceData || []).filter((att: any) => {
-        if (!att.status) return false; // Must have a status
-        if (!att.date) return false; // Must have a date
-        const recordDate = new Date(att.date);
-        const septemberCutoff = new Date('2025-09-01');
-        return recordDate >= septemberCutoff;
-      });
+      // Include all attendance records (no date or status filtering)
+      const filteredAttendance = (attendanceData || []);
 
-      console.log('Filtered attendance records (with status, from Sept 2025):', filteredAttendance.length);
+      console.log('Attendance records loaded:', filteredAttendance.length);
 
       // Group attendance by athlete_id (case-insensitive, trimmed) for reliable mapping
       const attendanceByAthlete: Record<string, AttendanceRecord[]> = {};

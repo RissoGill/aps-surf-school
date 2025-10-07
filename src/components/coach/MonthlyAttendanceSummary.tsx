@@ -25,12 +25,13 @@ interface MonthlySummary {
 export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummaryProps) => {
   // Group attendance by month
   const monthlySummaries = attendance.reduce((acc, record) => {
-    if (!record.Date || !record.status) return acc;
-    
+    if (!record.Date) return acc;
+
+    const statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
     const date = new Date(record.Date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
+
     if (!acc[monthKey]) {
       acc[monthKey] = {
         month: monthName,
@@ -39,10 +40,10 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
         total: 0
       };
     }
-    
-    acc[monthKey].statusCounts[record.status] = (acc[monthKey].statusCounts[record.status] || 0) + 1;
+
+    acc[monthKey].statusCounts[statusKey] = (acc[monthKey].statusCounts[statusKey] || 0) + 1;
     acc[monthKey].total += 1;
-    
+
     return acc;
   }, {} as Record<string, MonthlySummary>);
 
