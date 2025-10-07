@@ -16,19 +16,10 @@ const GuardianDashboard = () => {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianEmail, setGuardianEmail] = useState<string | null>(null);
 
-  // Get guardian's email from auth session
+  // Use demo guardian email for demo mode
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setGuardianEmail(session?.user?.email || null);
-    };
-    getSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      setGuardianEmail(session?.user?.email || null);
-    });
-
-    return () => subscription.unsubscribe();
+    // For demo purposes, use an existing guardian email from the database
+    setGuardianEmail('mmmarques82@gmail.com');
   }, []);
 
   // Fetch athletes linked to this guardian
