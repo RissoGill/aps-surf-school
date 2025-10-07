@@ -60,8 +60,17 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
     switch (status) {
       case "Present": return "bg-success/10 text-success";
       case "Absent": return "bg-destructive/10 text-destructive";
-      case "Late": return "bg-warning/10 text-warning";
+      case "Justified": return "bg-warning/10 text-warning";
       default: return "bg-secondary/10 text-secondary-foreground";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "Present": return "Present";
+      case "Absent": return "Not Present";
+      case "Justified": return "Justified";
+      default: return status;
     }
   };
 
@@ -83,15 +92,17 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
               </Badge>
             </div>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(summary.statusCounts).map(([status, count]) => (
-                <Badge 
-                  key={status} 
-                  className={`${getStatusColor(status)} text-xs`}
-                  variant="secondary"
-                >
-                  {status}: {count}
-                </Badge>
-              ))}
+              {Object.entries(summary.statusCounts)
+                .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+                .map(([status, count]) => (
+                  <Badge 
+                    key={status} 
+                    className={`${getStatusColor(status)} text-xs`}
+                    variant="secondary"
+                  >
+                    {getStatusLabel(status)}: {count}
+                  </Badge>
+                ))}
             </div>
           </div>
         ))}

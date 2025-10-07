@@ -161,10 +161,12 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Include all attendance records (no date or status filtering)
-      const filteredAttendance = (attendanceData || []);
+      // Only include attendance records that have a status
+      const filteredAttendance = (attendanceData || []).filter((att: any) => {
+        return att.status && att.status.trim() !== '';
+      });
 
-      console.log('Attendance records loaded:', filteredAttendance.length);
+      console.log('Attendance records with status:', filteredAttendance.length);
 
       // Group attendance by athlete_id (case-insensitive, trimmed) for reliable mapping
       const attendanceByAthlete: Record<string, AttendanceRecord[]> = {};
