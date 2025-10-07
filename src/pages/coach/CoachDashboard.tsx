@@ -292,18 +292,6 @@ const CoachDashboard = () => {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search athletes by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 touch-friendly shadow-soft"
-          />
-        </div>
-
-
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <Card className="shadow-soft">
@@ -327,7 +315,19 @@ const CoachDashboard = () => {
           </Card>
         </div>
 
-        {/* Athletes List */}
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Search athletes by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 touch-friendly shadow-soft"
+          />
+        </div>
+
+        {/* Athletes List - Only shown when searching */}
+        {searchQuery && (
         <Card className="shadow-medium">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -517,6 +517,7 @@ const CoachDashboard = () => {
             )}
           </CardContent>
         </Card>
+        )}
       </main>
 
       <SponsorBanner />
