@@ -166,7 +166,7 @@ const CoachDashboard = () => {
     const { error } = await supabase
       .from('Attendance')
       .insert({
-        id: `${selectedAthleteId}-${newAttendance.date}`,
+        id: `${selectedAthleteId}-${newAttendance.date}-${Date.now()}`,
         athlete_id: selectedAthleteId,
         date: newAttendance.date,
         status: newAttendance.status,
@@ -176,9 +176,10 @@ const CoachDashboard = () => {
       });
 
     if (error) {
+      console.error('Attendance save error:', error);
       toast({
         title: "Error",
-        description: "Failed to save attendance",
+        description: error.message || "Failed to save attendance",
         variant: "destructive",
       });
       return;
