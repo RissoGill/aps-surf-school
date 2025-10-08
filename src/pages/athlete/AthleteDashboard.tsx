@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
 interface Athlete {
-  Athlete_Id: string;
+  athlete_id: string;
   first_name: string | null;
   last_name: string | null;
   date_of_birth: string | null;
@@ -31,25 +32,76 @@ interface Athlete {
   transport: boolean | null;
   pickup_address: string | null;
   dropoff_address: string | null;
+  auth_uid: string | null;
 }
 
 interface AttendanceRecord {
-  Id: string;
-  Date: string | null;
+  id: string;
+  date: string | null;
   status: string | null;
-  treinador: string | null;
-  praia: string | null;
-  notas: string | null;
+  trainer: string | null;
+  beach_location: string | null;
+  notes: string | null;
 }
 
 const AthleteDashboard = () => {
-  const { id } = useParams();
-  const athleteId = id || 'A01'; // Default to A01 for testing if no ID in route
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
+  const [userAuthId, setUserAuthId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Check authentication and get user ID
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/login/athlete");
+        return;
+      }
+      
+      setUserAuthId(session.user.id);
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login/athlete");
+      } else {
+        setUserAuthId(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  // Fetch athlete data based on auth_uid
+  const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
+    queryKey: ['athlete', userAuthId],
+    queryFn: async () => {
+      if (!userAuthId) return null;
+      
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('*')
+        .eq('auth_uid', userAuthId)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data as Athlete | null;
+    },
+    enabled: !!userAuthId,
+  });
+
+  const athleteId = athlete?.athlete_id;
 
   // Real-time subscription for attendance updates
   useEffect(() => {
+    if (!athleteId) return;
+
     const channel = supabase
       .channel('athlete-attendance-changes')
       .on(
@@ -58,10 +110,9 @@ const AthleteDashboard = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'Attendance',
-          filter: `Athlete_id=eq.${athleteId}`
+          filter: `athlete_id=eq.${athleteId}`
         },
         () => {
-          // Invalidate and refetch attendance data when new record is added
           queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
         }
       )
@@ -71,10 +122,9 @@ const AthleteDashboard = () => {
           event: 'UPDATE',
           schema: 'public',
           table: 'Attendance',
-          filter: `Athlete_id=eq.${athleteId}`
+          filter: `athlete_id=eq.${athleteId}`
         },
         () => {
-          // Invalidate and refetch attendance data when record is updated
           queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
         }
       )
@@ -85,28 +135,16 @@ const AthleteDashboard = () => {
     };
   }, [athleteId, queryClient]);
 
-  const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
-    queryKey: ['athlete', athleteId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Atletas')
-        .select('*')
-        .eq('Athlete_Id', athleteId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data as Athlete | null;
-    },
-  });
-
   const { data: attendanceRecords = [], isLoading: isLoadingAttendance } = useQuery({
     queryKey: ['attendance', athleteId],
     queryFn: async () => {
+      if (!athleteId) return [];
+      
       const { data, error } = await supabase
         .from('Attendance')
         .select('*')
-        .eq('Athlete_id', athleteId)
-        .order('Date', { ascending: false });
+        .eq('athlete_id', athleteId)
+        .order('date', { ascending: false });
       
       if (error) throw error;
       
@@ -117,7 +155,17 @@ const AthleteDashboard = () => {
       
       return filteredData as AttendanceRecord[];
     },
+    enabled: !!athleteId,
   });
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out",
+    });
+    navigate("/login/athlete");
+  };
 
   const getMonthName = (month: number, year: number) => {
     const date = new Date(year, month);
@@ -138,8 +186,8 @@ const AthleteDashboard = () => {
 
   const getAttendanceForMonth = (month: number, year: number) => {
     return attendanceRecords.filter(record => {
-      if (!record.Date) return false;
-      const recordDate = new Date(record.Date);
+      if (!record.date) return false;
+      const recordDate = new Date(record.date);
       return recordDate.getMonth() === month && recordDate.getFullYear() === year;
     });
   };
@@ -164,6 +212,19 @@ const AthleteDashboard = () => {
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Athlete Dashboard" showBack backTo="/" />
       
+      {/* Logout Button */}
+      <div className="mobile-container pt-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleLogout}
+          className="ml-auto flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+      
       <main className="mobile-container py-6">
         {/* Athlete Info Header */}
         <Card className="shadow-medium mb-6">
@@ -185,7 +246,7 @@ const AthleteDashboard = () => {
                 {athlete.surf_level && (
                   <Badge className="bg-primary/10 text-primary mb-2">{athlete.surf_level}</Badge>
                 )}
-                <p className="text-sm text-muted-foreground">ID: {athlete.Athlete_Id}</p>
+                <p className="text-sm text-muted-foreground">ID: {athlete.athlete_id}</p>
               </div>
             ) : (
               <p className="text-center text-muted-foreground">Athlete not found</p>
@@ -394,23 +455,23 @@ const AthleteDashboard = () => {
                       </p>
                     ) : (
                       getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((record) => (
-                        <div key={record.Id} className="border border-border rounded-lg p-3 space-y-2">
+                        <div key={record.id} className="border border-border rounded-lg p-3 space-y-2">
                           <div className="flex items-center justify-between">
-                            <p className="font-medium">{record.Date || 'N/A'}</p>
+                            <p className="font-medium">{record.date || 'N/A'}</p>
                             <Badge className={getStatusColor(record.status)}>
                               {record.status || 'Unknown'}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                             <div>
-                              <span className="font-medium">Trainer:</span> {record.treinador || 'N/A'}
+                              <span className="font-medium">Trainer:</span> {record.trainer || 'N/A'}
                             </div>
                             <div>
-                              <span className="font-medium">Beach:</span> {record.praia || 'N/A'}
+                              <span className="font-medium">Beach:</span> {record.beach_location || 'N/A'}
                             </div>
-                            {record.notas && (
+                            {record.notes && (
                               <div className="col-span-2">
-                                <span className="font-medium">Notes:</span> {record.notas}
+                                <span className="font-medium">Notes:</span> {record.notes}
                               </div>
                             )}
                           </div>
