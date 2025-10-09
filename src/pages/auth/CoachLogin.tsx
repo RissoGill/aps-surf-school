@@ -32,9 +32,20 @@ const CoachLogin = () => {
 
       if (error) throw error;
 
+      // Fetch coach data to get the name
+      const { data: coach } = await supabase
+        .from('Coach')
+        .select('first_name, last_name')
+        .eq('auth_uid', data.user.id.toString())
+        .maybeSingle();
+
+      const coachName = coach?.first_name && coach?.last_name 
+        ? `${coach.first_name} ${coach.last_name}`
+        : "Coach";
+
       toast({
         title: "Login Successful",
-        description: "Welcome back, Coach!",
+        description: `Welcome back, ${coachName}!`,
       });
       navigate("/dashboard/coach");
     } catch (error: any) {
