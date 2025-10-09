@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { supabase } from "@/integrations/supabase/client";
 
 const CoachLogin = () => {
   const navigate = useNavigate();
@@ -23,15 +24,29 @@ const CoachLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - in real app, this would be an API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Login Successful",
         description: "Welcome back, Coach!",
       });
       navigate("/dashboard/coach");
-    }, 1000);
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid email or password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

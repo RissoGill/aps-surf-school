@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -66,9 +66,56 @@ const CoachDashboard = () => {
     notas: ""
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [coachData, setCoachData] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Check authentication and fetch coach data
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/login/coach");
+        return;
+      }
+
+      setUser(session.user);
+
+      // Fetch coach data based on auth_uid
+      const { data: coach, error } = await supabase
+        .from('Coach')
+        .select('*')
+        .eq('auth_uid', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching coach data:', error);
+        toast({
+          title: "Error",
+          description: "Could not load coach profile",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCoachData(coach);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/login/coach");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -292,19 +339,30 @@ const CoachDashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login/coach");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
       
       <main className="mobile-container py-6">
         {/* Welcome Section */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Welcome Back, Coach
-          </h2>
-          <p className="text-muted-foreground">
-            Manage your athletes and track their progress
-          </p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Welcome Back{coachData ? `, ${coachData.first_name}` : ''}
+            </h2>
+            <p className="text-muted-foreground">
+              Manage your athletes and track their progress
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
 
         {/* Quick Stats */}
