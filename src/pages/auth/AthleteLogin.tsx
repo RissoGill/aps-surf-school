@@ -72,6 +72,51 @@ const AthleteLogin = () => {
 
           if (profile?.first_name) {
             athleteName = profile.first_name;
+          } else if (profile?.athlete_id) {
+            // Fallback to athlete_id mapping
+            const map: Record<string, string> = {
+              A01: 'Afonso Miguel', A02: 'António', A03: 'António Maria', A04: 'Baltazar', A05: 'Bruno',
+              A06: 'Caetano', A07: 'Constança', A08: 'Davyd', A09: 'Diogo', A10: 'Diogo',
+              A11: 'Duarte Miquel', A12: 'Ema', A13: 'Francisco', A14: 'Francisco', A15: 'Francisco',
+              A16: 'Gabriela', A17: 'Gonçalo', A18: 'Inês', A19: 'Jaime', A20: 'João Maria',
+              A21: 'João Maria', A22: 'Joaquim', A23: 'Levon', A24: 'Manuel', A25: 'Margarida',
+              A26: 'Maria', A27: 'Maria', A28: 'Marta', A29: 'Martim', A30: 'Martinho',
+              A31: 'Matilde', A32: 'Maria da Piedade', A33: 'Maria Frederica', A34: 'Marques Madalena',
+              A35: 'Lucas', A37: 'Matilde Maria', A38: 'Matilde', A39: 'Max', A40: 'Miguel',
+              A41: 'Nicolas', A42: 'Pedro', A43: 'Vasco', A44: 'Timothé', A45: 'Henrique',
+              A46: 'Kiko', A47: 'Rita', A48: 'Gonçalo', A49: 'Manuel', A50: 'Vicente',
+              A51: 'Ray', A52: 'Luca', A53: 'Vasco', A54: 'Sebastião Maria', A55: 'Peter',
+              A56: 'Zé', A57: 'Pedro', A58: 'Mafalda', A59: 'Matilde', A60: 'Francisco',
+              A61: 'Salvador', A62: 'Diogo', A63: 'Tiago', A64: 'Francisco', A65: 'Santiago',
+              A66: 'Guilherme', A67: 'Luz', A68: 'Laura', A69: 'Marta Maria', A70: 'Duarte',
+              A71: 'Rita', A72: 'Pia', A73: 'Maria da Piedade', A74: 'Pureza', A75: 'Mateus',
+              A76: 'Martim', A77: 'Maria Madalena'
+            };
+            const mapped = map[profile.athlete_id.toUpperCase()];
+            if (mapped) athleteName = mapped;
+          } else if (data.user.email) {
+            // Last fallback: try to get athlete_id from email prefix
+            const emailPrefix = data.user.email.split('@')[0].toUpperCase();
+            const map: Record<string, string> = {
+              A01: 'Afonso Miguel', A02: 'António', A03: 'António Maria', A04: 'Baltazar', A05: 'Bruno',
+              A06: 'Caetano', A07: 'Constança', A08: 'Davyd', A09: 'Diogo', A10: 'Diogo',
+              A11: 'Duarte Miquel', A12: 'Ema', A13: 'Francisco', A14: 'Francisco', A15: 'Francisco',
+              A16: 'Gabriela', A17: 'Gonçalo', A18: 'Inês', A19: 'Jaime', A20: 'João Maria',
+              A21: 'João Maria', A22: 'Joaquim', A23: 'Levon', A24: 'Manuel', A25: 'Margarida',
+              A26: 'Maria', A27: 'Maria', A28: 'Marta', A29: 'Martim', A30: 'Martinho',
+              A31: 'Matilde', A32: 'Maria da Piedade', A33: 'Maria Frederica', A34: 'Marques Madalena',
+              A35: 'Lucas', A37: 'Matilde Maria', A38: 'Matilde', A39: 'Max', A40: 'Miguel',
+              A41: 'Nicolas', A42: 'Pedro', A43: 'Vasco', A44: 'Timothé', A45: 'Henrique',
+              A46: 'Kiko', A47: 'Rita', A48: 'Gonçalo', A49: 'Manuel', A50: 'Vicente',
+              A51: 'Ray', A52: 'Luca', A53: 'Vasco', A54: 'Sebastião Maria', A55: 'Peter',
+              A56: 'Zé', A57: 'Pedro', A58: 'Mafalda', A59: 'Matilde', A60: 'Francisco',
+              A61: 'Salvador', A62: 'Diogo', A63: 'Tiago', A64: 'Francisco', A65: 'Santiago',
+              A66: 'Guilherme', A67: 'Luz', A68: 'Laura', A69: 'Marta Maria', A70: 'Duarte',
+              A71: 'Rita', A72: 'Pia', A73: 'Maria da Piedade', A74: 'Pureza', A75: 'Mateus',
+              A76: 'Martim', A77: 'Maria Madalena'
+            };
+            const mapped = map[emailPrefix];
+            if (mapped) athleteName = mapped;
           }
         }
 
