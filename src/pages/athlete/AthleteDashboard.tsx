@@ -248,8 +248,21 @@ const AthleteDashboard = () => {
                 )}
                 <p className="text-sm text-muted-foreground">ID: {athlete.athlete_id}</p>
               </div>
+            ) : userAuthId ? (
+              <div className="text-center">
+                <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="h-8 w-8 text-warning" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">Profile Not Linked</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Your account is not yet linked to an athlete profile.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Please contact your coach or administrator to link your account.
+                </p>
+              </div>
             ) : (
-              <p className="text-center text-muted-foreground">Athlete not found</p>
+              <p className="text-center text-muted-foreground">Loading...</p>
             )}
           </CardContent>
         </Card>
