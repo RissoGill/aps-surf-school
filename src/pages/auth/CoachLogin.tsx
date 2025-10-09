@@ -37,7 +37,7 @@ const CoachLogin = () => {
       if (data.user) {
         const { data: coachByUid } = await supabase
           .from('Coach')
-          .select('first_name, last_name')
+          .select('first_name, last_name, coach_id')
           .eq('auth_uid', data.user.id.toString())
           .maybeSingle();
 
@@ -45,7 +45,7 @@ const CoachLogin = () => {
         if (!profile && data.user.email) {
           const { data: coachByEmail } = await supabase
             .from('Coach')
-            .select('first_name, last_name')
+            .select('first_name, last_name, coach_id')
             .eq('email', data.user.email)
             .maybeSingle();
           profile = coachByEmail || null;
@@ -53,7 +53,36 @@ const CoachLogin = () => {
 
         if (profile) {
           const parts = [profile.first_name, profile.last_name].filter(Boolean);
-          if (parts.length) coachName = parts.join(' ');
+          if (parts.length) {
+            coachName = parts.join(' ');
+          } else if (profile.coach_id) {
+            // Fallback to coach_id mapping
+            const map: Record<string, string> = {
+              T01: 'Nuno Telmo',
+              T02: 'David',
+              T03: 'Danilo',
+              T04: 'Gustavo',
+              T05: 'Aaron',
+              T06: 'Zé',
+              T07: 'Francisco'
+            };
+            const mapped = map[String(profile.coach_id).trim().toUpperCase()];
+            if (mapped) coachName = mapped;
+          }
+        } else {
+          // If no profile found, try mapping from email prefix
+          const map: Record<string, string> = {
+            T01: 'Nuno Telmo',
+            T02: 'David',
+            T03: 'Danilo',
+            T04: 'Gustavo',
+            T05: 'Aaron',
+            T06: 'Zé',
+            T07: 'Francisco'
+          };
+          const emailPrefix = data.user.email ? data.user.email.split('@')[0].toUpperCase() : '';
+          const mapped = map[emailPrefix];
+          if (mapped) coachName = mapped;
         }
       }
 
