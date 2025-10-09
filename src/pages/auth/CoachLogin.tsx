@@ -32,16 +32,30 @@ const CoachLogin = () => {
 
       if (error) throw error;
 
-      // Fetch coach data to get the name
-      const { data: coach } = await supabase
-        .from('Coach')
-        .select('first_name, last_name')
-        .eq('auth_uid', data.user.id.toString())
-        .maybeSingle();
+      // Fetch coach data to get the name (by auth_uid, then fallback by email)
+      let coachName = "Coach";
+      if (data.user) {
+        const { data: coachByUid } = await supabase
+          .from('Coach')
+          .select('first_name, last_name')
+          .eq('auth_uid', data.user.id.toString())
+          .maybeSingle();
 
-      const coachName = coach?.first_name && coach?.last_name 
-        ? `${coach.first_name} ${coach.last_name}`
-        : "Coach";
+        let profile = coachByUid;
+        if (!profile && data.user.email) {
+          const { data: coachByEmail } = await supabase
+            .from('Coach')
+            .select('first_name, last_name')
+            .eq('email', data.user.email)
+            .maybeSingle();
+          profile = coachByEmail || null;
+        }
+
+        if (profile) {
+          const parts = [profile.first_name, profile.last_name].filter(Boolean);
+          if (parts.length) coachName = parts.join(' ');
+        }
+      }
 
       toast({
         title: "Login Successful",

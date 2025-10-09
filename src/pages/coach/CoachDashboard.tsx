@@ -85,28 +85,35 @@ const CoachDashboard = () => {
       setUser(session.user);
 
       // Fetch coach data based on auth_uid (convert UUID to string for comparison)
-      const { data: coach, error } = await supabase
+      const { data: coachByUid, error: errorByUid } = await supabase
         .from('Coach')
         .select('*')
         .eq('auth_uid', session.user.id.toString())
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching coach data:', error);
-        toast({
-          title: "Error",
-          description: "Could not load coach profile",
-          variant: "destructive",
-        });
-        return;
+      if (errorByUid) {
+        console.error('Error fetching coach data by uid:', errorByUid);
       }
 
-      if (!coach) {
+      let profile = coachByUid;
+
+      if (!profile && session.user.email) {
+        const { data: coachByEmail, error: errorByEmail } = await supabase
+          .from('Coach')
+          .select('*')
+          .eq('email', session.user.email)
+          .maybeSingle();
+        if (errorByEmail) {
+          console.error('Error fetching coach data by email:', errorByEmail);
+        }
+        profile = coachByEmail || null;
+      }
+
+      if (!profile) {
         console.warn('No coach profile found for user:', session.user.id);
-        // Don't show error toast if no profile exists, just continue
-        // The welcome message will show generic "Coach" instead of name
+        setCoachData(null);
       } else {
-        setCoachData(coach);
+        setCoachData(profile);
       }
     };
 
@@ -359,7 +366,7 @@ const CoachDashboard = () => {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              Welcome Back{coachData ? `, ${coachData.first_name}` : ''}
+              Welcome Back{coachData ? `, ${[coachData.first_name, coachData.last_name].filter(Boolean).join(' ')}` : ''}
             </h2>
             <p className="text-muted-foreground">
               Manage your athletes and track their progress
