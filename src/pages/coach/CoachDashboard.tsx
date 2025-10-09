@@ -74,61 +74,60 @@ const CoachDashboard = () => {
 
   // Check authentication and fetch coach data
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/login/coach");
-        return;
-      }
-
-      setUser(session.user);
-
-      // Fetch coach data based on auth_uid (convert UUID to string for comparison)
-      const { data: coachByUid, error: errorByUid } = await supabase
-        .from('Coach')
-        .select('*')
-        .eq('auth_uid', session.user.id.toString())
-        .maybeSingle();
-
-      if (errorByUid) {
-        console.error('Error fetching coach data by uid:', errorByUid);
-      }
-
-      let profile = coachByUid;
-
-      if (!profile && session.user.email) {
-        const { data: coachByEmail, error: errorByEmail } = await supabase
+    const fetchCoachProfile = async (u: { id: string; email?: string | null }) => {
+      try {
+        // Try by auth_uid first
+        const { data: coachByUid, error: uidErr } = await supabase
           .from('Coach')
           .select('*')
-          .eq('email', session.user.email)
+          .eq('auth_uid', u.id.toString())
           .maybeSingle();
-        if (errorByEmail) {
-          console.error('Error fetching coach data by email:', errorByEmail);
-        }
-        profile = coachByEmail || null;
-      }
+        if (uidErr) console.warn('Coach by uid error:', uidErr);
 
-      if (!profile) {
-        console.warn('No coach profile found for user:', session.user.id);
+        let profile = coachByUid;
+
+        // Fallback by email (exact match), in case auth_uid not linked yet
+        if (!profile && u.email) {
+          const { data: coachByEmail, error: emailErr } = await supabase
+            .from('Coach')
+            .select('*')
+            .eq('email', u.email)
+            .maybeSingle();
+          if (emailErr) console.warn('Coach by email error:', emailErr);
+          profile = coachByEmail || null;
+        }
+
+        setCoachData(profile || null);
+        console.log('Coach profile resolved:', profile);
+      } catch (err) {
+        console.error('Unexpected coach fetch error:', err);
         setCoachData(null);
-      } else {
-        setCoachData(profile);
       }
     };
 
-    checkAuth();
-
+    // 1) Listen first (per best practices)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/login/coach");
-      } else {
-        setUser(session.user);
+      setUser(session?.user ?? null);
+      if (!session?.user) {
+        navigate('/login/coach');
+        return;
       }
+      // Defer supabase calls outside callback to avoid deadlocks
+      setTimeout(() => fetchCoachProfile(session.user), 0);
+    });
+
+    // 2) Then check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (!session?.user) {
+        navigate('/login/coach');
+        return;
+      }
+      fetchCoachProfile(session.user);
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+  }, [navigate]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -366,7 +365,7 @@ const CoachDashboard = () => {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              Welcome Back{coachData ? `, ${[coachData.first_name, coachData.last_name].filter(Boolean).join(' ')}` : ''}
+              {`Welcome Back, ${coachData ? [coachData.first_name, coachData.last_name].filter(Boolean).join(' ') : (user?.email ? user.email.split('@')[0] : 'Coach')}`}
             </h2>
             <p className="text-muted-foreground">
               Manage your athletes and track their progress
