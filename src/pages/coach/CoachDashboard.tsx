@@ -383,7 +383,16 @@ const CoachDashboard = () => {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              {`Welcome Back, ${coachDisplayName || (user?.email ? user.email.split('@')[0] : 'Coach')}`}
+              {`Welcome Back, ${
+                coachDisplayName ||
+                (() => {
+                  const idVal = String(coachData?.coach_id ?? '').trim().toLowerCase();
+                  const p = (user?.email ? user.email.split('@')[0] : '').trim();
+                  if (!p) return 'Coach';
+                  if (p.toLowerCase() === idVal || /^[A-Za-z]*\d+$/.test(p)) return 'Coach';
+                  return p;
+                })()
+              }`}
             </h2>
             <p className="text-muted-foreground">
               Manage your athletes and track their progress
