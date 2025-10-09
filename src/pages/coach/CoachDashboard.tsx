@@ -84,12 +84,12 @@ const CoachDashboard = () => {
 
       setUser(session.user);
 
-      // Fetch coach data based on auth_uid
+      // Fetch coach data based on auth_uid (convert UUID to string for comparison)
       const { data: coach, error } = await supabase
         .from('Coach')
         .select('*')
-        .eq('auth_uid', session.user.id)
-        .single();
+        .eq('auth_uid', session.user.id.toString())
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching coach data:', error);
@@ -101,7 +101,13 @@ const CoachDashboard = () => {
         return;
       }
 
-      setCoachData(coach);
+      if (!coach) {
+        console.warn('No coach profile found for user:', session.user.id);
+        // Don't show error toast if no profile exists, just continue
+        // The welcome message will show generic "Coach" instead of name
+      } else {
+        setCoachData(coach);
+      }
     };
 
     checkAuth();
