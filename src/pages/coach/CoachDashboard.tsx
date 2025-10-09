@@ -398,11 +398,15 @@ const CoachDashboard = () => {
               {`Welcome Back, ${
                 coachDisplayName ||
                 (() => {
-                  const idVal = String(coachData?.coach_id ?? '').trim().toLowerCase();
-                  const p = (user?.email ? user.email.split('@')[0] : '').trim();
-                  if (!p) return 'Coach';
-                  if (p.toLowerCase() === idVal || /^[A-Za-z]*\d+$/.test(p)) return 'Coach';
-                  return p;
+                  const map: Record<string, string> = { T01: 'Nuno Telmo' };
+                  const idFromData = (coachData?.coach_id ? String(coachData.coach_id).trim().toUpperCase() : '');
+                  const prefix = (user?.email ? user.email.split('@')[0] : '').trim();
+                  const idFromEmail = prefix ? prefix.toUpperCase() : '';
+                  const candidate = idFromData || idFromEmail;
+                  if (candidate && map[candidate]) return map[candidate];
+                  if (!prefix) return 'Coach';
+                  if (/^[A-Za-z]*\d+$/.test(prefix)) return 'Coach';
+                  return prefix;
                 })()
               }`}
             </h2>
