@@ -49,6 +49,7 @@ const AthleteDashboard = () => {
   const { toast } = useToast();
   const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
   const [userAuthId, setUserAuthId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Check authentication and get user ID
@@ -62,6 +63,7 @@ const AthleteDashboard = () => {
       }
       
       setUserAuthId(session.user.id);
+      setUserEmail(session.user.email ?? null);
     };
 
     checkAuth();
@@ -72,6 +74,7 @@ const AthleteDashboard = () => {
         navigate("/login/athlete");
       } else {
         setUserAuthId(session.user.id);
+        setUserEmail(session.user.email ?? null);
       }
     });
 
@@ -80,20 +83,36 @@ const AthleteDashboard = () => {
 
   // Fetch athlete data based on auth_uid
   const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
-    queryKey: ['athlete', userAuthId],
+    queryKey: ['athlete', userAuthId, userEmail],
     queryFn: async () => {
-      if (!userAuthId) return null;
-      
-      const { data, error } = await supabase
-        .from('Atletas')
-        .select('*')
-        .eq('auth_uid', userAuthId)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data as Athlete | null;
+      if (!userAuthId && !userEmail) return null;
+
+      // Try by auth_uid first
+      let profile: Athlete | null = null;
+      if (userAuthId) {
+        const { data, error } = await supabase
+          .from('Atletas')
+          .select('*')
+          .eq('auth_uid', userAuthId)
+          .maybeSingle();
+        if (error) console.warn('Athlete fetch by auth_uid error:', error.message);
+        if (data) profile = data as Athlete;
+      }
+
+      // Fallback by email if no profile found
+      if (!profile && userEmail) {
+        const { data, error } = await supabase
+          .from('Atletas')
+          .select('*')
+          .eq('email', userEmail)
+          .maybeSingle();
+        if (error) console.warn('Athlete fetch by email error:', error.message);
+        if (data) profile = data as Athlete;
+      }
+
+      return profile;
     },
-    enabled: !!userAuthId,
+    enabled: !!userAuthId || !!userEmail,
   });
 
   const athleteId = athlete?.athlete_id;
