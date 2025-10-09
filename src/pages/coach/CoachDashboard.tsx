@@ -356,6 +356,24 @@ const CoachDashboard = () => {
     navigate("/login/coach");
   };
 
+  const coachDisplayName = useMemo(() => {
+    if (!coachData) return undefined;
+    const c: any = coachData;
+    const idVal = String(c.coach_id ?? '').trim().toLowerCase();
+    const build = (a?: string | null, b?: string | null) => [a, b].filter(Boolean).join(' ').trim();
+    let name = build(c.first_name, c.last_name);
+    if (!name) name = build(c.firstName, c.lastName);
+    if (!name) name = build(c.firstname, c.lastname);
+    if (!name && typeof c.name === 'string') name = c.name.trim();
+    if (name) {
+      const n = name.trim();
+      // avoid showing IDs by mistake
+      if (n.toLowerCase() === idVal || /^[A-Za-z]*\d+$/.test(n)) return undefined;
+      return n;
+    }
+    return undefined;
+  }, [coachData]);
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -365,7 +383,7 @@ const CoachDashboard = () => {
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              {`Welcome Back, ${coachData ? [coachData.first_name, coachData.last_name].filter(Boolean).join(' ') : (user?.email ? user.email.split('@')[0] : 'Coach')}`}
+              {`Welcome Back, ${coachDisplayName || (user?.email ? user.email.split('@')[0] : 'Coach')}`}
             </h2>
             <p className="text-muted-foreground">
               Manage your athletes and track their progress
