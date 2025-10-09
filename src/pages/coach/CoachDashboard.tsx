@@ -371,7 +371,12 @@ const CoachDashboard = () => {
     if ((!name || !name.trim()) && idRaw) {
       const map: Record<string, string> = {
         T01: "Nuno Telmo",
-        // TODO: Add additional mappings (e.g., T02, T03) when provided
+        T02: "David",
+        T03: "Danilo",
+        T04: "Gustavo",
+        T05: "Aaron",
+        T06: "Zé",
+        T07: "Francisco"
       };
       const mapped = map[idRaw.toUpperCase()];
       if (mapped) return mapped;
@@ -398,7 +403,15 @@ const CoachDashboard = () => {
               {`Welcome Back, ${
                 coachDisplayName ||
                 (() => {
-                  const map: Record<string, string> = { T01: 'Nuno Telmo' };
+                  const map: Record<string, string> = {
+                    T01: 'Nuno Telmo',
+                    T02: 'David',
+                    T03: 'Danilo',
+                    T04: 'Gustavo',
+                    T05: 'Aaron',
+                    T06: 'Zé',
+                    T07: 'Francisco'
+                  };
                   const idFromData = (coachData?.coach_id ? String(coachData.coach_id).trim().toUpperCase() : '');
                   const prefix = (user?.email ? user.email.split('@')[0] : '').trim();
                   const idFromEmail = prefix ? prefix.toUpperCase() : '';
