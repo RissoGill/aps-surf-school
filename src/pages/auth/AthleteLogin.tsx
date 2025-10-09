@@ -51,9 +51,33 @@ const AthleteLogin = () => {
       }
 
       if (data.session) {
+        // Fetch athlete data to get the name
+        let athleteName = "Athlete";
+        if (data.user) {
+          const { data: athleteByUid } = await supabase
+            .from('Atletas')
+            .select('first_name, last_name, athlete_id')
+            .eq('auth_uid', data.user.id)
+            .maybeSingle();
+
+          let profile = athleteByUid;
+          if (!profile && data.user.email) {
+            const { data: athleteByEmail } = await supabase
+              .from('Atletas')
+              .select('first_name, last_name, athlete_id')
+              .eq('email', data.user.email)
+              .maybeSingle();
+            profile = athleteByEmail || null;
+          }
+
+          if (profile?.first_name) {
+            athleteName = profile.first_name;
+          }
+        }
+
         toast({
           title: "Login Successful",
-          description: "Welcome back, Athlete!",
+          description: `Welcome back, ${athleteName}!`,
         });
         navigate("/dashboard/athlete");
       }
