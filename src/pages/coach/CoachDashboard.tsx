@@ -359,16 +359,28 @@ const CoachDashboard = () => {
   const coachDisplayName = useMemo(() => {
     if (!coachData) return undefined;
     const c: any = coachData;
-    const idVal = String(c.coach_id ?? '').trim().toLowerCase();
+    const idRaw = String(c.coach_id ?? '').trim();
+    const idValLower = idRaw.toLowerCase();
     const build = (a?: string | null, b?: string | null) => [a, b].filter(Boolean).join(' ').trim();
     let name = build(c.first_name, c.last_name);
     if (!name) name = build(c.firstName, c.lastName);
     if (!name) name = build(c.firstname, c.lastname);
     if (!name && typeof c.name === 'string') name = c.name.trim();
+
+    // Fallback to known coach_id -> name mapping
+    if ((!name || !name.trim()) && idRaw) {
+      const map: Record<string, string> = {
+        T01: "Nuno Telmo",
+        // TODO: Add additional mappings (e.g., T02, T03) when provided
+      };
+      const mapped = map[idRaw.toUpperCase()];
+      if (mapped) return mapped;
+    }
+
     if (name) {
       const n = name.trim();
       // avoid showing IDs by mistake
-      if (n.toLowerCase() === idVal || /^[A-Za-z]*\d+$/.test(n)) return undefined;
+      if (n.toLowerCase() === idValLower || /^[A-Za-z]*\d+$/.test(n)) return undefined;
       return n;
     }
     return undefined;
