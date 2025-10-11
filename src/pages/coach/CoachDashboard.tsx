@@ -22,12 +22,13 @@ import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSu
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 
 interface AttendanceRecord {
-  Id: string;
-  Date: string | null;
+  id: string;
+  date: string | null;
   status: string | null;
-  treinador: string | null;
-  praia: string | null;
-  notas: string | null;
+  trainer: string | null;
+  beach_location: string | null;
+  notes: string | null;
+  athlete_id: string | null;
 }
 
 interface Athlete {
@@ -248,20 +249,21 @@ const CoachDashboard = () => {
         const key = String(att.athlete_id || '').trim().toLowerCase();
         if (!attendanceByAthlete[key]) attendanceByAthlete[key] = [];
         attendanceByAthlete[key].push({
-          Id: att.id,
-          Date: att.date,
+          id: att.id,
+          date: att.date,
           status: att.status,
-          treinador: att?.trainer ?? null,
-          praia: att?.beach_location ?? null,
-          notas: att?.notes ?? null,
+          trainer: att?.trainer ?? null,
+          beach_location: att?.beach_location ?? null,
+          notes: att?.notes ?? null,
+          athlete_id: att?.athlete_id ?? null,
         });
       });
 
       // Sort each athlete's attendance by date desc
       Object.values(attendanceByAthlete).forEach((list) => {
         list.sort((a, b) => {
-          const at = a.Date ? new Date(a.Date).getTime() : 0;
-          const bt = b.Date ? new Date(b.Date).getTime() : 0;
+          const at = a.date ? new Date(a.date).getTime() : 0;
+          const bt = b.date ? new Date(b.date).getTime() : 0;
           return bt - at;
         });
       });
@@ -609,18 +611,11 @@ const CoachDashboard = () => {
                         </div>
                       </div>
 
-                      {/* Monthly Summary */}
+                       {/* Monthly Summary */}
                       {athlete.attendance.length > 0 && (
                         <div className="pt-4 space-y-4">
                           <MonthlyAttendanceSummary attendance={athlete.attendance} />
-                          <AnnualAttendanceSummary attendance={athlete.attendance.map(record => ({
-                            id: record.Id,
-                            date: record.Date,
-                            status: record.status,
-                            trainer: record.treinador,
-                            beach_location: record.praia,
-                            notes: record.notas
-                          }))} />
+                          <AnnualAttendanceSummary attendance={athlete.attendance} />
                         </div>
                       )}
 
@@ -641,14 +636,14 @@ const CoachDashboard = () => {
                       <CollapsibleContent forceMount>
                         <div className="mt-3 space-y-2">
                           {athlete.attendance.map((record) => {
-                            const formattedDate = record.Date ? new Date(record.Date).toLocaleDateString('pt-PT', { 
+                            const formattedDate = record.date ? new Date(record.date).toLocaleDateString('pt-PT', { 
                               year: 'numeric', 
                               month: 'short', 
                               day: 'numeric' 
                             }) : '-';
                             
                             return (
-                            <Card key={record.Id} className="bg-accent/30">
+                            <Card key={record.id} className="bg-accent/30">
                               <CardContent className="p-3">
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                   <div>
@@ -659,25 +654,25 @@ const CoachDashboard = () => {
                                     <span className="text-muted-foreground">Status:</span>
                                     <p className="font-medium">{record.status || 'Not set'}</p>
                                   </div>
-                                  {record.treinador && (
+                                  {record.trainer && (
                                     <div>
                                       <span className="text-muted-foreground">Trainer:</span>
-                                      <p className="font-medium">{record.treinador}</p>
+                                      <p className="font-medium">{record.trainer}</p>
                                     </div>
                                   )}
-                                  {record.praia && (
+                                  {record.beach_location && (
                                     <div className="flex items-start gap-1">
                                       <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
                                       <div>
                                         <span className="text-muted-foreground">Beach:</span>
-                                        <p className="font-medium">{record.praia}</p>
+                                        <p className="font-medium">{record.beach_location}</p>
                                       </div>
                                     </div>
                                   )}
-                                  {record.notas && (
+                                  {record.notes && (
                                     <div className="col-span-2">
                                       <span className="text-muted-foreground">Notes:</span>
-                                      <p className="font-medium">{record.notas}</p>
+                                      <p className="font-medium">{record.notes}</p>
                                     </div>
                                   )}
                                 </div>

@@ -3,12 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
 
 interface AttendanceRecord {
-  Id: string;
-  Date: string | null;
+  id: string;
+  date: string | null;
   status: string | null;
-  treinador: string | null;
-  praia: string | null;
-  notas: string | null;
+  trainer: string | null;
+  beach_location: string | null;
+  notes: string | null;
 }
 
 interface MonthlyAttendanceSummaryProps {
@@ -25,10 +25,10 @@ interface MonthlySummary {
 export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummaryProps) => {
   // Group attendance by month
   const monthlySummaries = attendance.reduce((acc, record) => {
-    if (!record.Date) return acc;
+    if (!record.date) return acc;
 
     const statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
-    const date = new Date(record.Date);
+    const date = new Date(record.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
