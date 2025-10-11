@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 
 interface AttendanceRecord {
   Id: string;
@@ -123,6 +124,36 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
       </CardContent>
     </Card>
   );
+};
+
+const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) => {
+  const { data: attendanceRecords = [] } = useQuery({
+    queryKey: ['guardian-annual-attendance', athleteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Attendance')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || [])
+        .filter((record: any) => record.status)
+        .map((record: any) => ({
+          id: record.id,
+          date: record.date,
+          status: record.status,
+          trainer: record.trainer,
+          beach_location: record.beach_location,
+          notes: record.notes,
+        }));
+    },
+  });
+
+  if (attendanceRecords.length === 0) return null;
+
+  return <AnnualAttendanceSummary attendance={attendanceRecords} />;
 };
 
 const GuardianDashboard = () => {
@@ -438,6 +469,7 @@ const GuardianDashboard = () => {
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
             <AttendanceTab athleteId={athlete.athlete_id} />
+            <AnnualAttendanceSummaryWrapper athleteId={athlete.athlete_id} />
           </TabsContent>
         </Tabs>
       </main>

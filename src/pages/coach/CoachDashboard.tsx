@@ -19,6 +19,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
 import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSummary";
+import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 
 interface AttendanceRecord {
   Id: string;
@@ -610,8 +611,16 @@ const CoachDashboard = () => {
 
                       {/* Monthly Summary */}
                       {athlete.attendance.length > 0 && (
-                        <div className="pt-4">
+                        <div className="pt-4 space-y-4">
                           <MonthlyAttendanceSummary attendance={athlete.attendance} />
+                          <AnnualAttendanceSummary attendance={athlete.attendance.map(record => ({
+                            id: record.Id,
+                            date: record.Date,
+                            status: record.status,
+                            trainer: record.treinador,
+                            beach_location: record.praia,
+                            notes: record.notas
+                          }))} />
                         </div>
                       )}
 
