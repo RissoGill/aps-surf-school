@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 
 interface Athlete {
   athlete_id: string;
@@ -540,6 +541,10 @@ const AthleteDashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {!isLoadingAttendance && attendanceRecords.length > 0 && (
+              <AnnualAttendanceSummary attendance={attendanceRecords} />
+            )}
           </TabsContent>
         </Tabs>
       </main>
