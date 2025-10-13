@@ -60,7 +60,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   const [selectedMonthKey, setSelectedMonthKey] = useState<string>(
     sortedSummaries[0]?.key || ''
   );
-  const [isExpanded, setIsExpanded] = useState(true); // Show current month details by default
+  const [isExpanded, setIsExpanded] = useState(false); // Only show details when expanded
 
   const handleMonthChange = (value: string) => {
     setSelectedMonthKey(value);
@@ -128,6 +128,9 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                     <Badge variant="outline" className="text-xs">
                       {selectedSummary.total} total
                     </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {isExpanded ? 'Hide details' : 'View details'}
+                    </span>
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${
                         isExpanded ? 'transform rotate-180' : ''
