@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           address: string | null
           athlete_id: string
-          auth_uid: string | null
           date_of_birth: string | null
           dropoff_address: string | null
           email: string | null
@@ -32,7 +31,6 @@ export type Database = {
           mother_name: string | null
           mother_phone: number | null
           phone: string | null
-          photo_url: string | null
           pickup_address: string | null
           sql_line: string | null
           surf_level: string | null
@@ -43,7 +41,6 @@ export type Database = {
         Insert: {
           address?: string | null
           athlete_id: string
-          auth_uid?: string | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -57,7 +54,6 @@ export type Database = {
           mother_name?: string | null
           mother_phone?: number | null
           phone?: string | null
-          photo_url?: string | null
           pickup_address?: string | null
           sql_line?: string | null
           surf_level?: string | null
@@ -68,7 +64,6 @@ export type Database = {
         Update: {
           address?: string | null
           athlete_id?: string
-          auth_uid?: string | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -82,7 +77,6 @@ export type Database = {
           mother_name?: string | null
           mother_phone?: number | null
           phone?: string | null
-          photo_url?: string | null
           pickup_address?: string | null
           sql_line?: string | null
           surf_level?: string | null
@@ -163,39 +157,6 @@ export type Database = {
         }
         Relationships: []
       }
-      guardians: {
-        Row: {
-          auth_uid: string | null
-          created_at: string | null
-          email: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          auth_uid?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          auth_uid?: string | null
-          created_at?: string | null
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       Payments: {
         Row: {
           amount_due: number | null
@@ -236,6 +197,39 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
         ]
+      }
+      Users: {
+        Row: {
+          athlete_id: string | null
+          athlete_password: string | null
+          athlete_role: string | null
+          athlete_user_id: string | null
+          guardian_id: string | null
+          guardian_password: string | null
+          guardian_role: string | null
+          id: number
+        }
+        Insert: {
+          athlete_id?: string | null
+          athlete_password?: string | null
+          athlete_role?: string | null
+          athlete_user_id?: string | null
+          guardian_id?: string | null
+          guardian_password?: string | null
+          guardian_role?: string | null
+          id: number
+        }
+        Update: {
+          athlete_id?: string | null
+          athlete_password?: string | null
+          athlete_role?: string | null
+          athlete_user_id?: string | null
+          guardian_id?: string | null
+          guardian_password?: string | null
+          guardian_role?: string | null
+          id?: number
+        }
+        Relationships: []
       }
     }
     Views: {
