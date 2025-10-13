@@ -503,9 +503,20 @@ const GuardianDashboard = () => {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1; // 1-12
 
+  const getMonthNumber = (monthStr: string): number => {
+    const months: Record<string, number> = {
+      'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+      'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
+    };
+    // Try parsing as number first, then lookup as name
+    const parsed = parseInt(monthStr);
+    if (!isNaN(parsed)) return parsed;
+    return months[monthStr] || 0;
+  };
+
   const pastAndCurrentPayments = filteredPayments?.filter(p => {
     const paymentYear = p.year || 0;
-    const paymentMonth = parseInt(p.month) || 0;
+    const paymentMonth = getMonthNumber(p.month);
     
     // Include if year is less than current, or same year but month <= current
     if (paymentYear < currentYear) return true;
@@ -516,7 +527,7 @@ const GuardianDashboard = () => {
   // Find next payment (unpaid or partial payment from current or future months)
   const nextPayment = filteredPayments?.find(p => {
     const paymentYear = p.year || 0;
-    const paymentMonth = parseInt(p.month) || 0;
+    const paymentMonth = getMonthNumber(p.month);
     const isPaid = p.status?.toLowerCase() === "paid" || (p.amount_paid >= p.amount_due);
     
     // Look for unpaid/partial payments from current month onwards
