@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           address: string | null
           athlete_id: string
+          auth_uid: string | null
           date_of_birth: string | null
           dropoff_address: string | null
           email: string | null
@@ -25,6 +26,7 @@ export type Database = {
           father_name: string | null
           father_phone: string | null
           first_name: string | null
+          guardian_id: string | null
           last_name: string | null
           mother_email: string | null
           mother_name: string | null
@@ -41,6 +43,7 @@ export type Database = {
         Insert: {
           address?: string | null
           athlete_id: string
+          auth_uid?: string | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -48,6 +51,7 @@ export type Database = {
           father_name?: string | null
           father_phone?: string | null
           first_name?: string | null
+          guardian_id?: string | null
           last_name?: string | null
           mother_email?: string | null
           mother_name?: string | null
@@ -64,6 +68,7 @@ export type Database = {
         Update: {
           address?: string | null
           athlete_id?: string
+          auth_uid?: string | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -71,6 +76,7 @@ export type Database = {
           father_name?: string | null
           father_phone?: string | null
           first_name?: string | null
+          guardian_id?: string | null
           last_name?: string | null
           mother_email?: string | null
           mother_name?: string | null
@@ -93,8 +99,10 @@ export type Database = {
           date: string | null
           id: string
           notes: string | null
+          photos: string[] | null
           status: string | null
           trainer: string | null
+          videos: string[] | null
         }
         Insert: {
           athlete_id?: string | null
@@ -102,8 +110,10 @@ export type Database = {
           date?: string | null
           id: string
           notes?: string | null
+          photos?: string[] | null
           status?: string | null
           trainer?: string | null
+          videos?: string[] | null
         }
         Update: {
           athlete_id?: string | null
@@ -111,8 +121,10 @@ export type Database = {
           date?: string | null
           id?: string
           notes?: string | null
+          photos?: string[] | null
           status?: string | null
           trainer?: string | null
+          videos?: string[] | null
         }
         Relationships: [
           {
@@ -123,6 +135,33 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
         ]
+      }
+      Coach: {
+        Row: {
+          auth_uid: string | null
+          coach_id: string
+          email: string | null
+          first_name: string | null
+          last_name: string | null
+          phone: number | null
+        }
+        Insert: {
+          auth_uid?: string | null
+          coach_id: string
+          email?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          phone?: number | null
+        }
+        Update: {
+          auth_uid?: string | null
+          coach_id?: string
+          email?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          phone?: number | null
+        }
+        Relationships: []
       }
       Payments: {
         Row: {

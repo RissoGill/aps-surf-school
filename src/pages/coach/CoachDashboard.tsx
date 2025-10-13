@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,9 @@ const CoachDashboard = () => {
     praia: "",
     notas: ""
   });
+  const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
+  const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [coachData, setCoachData] = useState<any>(null);
@@ -292,42 +295,90 @@ const CoachDashboard = () => {
       return;
     }
 
-    const { error } = await supabase
-      .from('Attendance')
-      .insert({
-        id: `${selectedAthleteId}-${newAttendance.date}-${Date.now()}`,
-        athlete_id: selectedAthleteId,
-        date: newAttendance.date,
-        status: newAttendance.status,
-        trainer: newAttendance.treinador || null,
-        beach_location: newAttendance.praia || null,
-        notes: newAttendance.notas || null,
+    setIsUploading(true);
+
+    try {
+      // Upload photos and videos to storage
+      const photoUrls: string[] = [];
+      const videoUrls: string[] = [];
+
+      // Upload photos
+      for (const photo of uploadedPhotos) {
+        const fileExt = photo.name.split('.').pop();
+        const fileName = `${selectedAthleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('attendance-media')
+          .upload(fileName, photo);
+
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('attendance-media')
+          .getPublicUrl(fileName);
+        
+        photoUrls.push(publicUrl);
+      }
+
+      // Upload videos
+      for (const video of uploadedVideos) {
+        const fileExt = video.name.split('.').pop();
+        const fileName = `${selectedAthleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('attendance-media')
+          .upload(fileName, video);
+
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('attendance-media')
+          .getPublicUrl(fileName);
+        
+        videoUrls.push(publicUrl);
+      }
+
+      // Insert attendance record with media URLs
+      const { error } = await supabase
+        .from('Attendance')
+        .insert({
+          id: `${selectedAthleteId}-${newAttendance.date}-${Date.now()}`,
+          athlete_id: selectedAthleteId,
+          date: newAttendance.date,
+          status: newAttendance.status,
+          trainer: newAttendance.treinador || null,
+          beach_location: newAttendance.praia || null,
+          notes: newAttendance.notas || null,
+          photos: photoUrls.length > 0 ? photoUrls : null,
+          videos: videoUrls.length > 0 ? videoUrls : null,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Attendance recorded successfully",
       });
 
-    if (error) {
+      setIsDialogOpen(false);
+      setNewAttendance({
+        date: new Date().toISOString().split('T')[0],
+        status: "",
+        treinador: "",
+        praia: "",
+        notas: ""
+      });
+      setUploadedPhotos([]);
+      setUploadedVideos([]);
+      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+    } catch (error: any) {
       console.error('Attendance save error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save attendance",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsUploading(false);
     }
-
-    toast({
-      title: "Success",
-      description: "Attendance recorded successfully",
-    });
-
-    setIsDialogOpen(false);
-    setNewAttendance({
-      date: new Date().toISOString().split('T')[0],
-      status: "",
-      treinador: "",
-      praia: "",
-      notas: ""
-    });
-    queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
   };
 
   const filteredAthletes = useMemo(() => {
@@ -602,8 +653,94 @@ const CoachDashboard = () => {
                                     placeholder="Enter any notes"
                                   />
                                 </div>
-                                <Button onClick={handleSaveAttendance} className="w-full">
-                                  Save Attendance
+                                
+                                {/* Photo Upload */}
+                                <div className="space-y-2">
+                                  <Label className="flex items-center gap-2">
+                                    <ImageIcon className="h-4 w-4" />
+                                    Photos
+                                  </Label>
+                                  <div className="space-y-2">
+                                    <Input
+                                      type="file"
+                                      accept="image/*"
+                                      multiple
+                                      onChange={(e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        setUploadedPhotos(prev => [...prev, ...files]);
+                                      }}
+                                      className="cursor-pointer"
+                                    />
+                                    {uploadedPhotos.length > 0 && (
+                                      <div className="flex flex-wrap gap-2">
+                                        {uploadedPhotos.map((file, idx) => (
+                                          <div key={idx} className="relative group">
+                                            <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
+                                              <ImageIcon className="h-4 w-4" />
+                                              <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                                              <button
+                                                type="button"
+                                                onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                                className="text-muted-foreground hover:text-destructive"
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Video Upload */}
+                                <div className="space-y-2">
+                                  <Label className="flex items-center gap-2">
+                                    <Video className="h-4 w-4" />
+                                    Videos
+                                  </Label>
+                                  <div className="space-y-2">
+                                    <Input
+                                      type="file"
+                                      accept="video/*"
+                                      multiple
+                                      onChange={(e) => {
+                                        const files = Array.from(e.target.files || []);
+                                        setUploadedVideos(prev => [...prev, ...files]);
+                                      }}
+                                      className="cursor-pointer"
+                                    />
+                                    {uploadedVideos.length > 0 && (
+                                      <div className="flex flex-wrap gap-2">
+                                        {uploadedVideos.map((file, idx) => (
+                                          <div key={idx} className="relative group">
+                                            <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
+                                              <Video className="h-4 w-4" />
+                                              <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                                              <button
+                                                type="button"
+                                                onClick={() => setUploadedVideos(prev => prev.filter((_, i) => i !== idx))}
+                                                className="text-muted-foreground hover:text-destructive"
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <Button onClick={handleSaveAttendance} className="w-full" disabled={isUploading}>
+                                  {isUploading ? (
+                                    <>
+                                      <Upload className="h-4 w-4 mr-2 animate-spin" />
+                                      Uploading...
+                                    </>
+                                  ) : (
+                                    "Save Attendance"
+                                  )}
                                 </Button>
                               </div>
                             </DialogContent>
