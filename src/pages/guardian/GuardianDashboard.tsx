@@ -671,14 +671,10 @@ const GuardianDashboard = () => {
                 <CardTitle className="text-lg">Payment Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
                     <p className="text-xs text-muted-foreground">Next Payment</p>
-                  </div>
-                  <div className="p-3 bg-success/10 rounded-lg">
-                    <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
-                    <p className="text-xs text-muted-foreground">Total Paid</p>
                   </div>
                   <div className="p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
@@ -745,14 +741,10 @@ const GuardianDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="text-center p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
                     <p className="text-xs text-muted-foreground">Next Payment</p>
-                  </div>
-                  <div className="text-center p-3 bg-success/10 rounded-lg">
-                    <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
-                    <p className="text-xs text-muted-foreground">Total Paid</p>
                   </div>
                   <div className="text-center p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
