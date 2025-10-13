@@ -530,18 +530,23 @@ const GuardianDashboard = () => {
     return false;
   }) || [];
 
-  // Find next payment (unpaid or partial payment from current or future months)
-  const nextPayment = filteredPayments?.find(p => {
+  // Find next payment (earliest unpaid payment from current/future months)
+  const upcomingUnpaidPayments = filteredPayments?.filter(p => {
     const paymentYear = p.year || 0;
     const paymentMonth = getMonthNumber(p.month);
     const isPaid = p.status?.toLowerCase() === "paid" || (p.amount_paid >= p.amount_due);
     
-    // Look for unpaid/partial payments from current month onwards
+    // Include unpaid payments from current month onwards
     if (paymentYear > currentYear) return !isPaid;
     if (paymentYear === currentYear && paymentMonth >= currentMonth) return !isPaid;
     return false;
-  });
+  }).sort((a, b) => {
+    // Sort by year, then month to get the earliest payment first
+    if (a.year !== b.year) return (a.year || 0) - (b.year || 0);
+    return getMonthNumber(a.month) - getMonthNumber(b.month);
+  }) || [];
 
+  const nextPayment = upcomingUnpaidPayments[0];
   const nextPaymentAmount = nextPayment?.amount_due || 0;
   
   // Calculate next payment due date (5th of the month)
