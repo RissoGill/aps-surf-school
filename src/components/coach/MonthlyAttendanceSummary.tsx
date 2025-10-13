@@ -60,7 +60,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   const [selectedMonthKey, setSelectedMonthKey] = useState<string>(
     sortedSummaries[0]?.key || ''
   );
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Show current month details by default
 
   const handleMonthChange = (value: string) => {
     setSelectedMonthKey(value);
