@@ -625,7 +625,7 @@ const CoachDashboard = () => {
                                     <SelectContent>
                                       <SelectItem value="Present">Present</SelectItem>
                                       <SelectItem value="Absent">Absent</SelectItem>
-                                      <SelectItem value="Late">Late</SelectItem>
+                                      <SelectItem value="Justified">Justified</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
