@@ -20,15 +20,12 @@ const AthleteLogin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if user is already logged in
+  // Check if athlete is already logged in via localStorage
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard/athlete");
-      }
-    };
-    checkUser();
+    const athleteSession = localStorage.getItem('athleteSession');
+    if (athleteSession) {
+      navigate("/dashboard/athlete");
+    }
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,96 +33,45 @@ const AthleteLogin = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      // Query the Users table to validate credentials
+      const { data: userRecord, error } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('athlete_user_id', formData.email)
+        .eq('athlete_password', formData.password)
+        .maybeSingle();
 
-      if (error) {
+      if (error || !userRecord) {
         toast({
           title: "Login Failed",
-          description: error.message,
+          description: "Invalid email or password. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
-      if (data.session) {
-        // Fetch athlete data to get the name
-        let athleteName = "Athlete";
-        if (data.user) {
-          const { data: athleteByUid } = await supabase
-            .from('Atletas')
-            .select('first_name, last_name, athlete_id')
-            .eq('auth_uid', data.user.id)
-            .maybeSingle();
+      // Fetch athlete details from Atletas table
+      const { data: athleteData } = await supabase
+        .from('Atletas')
+        .select('first_name, last_name, athlete_id')
+        .eq('athlete_id', userRecord.athlete_id)
+        .maybeSingle();
 
-          let profile = athleteByUid;
-          if (!profile && data.user.email) {
-            const { data: athleteByEmail } = await supabase
-              .from('Atletas')
-              .select('first_name, last_name, athlete_id')
-              .eq('email', data.user.email)
-              .maybeSingle();
-            profile = athleteByEmail || null;
-          }
+      const athleteName = athleteData?.first_name || "Athlete";
 
-          if (profile?.first_name) {
-            athleteName = profile.first_name;
-          } else if (profile?.athlete_id) {
-            // Fallback to athlete_id mapping
-            const map: Record<string, string> = {
-              A01: 'Afonso Miguel', A02: 'António', A03: 'António Maria', A04: 'Baltazar', A05: 'Bruno',
-              A06: 'Caetano', A07: 'Constança', A08: 'Davyd', A09: 'Diogo', A10: 'Diogo',
-              A11: 'Duarte Miquel', A12: 'Ema', A13: 'Francisco', A14: 'Francisco', A15: 'Francisco',
-              A16: 'Gabriela', A17: 'Gonçalo', A18: 'Inês', A19: 'Jaime', A20: 'João Maria',
-              A21: 'João Maria', A22: 'Joaquim', A23: 'Levon', A24: 'Manuel', A25: 'Margarida',
-              A26: 'Maria', A27: 'Maria', A28: 'Marta', A29: 'Martim', A30: 'Martinho',
-              A31: 'Matilde', A32: 'Maria da Piedade', A33: 'Maria Frederica', A34: 'Marques Madalena',
-              A35: 'Lucas', A37: 'Matilde Maria', A38: 'Matilde', A39: 'Max', A40: 'Miguel',
-              A41: 'Nicolas', A42: 'Pedro', A43: 'Vasco', A44: 'Timothé', A45: 'Henrique',
-              A46: 'Kiko', A47: 'Rita', A48: 'Gonçalo', A49: 'Manuel', A50: 'Vicente',
-              A51: 'Ray', A52: 'Luca', A53: 'Vasco', A54: 'Sebastião Maria', A55: 'Peter',
-              A56: 'Zé', A57: 'Pedro', A58: 'Mafalda', A59: 'Matilde', A60: 'Francisco',
-              A61: 'Salvador', A62: 'Diogo', A63: 'Tiago', A64: 'Francisco', A65: 'Santiago',
-              A66: 'Guilherme', A67: 'Luz', A68: 'Laura', A69: 'Marta Maria', A70: 'Duarte',
-              A71: 'Rita', A72: 'Pia', A73: 'Maria da Piedade', A74: 'Pureza', A75: 'Mateus',
-              A76: 'Martim', A77: 'Maria Madalena'
-            };
-            const mapped = map[profile.athlete_id.toUpperCase()];
-            if (mapped) athleteName = mapped;
-          } else if (data.user.email) {
-            // Last fallback: try to get athlete_id from email prefix
-            const emailPrefix = data.user.email.split('@')[0].toUpperCase();
-            const map: Record<string, string> = {
-              A01: 'Afonso Miguel', A02: 'António', A03: 'António Maria', A04: 'Baltazar', A05: 'Bruno',
-              A06: 'Caetano', A07: 'Constança', A08: 'Davyd', A09: 'Diogo', A10: 'Diogo',
-              A11: 'Duarte Miquel', A12: 'Ema', A13: 'Francisco', A14: 'Francisco', A15: 'Francisco',
-              A16: 'Gabriela', A17: 'Gonçalo', A18: 'Inês', A19: 'Jaime', A20: 'João Maria',
-              A21: 'João Maria', A22: 'Joaquim', A23: 'Levon', A24: 'Manuel', A25: 'Margarida',
-              A26: 'Maria', A27: 'Maria', A28: 'Marta', A29: 'Martim', A30: 'Martinho',
-              A31: 'Matilde', A32: 'Maria da Piedade', A33: 'Maria Frederica', A34: 'Marques Madalena',
-              A35: 'Lucas', A37: 'Matilde Maria', A38: 'Matilde', A39: 'Max', A40: 'Miguel',
-              A41: 'Nicolas', A42: 'Pedro', A43: 'Vasco', A44: 'Timothé', A45: 'Henrique',
-              A46: 'Kiko', A47: 'Rita', A48: 'Gonçalo', A49: 'Manuel', A50: 'Vicente',
-              A51: 'Ray', A52: 'Luca', A53: 'Vasco', A54: 'Sebastião Maria', A55: 'Peter',
-              A56: 'Zé', A57: 'Pedro', A58: 'Mafalda', A59: 'Matilde', A60: 'Francisco',
-              A61: 'Salvador', A62: 'Diogo', A63: 'Tiago', A64: 'Francisco', A65: 'Santiago',
-              A66: 'Guilherme', A67: 'Luz', A68: 'Laura', A69: 'Marta Maria', A70: 'Duarte',
-              A71: 'Rita', A72: 'Pia', A73: 'Maria da Piedade', A74: 'Pureza', A75: 'Mateus',
-              A76: 'Martim', A77: 'Maria Madalena'
-            };
-            const mapped = map[emailPrefix];
-            if (mapped) athleteName = mapped;
-          }
-        }
+      // Store session in localStorage
+      localStorage.setItem('athleteSession', JSON.stringify({
+        athlete_id: userRecord.athlete_id,
+        email: formData.email,
+        role: userRecord.athlete_role,
+        name: athleteName
+      }));
 
-        toast({
-          title: "Login Successful",
-          description: `Welcome back, ${athleteName}!`,
-        });
-        navigate("/dashboard/athlete");
-      }
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${athleteName}!`,
+      });
+      navigate("/dashboard/athlete");
     } catch (error) {
       toast({
         title: "Error",
