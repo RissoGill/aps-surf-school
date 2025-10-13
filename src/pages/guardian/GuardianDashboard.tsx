@@ -392,7 +392,10 @@ const GuardianDashboard = () => {
       }
       
       if (guardian) {
+        console.log('Guardian profile loaded:', guardian);
         setGuardianId(guardian.id);
+      } else {
+        console.log('No guardian profile found for user:', session.user.id);
       }
     };
 
@@ -424,14 +427,22 @@ const GuardianDashboard = () => {
   const { data: athletes, isLoading: athletesLoading } = useQuery({
     queryKey: ['guardian-athletes', guardianId],
     queryFn: async () => {
-      if (!guardianId) return [];
+      if (!guardianId) {
+        console.log('No guardianId available for query');
+        return [];
+      }
+      
+      console.log('Fetching athletes for guardian_id:', guardianId);
       
       const { data, error } = await supabase
         .from('Atletas')
         .select('*')
         .eq('guardian_id', guardianId);
       
+      console.log('Athletes query result:', { data, error });
+      
       if (error) {
+        console.error('Error fetching athletes:', error);
         toast({
           title: "Error",
           description: "Failed to load athlete data",
@@ -440,6 +451,7 @@ const GuardianDashboard = () => {
         throw error;
       }
       
+      console.log('Athletes loaded:', data?.length || 0);
       return data || [];
     },
     enabled: !!guardianId,
@@ -512,6 +524,15 @@ const GuardianDashboard = () => {
   const isLoading = athletesLoading || paymentsLoading;
   const athlete = athletes?.[0]; // For now, display first athlete
 
+  console.log('Guardian Dashboard State:', {
+    isLoading,
+    athletesLoading,
+    paymentsLoading,
+    guardianId,
+    athletesCount: athletes?.length || 0,
+    athlete: athlete ? 'exists' : 'null'
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
@@ -529,6 +550,7 @@ const GuardianDashboard = () => {
   }
 
   if (!guardianId || !athlete) {
+    console.log('Showing error state:', { guardianId, hasAthlete: !!athlete });
     return (
       <div className="min-h-screen bg-gradient-surface">
         <AppHeader title="Guardian Dashboard" showBack backTo="/" />
@@ -539,6 +561,9 @@ const GuardianDashboard = () => {
                 {!guardianId 
                   ? "Guardian profile not found. Please contact administration."
                   : "No athletes linked to your account."}
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Debug: guardianId={guardianId || 'null'}, athletes={athletes?.length || 0}
               </p>
               <Button onClick={() => navigate("/login/guardian")}>Back to Login</Button>
             </CardContent>
