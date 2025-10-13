@@ -359,7 +359,6 @@ const GuardianDashboard = () => {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -383,7 +382,19 @@ const GuardianDashboard = () => {
       
       try {
         const guardianSession = JSON.parse(guardianSessionStr);
-        const athleteId = guardianSession.athlete_id;
+        let athleteId: string | null = guardianSession.athlete_id || null;
+
+        // Fallback: derive athlete_id from Users table if missing
+        if (!athleteId) {
+          const identifier = (guardianSession.guardian_id || guardianSession.email || '').trim();
+          const candidateIds = identifier.includes('@') ? [identifier] : [identifier, `${identifier}@aps.com`];
+          const { data: userRec, error } = await supabase
+            .from('Users')
+            .select('athlete_id')
+            .in('guardian_id', candidateIds)
+            .maybeSingle();
+          if (!error && userRec?.athlete_id) athleteId = userRec.athlete_id;
+        }
         
         if (!athleteId) {
           toast({
@@ -516,14 +527,6 @@ const GuardianDashboard = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
