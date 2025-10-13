@@ -497,9 +497,28 @@ const GuardianDashboard = () => {
     }
   };
 
+  // Calculate totals - outstanding only includes previous and current months
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // 1-12
+
+  const pastAndCurrentPayments = filteredPayments?.filter(p => {
+    const paymentYear = p.year || 0;
+    const paymentMonth = parseInt(p.month) || 0;
+    
+    // Include if year is less than current, or same year but month <= current
+    if (paymentYear < currentYear) return true;
+    if (paymentYear === currentYear && paymentMonth <= currentMonth) return true;
+    return false;
+  }) || [];
+
   const totalDue = filteredPayments?.reduce((sum, p) => sum + (p.amount_due || 0), 0) || 0;
   const totalPaid = filteredPayments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
-  const totalOutstanding = totalDue - totalPaid;
+  
+  // Outstanding only from past and current months
+  const outstandingDue = pastAndCurrentPayments.reduce((sum, p) => sum + (p.amount_due || 0), 0);
+  const outstandingPaid = pastAndCurrentPayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0);
+  const totalOutstanding = outstandingDue - outstandingPaid;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('pt-PT', {
