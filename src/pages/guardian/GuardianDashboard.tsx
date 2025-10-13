@@ -377,9 +377,11 @@ const GuardianDashboard = () => {
       // Fetch guardian profile to get guardian ID
       const { data: guardian, error } = await supabase
         .from('guardians')
-        .select('id')
+        .select('*')
         .eq('auth_uid', session.user.id)
         .maybeSingle();
+      
+      console.log('Guardian query result:', { guardian, error, userId: session.user.id });
       
       if (error) {
         console.error('Error fetching guardian profile:', error);
@@ -410,10 +412,11 @@ const GuardianDashboard = () => {
         setTimeout(() => {
           supabase
             .from('guardians')
-            .select('id')
+            .select('*')
             .eq('auth_uid', session.user.id)
             .maybeSingle()
-            .then(({ data: guardian }) => {
+            .then(({ data: guardian, error }) => {
+              console.log('Auth change guardian query:', { guardian, error });
               if (guardian) setGuardianId(guardian.id);
             });
         }, 0);
