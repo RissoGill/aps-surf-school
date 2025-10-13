@@ -512,7 +512,19 @@ const GuardianDashboard = () => {
     return false;
   }) || [];
 
-  const totalDue = filteredPayments?.reduce((sum, p) => sum + (p.amount_due || 0), 0) || 0;
+  // Find next payment (unpaid or partial payment from current or future months)
+  const nextPayment = filteredPayments?.find(p => {
+    const paymentYear = p.year || 0;
+    const paymentMonth = parseInt(p.month) || 0;
+    const isPaid = p.status?.toLowerCase() === "paid" || (p.amount_paid >= p.amount_due);
+    
+    // Look for unpaid/partial payments from current month onwards
+    if (paymentYear > currentYear) return !isPaid;
+    if (paymentYear === currentYear && paymentMonth >= currentMonth) return !isPaid;
+    return false;
+  });
+
+  const nextPaymentAmount = nextPayment?.amount_due || 0;
   const totalPaid = filteredPayments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
   
   // Outstanding only from past and current months
@@ -632,8 +644,8 @@ const GuardianDashboard = () => {
               <CardContent>
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="p-3 bg-accent/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{formatCurrency(totalDue)}</p>
-                    <p className="text-xs text-muted-foreground">Total Due</p>
+                    <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
+                    <p className="text-xs text-muted-foreground">Next Payment</p>
                   </div>
                   <div className="p-3 bg-success/10 rounded-lg">
                     <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
@@ -690,8 +702,8 @@ const GuardianDashboard = () => {
               <CardContent>
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="text-center p-3 bg-accent/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{formatCurrency(totalDue)}</p>
-                    <p className="text-xs text-muted-foreground">Total Due</p>
+                    <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
+                    <p className="text-xs text-muted-foreground">Next Payment</p>
                   </div>
                   <div className="text-center p-3 bg-success/10 rounded-lg">
                     <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
