@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible } from "@/components/ui/collapsible";
 import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
 import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSummary";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
@@ -757,68 +757,7 @@ const CoachDashboard = () => {
                       )}
 
                       {/* Attendance History Section */}
-                      {athlete.attendance.length > 0 && (
-                        <div className="pt-4 border-t border-border">
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="w-full">
-                              <Calendar className="h-4 w-4 mr-2" />
-                              <span className="text-sm font-medium">
-                                {athlete.attendance.length} attendance record(s) - Click to expand
-                              </span>
-                            </Button>
-                          </CollapsibleTrigger>
-                        </div>
-                      )}
 
-                      <CollapsibleContent forceMount>
-                        <div className="mt-3 space-y-2">
-                          {athlete.attendance.map((record) => {
-                            const formattedDate = record.date ? new Date(record.date).toLocaleDateString('pt-PT', { 
-                              year: 'numeric', 
-                              month: 'short', 
-                              day: 'numeric' 
-                            }) : '-';
-                            
-                            return (
-                            <Card key={record.id} className="bg-accent/30">
-                              <CardContent className="p-3">
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                  <div>
-                                    <span className="text-muted-foreground">Date:</span>
-                                    <p className="font-medium">{formattedDate}</p>
-                                  </div>
-                                  <div>
-                                    <span className="text-muted-foreground">Status:</span>
-                                    <p className="font-medium">{record.status || 'Not set'}</p>
-                                  </div>
-                                  {record.trainer && (
-                                    <div>
-                                      <span className="text-muted-foreground">Trainer:</span>
-                                      <p className="font-medium">{record.trainer}</p>
-                                    </div>
-                                  )}
-                                  {record.beach_location && (
-                                    <div className="flex items-start gap-1">
-                                      <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
-                                      <div>
-                                        <span className="text-muted-foreground">Beach:</span>
-                                        <p className="font-medium">{record.beach_location}</p>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {record.notes && (
-                                    <div className="col-span-2">
-                                      <span className="text-muted-foreground">Notes:</span>
-                                      <p className="font-medium">{record.notes}</p>
-                                    </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
                     </div>
                   </Collapsible>
                 ))}
