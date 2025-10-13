@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 
 interface AttendanceRecord {
   id: string;
@@ -58,6 +60,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   const [selectedMonthKey, setSelectedMonthKey] = useState<string>(
     sortedSummaries[0]?.key || ''
   );
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (sortedSummaries.length === 0) {
     return null;
@@ -107,27 +110,46 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
-            <Badge variant="outline" className="text-xs">
-              {selectedSummary.total} total
-            </Badge>
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <div className="space-y-2">
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {selectedSummary.total} total
+                    </Badge>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        isExpanded ? 'transform rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </div>
+              </Button>
+            </CollapsibleTrigger>
+            
+            <CollapsibleContent>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {Object.entries(selectedSummary.statusCounts)
+                  .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+                  .map(([status, count]) => (
+                    <Badge 
+                      key={status} 
+                      className={`${getStatusColor(status)} text-xs`}
+                      variant="secondary"
+                    >
+                      {getStatusLabel(status)}: {count}
+                    </Badge>
+                  ))}
+              </div>
+            </CollapsibleContent>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(selectedSummary.statusCounts)
-              .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
-              .map(([status, count]) => (
-                <Badge 
-                  key={status} 
-                  className={`${getStatusColor(status)} text-xs`}
-                  variant="secondary"
-                >
-                  {getStatusLabel(status)}: {count}
-                </Badge>
-              ))}
-          </div>
-        </div>
+        </Collapsible>
       </CardContent>
     </Card>
   );
