@@ -31,7 +31,11 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   const monthlySummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
 
-    const statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
+    // Map Absent to Present for statistics
+    let statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
+    if (statusKey === 'Absent') {
+      statusKey = 'Present';
+    }
     const date = new Date(record.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -154,7 +158,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 {/* Status Summary Badges */}
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(selectedSummary.statusCounts)
-                    .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+                    .filter(([status]) => ["Present", "Justified"].includes(status))
                     .map(([status, count]) => (
                       <Badge 
                         key={status} 

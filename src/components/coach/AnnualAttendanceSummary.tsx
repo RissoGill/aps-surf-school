@@ -26,7 +26,11 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
   const annualSummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
 
-    const statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
+    // Map Absent to Present for statistics
+    let statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
+    if (statusKey === 'Absent') {
+      statusKey = 'Present';
+    }
     const date = new Date(record.date);
     const year = date.getFullYear();
 
@@ -89,7 +93,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
             </div>
             <div className="flex flex-wrap gap-2">
               {Object.entries(summary.statusCounts)
-                .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+                .filter(([status]) => ["Present", "Justified"].includes(status))
                 .map(([status, count]) => (
                   <Badge 
                     key={status} 
