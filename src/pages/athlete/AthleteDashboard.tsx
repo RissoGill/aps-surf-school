@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play } from "lucide-react";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -605,27 +605,50 @@ const AthleteDashboard = () => {
                             <ImageIcon className="h-4 w-4" />
                             Photos ({allPhotos.length})
                           </h3>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {allPhotos.map((photo, idx) => (
-                              <div key={idx} className="relative group">
-                                <a href={photo.url} target="_blank" rel="noopener noreferrer">
-                                  <img
-                                    src={photo.url}
-                                    alt={`Training photo from ${photo.date || 'session'}`}
-                                    className="w-full h-32 object-cover rounded-lg border border-border hover:border-primary transition-all"
-                                  />
-                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center text-white text-xs p-2">
-                                    {photo.date && (
-                                      <p className="font-medium">
-                                        {new Date(photo.date).toLocaleDateString('pt-PT')}
-                                      </p>
-                                    )}
-                                    {photo.trainer && (
-                                      <p className="text-white/80">by {photo.trainer}</p>
-                                    )}
+                              <Card key={idx} className="overflow-hidden">
+                                <div className="relative group">
+                                  <a href={photo.url} target="_blank" rel="noopener noreferrer">
+                                    <img
+                                      src={photo.url}
+                                      alt={`Training photo from ${photo.date || 'session'}`}
+                                      className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
+                                    />
+                                  </a>
+                                </div>
+                                <CardContent className="p-3 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      {photo.date && (
+                                        <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                                          <Calendar className="h-3 w-3" />
+                                          {new Date(photo.date).toLocaleDateString('pt-PT', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                          })}
+                                        </p>
+                                      )}
+                                      {photo.trainer && (
+                                        <p className="text-xs text-muted-foreground truncate">
+                                          Coach: {photo.trainer}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 w-8 p-0"
+                                      asChild
+                                    >
+                                      <a href={photo.url} download target="_blank" rel="noopener noreferrer">
+                                        <Download className="h-4 w-4" />
+                                      </a>
+                                    </Button>
                                   </div>
-                                </a>
-                              </div>
+                                </CardContent>
+                              </Card>
                             ))}
                           </div>
                         </div>
@@ -640,32 +663,53 @@ const AthleteDashboard = () => {
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {allVideos.map((video, idx) => (
-                              <div key={idx} className="relative group">
+                              <Card key={idx} className="overflow-hidden">
                                 <a href={video.url} target="_blank" rel="noopener noreferrer" className="block">
-                                  <div className="relative w-full h-48 bg-secondary/10 rounded-lg border border-border hover:border-primary transition-all flex items-center justify-center">
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center">
+                                  <div className="relative w-full h-48 bg-secondary/10 flex items-center justify-center">
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                      <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                                         <Play className="h-8 w-8 text-primary ml-1" />
                                       </div>
                                     </div>
                                     <video
                                       src={video.url}
-                                      className="w-full h-full object-cover rounded-lg"
+                                      className="w-full h-full object-cover"
                                       preload="metadata"
                                     />
                                   </div>
-                                  <div className="mt-2 text-xs">
-                                    {video.date && (
-                                      <p className="font-medium text-foreground">
-                                        {new Date(video.date).toLocaleDateString('pt-PT')}
-                                      </p>
-                                    )}
-                                    {video.trainer && (
-                                      <p className="text-muted-foreground">Coach: {video.trainer}</p>
-                                    )}
-                                  </div>
                                 </a>
-                              </div>
+                                <CardContent className="p-3 space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      {video.date && (
+                                        <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                                          <Calendar className="h-3 w-3" />
+                                          {new Date(video.date).toLocaleDateString('pt-PT', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                          })}
+                                        </p>
+                                      )}
+                                      {video.trainer && (
+                                        <p className="text-xs text-muted-foreground truncate">
+                                          Coach: {video.trainer}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-8 w-8 p-0"
+                                      asChild
+                                    >
+                                      <a href={video.url} download target="_blank" rel="noopener noreferrer">
+                                        <Download className="h-4 w-4" />
+                                      </a>
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
                             ))}
                           </div>
                         </div>
