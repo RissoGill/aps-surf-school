@@ -34,11 +34,14 @@ const GuardianLogin = () => {
 
     const { email, password } = formData;
     try {
-      // Query the Users table to validate credentials
+      const identifier = email.trim();
+      const candidateIds = identifier.includes('@') ? [identifier] : [identifier, `${identifier}@aps.com`];
+
+      // Query the Users table to validate credentials (accept code or email)
       const { data: userRecord, error } = await supabase
         .from('Users')
         .select('*')
-        .eq('guardian_id', email)
+        .in('guardian_id', candidateIds)
         .eq('guardian_password', password)
         .maybeSingle();
 
@@ -101,12 +104,12 @@ const GuardianLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email or Code</Label>
                 <Input
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder="parent@email.com"
+                  type="text"
+                  placeholder="PA01 or parent@email.com"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
