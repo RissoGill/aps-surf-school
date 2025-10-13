@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AttendanceRecord {
   id: string;
@@ -50,11 +52,19 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   // Sort by year-month descending (most recent first)
   const sortedSummaries = Object.entries(monthlySummaries)
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([_, summary]) => summary);
+    .map(([key, summary]) => ({ key, ...summary }));
+
+  // State for selected month - default to most recent
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(
+    sortedSummaries[0]?.key || ''
+  );
 
   if (sortedSummaries.length === 0) {
     return null;
   }
+
+  // Find the selected month summary
+  const selectedSummary = sortedSummaries.find(s => s.key === selectedMonthKey) || sortedSummaries[0];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -77,35 +87,47 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   return (
     <Card className="shadow-soft">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          Monthly Summary
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Monthly Summary
+          </CardTitle>
+          <Select value={selectedMonthKey} onValueChange={setSelectedMonthKey}>
+            <SelectTrigger className="w-[180px] h-8 text-sm">
+              <SelectValue placeholder="Select month" />
+            </SelectTrigger>
+            <SelectContent className="bg-card z-50">
+              {sortedSummaries.map((summary) => (
+                <SelectItem key={summary.key} value={summary.key}>
+                  {summary.month}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {sortedSummaries.map((summary, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-foreground">{summary.month}</p>
-              <Badge variant="outline" className="text-xs">
-                {summary.total} total
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(summary.statusCounts)
-                .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
-                .map(([status, count]) => (
-                  <Badge 
-                    key={status} 
-                    className={`${getStatusColor(status)} text-xs`}
-                    variant="secondary"
-                  >
-                    {getStatusLabel(status)}: {count}
-                  </Badge>
-                ))}
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
+            <Badge variant="outline" className="text-xs">
+              {selectedSummary.total} total
+            </Badge>
           </div>
-        ))}
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(selectedSummary.statusCounts)
+              .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+              .map(([status, count]) => (
+                <Badge 
+                  key={status} 
+                  className={`${getStatusColor(status)} text-xs`}
+                  variant="secondary"
+                >
+                  {getStatusLabel(status)}: {count}
+                </Badge>
+              ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
