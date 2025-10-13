@@ -358,7 +358,6 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
 const GuardianDashboard = () => {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedRecentMonth, setSelectedRecentMonth] = useState<string | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -557,22 +556,14 @@ const GuardianDashboard = () => {
     return months[parseInt(monthStr) - 1] || monthStr;
   };
 
-  // Get available months from payments for Recent Payments filter
-  const availableMonths = Array.from(
-    new Set(
-      payments?.map(p => `${p.year}-${String(p.month).padStart(2, '0')}`) || []
-    )
-  ).sort((a, b) => b.localeCompare(a)); // Sort descending (newest first)
-
-  // Default to current month if not selected
-  const currentMonthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-  const effectiveRecentMonth = selectedRecentMonth || currentMonthKey;
-
-  // Filter recent payments by selected month
-  const recentPayments = payments?.filter(p => {
-    const paymentKey = `${p.year}-${String(p.month).padStart(2, '0')}`;
-    return paymentKey === effectiveRecentMonth;
-  }) || [];
+  // Get the last 2 paid payments (with payment_date)
+  const recentPaidPayments = (payments || [])
+    .filter(p => p.payment_date)
+    .sort((a, b) => {
+      if (!a.payment_date || !b.payment_date) return 0;
+      return new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime();
+    })
+    .slice(0, 2);
 
   const isLoading = athletesLoading;
   const athlete = athletes?.[0]; // For now, display first athlete
@@ -686,45 +677,39 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Recent Payments</CardTitle>
-                  <select
-                    className="text-sm border rounded px-2 py-1"
-                    value={effectiveRecentMonth}
-                    onChange={(e) => setSelectedRecentMonth(e.target.value)}
-                  >
-                    {availableMonths.map(monthKey => {
-                      const [year, month] = monthKey.split('-');
-                      return (
-                        <option key={monthKey} value={monthKey}>
-                          {getMonthName(month)} {year}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+                <CardTitle className="text-lg">Recent Payments</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentPayments.map((payment) => {
+                  {recentPaidPayments.map((payment) => {
                     const statusInfo = getPaymentStatus(payment);
                     const StatusIcon = statusInfo.icon;
+                    const paymentDate = payment.payment_date 
+                      ? new Date(payment.payment_date).toLocaleDateString('pt-PT', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })
+                      : '-';
                     
                     return (
                       <div key={payment.payment_id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                         <div>
                           <p className="font-medium">{getMonthName(payment.month)} {payment.year}</p>
-                          <p className="text-sm text-muted-foreground">{formatCurrency(payment.amount_due)}</p>
+                          <p className="text-sm text-muted-foreground">Paid: {paymentDate}</p>
                         </div>
-                        <Badge className={statusInfo.color}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {statusInfo.status}
-                        </Badge>
+                        <div className="text-right">
+                          <p className="font-medium">{formatCurrency(payment.amount_paid || 0)}</p>
+                          <Badge className={statusInfo.color}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {statusInfo.status}
+                          </Badge>
+                        </div>
                       </div>
                     );
                   })}
-                  {recentPayments.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found for this month</p>
+                  {recentPaidPayments.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No recent payments found</p>
                   )}
                 </div>
               </CardContent>
