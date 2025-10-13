@@ -503,7 +503,7 @@ const GuardianDashboard = () => {
     return months[parseInt(monthStr) - 1] || monthStr;
   };
 
-  const isLoading = athletesLoading || paymentsLoading;
+  const isLoading = athletesLoading;
   const athlete = athletes?.[0]; // For now, display first athlete
 
   console.log('Guardian Dashboard State:', {
