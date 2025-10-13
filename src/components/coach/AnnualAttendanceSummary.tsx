@@ -22,15 +22,11 @@ interface AnnualSummary {
 }
 
 export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryProps) => {
-  // Group attendance by year
+  // Group attendance by year - keep original status for display, but count separately
   const annualSummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
 
-    // Map Absent to Present for statistics
-    let statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
-    if (statusKey === 'Absent') {
-      statusKey = 'Present';
-    }
+    const originalStatus = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
     const date = new Date(record.date);
     const year = date.getFullYear();
 
@@ -42,7 +38,14 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
       };
     }
 
-    acc[year].statusCounts[statusKey] = (acc[year].statusCounts[statusKey] || 0) + 1;
+    // Count original status for display
+    acc[year].statusCounts[originalStatus] = (acc[year].statusCounts[originalStatus] || 0) + 1;
+    
+    // Also add to Present count if status is Absent (for statistics)
+    if (originalStatus === 'Absent') {
+      acc[year].statusCounts['Present'] = (acc[year].statusCounts['Present'] || 0) + 1;
+    }
+    
     acc[year].total += 1;
 
     return acc;
@@ -93,7 +96,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
             </div>
             <div className="flex flex-wrap gap-2">
               {Object.entries(summary.statusCounts)
-                .filter(([status]) => ["Present", "Justified"].includes(status))
+                .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
                 .map(([status, count]) => (
                   <Badge 
                     key={status} 

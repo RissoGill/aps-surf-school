@@ -27,15 +27,11 @@ interface MonthlySummary {
 }
 
 export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummaryProps) => {
-  // Group attendance by month
+  // Group attendance by month - keep original status for display, but count separately
   const monthlySummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
 
-    // Map Absent to Present for statistics
-    let statusKey = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
-    if (statusKey === 'Absent') {
-      statusKey = 'Present';
-    }
+    const originalStatus = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
     const date = new Date(record.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -49,7 +45,14 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
       };
     }
 
-    acc[monthKey].statusCounts[statusKey] = (acc[monthKey].statusCounts[statusKey] || 0) + 1;
+    // Count original status for display
+    acc[monthKey].statusCounts[originalStatus] = (acc[monthKey].statusCounts[originalStatus] || 0) + 1;
+    
+    // Also add to Present count if status is Absent (for statistics)
+    if (originalStatus === 'Absent') {
+      acc[monthKey].statusCounts['Present'] = (acc[monthKey].statusCounts['Present'] || 0) + 1;
+    }
+    
     acc[monthKey].total += 1;
 
     return acc;
@@ -158,7 +161,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 {/* Status Summary Badges */}
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(selectedSummary.statusCounts)
-                    .filter(([status]) => ["Present", "Justified"].includes(status))
+                    .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
                     .map(([status, count]) => (
                       <Badge 
                         key={status} 
