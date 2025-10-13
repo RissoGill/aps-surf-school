@@ -358,6 +358,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
 const GuardianDashboard = () => {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedRecentMonth, setSelectedRecentMonth] = useState<string | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -545,6 +546,23 @@ const GuardianDashboard = () => {
     return months[parseInt(monthStr) - 1] || monthStr;
   };
 
+  // Get available months from payments for Recent Payments filter
+  const availableMonths = Array.from(
+    new Set(
+      payments?.map(p => `${p.year}-${String(p.month).padStart(2, '0')}`) || []
+    )
+  ).sort((a, b) => b.localeCompare(a)); // Sort descending (newest first)
+
+  // Default to current month if not selected
+  const currentMonthKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+  const effectiveRecentMonth = selectedRecentMonth || currentMonthKey;
+
+  // Filter recent payments by selected month
+  const recentPayments = payments?.filter(p => {
+    const paymentKey = `${p.year}-${String(p.month).padStart(2, '0')}`;
+    return paymentKey === effectiveRecentMonth;
+  }) || [];
+
   const isLoading = athletesLoading;
   const athlete = athletes?.[0]; // For now, display first athlete
 
@@ -661,11 +679,27 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-lg">Recent Payments</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Recent Payments</CardTitle>
+                  <select
+                    className="text-sm border rounded px-2 py-1"
+                    value={effectiveRecentMonth}
+                    onChange={(e) => setSelectedRecentMonth(e.target.value)}
+                  >
+                    {availableMonths.map(monthKey => {
+                      const [year, month] = monthKey.split('-');
+                      return (
+                        <option key={monthKey} value={monthKey}>
+                          {getMonthName(month)} {year}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {filteredPayments?.slice(0, 3).map((payment) => {
+                  {recentPayments.map((payment) => {
                     const statusInfo = getPaymentStatus(payment);
                     const StatusIcon = statusInfo.icon;
                     
@@ -682,8 +716,8 @@ const GuardianDashboard = () => {
                       </div>
                     );
                   })}
-                  {(!filteredPayments || filteredPayments.length === 0) && (
-                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found</p>
+                  {recentPayments.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found for this month</p>
                   )}
                 </div>
               </CardContent>
