@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar } from "lucide-react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,8 @@ interface AttendanceRecord {
   trainer: string | null;
   beach_location: string | null;
   notes: string | null;
+  photos: string[] | null;
+  videos: string[] | null;
 }
 
 const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
@@ -49,6 +51,8 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
         trainer: record.trainer,
         beach_location: record.beach_location,
         notes: record.notes,
+        photos: record.photos,
+        videos: record.videos,
       })) as AttendanceRecord[];
     },
   });
@@ -154,6 +158,200 @@ const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) =>
   if (attendanceRecords.length === 0) return null;
 
   return <AnnualAttendanceSummary attendance={attendanceRecords} />;
+};
+
+const MediaTab = ({ athleteId }: { athleteId: string }) => {
+  const { data: attendanceRecords = [], isLoading } = useQuery({
+    queryKey: ['guardian-media', athleteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Attendance')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map((record: any) => ({
+        Id: record.id,
+        Date: record.date,
+        status: record.status,
+        trainer: record.trainer,
+        beach_location: record.beach_location,
+        notes: record.notes,
+        photos: record.photos,
+        videos: record.videos,
+      })) as AttendanceRecord[];
+    },
+  });
+
+  const allPhotos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
+  const allVideos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
+  
+  attendanceRecords.forEach(record => {
+    if (record.photos && Array.isArray(record.photos)) {
+      record.photos.forEach(url => {
+        allPhotos.push({ url, date: record.Date, trainer: record.trainer });
+      });
+    }
+    if (record.videos && Array.isArray(record.videos)) {
+      record.videos.forEach(url => {
+        allVideos.push({ url, date: record.Date, trainer: record.trainer });
+      });
+    }
+  });
+
+  const hasMedia = allPhotos.length > 0 || allVideos.length > 0;
+
+  return (
+    <Card className="shadow-soft">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ImageIcon className="h-5 w-5" />
+          Photos & Videos
+        </CardTitle>
+        <CardDescription>Media from training sessions</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 w-full bg-secondary/10 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : !hasMedia ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground">No photos or videos yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Coaches will upload media from training sessions
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Photos Section */}
+            {allPhotos.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Photos ({allPhotos.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {allPhotos.map((photo, idx) => (
+                    <Card key={idx} className="overflow-hidden">
+                      <div className="relative group">
+                        <a href={photo.url} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={photo.url}
+                            alt={`Training photo from ${photo.date || 'session'}`}
+                            className="w-full h-48 object-cover hover:opacity-90 transition-opacity"
+                          />
+                        </a>
+                      </div>
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            {photo.date && (
+                              <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(photo.date).toLocaleDateString('pt-PT', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                            )}
+                            {photo.trainer && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                Coach: {photo.trainer}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            asChild
+                          >
+                            <a href={photo.url} download target="_blank" rel="noopener noreferrer">
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Videos Section */}
+            {allVideos.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Videos ({allVideos.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {allVideos.map((video, idx) => (
+                    <Card key={idx} className="overflow-hidden">
+                      <a href={video.url} target="_blank" rel="noopener noreferrer" className="block">
+                        <div className="relative w-full h-48 bg-secondary/10 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center z-10">
+                            <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                              <Play className="h-8 w-8 text-primary ml-1" />
+                            </div>
+                          </div>
+                          <video
+                            src={video.url}
+                            className="w-full h-full object-cover"
+                            preload="metadata"
+                          />
+                        </div>
+                      </a>
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            {video.date && (
+                              <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {new Date(video.date).toLocaleDateString('pt-PT', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </p>
+                            )}
+                            {video.trainer && (
+                              <p className="text-xs text-muted-foreground truncate">
+                                Coach: {video.trainer}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                            asChild
+                          >
+                            <a href={video.url} download target="_blank" rel="noopener noreferrer">
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 };
 
 const GuardianDashboard = () => {
@@ -324,10 +522,11 @@ const GuardianDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
             <TabsTrigger value="payments" className="text-xs">Payments</TabsTrigger>
             <TabsTrigger value="attendance" className="text-xs">Attendance</TabsTrigger>
+            <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -470,6 +669,11 @@ const GuardianDashboard = () => {
           <TabsContent value="attendance" className="space-y-4">
             <AttendanceTab athleteId={athlete.athlete_id} />
             <AnnualAttendanceSummaryWrapper athleteId={athlete.athlete_id} />
+          </TabsContent>
+
+          {/* Media Tab */}
+          <TabsContent value="media" className="space-y-4">
+            <MediaTab athleteId={athlete.athlete_id} />
           </TabsContent>
         </Tabs>
       </main>
