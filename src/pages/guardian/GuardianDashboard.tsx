@@ -536,6 +536,18 @@ const GuardianDashboard = () => {
   });
 
   const nextPaymentAmount = nextPayment?.amount_due || 0;
+  
+  // Calculate next payment due date (5th of the month)
+  const nextPaymentDueDate = nextPayment ? (() => {
+    const month = getMonthNumber(nextPayment.month);
+    const year = nextPayment.year;
+    const dueDate = new Date(year, month - 1, 5);
+    return dueDate.toLocaleDateString('pt-PT', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+  })() : null;
   const totalPaid = filteredPayments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
   
   // Outstanding only from past and current months
@@ -666,6 +678,9 @@ const GuardianDashboard = () => {
                   <div className="p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
                     <p className="text-xs text-muted-foreground">Next Payment</p>
+                    {nextPaymentDueDate && (
+                      <p className="text-xs text-muted-foreground mt-1">Due: {nextPaymentDueDate}</p>
+                    )}
                   </div>
                   <div className="p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
@@ -730,6 +745,9 @@ const GuardianDashboard = () => {
                   <div className="text-center p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
                     <p className="text-xs text-muted-foreground">Next Payment</p>
+                    {nextPaymentDueDate && (
+                      <p className="text-xs text-muted-foreground mt-1">Due: {nextPaymentDueDate}</p>
+                    )}
                   </div>
                   <div className="text-center p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
