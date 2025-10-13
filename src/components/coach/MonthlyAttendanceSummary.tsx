@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronDown } from "lucide-react";
+import { Calendar, ChevronDown, MapPin } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,14 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
 
   // Find the selected month summary
   const selectedSummary = sortedSummaries.find(s => s.key === selectedMonthKey) || sortedSummaries[0];
+  
+  // Filter attendance records for the selected month
+  const selectedMonthRecords = attendance.filter(record => {
+    if (!record.date) return false;
+    const date = new Date(record.date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return monthKey === selectedMonthKey;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -142,18 +150,70 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
             </CollapsibleTrigger>
             
             <CollapsibleContent>
-              <div className="flex flex-wrap gap-2 pt-2">
-                {Object.entries(selectedSummary.statusCounts)
-                  .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
-                  .map(([status, count]) => (
-                    <Badge 
-                      key={status} 
-                      className={`${getStatusColor(status)} text-xs`}
-                      variant="secondary"
-                    >
-                      {getStatusLabel(status)}: {count}
-                    </Badge>
-                  ))}
+              <div className="space-y-3 pt-3">
+                {/* Status Summary Badges */}
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(selectedSummary.statusCounts)
+                    .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
+                    .map(([status, count]) => (
+                      <Badge 
+                        key={status} 
+                        className={`${getStatusColor(status)} text-xs`}
+                        variant="secondary"
+                      >
+                        {getStatusLabel(status)}: {count}
+                      </Badge>
+                    ))}
+                </div>
+                
+                {/* Attendance Records Details */}
+                <div className="space-y-2">
+                  {selectedMonthRecords.map((record) => {
+                    const formattedDate = record.date ? new Date(record.date).toLocaleDateString('pt-PT', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    }) : '-';
+                    
+                    return (
+                      <Card key={record.id} className="bg-accent/30">
+                        <CardContent className="p-3">
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Date:</span>
+                              <p className="font-medium">{formattedDate}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Status:</span>
+                              <p className="font-medium">{record.status || 'Not set'}</p>
+                            </div>
+                            {record.trainer && (
+                              <div>
+                                <span className="text-muted-foreground">Trainer:</span>
+                                <p className="font-medium">{record.trainer}</p>
+                              </div>
+                            )}
+                            {record.beach_location && (
+                              <div className="flex items-start gap-1">
+                                <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
+                                <div>
+                                  <span className="text-muted-foreground">Beach:</span>
+                                  <p className="font-medium">{record.beach_location}</p>
+                                </div>
+                              </div>
+                            )}
+                            {record.notes && (
+                              <div className="col-span-2">
+                                <span className="text-muted-foreground">Notes:</span>
+                                <p className="font-medium">{record.notes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             </CollapsibleContent>
           </div>
