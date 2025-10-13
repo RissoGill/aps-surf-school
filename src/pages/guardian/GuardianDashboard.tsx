@@ -497,10 +497,11 @@ const GuardianDashboard = () => {
     }
   };
 
-  // Calculate totals - outstanding only includes previous and current months
+  // Calculate totals - outstanding only includes payments where due date (5th of month) has passed
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1; // 1-12
+  const currentDay = now.getDate();
 
   const getMonthNumber = (monthStr: string): number => {
     const months: Record<string, number> = {
@@ -513,13 +514,19 @@ const GuardianDashboard = () => {
     return months[monthStr] || 0;
   };
 
-  const pastAndCurrentPayments = filteredPayments?.filter(p => {
+  const pastDuePayments = filteredPayments?.filter(p => {
     const paymentYear = p.year || 0;
     const paymentMonth = getMonthNumber(p.month);
     
-    // Include if year is less than current, or same year but month <= current
+    // Include if year is less than current year
     if (paymentYear < currentYear) return true;
-    if (paymentYear === currentYear && paymentMonth <= currentMonth) return true;
+    
+    // If same year, include if month is less than current month
+    if (paymentYear === currentYear && paymentMonth < currentMonth) return true;
+    
+    // If same year and same month, include only if we're past the 5th
+    if (paymentYear === currentYear && paymentMonth === currentMonth && currentDay >= 5) return true;
+    
     return false;
   }) || [];
 
@@ -550,9 +557,9 @@ const GuardianDashboard = () => {
   })() : null;
   const totalPaid = filteredPayments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
   
-  // Outstanding only from past and current months
-  const outstandingDue = pastAndCurrentPayments.reduce((sum, p) => sum + (p.amount_due || 0), 0);
-  const outstandingPaid = pastAndCurrentPayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0);
+  // Outstanding only from payments where due date has passed
+  const outstandingDue = pastDuePayments.reduce((sum, p) => sum + (p.amount_due || 0), 0);
+  const outstandingPaid = pastDuePayments.reduce((sum, p) => sum + (p.amount_paid || 0), 0);
   const totalOutstanding = outstandingDue - outstandingPaid;
 
   const formatCurrency = (amount: number) => {
