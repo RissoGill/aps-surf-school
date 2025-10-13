@@ -397,7 +397,30 @@ const GuardianDashboard = () => {
         console.log('Guardian profile loaded:', guardian);
         setGuardianId(guardian.id);
       } else {
-        console.log('No guardian profile found for user:', session.user.id);
+        console.log('No guardian profile found for user:', session.user.id, '— creating one now');
+        const { data: inserted, error: insertError } = await supabase
+          .from('guardians')
+          .insert({
+            auth_uid: session.user.id,
+            email: session.user.email,
+            first_name: (session.user.user_metadata as any)?.first_name || 'Guardian',
+            last_name: (session.user.user_metadata as any)?.last_name || ''
+          })
+          .select('*')
+          .maybeSingle();
+        if (insertError) {
+          console.error('Error creating guardian profile:', insertError);
+          toast({
+            title: "Profile setup failed",
+            description: "We couldn't create your guardian profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        if (inserted) {
+          console.log('Guardian profile created:', inserted);
+          setGuardianId(inserted.id);
+        }
       }
     };
 

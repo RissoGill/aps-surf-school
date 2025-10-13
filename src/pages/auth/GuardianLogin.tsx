@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { supabase } from "@/integrations/supabase/client";
 
 const GuardianLogin = () => {
   const navigate = useNavigate();
@@ -19,19 +20,41 @@ const GuardianLogin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/dashboard/guardian");
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) navigate("/dashboard/guardian");
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login - in real app, this would be an API call
-    setTimeout(() => {
-      setIsLoading(false);
+    const { email, password } = formData;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        throw error;
+      }
       toast({
-        title: "Login Successful",
+        title: "Login successful",
         description: "Welcome back, Guardian!",
       });
       navigate("/dashboard/guardian");
-    }, 1000);
+    } catch (err: any) {
+      toast({
+        title: "Login failed",
+        description: err?.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
