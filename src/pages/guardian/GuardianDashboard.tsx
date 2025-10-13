@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -357,24 +358,78 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
 const GuardianDashboard = () => {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [guardianEmail, setGuardianEmail] = useState<string | null>(null);
+  const [guardianId, setGuardianId] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
-  // Use demo guardian email for demo mode
+  // Check authentication and get guardian profile
   useEffect(() => {
-    // For demo purposes, use an existing guardian email from the database
-    setGuardianEmail('mmmarques82@gmail.com');
-  }, []);
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        navigate("/login/guardian");
+        return;
+      }
+      
+      setUser(session.user);
+      
+      // Fetch guardian profile to get guardian ID
+      const { data: guardian, error } = await supabase
+        .from('guardians')
+        .select('id')
+        .eq('auth_uid', session.user.id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching guardian profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load guardian profile",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (guardian) {
+        setGuardianId(guardian.id);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate("/login/guardian");
+      } else {
+        setUser(session.user);
+        setTimeout(() => {
+          supabase
+            .from('guardians')
+            .select('id')
+            .eq('auth_uid', session.user.id)
+            .maybeSingle()
+            .then(({ data: guardian }) => {
+              if (guardian) setGuardianId(guardian.id);
+            });
+        }, 0);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
 
   // Fetch athletes linked to this guardian
   const { data: athletes, isLoading: athletesLoading } = useQuery({
-    queryKey: ['guardian-athletes', guardianEmail],
+    queryKey: ['guardian-athletes', guardianId],
     queryFn: async () => {
-      if (!guardianEmail) return [];
+      if (!guardianId) return [];
       
       const { data, error } = await supabase
         .from('Atletas')
         .select('*')
-        .or(`mother_email.eq.${guardianEmail},father_email.eq.${guardianEmail}`);
+        .eq('guardian_id', guardianId);
       
       if (error) {
         toast({
@@ -387,7 +442,7 @@ const GuardianDashboard = () => {
       
       return data || [];
     },
-    enabled: !!guardianEmail,
+    enabled: !!guardianId,
   });
 
   // Fetch payments for all guardian's athletes
@@ -465,29 +520,27 @@ const GuardianDashboard = () => {
     );
   }
 
-  if (!guardianEmail) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-surface">
-        <AppHeader title="Guardian Dashboard" showBack backTo="/" />
-        <main className="mobile-container py-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Please log in to view your dashboard.</p>
-            </CardContent>
-          </Card>
-        </main>
+      <div className="min-h-screen bg-gradient-surface flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!athlete) {
+  if (!guardianId || !athlete) {
     return (
       <div className="min-h-screen bg-gradient-surface">
         <AppHeader title="Guardian Dashboard" showBack backTo="/" />
         <main className="mobile-container py-6">
           <Card>
             <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">No athlete found linked to your account.</p>
+              <p className="text-muted-foreground mb-4">
+                {!guardianId 
+                  ? "Guardian profile not found. Please contact administration."
+                  : "No athletes linked to your account."}
+              </p>
+              <Button onClick={() => navigate("/login/guardian")}>Back to Login</Button>
             </CardContent>
           </Card>
         </main>
