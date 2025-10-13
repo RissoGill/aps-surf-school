@@ -62,6 +62,11 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
   );
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleMonthChange = (value: string) => {
+    setSelectedMonthKey(value);
+    setIsExpanded(false); // Collapse when changing month
+  };
+
   if (sortedSummaries.length === 0) {
     return null;
   }
@@ -95,7 +100,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
             <Calendar className="h-4 w-4" />
             Monthly Summary
           </CardTitle>
-          <Select value={selectedMonthKey} onValueChange={setSelectedMonthKey}>
+          <Select value={selectedMonthKey} onValueChange={handleMonthChange}>
             <SelectTrigger className="w-[180px] h-8 text-sm">
               <SelectValue placeholder="Select month" />
             </SelectTrigger>
