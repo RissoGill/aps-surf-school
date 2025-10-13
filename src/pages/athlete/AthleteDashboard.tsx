@@ -55,67 +55,56 @@ const AthleteDashboard = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
-  // Check authentication and get user ID
+  // Check authentication from localStorage
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/login/athlete");
-        return;
-      }
-      
-      setUserAuthId(session.user.id);
-      setUserEmail(session.user.email ?? null);
-    };
-
-    checkAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/login/athlete");
-      } else {
-        setUserAuthId(session.user.id);
-        setUserEmail(session.user.email ?? null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const athleteSessionStr = localStorage.getItem('athleteSession');
+    
+    if (!athleteSessionStr) {
+      navigate("/login/athlete");
+      return;
+    }
+    
+    try {
+      const athleteSession = JSON.parse(athleteSessionStr);
+      // Set athlete_id as userAuthId for compatibility with existing queries
+      setUserAuthId(athleteSession.athlete_id);
+      setUserEmail(athleteSession.email);
+    } catch (error) {
+      console.error('Error parsing athlete session:', error);
+      navigate("/login/athlete");
+    }
   }, [navigate]);
 
-  // Fetch athlete data based on auth_uid
+  // Fetch athlete data based on athlete_id from session
   const { data: athlete, isLoading: isLoadingAthlete } = useQuery({
     queryKey: ['athlete', userAuthId, userEmail],
     queryFn: async () => {
-      if (!userAuthId && !userEmail) return null;
+      if (!userAuthId) return null;
 
-      // Try by auth_uid first
-      let profile: Athlete | null = null;
-      if (userAuthId) {
-        const { data, error } = await supabase
-          .from('Atletas')
-          .select('*')
-          .eq('auth_uid', userAuthId)
-          .maybeSingle();
-        if (error) console.warn('Athlete fetch by auth_uid error:', error.message);
-        if (data) profile = data as Athlete;
+      // Query by athlete_id
+      const { data, error } = await supabase
+        .from('Atletas')
+        .select('*')
+        .eq('athlete_id', userAuthId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching athlete:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load athlete profile",
+          variant: "destructive",
+        });
+        throw error;
       }
 
-      // Fallback by email if no profile found
-      if (!profile && userEmail) {
-        const { data, error } = await supabase
-          .from('Atletas')
-          .select('*')
-          .eq('email', userEmail)
-          .maybeSingle();
-        if (error) console.warn('Athlete fetch by email error:', error.message);
-        if (data) profile = data as Athlete;
+      if (!data) {
+        console.warn('No athlete found for athlete_id:', userAuthId);
       }
 
-      return profile;
+      return data as Athlete | null;
     },
-    enabled: !!userAuthId || !!userEmail,
+    enabled: !!userAuthId,
   });
 
   const athleteId = athlete?.athlete_id;
@@ -180,8 +169,8 @@ const AthleteDashboard = () => {
     enabled: !!athleteId,
   });
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    localStorage.removeItem('athleteSession');
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out",

@@ -362,108 +362,64 @@ const GuardianDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Check authentication and get guardian profile
+  const handleLogout = () => {
+    localStorage.removeItem('guardianSession');
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
+    navigate("/login/guardian");
+  };
+
+  // Check authentication from localStorage
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const guardianSessionStr = localStorage.getItem('guardianSession');
       
-      if (!session) {
+      if (!guardianSessionStr) {
         navigate("/login/guardian");
         return;
       }
       
-      setUser(session.user);
-      
-      // Fetch guardian profile to get guardian ID
-      const { data: guardian, error } = await supabase
-        .from('guardians')
-        .select('*')
-        .eq('auth_uid', session.user.id)
-        .maybeSingle();
-      
-      console.log('Guardian query result:', { guardian, error, userId: session.user.id });
-      
-      if (error) {
-        console.error('Error fetching guardian profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load guardian profile",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (guardian) {
-        console.log('Guardian profile loaded:', guardian);
-        setGuardianId(guardian.id);
-      } else {
-        console.log('No guardian profile found for user:', session.user.id, '— creating one now');
-        const { data: inserted, error: insertError } = await supabase
-          .from('guardians')
-          .insert({
-            auth_uid: session.user.id,
-            email: session.user.email,
-            first_name: (session.user.user_metadata as any)?.first_name || 'Guardian',
-            last_name: (session.user.user_metadata as any)?.last_name || ''
-          })
-          .select('*')
-          .maybeSingle();
-        if (insertError) {
-          console.error('Error creating guardian profile:', insertError);
+      try {
+        const guardianSession = JSON.parse(guardianSessionStr);
+        const athleteId = guardianSession.athlete_id;
+        
+        if (!athleteId) {
           toast({
-            title: "Profile setup failed",
-            description: "We couldn't create your guardian profile.",
+            title: "Error",
+            description: "No athlete linked to this guardian account",
             variant: "destructive",
           });
           return;
         }
-        if (inserted) {
-          console.log('Guardian profile created:', inserted);
-          setGuardianId(inserted.id);
-        }
+        
+        // Use the athlete_id directly for queries
+        setGuardianId(athleteId);
+      } catch (error) {
+        console.error('Error parsing guardian session:', error);
+        navigate("/login/guardian");
       }
     };
 
     checkAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/login/guardian");
-      } else {
-        setUser(session.user);
-        setTimeout(() => {
-          supabase
-            .from('guardians')
-            .select('*')
-            .eq('auth_uid', session.user.id)
-            .maybeSingle()
-            .then(({ data: guardian, error }) => {
-              console.log('Auth change guardian query:', { guardian, error });
-              if (guardian) setGuardianId(guardian.id);
-            });
-        }, 0);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, [navigate, toast]);
 
-  // Fetch athletes linked to this guardian
+  // Fetch athletes linked to this guardian (using athlete_id from session)
   const { data: athletes, isLoading: athletesLoading } = useQuery({
     queryKey: ['guardian-athletes', guardianId],
     queryFn: async () => {
       if (!guardianId) {
-        console.log('No guardianId available for query');
+        console.log('No guardianId (athlete_id) available for query');
         return [];
       }
       
-      console.log('Fetching athletes for guardian_id:', guardianId);
+      console.log('Fetching athlete for athlete_id:', guardianId);
       
       const { data, error } = await supabase
         .from('Atletas')
         .select('*')
-        .eq('guardian_id', guardianId);
+        .eq('athlete_id', guardianId);
       
       console.log('Athletes query result:', { data, error });
       
@@ -604,6 +560,18 @@ const GuardianDashboard = () => {
       <AppHeader title="Guardian Dashboard" showBack backTo="/" />
       
       <main className="mobile-container py-6">
+        {/* Logout Button */}
+        <div className="mb-4 flex justify-end">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleLogout}
+            className="touch-friendly"
+          >
+            Logout
+          </Button>
+        </div>
+
         {/* Child Info Header */}
         <Card className="shadow-medium mb-6">
           <CardContent className="p-6">

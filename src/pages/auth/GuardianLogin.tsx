@@ -20,15 +20,12 @@ const GuardianLogin = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already authenticated, redirect to dashboard
+  // Check if guardian is already logged in via localStorage
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard/guardian");
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate("/dashboard/guardian");
-    });
-    return () => subscription.unsubscribe();
+    const guardianSession = localStorage.getItem('guardianSession');
+    if (guardianSession) {
+      navigate("/dashboard/guardian");
+    }
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,10 +34,31 @@ const GuardianLogin = () => {
 
     const { email, password } = formData;
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        throw error;
+      // Query the Users table to validate credentials
+      const { data: userRecord, error } = await supabase
+        .from('Users')
+        .select('*')
+        .eq('guardian_id', email)
+        .eq('guardian_password', password)
+        .maybeSingle();
+
+      if (error || !userRecord) {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
+        return;
       }
+
+      // Store session in localStorage
+      localStorage.setItem('guardianSession', JSON.stringify({
+        guardian_id: userRecord.guardian_id,
+        athlete_id: userRecord.athlete_id,
+        role: userRecord.guardian_role,
+        email: email
+      }));
+
       toast({
         title: "Login successful",
         description: "Welcome back, Guardian!",
@@ -49,7 +67,7 @@ const GuardianLogin = () => {
     } catch (err: any) {
       toast({
         title: "Login failed",
-        description: err?.message || "Please check your credentials and try again.",
+        description: err?.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
