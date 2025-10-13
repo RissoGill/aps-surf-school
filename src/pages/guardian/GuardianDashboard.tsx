@@ -445,7 +445,7 @@ const GuardianDashboard = () => {
     queryFn: async () => {
       if (!athletes || athletes.length === 0) return [];
       
-      const athleteIds = athletes.map(a => a.Athlete_Id);
+      const athleteIds = athletes.map(a => a.athlete_id);
       
       const { data, error } = await supabase
         .from('Payments')
