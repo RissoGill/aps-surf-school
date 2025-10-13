@@ -140,7 +140,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 <div className="flex items-center justify-between w-full">
                   <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="default" className="text-xs font-bold bg-primary">
                       {selectedSummary.total} total
                     </Badge>
                     <span className="text-xs text-muted-foreground">
