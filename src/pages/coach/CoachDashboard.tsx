@@ -591,11 +591,10 @@ const CoachDashboard = () => {
                   <Collapsible key={athlete.athlete_id} defaultOpen={false} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       <Tabs defaultValue="view" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
+                        <TabsList className="grid w-full grid-cols-3">
                           <TabsTrigger value="view">View Info</TabsTrigger>
                           <TabsTrigger value="add">Add Attendance</TabsTrigger>
-                          <TabsTrigger value="championships">Championships</TabsTrigger>
-                          <TabsTrigger value="estagios">Estágios</TabsTrigger>
+                          <TabsTrigger value="registrations">Registrations</TabsTrigger>
                         </TabsList>
                         
                         <TabsContent value="view" className="space-y-4">
@@ -765,12 +764,23 @@ const CoachDashboard = () => {
                           </div>
                         </TabsContent>
                         
-                        <TabsContent value="championships" className="space-y-4">
-                          <ChampionshipsTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
-                        </TabsContent>
-                        
-                        <TabsContent value="estagios" className="space-y-4">
-                          <EstagiosTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
+                        <TabsContent value="registrations" className="space-y-4">
+                          <div className="pt-4">
+                            <Tabs defaultValue="championships" className="w-full">
+                              <TabsList className="grid w-full grid-cols-2 mb-4">
+                                <TabsTrigger value="championships">Championships</TabsTrigger>
+                                <TabsTrigger value="estagios">Estágios</TabsTrigger>
+                              </TabsList>
+                              
+                              <TabsContent value="championships">
+                                <ChampionshipsTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
+                              </TabsContent>
+                              
+                              <TabsContent value="estagios">
+                                <EstagiosTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
+                              </TabsContent>
+                            </Tabs>
+                          </div>
                         </TabsContent>
                       </Tabs>
                     </div>
