@@ -149,7 +149,7 @@ export const EstagiosTab = ({ athleteId, athleteName }: EstagiosTabProps) => {
   return (
     <div className="pt-4 space-y-6">
       <div className="flex items-center gap-2 mb-4">
-        <GraduationCap className="h-5 w-5 text-primary" />
+        <GraduationCap className="h-5 w-5 text-estagios" />
         <h3 className="text-lg font-semibold">Register {athleteName} for Estágios</h3>
       </div>
 
@@ -174,8 +174,8 @@ export const EstagiosTab = ({ athleteId, athleteName }: EstagiosTabProps) => {
 
         {/* Selected Estagio Details */}
         {selectedEstagio && (
-          <Card className="shadow-soft">
-            <CardHeader className="pb-3">
+          <Card className="shadow-soft border-l-4 border-l-estagios">
+            <CardHeader className="pb-3 bg-estagios-light">
               <div className="flex items-start justify-between gap-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   {selectedEstagio.nome_estagio || 'Unnamed Estágio'}

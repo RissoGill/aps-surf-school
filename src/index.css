@@ -30,6 +30,15 @@
 
     --accent: 174 54% 95%;
     --accent-foreground: 174 54% 25%;
+    
+    /* Tab Colors for Better Readability */
+    --tab-championships: 45 93% 47%;
+    --tab-championships-foreground: 0 0% 100%;
+    --tab-championships-light: 45 93% 95%;
+    
+    --tab-estagios: 262 83% 58%;
+    --tab-estagios-foreground: 0 0% 100%;
+    --tab-estagios-light: 262 83% 95%;
 
     /* Status Colors */
     --success: 142 76% 36%;

@@ -151,7 +151,7 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
   return (
     <div className="pt-4 space-y-6">
       <div className="flex items-center gap-2 mb-4">
-        <Trophy className="h-5 w-5 text-primary" />
+        <Trophy className="h-5 w-5 text-championships" />
         <h3 className="text-lg font-semibold">Register {athleteName} for Championships</h3>
       </div>
 
@@ -176,8 +176,8 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
 
         {/* Selected Championship Details */}
         {selectedChampionship && (
-          <Card className="shadow-soft">
-            <CardHeader className="pb-3">
+          <Card className="shadow-soft border-l-4 border-l-championships">
+            <CardHeader className="pb-3 bg-championships-light">
               <div className="flex items-start justify-between gap-4">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   {selectedChampionship.nome_campeonato || 'Unnamed Championship'}

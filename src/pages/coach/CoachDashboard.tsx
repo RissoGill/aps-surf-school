@@ -767,9 +767,19 @@ const CoachDashboard = () => {
                         <TabsContent value="registrations" className="space-y-4">
                           <div className="pt-4">
                             <Tabs defaultValue="championships" className="w-full">
-                              <TabsList className="grid w-full grid-cols-2 mb-4">
-                                <TabsTrigger value="championships">Championships</TabsTrigger>
-                                <TabsTrigger value="estagios">Estágios</TabsTrigger>
+                              <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 p-1">
+                                <TabsTrigger 
+                                  value="championships" 
+                                  className="data-[state=active]:bg-championships data-[state=active]:text-championships-foreground"
+                                >
+                                  Championships
+                                </TabsTrigger>
+                                <TabsTrigger 
+                                  value="estagios"
+                                  className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground"
+                                >
+                                  Estágios
+                                </TabsTrigger>
                               </TabsList>
                               
                               <TabsContent value="championships">

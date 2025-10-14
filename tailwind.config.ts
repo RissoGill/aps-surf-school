@@ -70,6 +70,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        championships: {
+          DEFAULT: "hsl(var(--tab-championships))",
+          foreground: "hsl(var(--tab-championships-foreground))",
+          light: "hsl(var(--tab-championships-light))",
+        },
+        estagios: {
+          DEFAULT: "hsl(var(--tab-estagios))",
+          foreground: "hsl(var(--tab-estagios-foreground))",
+          light: "hsl(var(--tab-estagios-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
