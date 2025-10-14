@@ -20,6 +20,7 @@ import { Collapsible } from "@/components/ui/collapsible";
 import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
 import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSummary";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AttendanceRecord {
   id: string;
@@ -584,180 +585,182 @@ const CoachDashboard = () => {
               </div>
             ) : (
               <div className="space-y-0">
-                {filteredAthletes.map((athlete) => (
+                 {filteredAthletes.map((athlete) => (
                   <Collapsible key={athlete.athlete_id} defaultOpen={false} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
-                      {/* Athlete Profile Information */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
-                        </div>
-                        <div className="flex-shrink-0">
-                          <Dialog open={isDialogOpen && selectedAthleteId === athlete.athlete_id} onOpenChange={(open) => {
-                            setIsDialogOpen(open);
-                            if (open) setSelectedAthleteId(athlete.athlete_id);
-                          }}>
-                            <DialogTrigger asChild>
-                              <Button size="sm" variant="outline" className="touch-friendly">
-                                <Plus className="h-4 w-4 mr-1" />
-                                Add
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Record Attendance for {athlete.first_name} {athlete.last_name}</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label>Date</Label>
-                                  <Input
-                                    type="date"
-                                    value={newAttendance.date}
-                                    onChange={(e) => setNewAttendance({ ...newAttendance, date: e.target.value })}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Status *</Label>
-                                  <Select value={newAttendance.status} onValueChange={(value) => setNewAttendance({ ...newAttendance, status: value })}>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Present">Present</SelectItem>
-                                      <SelectItem value="Absent">Absent</SelectItem>
-                                      <SelectItem value="Justified">Justified</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Trainer</Label>
-                                  <Input
-                                    value={newAttendance.treinador}
-                                    onChange={(e) => setNewAttendance({ ...newAttendance, treinador: e.target.value })}
-                                    placeholder="Enter trainer name"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Beach Location</Label>
-                                  <Input
-                                    value={newAttendance.praia}
-                                    onChange={(e) => setNewAttendance({ ...newAttendance, praia: e.target.value })}
-                                    placeholder="Enter beach name"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Notes</Label>
-                                  <Textarea
-                                    value={newAttendance.notas}
-                                    onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
-                                    placeholder="Enter any notes"
-                                  />
-                                </div>
-                                
-                                {/* Photo Upload */}
-                                <div className="space-y-2">
-                                  <Label className="flex items-center gap-2">
-                                    <ImageIcon className="h-4 w-4" />
-                                    Photos
-                                  </Label>
-                                  <div className="space-y-2">
-                                    <Input
-                                      type="file"
-                                      accept="image/*"
-                                      multiple
-                                      onChange={(e) => {
-                                        const files = Array.from(e.target.files || []);
-                                        setUploadedPhotos(prev => [...prev, ...files]);
-                                      }}
-                                      className="cursor-pointer"
-                                    />
-                                    {uploadedPhotos.length > 0 && (
-                                      <div className="flex flex-wrap gap-2">
-                                        {uploadedPhotos.map((file, idx) => (
-                                          <div key={idx} className="relative group">
-                                            <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
-                                              <ImageIcon className="h-4 w-4" />
-                                              <span className="text-sm truncate max-w-[150px]">{file.name}</span>
-                                              <button
-                                                type="button"
-                                                onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
-                                                className="text-muted-foreground hover:text-destructive"
-                                              >
-                                                <X className="h-4 w-4" />
-                                              </button>
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
+                      <Tabs defaultValue="view" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="view">View Info</TabsTrigger>
+                          <TabsTrigger value="add">Add Attendance</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="view" className="space-y-4">
+                          {/* Athlete Profile Information */}
+                          <div className="pt-4">
+                            <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
+                          </div>
 
-                                {/* Video Upload */}
-                                <div className="space-y-2">
-                                  <Label className="flex items-center gap-2">
-                                    <Video className="h-4 w-4" />
-                                    Videos
-                                  </Label>
-                                  <div className="space-y-2">
-                                    <Input
-                                      type="file"
-                                      accept="video/*"
-                                      multiple
-                                      onChange={(e) => {
-                                        const files = Array.from(e.target.files || []);
-                                        setUploadedVideos(prev => [...prev, ...files]);
-                                      }}
-                                      className="cursor-pointer"
-                                    />
-                                    {uploadedVideos.length > 0 && (
-                                      <div className="flex flex-wrap gap-2">
-                                        {uploadedVideos.map((file, idx) => (
-                                          <div key={idx} className="relative group">
-                                            <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
-                                              <Video className="h-4 w-4" />
-                                              <span className="text-sm truncate max-w-[150px]">{file.name}</span>
-                                              <button
-                                                type="button"
-                                                onClick={() => setUploadedVideos(prev => prev.filter((_, i) => i !== idx))}
-                                                className="text-muted-foreground hover:text-destructive"
-                                              >
-                                                <X className="h-4 w-4" />
-                                              </button>
-                                            </div>
-                                          </div>
-                                        ))}
+                          {/* Annual Summary First, then Monthly with Dropdown */}
+                          {athlete.attendance.length > 0 && (
+                            <div className="space-y-4">
+                              <AnnualAttendanceSummary attendance={athlete.attendance} />
+                              <MonthlyAttendanceSummary attendance={athlete.attendance} />
+                            </div>
+                          )}
+                        </TabsContent>
+                        
+                        <TabsContent value="add" className="space-y-4">
+                          <div className="pt-4 space-y-4">
+                            <h3 className="text-lg font-semibold">Record Attendance for {athlete.first_name} {athlete.last_name}</h3>
+                            
+                            <div className="space-y-2">
+                              <Label>Date</Label>
+                              <Input
+                                type="date"
+                                value={newAttendance.date}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, date: e.target.value })}
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Status *</Label>
+                              <Select value={newAttendance.status} onValueChange={(value) => setNewAttendance({ ...newAttendance, status: value })}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Present">Present</SelectItem>
+                                  <SelectItem value="Absent">Absent</SelectItem>
+                                  <SelectItem value="Justified">Justified</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Trainer</Label>
+                              <Input
+                                value={newAttendance.treinador}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, treinador: e.target.value })}
+                                placeholder="Enter trainer name"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Beach Location</Label>
+                              <Input
+                                value={newAttendance.praia}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, praia: e.target.value })}
+                                placeholder="Enter beach name"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Notes</Label>
+                              <Textarea
+                                value={newAttendance.notas}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
+                                placeholder="Enter any notes"
+                              />
+                            </div>
+                            
+                            {/* Photo Upload */}
+                            <div className="space-y-2">
+                              <Label className="flex items-center gap-2">
+                                <ImageIcon className="h-4 w-4" />
+                                Photos
+                              </Label>
+                              <div className="space-y-2">
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  onChange={(e) => {
+                                    const files = Array.from(e.target.files || []);
+                                    setUploadedPhotos(prev => [...prev, ...files]);
+                                  }}
+                                  className="cursor-pointer"
+                                />
+                                {uploadedPhotos.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {uploadedPhotos.map((file, idx) => (
+                                      <div key={idx} className="relative group">
+                                        <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
+                                          <ImageIcon className="h-4 w-4" />
+                                          <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                            className="text-muted-foreground hover:text-destructive"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </button>
+                                        </div>
                                       </div>
-                                    )}
+                                    ))}
                                   </div>
-                                </div>
-                                
-                                <Button onClick={handleSaveAttendance} className="w-full" disabled={isUploading}>
-                                  {isUploading ? (
-                                    <>
-                                      <Upload className="h-4 w-4 mr-2 animate-spin" />
-                                      Uploading...
-                                    </>
-                                  ) : (
-                                    "Save Attendance"
-                                  )}
-                                </Button>
+                                )}
                               </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </div>
+                            </div>
 
-                       {/* Annual Summary First, then Monthly with Dropdown */}
-                      {athlete.attendance.length > 0 && (
-                        <div className="pt-4 space-y-4">
-                          <AnnualAttendanceSummary attendance={athlete.attendance} />
-                          <MonthlyAttendanceSummary attendance={athlete.attendance} />
-                        </div>
-                      )}
-
-                      {/* Attendance History Section */}
-
+                            {/* Video Upload */}
+                            <div className="space-y-2">
+                              <Label className="flex items-center gap-2">
+                                <Video className="h-4 w-4" />
+                                Videos
+                              </Label>
+                              <div className="space-y-2">
+                                <Input
+                                  type="file"
+                                  accept="video/*"
+                                  multiple
+                                  onChange={(e) => {
+                                    const files = Array.from(e.target.files || []);
+                                    setUploadedVideos(prev => [...prev, ...files]);
+                                  }}
+                                  className="cursor-pointer"
+                                />
+                                {uploadedVideos.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {uploadedVideos.map((file, idx) => (
+                                      <div key={idx} className="relative group">
+                                        <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
+                                          <Video className="h-4 w-4" />
+                                          <span className="text-sm truncate max-w-[150px]">{file.name}</span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setUploadedVideos(prev => prev.filter((_, i) => i !== idx))}
+                                            className="text-muted-foreground hover:text-destructive"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <Button 
+                              onClick={() => {
+                                setSelectedAthleteId(athlete.athlete_id);
+                                handleSaveAttendance();
+                              }} 
+                              className="w-full" 
+                              disabled={isUploading}
+                            >
+                              {isUploading ? (
+                                <>
+                                  <Upload className="h-4 w-4 mr-2 animate-spin" />
+                                  Uploading...
+                                </>
+                              ) : (
+                                "Save Attendance"
+                              )}
+                            </Button>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
                     </div>
                   </Collapsible>
                 ))}
