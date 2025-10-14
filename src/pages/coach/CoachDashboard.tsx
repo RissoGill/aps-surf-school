@@ -512,8 +512,14 @@ const CoachDashboard = () => {
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">-</p>
-              <p className="text-sm text-muted-foreground">Today's Sessions</p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-foreground">
+                  {athletes?.reduce((total, athlete) => total + athlete.attendance.length, 0) || 0}
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">Total Training</p>
             </CardContent>
           </Card>
         </div>
