@@ -458,17 +458,36 @@ const CoachDashboard = () => {
     if (!athletes || !coachDisplayName) return 0;
     
     const coachName = coachDisplayName.toLowerCase();
-    const coachId = coachData?.coach_id?.toString().toLowerCase();
+    const coachId = coachData?.coach_id?.toString().toUpperCase(); // Keep uppercase for matching
     
-    return athletes.reduce((total, athlete) => {
-      const coachSessions = athlete.attendance.filter((record) => {
-        if (!record.trainer) return false;
-        const trainerLower = record.trainer.toLowerCase();
-        // Match by name or coach_id
-        return trainerLower.includes(coachName) || (coachId && trainerLower.includes(coachId));
+    console.log('Counting sessions for:', { coachName, coachId, coachDisplayName });
+    
+    let totalCount = 0;
+    athletes.forEach((athlete) => {
+      athlete.attendance.forEach((record) => {
+        if (record.trainer) {
+          const trainerUpper = record.trainer.toUpperCase();
+          const trainerLower = record.trainer.toLowerCase();
+          
+          // Match by exact coach_id or if trainer contains coach name
+          const isMatch = (coachId && trainerUpper === coachId) || 
+                         (coachId && trainerUpper.includes(coachId)) ||
+                         trainerLower.includes(coachName);
+          
+          if (isMatch) {
+            totalCount++;
+            console.log('Matched session:', { 
+              trainer: record.trainer, 
+              date: record.date, 
+              athlete: athlete.athlete_id 
+            });
+          }
+        }
       });
-      return total + coachSessions.length;
-    }, 0);
+    });
+    
+    console.log('Total sessions for coach:', totalCount);
+    return totalCount;
   }, [athletes, coachDisplayName, coachData]);
 
   // Calculate current month training sessions for this coach
@@ -476,23 +495,33 @@ const CoachDashboard = () => {
     if (!athletes || !coachDisplayName) return 0;
     
     const coachName = coachDisplayName.toLowerCase();
-    const coachId = coachData?.coach_id?.toString().toLowerCase();
+    const coachId = coachData?.coach_id?.toString().toUpperCase();
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     
-    return athletes.reduce((total, athlete) => {
-      const coachSessions = athlete.attendance.filter((record) => {
-        if (!record.trainer || !record.date) return false;
-        const trainerLower = record.trainer.toLowerCase();
-        const recordDate = new Date(record.date);
-        const isCoachMatch = trainerLower.includes(coachName) || (coachId && trainerLower.includes(coachId));
-        const isCurrentMonth = recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
-        
-        return isCoachMatch && isCurrentMonth;
+    let monthCount = 0;
+    athletes.forEach((athlete) => {
+      athlete.attendance.forEach((record) => {
+        if (record.trainer && record.date) {
+          const trainerUpper = record.trainer.toUpperCase();
+          const trainerLower = record.trainer.toLowerCase();
+          const recordDate = new Date(record.date);
+          
+          const isCoachMatch = (coachId && trainerUpper === coachId) || 
+                              (coachId && trainerUpper.includes(coachId)) ||
+                              trainerLower.includes(coachName);
+          const isCurrentMonth = recordDate.getMonth() === currentMonth && 
+                                recordDate.getFullYear() === currentYear;
+          
+          if (isCoachMatch && isCurrentMonth) {
+            monthCount++;
+          }
+        }
       });
-      return total + coachSessions.length;
-    }, 0);
+    });
+    
+    return monthCount;
   }, [athletes, coachDisplayName, coachData]);
 
   return (
