@@ -13,6 +13,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
+import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
 
 interface Athlete {
   athlete_id: string;
@@ -137,6 +138,18 @@ const AthleteDashboard = () => {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'campeonatos_atletas',
+          filter: `athlete_id=eq.${athleteId}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['athlete-championship-registrations', athleteId] });
         }
       )
       .subscribe();
@@ -280,10 +293,11 @@ const AthleteDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="personal" className="text-xs">Personal</TabsTrigger>
             <TabsTrigger value="training" className="text-xs">Training</TabsTrigger>
             <TabsTrigger value="attendance" className="text-xs">Attendance</TabsTrigger>
+            <TabsTrigger value="championships" className="text-xs">Championships</TabsTrigger>
             <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
           </TabsList>
 
@@ -537,6 +551,30 @@ const AthleteDashboard = () => {
             {!isLoadingAttendance && attendanceRecords.length > 0 && (
               <AnnualAttendanceSummary attendance={attendanceRecords} />
             )}
+          </TabsContent>
+
+          {/* Championships Tab */}
+          <TabsContent value="championships" className="space-y-4">
+            <Card className="shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  My Championships
+                </CardTitle>
+                <CardDescription>
+                  View all championships you are registered for
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {athleteId ? (
+                  <AthleteChampionshipsTab athleteId={athleteId} />
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Loading championship information...
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Media Tab */}
