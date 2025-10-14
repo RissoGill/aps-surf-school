@@ -594,21 +594,21 @@ const CoachDashboard = () => {
                         <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1">
                           <TabsTrigger 
                             value="view"
-                            className="data-[state=active]:bg-view data-[state=active]:text-view-foreground"
+                            className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm px-2"
                           >
                             View Info
                           </TabsTrigger>
                           <TabsTrigger 
                             value="add"
-                            className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground"
+                            className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm px-2"
                           >
-                            Add Attendance
+                            Attendance
                           </TabsTrigger>
                           <TabsTrigger 
                             value="registrations"
-                            className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground"
+                            className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs sm:text-sm px-2"
                           >
-                            Registrations
+                            Register
                           </TabsTrigger>
                         </TabsList>
                         
@@ -785,13 +785,13 @@ const CoachDashboard = () => {
                               <TabsList className="grid w-full grid-cols-2 mb-4 bg-muted/50 p-1">
                                 <TabsTrigger 
                                   value="championships" 
-                                  className="data-[state=active]:bg-championships data-[state=active]:text-championships-foreground"
+                                  className="data-[state=active]:bg-championships data-[state=active]:text-championships-foreground text-sm"
                                 >
                                   Championships
                                 </TabsTrigger>
                                 <TabsTrigger 
                                   value="estagios"
-                                  className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground"
+                                  className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground text-sm"
                                 >
                                   Estágios
                                 </TabsTrigger>
