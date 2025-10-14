@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download } from "lucide-react";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -261,14 +261,14 @@ const AthleteDashboard = () => {
               </div>
             ) : athlete ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="h-8 w-8 text-success" />
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
+                  <Trophy className="h-8 w-8 text-white" />
                 </div>
                 <h2 className="text-xl font-bold text-foreground mb-2">
                   {athlete.first_name} {athlete.last_name}
                 </h2>
                 {athlete.surf_level && (
-                  <Badge className="bg-primary/10 text-primary mb-2">{athlete.surf_level}</Badge>
+                  <Badge className="bg-gradient-primary text-white border-none mb-2 shadow-soft">{athlete.surf_level}</Badge>
                 )}
                 <p className="text-sm text-muted-foreground">ID: {athlete.athlete_id}</p>
               </div>
@@ -303,8 +303,8 @@ const AthleteDashboard = () => {
 
           {/* Personal Data Tab */}
           <TabsContent value="personal" className="space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
+            <Card className="shadow-soft border-l-4 border-l-primary">
+              <CardHeader className="bg-primary/5">
                 <CardTitle className="text-lg">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -331,7 +331,7 @@ const AthleteDashboard = () => {
                     <div>
                       <p className="text-muted-foreground">Level</p>
                       {athlete.surf_level ? (
-                        <Badge className="bg-primary/10 text-primary">{athlete.surf_level}</Badge>
+                        <Badge className="bg-gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
                         <p className="font-medium">N/A</p>
                       )}
@@ -343,8 +343,8 @@ const AthleteDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft">
-              <CardHeader>
+            <Card className="shadow-soft border-l-4 border-l-success">
+              <CardHeader className="bg-success/5">
                 <CardTitle className="text-lg">Emergency Contacts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -353,7 +353,10 @@ const AthleteDashboard = () => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <h4 className="font-medium mb-2">Mother</h4>
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-success" />
+                        Mother
+                      </h4>
                       <div className="text-sm space-y-1">
                         <p><span className="text-muted-foreground">Name:</span> {athlete.mother_name || 'N/A'}</p>
                         <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone || 'N/A'}</p>
@@ -361,7 +364,10 @@ const AthleteDashboard = () => {
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Father</h4>
+                      <h4 className="font-medium mb-2 flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-success" />
+                        Father
+                      </h4>
                       <div className="text-sm space-y-1">
                         <p><span className="text-muted-foreground">Name:</span> {athlete.father_name || 'N/A'}</p>
                         <p><span className="text-muted-foreground">Phone:</span> {athlete.father_phone || 'N/A'}</p>
@@ -378,10 +384,10 @@ const AthleteDashboard = () => {
 
           {/* Training Info Tab */}
           <TabsContent value="training" className="space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
+            <Card className="shadow-soft border-l-4 border-l-primary">
+              <CardHeader className="bg-primary/5">
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                  <Calendar className="h-5 w-5 text-primary" />
                   Training Schedule
                 </CardTitle>
               </CardHeader>
@@ -392,15 +398,20 @@ const AthleteDashboard = () => {
                   <>
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
-                      <p className="font-medium">{athlete.trainings_per_week || 0} sessions per week</p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-soft">
+                          <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
+                        </div>
+                        <p className="font-medium">sessions per week</p>
+                      </div>
                     </div>
                     
                     <div>
                       <p className="text-sm text-muted-foreground mb-3">Training Days</p>
                       {athlete.training_days ? (
-                        <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
-                          <Clock className="h-4 w-4 text-primary" />
-                          <span className="font-medium">{athlete.training_days}</span>
+                        <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                          <Clock className="h-5 w-5 text-primary" />
+                          <span className="font-medium text-foreground">{athlete.training_days}</span>
                         </div>
                       ) : (
                         <p className="font-medium">Not specified</p>
@@ -413,10 +424,10 @@ const AthleteDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft">
-              <CardHeader>
+            <Card className="shadow-soft border-l-4 border-l-warning">
+              <CardHeader className="bg-warning/5">
                 <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                  <MapPin className="h-5 w-5 text-warning" />
                   Transportation
                 </CardTitle>
               </CardHeader>
@@ -427,19 +438,19 @@ const AthleteDashboard = () => {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       {athlete.transport ? (
-                        <Badge className="bg-success/10 text-success">Service Provided</Badge>
+                        <Badge className="bg-success text-success-foreground shadow-soft">✓ Service Provided</Badge>
                       ) : (
                         <Badge variant="secondary">No Service</Badge>
                       )}
                     </div>
                     {athlete.transport && (
                       <div className="text-sm space-y-2">
-                        <div>
-                          <p className="text-muted-foreground">Pickup</p>
+                        <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
+                          <p className="text-muted-foreground text-xs">Pickup Address</p>
                           <p className="font-medium">{athlete.pickup_address || 'N/A'}</p>
                         </div>
-                        <div>
-                          <p className="text-muted-foreground">Drop-off</p>
+                        <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
+                          <p className="text-muted-foreground text-xs">Drop-off Address</p>
                           <p className="font-medium">{athlete.dropoff_address || 'N/A'}</p>
                         </div>
                       </div>
@@ -454,10 +465,13 @@ const AthleteDashboard = () => {
 
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
+            <Card className="shadow-soft border-l-4 border-l-primary">
+              <CardHeader className="bg-primary/5">
                 <div className="flex items-center justify-between mb-2">
-                  <CardTitle>{getMonthName(selectedMonth.month, selectedMonth.year)} Attendance</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    {getMonthName(selectedMonth.month, selectedMonth.year)}
+                  </CardTitle>
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
@@ -494,22 +508,26 @@ const AthleteDashboard = () => {
                       </p>
                     ) : (
                       getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((record) => (
-                        <div key={record.id} className="border border-border rounded-lg p-3 space-y-2">
+                        <div key={record.id} className="border border-border rounded-lg p-3 space-y-2 hover:bg-accent/5 transition-colors">
                           <div className="flex items-center justify-between">
-                            <p className="font-medium">{record.date || 'N/A'}</p>
+                            <p className="font-medium text-foreground">{record.date || 'N/A'}</p>
                             <Badge className={getStatusColor(record.status)}>
                               {record.status || 'Unknown'}
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                            <div>
-                              <span className="font-medium">Trainer:</span> {record.trainer || 'N/A'}
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex items-center gap-1">
+                              <User className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Trainer:</span> 
+                              <span className="font-medium">{record.trainer || 'N/A'}</span>
                             </div>
-                            <div>
-                              <span className="font-medium">Beach:</span> {record.beach_location || 'N/A'}
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-muted-foreground">Beach:</span> 
+                              <span className="font-medium">{record.beach_location || 'N/A'}</span>
                             </div>
                             {record.notes && (
-                              <div className="col-span-2">
+                              <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded text-xs">
                                 <span className="font-medium">Notes:</span> {record.notes}
                               </div>
                             )}
