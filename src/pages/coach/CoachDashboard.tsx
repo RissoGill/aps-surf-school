@@ -471,6 +471,30 @@ const CoachDashboard = () => {
     }, 0);
   }, [athletes, coachDisplayName, coachData]);
 
+  // Calculate current month training sessions for this coach
+  const currentMonthTrainingSessions = useMemo(() => {
+    if (!athletes || !coachDisplayName) return 0;
+    
+    const coachName = coachDisplayName.toLowerCase();
+    const coachId = coachData?.coach_id?.toString().toLowerCase();
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    return athletes.reduce((total, athlete) => {
+      const coachSessions = athlete.attendance.filter((record) => {
+        if (!record.trainer || !record.date) return false;
+        const trainerLower = record.trainer.toLowerCase();
+        const recordDate = new Date(record.date);
+        const isCoachMatch = trainerLower.includes(coachName) || (coachId && trainerLower.includes(coachId));
+        const isCurrentMonth = recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
+        
+        return isCoachMatch && isCurrentMonth;
+      });
+      return total + coachSessions.length;
+    }, 0);
+  }, [athletes, coachDisplayName, coachData]);
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -531,11 +555,19 @@ const CoachDashboard = () => {
             <CardContent className="p-4 text-center">
               <Waves className="h-6 w-6 text-success mx-auto mb-2" />
               {isLoading ? (
-                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+                <>
+                  <Skeleton className="h-8 w-12 mx-auto mb-1" />
+                  <Skeleton className="h-4 w-20 mx-auto" />
+                </>
               ) : (
-                <p className="text-2xl font-bold text-foreground">
-                  {totalTrainingSessions}
-                </p>
+                <>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalTrainingSessions}
+                  </p>
+                  <p className="text-xs text-success font-medium mb-1">
+                    {currentMonthTrainingSessions} this month
+                  </p>
+                </>
               )}
               <p className="text-sm text-muted-foreground">Total Training</p>
             </CardContent>
