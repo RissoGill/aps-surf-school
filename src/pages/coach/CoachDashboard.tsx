@@ -591,10 +591,25 @@ const CoachDashboard = () => {
                   <Collapsible key={athlete.athlete_id} defaultOpen={false} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       <Tabs defaultValue="view" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="view">View Info</TabsTrigger>
-                          <TabsTrigger value="add">Add Attendance</TabsTrigger>
-                          <TabsTrigger value="registrations">Registrations</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1">
+                          <TabsTrigger 
+                            value="view"
+                            className="data-[state=active]:bg-view data-[state=active]:text-view-foreground"
+                          >
+                            View Info
+                          </TabsTrigger>
+                          <TabsTrigger 
+                            value="add"
+                            className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground"
+                          >
+                            Add Attendance
+                          </TabsTrigger>
+                          <TabsTrigger 
+                            value="registrations"
+                            className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground"
+                          >
+                            Registrations
+                          </TabsTrigger>
                         </TabsList>
                         
                         <TabsContent value="view" className="space-y-4">

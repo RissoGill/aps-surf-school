@@ -32,6 +32,18 @@
     --accent-foreground: 174 54% 25%;
     
     /* Tab Colors for Better Readability */
+    --tab-view: 200 70% 50%;
+    --tab-view-foreground: 0 0% 100%;
+    --tab-view-light: 200 70% 95%;
+    
+    --tab-attendance: 174 54% 42%;
+    --tab-attendance-foreground: 0 0% 100%;
+    --tab-attendance-light: 174 54% 95%;
+    
+    --tab-registrations: 280 60% 55%;
+    --tab-registrations-foreground: 0 0% 100%;
+    --tab-registrations-light: 280 60% 95%;
+    
     --tab-championships: 45 93% 47%;
     --tab-championships-foreground: 0 0% 100%;
     --tab-championships-light: 45 93% 95%;

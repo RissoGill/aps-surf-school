@@ -80,6 +80,21 @@ export default {
           foreground: "hsl(var(--tab-estagios-foreground))",
           light: "hsl(var(--tab-estagios-light))",
         },
+        view: {
+          DEFAULT: "hsl(var(--tab-view))",
+          foreground: "hsl(var(--tab-view-foreground))",
+          light: "hsl(var(--tab-view-light))",
+        },
+        attendance: {
+          DEFAULT: "hsl(var(--tab-attendance))",
+          foreground: "hsl(var(--tab-attendance-foreground))",
+          light: "hsl(var(--tab-attendance-light))",
+        },
+        registrations: {
+          DEFAULT: "hsl(var(--tab-registrations))",
+          foreground: "hsl(var(--tab-registrations-foreground))",
+          light: "hsl(var(--tab-registrations-light))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
