@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -511,7 +511,7 @@ const CoachDashboard = () => {
           
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
-              <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
+              <Waves className="h-6 w-6 text-success mx-auto mb-2" />
               {isLoading ? (
                 <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
