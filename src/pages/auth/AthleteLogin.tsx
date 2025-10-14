@@ -35,7 +35,7 @@ const AthleteLogin = () => {
     try {
       // Query the Users table to validate credentials
       const { data: userRecord, error } = await supabase
-        .from('Users')
+        .from('users')
         .select('*')
         .eq('athlete_user_id', formData.email)
         .eq('athlete_password', formData.password)
@@ -52,7 +52,7 @@ const AthleteLogin = () => {
 
       // Fetch athlete details from Atletas table
       const { data: athleteData } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('first_name, last_name, athlete_id')
         .eq('athlete_id', userRecord.athlete_id)
         .maybeSingle();

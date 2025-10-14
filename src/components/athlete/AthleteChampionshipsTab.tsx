@@ -42,7 +42,7 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
       if (!registrations || registrations.length === 0) return [];
       
       const { data, error } = await supabase
-        .from('Campeonatos')
+        .from('campeonatos')
         .select('*')
         .in('id', registrations)
         .order('data_inicio', { ascending: true });

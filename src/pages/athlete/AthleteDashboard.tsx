@@ -84,7 +84,7 @@ const AthleteDashboard = () => {
 
       // Query by athlete_id
       const { data, error } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('*')
         .eq('athlete_id', userAuthId)
         .maybeSingle();
@@ -121,7 +121,7 @@ const AthleteDashboard = () => {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'Attendance',
+          table: 'attendance',
           filter: `athlete_id=eq.${athleteId}`
         },
         () => {
@@ -133,7 +133,7 @@ const AthleteDashboard = () => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'Attendance',
+          table: 'attendance',
           filter: `athlete_id=eq.${athleteId}`
         },
         () => {
@@ -165,7 +165,7 @@ const AthleteDashboard = () => {
       if (!athleteId) return [];
       
       const { data, error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*')
         .eq('athlete_id', athleteId)
         .order('date', { ascending: false });

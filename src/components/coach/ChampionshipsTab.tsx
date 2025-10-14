@@ -37,7 +37,7 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
     queryKey: ['championships'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Campeonatos')
+        .from('campeonatos')
         .select('*')
         .order('data_inicio', { ascending: true });
       

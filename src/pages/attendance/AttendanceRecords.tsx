@@ -30,7 +30,7 @@ const AttendanceRecords = () => {
     queryFn: async () => {
       const [attendanceRes, athletesRes] = await Promise.all([
         supabase
-          .from("Attendance")
+          .from("attendance")
           .select(`
             id,
             date,
@@ -42,7 +42,7 @@ const AttendanceRecords = () => {
           `)
           .order("date", { ascending: false }),
         supabase
-          .from("Atletas")
+          .from("atletas")
           .select("athlete_id, first_name, last_name")
       ]);
 

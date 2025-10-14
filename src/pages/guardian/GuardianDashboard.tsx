@@ -29,7 +29,7 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
     queryKey: ['guardian-attendance', athleteId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*')
         .eq('athlete_id', athleteId)
         .order('date', { ascending: false });
@@ -136,7 +136,7 @@ const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) =>
     queryKey: ['guardian-annual-attendance', athleteId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*')
         .eq('athlete_id', athleteId)
         .order('date', { ascending: false });
@@ -166,7 +166,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
     queryKey: ['guardian-media', athleteId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*')
         .eq('athlete_id', athleteId)
         .order('date', { ascending: false });
@@ -389,7 +389,7 @@ const GuardianDashboard = () => {
           const identifier = (guardianSession.guardian_id || guardianSession.email || '').trim();
           const candidateIds = identifier.includes('@') ? [identifier] : [identifier, `${identifier}@aps.com`];
           const { data: userRec, error } = await supabase
-            .from('Users')
+            .from('users')
             .select('athlete_id')
             .in('guardian_id', candidateIds)
             .maybeSingle();
@@ -428,7 +428,7 @@ const GuardianDashboard = () => {
       console.log('Fetching athlete for athlete_id:', guardianId);
       
       const { data, error } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('*')
         .eq('athlete_id', guardianId);
       
@@ -459,7 +459,7 @@ const GuardianDashboard = () => {
       const athleteIds = athletes.map(a => a.athlete_id);
       
       const { data, error } = await supabase
-        .from('Payments')
+        .from('payments')
         .select('*')
         .in('athlete_id', athleteIds)
         .order('year', { ascending: false })

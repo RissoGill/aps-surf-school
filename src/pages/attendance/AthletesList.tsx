@@ -24,7 +24,7 @@ const AthletesList = () => {
     queryKey: ['athletes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('*')
         .order('first_name', { ascending: true });
       

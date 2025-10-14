@@ -35,7 +35,7 @@ export const EstagiosTab = ({ athleteId, athleteName }: EstagiosTabProps) => {
     queryKey: ['estagios'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('Estagio')
+        .from('estagio')
         .select('*')
         .order('data_inicio', { ascending: true });
       

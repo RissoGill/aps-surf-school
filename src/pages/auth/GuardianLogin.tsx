@@ -39,7 +39,7 @@ const GuardianLogin = () => {
 
       // Query the Users table to validate credentials (accept code or email)
       const { data: userRecord, error } = await supabase
-        .from('Users')
+        .from('users')
         .select('*')
         .in('guardian_id', candidateIds)
         .eq('guardian_password', password)

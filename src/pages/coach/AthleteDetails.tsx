@@ -62,7 +62,7 @@ const AthleteDetails = () => {
       if (!id) throw new Error('No athlete ID provided');
       
       const { data, error } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('*')
         .eq('Athlete_Id', id)
         .maybeSingle();
@@ -80,7 +80,7 @@ const AthleteDetails = () => {
       if (!id) return [];
       
       const { data, error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*')
         .eq('Athlete_id', id)
         .order('Date', { ascending: false });
@@ -98,7 +98,7 @@ const AthleteDetails = () => {
   const handleSaveAttendance = async (recordId: string) => {
     try {
       const { error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .update(editedRecord)
         .eq('Id', recordId);
 
