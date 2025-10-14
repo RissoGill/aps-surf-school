@@ -245,12 +245,12 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Only include attendance records that have a status
+      // Include all attendance records that have a valid date (ignore status)
       const filteredAttendance = (attendanceData || []).filter((att: any) => {
-        return att.status && att.status.trim() !== '';
+        return !!att.date;
       });
 
-      console.log('Attendance records with status:', filteredAttendance.length);
+      console.log('Attendance records with date:', filteredAttendance.length);
 
       // Group attendance by athlete_id (case-insensitive, trimmed) for reliable mapping
       const attendanceByAthlete: Record<string, AttendanceRecord[]> = {};
@@ -582,24 +582,37 @@ const CoachDashboard = () => {
           </Card>
           
           <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Waves className="h-6 w-6 text-success mx-auto mb-2" />
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Waves className="h-6 w-6 text-success" />
+                  <span className="text-sm text-muted-foreground">Training Days</span>
+                </div>
+              </div>
+
               {isLoading ? (
-                <>
-                  <Skeleton className="h-8 w-12 mx-auto mb-1" />
-                  <Skeleton className="h-4 w-20 mx-auto" />
-                </>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Skeleton className="h-8 w-12 mb-1" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="text-right">
+                    <Skeleton className="h-8 w-12 ml-auto mb-1" />
+                    <Skeleton className="h-4 w-20 ml-auto" />
+                  </div>
+                </div>
               ) : (
-                <>
-                  <p className="text-2xl font-bold text-foreground">
-                    {totalTrainingSessions}
-                  </p>
-                  <p className="text-xs text-success font-medium mb-1">
-                    {currentMonthTrainingSessions} this month
-                  </p>
-                </>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
+                    <p className="text-xs text-muted-foreground">Total</p>
+                  </div>
+                </div>
               )}
-              <p className="text-sm text-muted-foreground">Total Training</p>
             </CardContent>
           </Card>
         </div>
