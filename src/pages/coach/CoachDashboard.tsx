@@ -455,32 +455,31 @@ const CoachDashboard = () => {
 
   // Calculate total training sessions for this coach
   const totalTrainingSessions = useMemo(() => {
-    if (!athletes || !coachDisplayName) return 0;
+    if (!athletes) return 0;
     
-    const coachName = coachDisplayName.toLowerCase();
-    const coachId = coachData?.coach_id?.toString().toUpperCase(); // Keep uppercase for matching
+    // Get coach identifiers for matching
+    const coachId = coachData?.coach_id?.toString().toUpperCase(); // e.g., "T04"
+    const firstName = coachData?.first_name?.toLowerCase(); // e.g., "gustavo"
+    const lastName = coachData?.last_name?.toLowerCase(); // e.g., "veiga"
     
-    console.log('Counting sessions for:', { coachName, coachId, coachDisplayName });
+    console.log('Counting sessions for:', { coachId, firstName, lastName });
     
     let totalCount = 0;
     athletes.forEach((athlete) => {
       athlete.attendance.forEach((record) => {
         if (record.trainer) {
-          const trainerUpper = record.trainer.toUpperCase();
-          const trainerLower = record.trainer.toLowerCase();
+          const trainerUpper = record.trainer.toUpperCase().trim();
+          const trainerLower = record.trainer.toLowerCase().trim();
           
-          // Match by exact coach_id or if trainer contains coach name
+          // Match by coach_id, first name, or last name
           const isMatch = (coachId && trainerUpper === coachId) || 
                          (coachId && trainerUpper.includes(coachId)) ||
-                         trainerLower.includes(coachName);
+                         (firstName && trainerLower === firstName) ||
+                         (firstName && trainerLower.includes(firstName)) ||
+                         (lastName && trainerLower.includes(lastName));
           
           if (isMatch) {
             totalCount++;
-            console.log('Matched session:', { 
-              trainer: record.trainer, 
-              date: record.date, 
-              athlete: athlete.athlete_id 
-            });
           }
         }
       });
@@ -488,14 +487,15 @@ const CoachDashboard = () => {
     
     console.log('Total sessions for coach:', totalCount);
     return totalCount;
-  }, [athletes, coachDisplayName, coachData]);
+  }, [athletes, coachData]);
 
   // Calculate current month training sessions for this coach
   const currentMonthTrainingSessions = useMemo(() => {
-    if (!athletes || !coachDisplayName) return 0;
+    if (!athletes) return 0;
     
-    const coachName = coachDisplayName.toLowerCase();
     const coachId = coachData?.coach_id?.toString().toUpperCase();
+    const firstName = coachData?.first_name?.toLowerCase();
+    const lastName = coachData?.last_name?.toLowerCase();
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -504,13 +504,15 @@ const CoachDashboard = () => {
     athletes.forEach((athlete) => {
       athlete.attendance.forEach((record) => {
         if (record.trainer && record.date) {
-          const trainerUpper = record.trainer.toUpperCase();
-          const trainerLower = record.trainer.toLowerCase();
+          const trainerUpper = record.trainer.toUpperCase().trim();
+          const trainerLower = record.trainer.toLowerCase().trim();
           const recordDate = new Date(record.date);
           
           const isCoachMatch = (coachId && trainerUpper === coachId) || 
                               (coachId && trainerUpper.includes(coachId)) ||
-                              trainerLower.includes(coachName);
+                              (firstName && trainerLower === firstName) ||
+                              (firstName && trainerLower.includes(firstName)) ||
+                              (lastName && trainerLower.includes(lastName));
           const isCurrentMonth = recordDate.getMonth() === currentMonth && 
                                 recordDate.getFullYear() === currentYear;
           
@@ -522,7 +524,7 @@ const CoachDashboard = () => {
     });
     
     return monthCount;
-  }, [athletes, coachDisplayName, coachData]);
+  }, [athletes, coachData]);
 
   return (
     <div className="min-h-screen bg-gradient-surface">
