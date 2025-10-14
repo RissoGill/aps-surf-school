@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trophy, MapPin, Calendar, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Label } from "@/components/ui/label";
 
 interface Championship {
   id: number;
@@ -28,6 +30,7 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [registering, setRegistering] = useState<number | null>(null);
+  const [selectedChampionshipId, setSelectedChampionshipId] = useState<string>("");
 
   // Fetch all championships
   const { data: championships, isLoading: loadingChampionships } = useQuery({
@@ -57,7 +60,18 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
     },
   });
 
-  const handleRegisterAthlete = async (championshipId: number) => {
+  const handleRegisterAthlete = async () => {
+    if (!selectedChampionshipId) {
+      toast({
+        title: "No Championship Selected",
+        description: "Please select a championship first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const championshipId = parseInt(selectedChampionshipId);
+
     // Check if already registered
     if (registrations?.includes(championshipId)) {
       toast({
@@ -85,7 +99,8 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
         description: "Athlete successfully registered for this championship!",
       });
 
-      // Invalidate queries to refresh the registration list
+      // Clear selection and invalidate queries
+      setSelectedChampionshipId("");
       queryClient.invalidateQueries({ queryKey: ['athlete-championships', athleteId] });
     } catch (error: any) {
       console.error('Error registering athlete:', error);
@@ -130,80 +145,117 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
     );
   }
 
+  const selectedChampionship = championships?.find(c => c.id.toString() === selectedChampionshipId);
+  const isSelectedRegistered = selectedChampionshipId ? isRegistered(parseInt(selectedChampionshipId)) : false;
+
   return (
-    <div className="pt-4 space-y-4">
+    <div className="pt-4 space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">Register {athleteName} for Championships</h3>
       </div>
 
-      <div className="space-y-3">
-        {championships.map((championship) => {
-          const registered = isRegistered(championship.id);
-          const isRegistering = registering === championship.id;
+      {/* Championship Selection */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Select Championship</Label>
+          <Select value={selectedChampionshipId} onValueChange={setSelectedChampionshipId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a championship..." />
+            </SelectTrigger>
+            <SelectContent>
+              {championships.map((championship) => (
+                <SelectItem key={championship.id} value={championship.id.toString()}>
+                  {championship.nome_campeonato || 'Unnamed Championship'}
+                  {isRegistered(championship.id) && ' ✓'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-          return (
-            <Card key={championship.id} className={`shadow-soft transition-all ${registered ? 'bg-muted/50' : ''}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-4">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    {championship.nome_campeonato || 'Unnamed Championship'}
-                    {registered && (
-                      <Badge variant="default" className="bg-success text-success-foreground">
-                        Registered
-                      </Badge>
-                    )}
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                  {championship.categoria && (
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-foreground">{championship.categoria}</span>
-                    </div>
+        {/* Selected Championship Details */}
+        {selectedChampionship && (
+          <Card className="shadow-soft">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-4">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  {selectedChampionship.nome_campeonato || 'Unnamed Championship'}
+                  {isSelectedRegistered && (
+                    <Badge variant="default" className="bg-success text-success-foreground">
+                      Registered
+                    </Badge>
                   )}
-                  
-                  {championship.gender && (
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {championship.gender}
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  {championship.local && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">{championship.local}</span>
-                    </div>
-                  )}
-                  
-                  {championship.data_inicio && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        {format(new Date(championship.data_inicio), 'MMM d, yyyy')}
-                        {championship.data_fim && ` - ${format(new Date(championship.data_fim), 'MMM d, yyyy')}`}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                </CardTitle>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                {selectedChampionship.categoria && (
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-foreground">{selectedChampionship.categoria}</span>
+                  </div>
+                )}
+                
+                {selectedChampionship.gender && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {selectedChampionship.gender}
+                    </Badge>
+                  </div>
+                )}
+                
+                {selectedChampionship.local && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">{selectedChampionship.local}</span>
+                  </div>
+                )}
+                
+                {selectedChampionship.data_inicio && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      {format(new Date(selectedChampionship.data_inicio), 'MMM d, yyyy')}
+                      {selectedChampionship.data_fim && ` - ${format(new Date(selectedChampionship.data_fim), 'MMM d, yyyy')}`}
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                <Button
-                  onClick={() => handleRegisterAthlete(championship.id)}
-                  disabled={registered || isRegistering}
-                  className="w-full"
-                  variant={registered ? "outline" : "default"}
-                >
-                  {isRegistering ? "Registering..." : registered ? "Already Registered" : "Register for Championship"}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+              <Button
+                onClick={handleRegisterAthlete}
+                disabled={isSelectedRegistered || registering !== null}
+                className="w-full"
+                variant={isSelectedRegistered ? "outline" : "default"}
+              >
+                {registering ? "Registering..." : isSelectedRegistered ? "Already Registered" : "Register for Championship"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* List of Already Registered Championships */}
+        {registrations && registrations.length > 0 && (
+          <div className="space-y-2">
+            <Label>Already Registered Championships</Label>
+            <div className="space-y-2">
+              {championships
+                ?.filter(c => isRegistered(c.id))
+                .map(championship => (
+                  <div key={championship.id} className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
+                    <Trophy className="h-4 w-4 text-success" />
+                    <span className="text-sm font-medium">{championship.nome_campeonato}</span>
+                    <Badge variant="outline" className="ml-auto text-xs bg-success/10 text-success border-success/20">
+                      Registered
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
