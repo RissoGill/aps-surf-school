@@ -20,6 +20,7 @@ import { Collapsible } from "@/components/ui/collapsible";
 import { AthleteProfileCard } from "@/components/coach/AthleteProfileCard";
 import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSummary";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
+import { AttendanceMediaGallery } from "@/components/coach/AttendanceMediaGallery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChampionshipsTab } from "@/components/coach/ChampionshipsTab";
 import { EstagiosTab } from "@/components/coach/EstagiosTab";
@@ -32,6 +33,8 @@ interface AttendanceRecord {
   beach_location: string | null;
   notes: string | null;
   athlete_id: string | null;
+  photos?: string[];
+  videos?: string[];
 }
 
 interface Athlete {
@@ -262,6 +265,8 @@ const CoachDashboard = () => {
           beach_location: att?.beach_location ?? null,
           notes: att?.notes ?? null,
           athlete_id: att?.athlete_id ?? null,
+          photos: att?.photos ?? [],
+          videos: att?.videos ?? [],
         });
       });
 
@@ -623,6 +628,7 @@ const CoachDashboard = () => {
                             <div className="space-y-4">
                               <AnnualAttendanceSummary attendance={athlete.attendance} />
                               <MonthlyAttendanceSummary attendance={athlete.attendance} />
+                              <AttendanceMediaGallery attendance={athlete.attendance} />
                             </div>
                           )}
                         </TabsContent>
