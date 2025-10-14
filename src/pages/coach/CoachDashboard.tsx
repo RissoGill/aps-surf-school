@@ -453,7 +453,7 @@ const CoachDashboard = () => {
     return undefined;
   }, [coachData]);
 
-  // Calculate total training sessions for this coach
+  // Calculate total training days for this coach
   const totalTrainingSessions = useMemo(() => {
     if (!athletes) return 0;
     
@@ -462,12 +462,12 @@ const CoachDashboard = () => {
     const firstName = coachData?.first_name?.toLowerCase(); // e.g., "gustavo"
     const lastName = coachData?.last_name?.toLowerCase(); // e.g., "veiga"
     
-    console.log('Counting sessions for:', { coachId, firstName, lastName });
+    console.log('Counting training days for:', { coachId, firstName, lastName });
     
-    let totalCount = 0;
+    const uniqueDates = new Set<string>();
     athletes.forEach((athlete) => {
       athlete.attendance.forEach((record) => {
-        if (record.trainer) {
+        if (record.trainer && record.date) {
           const trainerUpper = record.trainer.toUpperCase().trim();
           const trainerLower = record.trainer.toLowerCase().trim();
           
@@ -479,17 +479,17 @@ const CoachDashboard = () => {
                          (lastName && trainerLower.includes(lastName));
           
           if (isMatch) {
-            totalCount++;
+            uniqueDates.add(record.date);
           }
         }
       });
     });
     
-    console.log('Total sessions for coach:', totalCount);
-    return totalCount;
+    console.log('Total training days for coach:', uniqueDates.size);
+    return uniqueDates.size;
   }, [athletes, coachData]);
 
-  // Calculate current month training sessions for this coach
+  // Calculate current month training days for this coach
   const currentMonthTrainingSessions = useMemo(() => {
     if (!athletes) return 0;
     
@@ -500,7 +500,7 @@ const CoachDashboard = () => {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     
-    let monthCount = 0;
+    const uniqueDates = new Set<string>();
     athletes.forEach((athlete) => {
       athlete.attendance.forEach((record) => {
         if (record.trainer && record.date) {
@@ -517,13 +517,13 @@ const CoachDashboard = () => {
                                 recordDate.getFullYear() === currentYear;
           
           if (isCoachMatch && isCurrentMonth) {
-            monthCount++;
+            uniqueDates.add(record.date);
           }
         }
       });
     });
     
-    return monthCount;
+    return uniqueDates.size;
   }, [athletes, coachData]);
 
   return (
