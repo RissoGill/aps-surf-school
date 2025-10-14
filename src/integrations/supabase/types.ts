@@ -130,6 +130,69 @@ export type Database = {
           },
         ]
       }
+      Campeonatos: {
+        Row: {
+          categoria: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          gender: string | null
+          id: number
+          local: string | null
+          nome_campeonato: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          gender?: string | null
+          id: number
+          local?: string | null
+          nome_campeonato?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          gender?: string | null
+          id?: number
+          local?: string | null
+          nome_campeonato?: string | null
+        }
+        Relationships: []
+      }
+      campeonatos_atletas: {
+        Row: {
+          athlete_id: string | null
+          campeonato_id: number | null
+          id: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          campeonato_id?: number | null
+          id: string
+        }
+        Update: {
+          athlete_id?: string | null
+          campeonato_id?: number | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campeonatos_atletas_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "Atletas"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "campeonatos_atletas_campeonato_id_fkey"
+            columns: ["campeonato_id"]
+            isOneToOne: false
+            referencedRelation: "Campeonatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Coach: {
         Row: {
           auth_uid: string | null
