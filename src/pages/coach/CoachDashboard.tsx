@@ -456,73 +456,72 @@ const CoachDashboard = () => {
   // Calculate total training days for this coach
   const totalTrainingSessions = useMemo(() => {
     if (!athletes) return 0;
-    
-    // Get coach identifiers for matching
-    const coachId = coachData?.coach_id?.toString().toUpperCase(); // e.g., "T04"
-    const firstName = coachData?.first_name?.toLowerCase(); // e.g., "gustavo"
-    const lastName = coachData?.last_name?.toLowerCase(); // e.g., "veiga"
-    
-    console.log('Counting training days for:', { coachId, firstName, lastName });
-    
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const trainerMatchesCoach = (trainer: string) => {
+      const tUpper = trainer.trim().toUpperCase();
+      const tLower = trainer.trim().toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
     const uniqueDates = new Set<string>();
-    athletes.forEach((athlete) => {
-      athlete.attendance.forEach((record) => {
-        if (record.trainer && record.date) {
-          const trainerUpper = record.trainer.toUpperCase().trim();
-          const trainerLower = record.trainer.toLowerCase().trim();
-          
-          // Match by coach_id, first name, or last name
-          const isMatch = (coachId && trainerUpper === coachId) || 
-                         (coachId && trainerUpper.includes(coachId)) ||
-                         (firstName && trainerLower === firstName) ||
-                         (firstName && trainerLower.includes(firstName)) ||
-                         (lastName && trainerLower.includes(lastName));
-          
-          if (isMatch) {
-            uniqueDates.add(record.date);
-          }
+    for (const athlete of athletes) {
+      for (const record of athlete.attendance) {
+        if (!record.trainer || !record.date) continue;
+        if (trainerMatchesCoach(record.trainer)) {
+          uniqueDates.add(record.date);
         }
-      });
-    });
-    
-    console.log('Total training days for coach:', uniqueDates.size);
+      }
+    }
+
     return uniqueDates.size;
   }, [athletes, coachData]);
 
   // Calculate current month training days for this coach
   const currentMonthTrainingSessions = useMemo(() => {
     if (!athletes) return 0;
-    
-    const coachId = coachData?.coach_id?.toString().toUpperCase();
-    const firstName = coachData?.first_name?.toLowerCase();
-    const lastName = coachData?.last_name?.toLowerCase();
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const trainerMatchesCoach = (trainer: string) => {
+      const tUpper = trainer.trim().toUpperCase();
+      const tLower = trainer.trim().toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
     const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
-    
+    const currentYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
     const uniqueDates = new Set<string>();
-    athletes.forEach((athlete) => {
-      athlete.attendance.forEach((record) => {
-        if (record.trainer && record.date) {
-          const trainerUpper = record.trainer.toUpperCase().trim();
-          const trainerLower = record.trainer.toLowerCase().trim();
-          const recordDate = new Date(record.date);
-          
-          const isCoachMatch = (coachId && trainerUpper === coachId) || 
-                              (coachId && trainerUpper.includes(coachId)) ||
-                              (firstName && trainerLower === firstName) ||
-                              (firstName && trainerLower.includes(firstName)) ||
-                              (lastName && trainerLower.includes(lastName));
-          const isCurrentMonth = recordDate.getMonth() === currentMonth && 
-                                recordDate.getFullYear() === currentYear;
-          
-          if (isCoachMatch && isCurrentMonth) {
-            uniqueDates.add(record.date);
-          }
+    for (const athlete of athletes) {
+      for (const record of athlete.attendance) {
+        if (!record.trainer || !record.date) continue;
+        if (!trainerMatchesCoach(record.trainer)) continue;
+        if (record.date.slice(0, 7) === currentYm) {
+          uniqueDates.add(record.date);
         }
-      });
-    });
-    
+      }
+    }
+
     return uniqueDates.size;
   }, [athletes, coachData]);
 
