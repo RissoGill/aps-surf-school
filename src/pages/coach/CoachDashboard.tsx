@@ -453,6 +453,24 @@ const CoachDashboard = () => {
     return undefined;
   }, [coachData]);
 
+  // Calculate total training sessions for this coach
+  const totalTrainingSessions = useMemo(() => {
+    if (!athletes || !coachDisplayName) return 0;
+    
+    const coachName = coachDisplayName.toLowerCase();
+    const coachId = coachData?.coach_id?.toString().toLowerCase();
+    
+    return athletes.reduce((total, athlete) => {
+      const coachSessions = athlete.attendance.filter((record) => {
+        if (!record.trainer) return false;
+        const trainerLower = record.trainer.toLowerCase();
+        // Match by name or coach_id
+        return trainerLower.includes(coachName) || (coachId && trainerLower.includes(coachId));
+      });
+      return total + coachSessions.length;
+    }, 0);
+  }, [athletes, coachDisplayName, coachData]);
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -516,7 +534,7 @@ const CoachDashboard = () => {
                 <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
                 <p className="text-2xl font-bold text-foreground">
-                  {athletes?.reduce((total, athlete) => total + athlete.attendance.length, 0) || 0}
+                  {totalTrainingSessions}
                 </p>
               )}
               <p className="text-sm text-muted-foreground">Total Training</p>
