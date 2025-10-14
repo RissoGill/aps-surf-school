@@ -89,7 +89,7 @@ const CoachDashboard = () => {
       try {
         // Try by auth_uid first
         const { data: coachByUid, error: uidErr } = await supabase
-          .from('Coach')
+          .from('coach')
           .select('*')
           .eq('auth_uid', u.id.toString())
           .maybeSingle();
@@ -100,7 +100,7 @@ const CoachDashboard = () => {
         // Fallback by email (exact match), in case auth_uid not linked yet
         if (!profile && u.email) {
           const { data: coachByEmail, error: emailErr } = await supabase
-            .from('Coach')
+            .from('coach')
             .select('*')
             .eq('email', u.email)
             .maybeSingle();
@@ -161,7 +161,7 @@ const CoachDashboard = () => {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'Attendance'
+          table: 'attendance'
         },
         () => {
           // Invalidate and refetch athletes data when new attendance is added
@@ -173,7 +173,7 @@ const CoachDashboard = () => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'Attendance'
+          table: 'attendance'
         },
         () => {
           // Invalidate and refetch athletes data when attendance is updated
@@ -192,7 +192,7 @@ const CoachDashboard = () => {
     queryFn: async () => {
       // Fetch all athletes
       const { data: athletesData, error: athletesError } = await supabase
-        .from('Atletas')
+        .from('atletas')
         .select('*')
         .order('first_name', { ascending: true });
       
@@ -206,7 +206,7 @@ const CoachDashboard = () => {
 
       // Get total rows count first
       const { count: attendanceCount, error: countError } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .select('*', { count: 'exact', head: true });
 
       if (countError) {
@@ -225,7 +225,7 @@ const CoachDashboard = () => {
           const to = Math.min(from + pageSize - 1, total - 1);
           pagePromises.push(
             supabase
-              .from('Attendance')
+              .from('attendance')
               .select('*')
               .order('date', { ascending: false })
               .range(from, to)
@@ -346,7 +346,7 @@ const CoachDashboard = () => {
 
       // Insert attendance record with media URLs
       const { error } = await supabase
-        .from('Attendance')
+        .from('attendance')
         .insert({
           id: `${selectedAthleteId}-${newAttendance.date}-${Date.now()}`,
           athlete_id: selectedAthleteId,
