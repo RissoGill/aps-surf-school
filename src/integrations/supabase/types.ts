@@ -220,6 +220,63 @@ export type Database = {
         }
         Relationships: []
       }
+      Estagio: {
+        Row: {
+          data_fim: string | null
+          data_inicio: string | null
+          id: number
+          local: string | null
+          nome_estagio: string | null
+        }
+        Insert: {
+          data_fim?: string | null
+          data_inicio?: string | null
+          id: number
+          local?: string | null
+          nome_estagio?: string | null
+        }
+        Update: {
+          data_fim?: string | null
+          data_inicio?: string | null
+          id?: number
+          local?: string | null
+          nome_estagio?: string | null
+        }
+        Relationships: []
+      }
+      estagio_atletas: {
+        Row: {
+          athlete_id: string | null
+          estagios_id: number | null
+          id: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          estagios_id?: number | null
+          id: string
+        }
+        Update: {
+          athlete_id?: string | null
+          estagios_id?: number | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estagio_atletas_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "Atletas"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "estagio_atletas_estagios_id_fkey"
+            columns: ["estagios_id"]
+            isOneToOne: false
+            referencedRelation: "Estagio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Payments: {
         Row: {
           amount_due: number | null

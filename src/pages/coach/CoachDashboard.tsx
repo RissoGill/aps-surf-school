@@ -22,6 +22,7 @@ import { MonthlyAttendanceSummary } from "@/components/coach/MonthlyAttendanceSu
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChampionshipsTab } from "@/components/coach/ChampionshipsTab";
+import { EstagiosTab } from "@/components/coach/EstagiosTab";
 
 interface AttendanceRecord {
   id: string;
@@ -590,10 +591,11 @@ const CoachDashboard = () => {
                   <Collapsible key={athlete.athlete_id} defaultOpen={false} className="border-b border-border last:border-b-0">
                     <div className="p-4 space-y-4">
                       <Tabs defaultValue="view" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-4">
                           <TabsTrigger value="view">View Info</TabsTrigger>
                           <TabsTrigger value="add">Add Attendance</TabsTrigger>
                           <TabsTrigger value="championships">Championships</TabsTrigger>
+                          <TabsTrigger value="estagios">Estágios</TabsTrigger>
                         </TabsList>
                         
                         <TabsContent value="view" className="space-y-4">
@@ -765,6 +767,10 @@ const CoachDashboard = () => {
                         
                         <TabsContent value="championships" className="space-y-4">
                           <ChampionshipsTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
+                        </TabsContent>
+                        
+                        <TabsContent value="estagios" className="space-y-4">
+                          <EstagiosTab athleteId={athlete.athlete_id} athleteName={`${athlete.first_name} ${athlete.last_name}`} />
                         </TabsContent>
                       </Tabs>
                     </div>
