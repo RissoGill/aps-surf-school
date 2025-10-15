@@ -294,11 +294,36 @@ const AthleteDashboard = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="personal" className="w-full">
           <TabsList className="grid w-full grid-cols-5 mb-6">
-            <TabsTrigger value="personal" className="text-xs">Personal</TabsTrigger>
-            <TabsTrigger value="training" className="text-xs">Training</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-xs">Attendance</TabsTrigger>
-            <TabsTrigger value="championships" className="text-xs">Championships</TabsTrigger>
-            <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
+            <TabsTrigger 
+              value="personal" 
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm px-2"
+            >
+              Personal
+            </TabsTrigger>
+            <TabsTrigger 
+              value="training" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm px-2"
+            >
+              Training
+            </TabsTrigger>
+            <TabsTrigger 
+              value="attendance" 
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm px-2"
+            >
+              Attendance
+            </TabsTrigger>
+            <TabsTrigger 
+              value="championships" 
+              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs sm:text-sm px-2"
+            >
+              Championships
+            </TabsTrigger>
+            <TabsTrigger 
+              value="media" 
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs sm:text-sm px-2"
+            >
+              Media
+            </TabsTrigger>
           </TabsList>
 
           {/* Personal Data Tab */}
