@@ -46,7 +46,7 @@ const AthletesList = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Athletes List</h1>
-          <p className="text-muted-foreground">
+          <p className="text-base text-muted-foreground font-medium">
             View all registered athletes in the academy
           </p>
         </div>
@@ -96,7 +96,7 @@ const AthletesList = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">
+                      <CardTitle className="text-xl font-bold truncate">
                         {athlete.first_name} {athlete.last_name}
                       </CardTitle>
                       {athlete.surf_level && (

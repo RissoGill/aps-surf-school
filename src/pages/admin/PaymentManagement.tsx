@@ -135,8 +135,8 @@ const PaymentManagement = () => {
       <main className="mobile-container py-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-foreground">Payments</h2>
-          <p className="text-sm text-muted-foreground">{filteredPayments.length} payment records</p>
+          <h2 className="text-2xl font-bold text-foreground">Payments</h2>
+          <p className="text-base text-muted-foreground font-medium">{filteredPayments.length} payment records</p>
         </div>
 
         {/* Search and Filter */}

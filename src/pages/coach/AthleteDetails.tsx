@@ -220,11 +220,11 @@ const AthleteDetails = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <User className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
                   {athlete.first_name} {athlete.last_name}
                 </h2>
                 {athlete.surf_level && (
-                  <Badge className={getLevelColor(athlete.surf_level)}>{athlete.surf_level}</Badge>
+                  <Badge className={`${getLevelColor(athlete.surf_level)} text-sm font-semibold px-4 py-1`}>{athlete.surf_level}</Badge>
                 )}
               </CardContent>
             </Card>
@@ -232,20 +232,35 @@ const AthleteDetails = () => {
         {/* Tabs */}
         <Tabs defaultValue="personal" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="personal" className="text-xs">Personal</TabsTrigger>
-            <TabsTrigger value="training" className="text-xs">Training</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-xs">Attendance</TabsTrigger>
+            <TabsTrigger 
+              value="personal" 
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Personal
+            </TabsTrigger>
+            <TabsTrigger 
+              value="training" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Training
+            </TabsTrigger>
+            <TabsTrigger 
+              value="attendance" 
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Attendance
+            </TabsTrigger>
           </TabsList>
 
           {/* Personal Data (Read-only) */}
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <User className="h-6 w-6" />
                   Personal Information
                 </CardTitle>
-                <CardDescription>Read-only athlete data</CardDescription>
+                <CardDescription className="text-base">Read-only athlete data</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -314,11 +329,11 @@ const AthleteDetails = () => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <Calendar className="h-6 w-6" />
                   Training Schedule
                 </CardTitle>
-                <CardDescription>Read-only training information</CardDescription>
+                <CardDescription className="text-base">Read-only training information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -344,8 +359,8 @@ const AthleteDetails = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Car className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <Car className="h-6 w-6" />
                   Transportation
                 </CardTitle>
               </CardHeader>

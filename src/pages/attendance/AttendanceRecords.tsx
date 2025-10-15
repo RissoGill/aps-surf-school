@@ -90,8 +90,8 @@ const AttendanceRecords = () => {
       <main className="flex-1 mobile-container py-6">
         <Card>
           <CardHeader>
-            <CardTitle>Attendance Records</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold">Attendance Records</CardTitle>
+            <CardDescription className="text-base">
               View all attendance records with athlete information (from September 2025 onwards)
             </CardDescription>
           </CardHeader>

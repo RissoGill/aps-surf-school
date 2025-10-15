@@ -101,8 +101,8 @@ const AthleteManagement = () => {
         {/* Header Actions */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Athletes</h2>
-            <p className="text-sm text-muted-foreground">{filteredAthletes.length} total athletes</p>
+            <h2 className="text-2xl font-bold text-foreground">Athletes</h2>
+            <p className="text-base text-muted-foreground font-medium">{filteredAthletes.length} total athletes</p>
           </div>
           
           <Button className="touch-friendly" onClick={() => setIsAddDialogOpen(true)}>

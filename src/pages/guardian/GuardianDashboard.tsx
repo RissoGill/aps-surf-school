@@ -70,11 +70,11 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-xl font-bold">
+          <Calendar className="h-6 w-6" />
           Attendance Records
         </CardTitle>
-        <CardDescription>Training session attendance history (from September 2025)</CardDescription>
+        <CardDescription className="text-base">Training session attendance history (from September 2025)</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -207,11 +207,11 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ImageIcon className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-xl font-bold">
+          <ImageIcon className="h-6 w-6" />
           Photos & Videos
         </CardTitle>
-        <CardDescription>Media from training sessions</CardDescription>
+        <CardDescription className="text-base">Media from training sessions</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -657,13 +657,13 @@ const GuardianDashboard = () => {
               <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-warning" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-bold text-foreground mb-2">
                 {athlete.first_name} {athlete.last_name}
               </h2>
-              <Badge className="bg-primary/10 text-primary mb-2">
+              <Badge className="bg-gradient-primary text-white border-none mb-2 text-sm font-semibold px-4 py-1 shadow-soft">
                 {athlete.surf_level || 'Beginner'} Level
               </Badge>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground font-medium">
                 {athlete.trainings_per_week || 0} sessions per week
               </p>
             </div>
@@ -673,17 +673,37 @@ const GuardianDashboard = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-            <TabsTrigger value="payments" className="text-xs">Payments</TabsTrigger>
-            <TabsTrigger value="attendance" className="text-xs">Attendance</TabsTrigger>
-            <TabsTrigger value="media" className="text-xs">Media</TabsTrigger>
+            <TabsTrigger 
+              value="overview" 
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="payments" 
+              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Payments
+            </TabsTrigger>
+            <TabsTrigger 
+              value="attendance" 
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Attendance
+            </TabsTrigger>
+            <TabsTrigger 
+              value="media" 
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-sm sm:text-base font-semibold px-2"
+            >
+              Media
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-lg">Payment Summary</CardTitle>
+                <CardTitle className="text-xl font-bold">Payment Summary</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 text-center">
@@ -704,7 +724,7 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-lg">Recent Payments</CardTitle>
+                <CardTitle className="text-xl font-bold">Recent Payments</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">

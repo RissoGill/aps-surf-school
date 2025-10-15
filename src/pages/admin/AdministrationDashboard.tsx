@@ -59,8 +59,8 @@ const AdministrationDashboard = () => {
               <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-secondary-foreground" />
               </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Admin Dashboard</h2>
-              <p className="text-sm text-muted-foreground">Complete school management access</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Admin Dashboard</h2>
+              <p className="text-base text-muted-foreground font-medium">Complete school management access</p>
             </div>
           </CardContent>
         </Card>
@@ -79,7 +79,7 @@ const AdministrationDashboard = () => {
 
         {/* Admin Actions */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Management Tools</h3>
+          <h3 className="text-xl font-bold text-foreground mb-4">Management Tools</h3>
           
           {adminActions.map((action, index) => (
             <Card 
