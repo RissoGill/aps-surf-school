@@ -261,27 +261,27 @@ const AthleteDashboard = () => {
               </div>
             ) : athlete ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
-                  <Trophy className="h-8 w-8 text-white" />
+                <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
+                  <Trophy className="h-10 w-10 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
                   {athlete.first_name} {athlete.last_name}
                 </h2>
                 {athlete.surf_level && (
-                  <Badge className="bg-gradient-primary text-white border-none mb-2 shadow-soft">{athlete.surf_level}</Badge>
+                  <Badge className="bg-gradient-primary text-white border-none mb-2 shadow-soft text-sm font-semibold px-4 py-1">{athlete.surf_level}</Badge>
                 )}
-                <p className="text-sm text-muted-foreground">ID: {athlete.athlete_id}</p>
+                <p className="text-base text-muted-foreground font-medium">ID: {athlete.athlete_id}</p>
               </div>
             ) : userAuthId ? (
               <div className="text-center">
-                <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="h-8 w-8 text-warning" />
+                <div className="w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="h-10 w-10 text-warning" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">Profile Not Linked</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <h3 className="text-xl font-bold text-foreground mb-2">Profile Not Linked</h3>
+                <p className="text-base text-muted-foreground mb-3 font-medium">
                   Your account is not yet linked to an athlete profile.
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Please contact your coach or administrator to link your account.
                 </p>
               </div>
@@ -330,7 +330,7 @@ const AthleteDashboard = () => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="text-lg">Personal Information</CardTitle>
+                <CardTitle className="text-xl font-bold">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -340,21 +340,21 @@ const AthleteDashboard = () => {
                     <Skeleton className="h-12 w-full" />
                   </div>
                 ) : athlete ? (
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-base">
                     <div>
-                      <p className="text-muted-foreground">Date of Birth</p>
-                      <p className="font-medium">{athlete.date_of_birth || 'N/A'}</p>
+                      <p className="text-muted-foreground font-medium mb-1">Date of Birth</p>
+                      <p className="font-semibold">{athlete.date_of_birth || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Phone</p>
-                      <p className="font-medium">{athlete.phone || 'N/A'}</p>
+                      <p className="text-muted-foreground font-medium mb-1">Phone</p>
+                      <p className="font-semibold">{athlete.phone || 'N/A'}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-muted-foreground">Address</p>
-                      <p className="font-medium">{athlete.address || 'N/A'}</p>
+                      <p className="text-muted-foreground font-medium mb-1">Address</p>
+                      <p className="font-semibold">{athlete.address || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Level</p>
+                      <p className="text-muted-foreground font-medium mb-1">Level</p>
                       {athlete.surf_level ? (
                         <Badge className="bg-gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
@@ -370,7 +370,7 @@ const AthleteDashboard = () => {
 
             <Card className="shadow-soft border-l-4 border-l-success">
               <CardHeader className="bg-success/5">
-                <CardTitle className="text-lg">Emergency Contacts</CardTitle>
+                <CardTitle className="text-xl font-bold">Emergency Contacts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -378,25 +378,25 @@ const AthleteDashboard = () => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <h4 className="font-medium mb-2 flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-success" />
+                      <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <Phone className="h-5 w-5 text-success" />
                         Mother
                       </h4>
-                      <div className="text-sm space-y-1">
-                        <p><span className="text-muted-foreground">Name:</span> {athlete.mother_name || 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone || 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Email:</span> {athlete.mother_email || 'N/A'}</p>
+                      <div className="text-base space-y-1">
+                        <p><span className="text-muted-foreground font-medium">Name:</span> <span className="font-semibold">{athlete.mother_name || 'N/A'}</span></p>
+                        <p><span className="text-muted-foreground font-medium">Phone:</span> <span className="font-semibold">{athlete.mother_phone || 'N/A'}</span></p>
+                        <p><span className="text-muted-foreground font-medium">Email:</span> <span className="font-semibold">{athlete.mother_email || 'N/A'}</span></p>
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2 flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-success" />
+                      <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
+                        <Phone className="h-5 w-5 text-success" />
                         Father
                       </h4>
-                      <div className="text-sm space-y-1">
-                        <p><span className="text-muted-foreground">Name:</span> {athlete.father_name || 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Phone:</span> {athlete.father_phone || 'N/A'}</p>
-                        <p><span className="text-muted-foreground">Email:</span> {athlete.father_email || 'N/A'}</p>
+                      <div className="text-base space-y-1">
+                        <p><span className="text-muted-foreground font-medium">Name:</span> <span className="font-semibold">{athlete.father_name || 'N/A'}</span></p>
+                        <p><span className="text-muted-foreground font-medium">Phone:</span> <span className="font-semibold">{athlete.father_phone || 'N/A'}</span></p>
+                        <p><span className="text-muted-foreground font-medium">Email:</span> <span className="font-semibold">{athlete.father_email || 'N/A'}</span></p>
                       </div>
                     </div>
                   </>
@@ -411,8 +411,8 @@ const AthleteDashboard = () => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <Calendar className="h-6 w-6 text-primary" />
                   Training Schedule
                 </CardTitle>
               </CardHeader>
@@ -451,8 +451,8 @@ const AthleteDashboard = () => {
 
             <Card className="shadow-soft border-l-4 border-l-warning">
               <CardHeader className="bg-warning/5">
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-warning" />
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <MapPin className="h-6 w-6 text-warning" />
                   Transportation
                 </CardTitle>
               </CardHeader>
