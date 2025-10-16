@@ -960,41 +960,44 @@ const GuardianDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="w-full h-auto flex flex-wrap justify-start gap-1 bg-muted/50 p-2 mb-6">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger 
               value="payments" 
-              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Payments
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Media
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
-              Championships
+              <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
+              <span className="hidden sm:inline">Championships</span>
+              <span className="sm:hidden">Champs</span>
             </TabsTrigger>
             <TabsTrigger 
               value="estagios" 
-              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
+              <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
               Estágios
             </TabsTrigger>
           </TabsList>
