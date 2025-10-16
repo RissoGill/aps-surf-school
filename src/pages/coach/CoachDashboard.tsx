@@ -410,7 +410,7 @@ const CoachDashboard = () => {
       });
       setUploadedPhotos([]);
       setUploadedVideos([]);
-      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'], refetchType: 'all' });
     } catch (error: any) {
       console.error('Attendance save error:', error);
       toast({
@@ -598,9 +598,8 @@ const CoachDashboard = () => {
     const byMonth: Record<string, Set<string>> = {};
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
-        
+        if (!record.date) continue;
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         const yearMonth = record.date.slice(0, 7);
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = new Set();
@@ -625,12 +624,16 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tLower = coach.toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
         (firstName && tokens.includes(firstName)) ||
         (lastName && tokens.includes(lastName)) ||
         (fullName && tLower === fullName)
@@ -640,8 +643,8 @@ const CoachDashboard = () => {
     const byYear: Record<string, Set<string>> = {};
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
+        if (!record.date) continue;
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         
         const year = record.date.slice(0, 4);
         if (!byYear[year]) {
@@ -667,12 +670,16 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tLower = coach.toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
         (firstName && tokens.includes(firstName)) ||
         (lastName && tokens.includes(lastName)) ||
         (fullName && tLower === fullName)
@@ -682,8 +689,8 @@ const CoachDashboard = () => {
     const byMonth: Record<string, string[]> = {};
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
+        if (!record.date) continue;
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         
         const yearMonth = record.date.slice(0, 7);
         if (!byMonth[yearMonth]) {
