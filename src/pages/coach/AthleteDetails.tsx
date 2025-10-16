@@ -111,9 +111,9 @@ const AthleteDetails = () => {
 
       if (error) throw error;
 
-      // Invalidate all attendance-related queries
-      queryClient.invalidateQueries({ queryKey: ['attendance'] });
-      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+      // Force refetch all attendance queries immediately
+      await queryClient.invalidateQueries({ queryKey: ['attendance'], refetchType: 'all' });
+      await queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'], refetchType: 'all' });
       
       setEditingAttendance(null);
       setEditedRecord({});
@@ -145,13 +145,13 @@ const AthleteDetails = () => {
 
       if (error) throw error;
 
-      // Invalidate all attendance-related queries to refresh statistics
-      queryClient.invalidateQueries({ queryKey: ['attendance'] });
-      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+      // Force immediate refetch of all attendance queries
+      await queryClient.invalidateQueries({ queryKey: ['attendance'], refetchType: 'all' });
+      await queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'], refetchType: 'all' });
       
       toast({
         title: "Attendance Deleted",
-        description: "Attendance record has been deleted successfully.",
+        description: "Attendance record has been deleted successfully. Dashboard statistics will update when you navigate back.",
       });
     } catch (error) {
       console.error('Error deleting attendance:', error);
