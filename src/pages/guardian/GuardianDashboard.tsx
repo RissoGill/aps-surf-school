@@ -751,7 +751,7 @@ const GuardianDashboard = () => {
                     onClick={() => setSelectedAthleteId(child.athlete_id)}
                   >
                     <div className="font-semibold text-base">
-                      {child.first_name} {child.last_name}
+                      {child.first_name}
                     </div>
                     <div className="flex gap-2 text-xs">
                       <Badge 
