@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone } from "lucide-react";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone, Plane } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -343,6 +343,13 @@ const AthleteDashboard = () => {
             >
               <ImageIcon className="h-3 w-3 mr-1 inline sm:hidden" />
               Media
+            </TabsTrigger>
+            <TabsTrigger 
+              value="estagios" 
+              className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+            >
+              <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
+              Estágios
             </TabsTrigger>
           </TabsList>
 
@@ -804,6 +811,102 @@ const AthleteDashboard = () => {
                           </div>
                         </div>
                       )}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Estágios Tab */}
+          <TabsContent value="estagios">
+            <Card className="shadow-soft border-l-4 border-l-estagios">
+              <CardHeader className="bg-estagios/5">
+                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                  <Plane className="h-6 w-6 text-estagios" />
+                  Estágios
+                </CardTitle>
+                <CardDescription>Training camps and internships you are registered for</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isLoadingAthlete || !athleteId ? (
+                  <div className="text-center py-4">
+                    <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : (() => {
+                  const { data: estagios = [], isLoading: isLoadingEstagios } = useQuery({
+                    queryKey: ['athlete-estagios', athleteId],
+                    queryFn: async () => {
+                      // Get estagio registrations for this athlete
+                      const { data: registrations, error: regError } = await supabase
+                        .from('estagio_atletas')
+                        .select('estagios_id')
+                        .eq('athlete_id', athleteId);
+                      
+                      if (regError) throw regError;
+                      if (!registrations || registrations.length === 0) return [];
+                      
+                      const estagioIds = registrations.map(r => r.estagios_id);
+                      
+                      // Get estagio details
+                      const { data, error } = await supabase
+                        .from('estagio')
+                        .select('*')
+                        .in('id', estagioIds)
+                        .order('data_inicio', { ascending: false });
+                      
+                      if (error) throw error;
+                      return data || [];
+                    },
+                  });
+
+                  if (isLoadingEstagios) {
+                    return (
+                      <div className="text-center py-4">
+                        <Skeleton className="h-20 w-full" />
+                      </div>
+                    );
+                  }
+
+                  if (estagios.length === 0) {
+                    return (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        You are not registered for any estágios yet
+                      </p>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {estagios.map((estagio: any) => (
+                        <div key={estagio.id} className="border border-border rounded-lg p-4 bg-card hover:bg-accent/5 transition-colors">
+                          <h3 className="font-semibold text-lg mb-2">{estagio.nome_estagio}</h3>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {estagio.local && (
+                              <div className="col-span-2">
+                                <span className="text-muted-foreground">Location:</span>
+                                <p className="font-medium">{estagio.local}</p>
+                              </div>
+                            )}
+                            {estagio.data_inicio && (
+                              <div>
+                                <span className="text-muted-foreground">Start:</span>
+                                <p className="font-medium">
+                                  {new Date(estagio.data_inicio).toLocaleDateString('pt-PT')}
+                                </p>
+                              </div>
+                            )}
+                            {estagio.data_fim && (
+                              <div>
+                                <span className="text-muted-foreground">End:</span>
+                                <p className="font-medium">
+                                  {new Date(estagio.data_fim).toLocaleDateString('pt-PT')}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   );
                 })()}
