@@ -672,7 +672,7 @@ const CoachDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <User className="h-6 w-6 text-primary mx-auto mb-2" />
@@ -686,82 +686,79 @@ const CoachDashboard = () => {
           </Card>
           
           <Card className="shadow-soft">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Waves className="h-6 w-6 text-success" />
-                  <span className="text-sm text-muted-foreground">Training Days</span>
-                </div>
-              </div>
-
+            <CardContent className="p-4 text-center">
+              <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
               {isLoading ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Skeleton className="h-8 w-12 mb-1" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                  <div className="text-right">
-                    <Skeleton className="h-8 w-12 ml-auto mb-1" />
-                    <Skeleton className="h-4 w-20 ml-auto" />
-                  </div>
-                </div>
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
-                    <p className="text-xs text-muted-foreground">This Month</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
-                    <p className="text-xs text-muted-foreground">Total</p>
-                  </div>
-                </div>
+                <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
               )}
+              <p className="text-sm text-muted-foreground">This Month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-soft">
+            <CardContent className="p-4 text-center">
+              <Waves className="h-6 w-6 text-warning mx-auto mb-2" />
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
+              )}
+              <p className="text-sm text-muted-foreground">Total Days</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Training Days Breakdown for logged-in coach */}
-        {!isLoading && Object.keys(trainingDaysByMonth).length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <Card className="shadow-soft">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Your Training Days by Month</CardTitle>
-                <CardDescription>Monthly breakdown of your sessions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {Object.entries(trainingDaysByMonth).map(([month, count]) => {
-                    const [year, monthNum] = month.split('-');
-                    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                    return (
-                      <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                        <span className="text-sm font-medium">{monthName} {year}</span>
-                        <Badge variant="secondary">{count} days</Badge>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-soft">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Your Training Days by Year</CardTitle>
-                <CardDescription>Annual breakdown of your sessions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(trainingDaysByYear).map(([year, count]) => (
-                    <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                      <span className="text-sm font-medium">{year}</span>
-                      <Badge variant="secondary">{count} days</Badge>
+        {/* Training Days Breakdown */}
+        {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
+          <Card className="shadow-soft mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Training Session History</CardTitle>
+              <CardDescription>Detailed breakdown of your training days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Monthly breakdown */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
+                  {Object.keys(trainingDaysByMonth).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {Object.entries(trainingDaysByMonth).map(([month, count]) => {
+                        const [year, monthNum] = month.split('-');
+                        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                        return (
+                          <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                            <span className="text-sm font-medium">{monthName} {year}</span>
+                            <Badge variant="secondary">{count} days</Badge>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+                
+                {/* Yearly breakdown */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
+                  {Object.keys(trainingDaysByYear).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {Object.entries(trainingDaysByYear).map(([year, count]) => (
+                        <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                          <span className="text-sm font-medium">{year}</span>
+                          <Badge variant="secondary">{count} days</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Search Bar */}
