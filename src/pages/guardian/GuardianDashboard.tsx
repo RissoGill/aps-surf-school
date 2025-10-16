@@ -359,6 +359,8 @@ const GuardianDashboard = () => {
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
+  const [guardianRole, setGuardianRole] = useState<string | null>(null);
+  const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -382,7 +384,9 @@ const GuardianDashboard = () => {
       
       try {
         const guardianSession = JSON.parse(guardianSessionStr);
+        const role = guardianSession.role || null;
         let athleteId: string | null = guardianSession.athlete_id || null;
+        let storedGuardianId: string | null = guardianSession.guardian_id || null;
 
         // Fallback: derive athlete_id from Users table if missing
         if (!athleteId) {
@@ -390,23 +394,33 @@ const GuardianDashboard = () => {
           const candidateIds = identifier.includes('@') ? [identifier] : [identifier, `${identifier}@aps.com`];
           const { data: userRec, error } = await supabase
             .from('users')
-            .select('athlete_id')
+            .select('athlete_id, guardian_id')
             .in('guardian_id', candidateIds)
             .maybeSingle();
-          if (!error && userRec?.athlete_id) athleteId = userRec.athlete_id;
+          if (!error && userRec?.athlete_id) {
+            athleteId = userRec.athlete_id;
+            storedGuardianId = userRec.guardian_id;
+          }
         }
         
-        if (!athleteId) {
-          toast({
-            title: "Error",
-            description: "No athlete linked to this guardian account",
-            variant: "destructive",
-          });
-          return;
-        }
+        setGuardianRole(role);
         
-        // Use the athlete_id directly for queries
-        setGuardianId(athleteId);
+        // For family guardians, use the guardian_id to fetch all children
+        if (role === 'family' && storedGuardianId) {
+          setGuardianId(storedGuardianId);
+        } else {
+          // For regular guardians, use athlete_id
+          if (!athleteId) {
+            toast({
+              title: "Error",
+              description: "No athlete linked to this guardian account",
+              variant: "destructive",
+            });
+            return;
+          }
+          setGuardianId(athleteId);
+          setSelectedAthleteId(athleteId);
+        }
       } catch (error) {
         console.error('Error parsing guardian session:', error);
         navigate("/login/guardian");
@@ -416,36 +430,68 @@ const GuardianDashboard = () => {
     checkAuth();
   }, [navigate, toast]);
 
-  // Fetch athletes linked to this guardian (using athlete_id from session)
+  // Fetch athletes linked to this guardian
   const { data: athletes, isLoading: athletesLoading } = useQuery({
-    queryKey: ['guardian-athletes', guardianId],
+    queryKey: ['guardian-athletes', guardianId, guardianRole],
     queryFn: async () => {
       if (!guardianId) {
-        console.log('No guardianId (athlete_id) available for query');
+        console.log('No guardianId available for query');
         return [];
       }
       
-      console.log('Fetching athlete for athlete_id:', guardianId);
-      
-      const { data, error } = await supabase
-        .from('atletas')
-        .select('*')
-        .eq('athlete_id', guardianId);
-      
-      console.log('Athletes query result:', { data, error });
-      
-      if (error) {
-        console.error('Error fetching athletes:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load athlete data",
-          variant: "destructive",
-        });
-        throw error;
+      // For family guardians, fetch all children with matching guardian_id
+      if (guardianRole === 'family') {
+        console.log('Fetching all athletes for guardian_id:', guardianId);
+        
+        const { data, error } = await supabase
+          .from('atletas')
+          .select('*')
+          .eq('guardian_id', guardianId);
+        
+        console.log('Family athletes query result:', { data, error });
+        
+        if (error) {
+          console.error('Error fetching family athletes:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load family athlete data",
+            variant: "destructive",
+          });
+          throw error;
+        }
+        
+        console.log('Family athletes loaded:', data?.length || 0);
+        
+        // Auto-select first child if none selected
+        if (data && data.length > 0 && !selectedAthleteId) {
+          setSelectedAthleteId(data[0].athlete_id);
+        }
+        
+        return data || [];
+      } else {
+        // For regular guardians, fetch single athlete by athlete_id
+        console.log('Fetching athlete for athlete_id:', guardianId);
+        
+        const { data, error } = await supabase
+          .from('atletas')
+          .select('*')
+          .eq('athlete_id', guardianId);
+        
+        console.log('Athletes query result:', { data, error });
+        
+        if (error) {
+          console.error('Error fetching athletes:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load athlete data",
+            variant: "destructive",
+          });
+          throw error;
+        }
+        
+        console.log('Athletes loaded:', data?.length || 0);
+        return data || [];
       }
-      
-      console.log('Athletes loaded:', data?.length || 0);
-      return data || [];
     },
     enabled: !!guardianId,
   });
@@ -480,12 +526,17 @@ const GuardianDashboard = () => {
   });
 
   // Filter payments by selected year if set
-  const filteredPayments = selectedYear 
-    ? payments?.filter(p => p.year === selectedYear) 
+  // For family guardians, also filter by selected athlete
+  const currentAthletePayments = guardianRole === 'family' && selectedAthleteId
+    ? payments?.filter(p => p.athlete_id === selectedAthleteId)
     : payments;
+  
+  const filteredPayments = selectedYear 
+    ? currentAthletePayments?.filter(p => p.year === selectedYear) 
+    : currentAthletePayments;
 
-  // Get unique years for filtering
-  const availableYears = Array.from(new Set(payments?.map(p => p.year) || [])).sort((a, b) => b - a);
+  // Get unique years for filtering (from current athlete's payments only)
+  const availableYears = Array.from(new Set(currentAthletePayments?.map(p => p.year) || [])).sort((a, b) => b - a);
 
   const getPaymentStatus = (payment: any) => {
     if (payment.status?.toLowerCase() === "paid" || payment.amount_paid >= payment.amount_due) {
@@ -580,8 +631,8 @@ const GuardianDashboard = () => {
     return months[parseInt(monthStr) - 1] || monthStr;
   };
 
-  // Get the last 2 paid payments (with payment_date)
-  const recentPaidPayments = (payments || [])
+  // Get the last 2 paid payments (with payment_date) for current athlete
+  const recentPaidPayments = (currentAthletePayments || [])
     .filter(p => p.payment_date)
     .sort((a, b) => {
       if (!a.payment_date || !b.payment_date) return 0;
@@ -590,7 +641,9 @@ const GuardianDashboard = () => {
     .slice(0, 2);
 
   const isLoading = athletesLoading;
-  const athlete = athletes?.[0]; // For now, display first athlete
+  const athlete = guardianRole === 'family' 
+    ? athletes?.find(a => a.athlete_id === selectedAthleteId) || athletes?.[0] 
+    : athletes?.[0]; // For now, display first athlete (or selected for family)
 
   console.log('Guardian Dashboard State:', {
     isLoading,
@@ -649,6 +702,50 @@ const GuardianDashboard = () => {
             Logout
           </Button>
         </div>
+
+        {/* Family Area - Show all children for family guardians */}
+        {guardianRole === 'family' && athletes && athletes.length > 1 && (
+          <Card className="shadow-medium mb-6 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-primary" />
+                Family Area
+              </CardTitle>
+              <CardDescription>Select a child to view their information</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {athletes.map((child) => (
+                  <Button
+                    key={child.athlete_id}
+                    variant={selectedAthleteId === child.athlete_id ? "default" : "outline"}
+                    className={`h-auto py-4 px-4 flex flex-col items-start gap-2 ${
+                      selectedAthleteId === child.athlete_id 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'hover:bg-primary/10'
+                    }`}
+                    onClick={() => setSelectedAthleteId(child.athlete_id)}
+                  >
+                    <div className="font-semibold text-base">
+                      {child.first_name} {child.last_name}
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <Badge 
+                        variant="secondary" 
+                        className={selectedAthleteId === child.athlete_id ? 'bg-primary-foreground/20' : ''}
+                      >
+                        {child.surf_level || 'Beginner'}
+                      </Badge>
+                      <span className="text-muted-foreground">
+                        {child.trainings_per_week || 0}x/week
+                      </span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Child Info Header */}
         <Card className="shadow-medium mb-6">
