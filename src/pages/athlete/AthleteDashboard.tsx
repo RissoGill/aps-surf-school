@@ -296,31 +296,31 @@ const AthleteDashboard = () => {
           <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
             >
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
             >
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
             >
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
             >
-              Championships
+              Champs
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
             >
               Media
             </TabsTrigger>
