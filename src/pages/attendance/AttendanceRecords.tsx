@@ -18,7 +18,7 @@ interface AttendanceRecord {
   Id: string;
   Date: string | null;
   status: string | null;
-  treinador: string | null;
+  coach_id: string | null;
   praia: string | null;
   notas: string | null;
   athlete_name: string;
@@ -35,7 +35,7 @@ const AttendanceRecords = () => {
             id,
             date,
             status,
-            trainer,
+            coach_id,
             beach_location,
             notes,
             athlete_id
@@ -72,7 +72,7 @@ const AttendanceRecords = () => {
         Id: record.id,
         Date: record.date,
         status: record.status,
-        treinador: record.trainer,
+        coach_id: record.coach_id,
         praia: record.beach_location,
         notas: record.notes,
         athlete_name: record.athlete_id ? nameById.get(record.athlete_id) || "Unknown Athlete" : "Unknown Athlete",
@@ -116,7 +116,7 @@ const AttendanceRecords = () => {
                       <TableHead>Athlete</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Trainer</TableHead>
+                      <TableHead>Coach ID</TableHead>
                       <TableHead>Beach</TableHead>
                       <TableHead>Notes</TableHead>
                     </TableRow>
@@ -130,7 +130,7 @@ const AttendanceRecords = () => {
                           </TableCell>
                           <TableCell>{record.Date || "-"}</TableCell>
                           <TableCell>{record.status || "-"}</TableCell>
-                          <TableCell>{record.treinador || "-"}</TableCell>
+                          <TableCell>{record.coach_id || "-"}</TableCell>
                           <TableCell>{record.praia || "-"}</TableCell>
                           <TableCell className="max-w-xs truncate">
                             {record.notas || "-"}
