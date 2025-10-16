@@ -97,10 +97,17 @@ const AthleteDetails = () => {
 
   const handleSaveAttendance = async (recordId: string) => {
     try {
+      // Map frontend field names to database column names and exclude the id
+      const updateData: any = {};
+      if (editedRecord.status !== undefined) updateData.status = editedRecord.status;
+      if (editedRecord.coach !== undefined) updateData.coach_id = editedRecord.coach;
+      if (editedRecord.praia !== undefined) updateData.beach_location = editedRecord.praia;
+      if (editedRecord.notas !== undefined) updateData.notes = editedRecord.notas;
+
       const { error } = await supabase
         .from('attendance')
-        .update(editedRecord)
-        .eq('Id', recordId);
+        .update(updateData)
+        .eq('id', recordId);
 
       if (error) throw error;
 
@@ -118,7 +125,7 @@ const AthleteDetails = () => {
       console.error('Error saving attendance:', error);
       toast({
         title: "Error",
-        description: "Failed to save attendance record. Please try again.",
+        description: `Failed to update table row: ${error.message}`,
         variant: "destructive",
       });
     }
