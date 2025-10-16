@@ -14,6 +14,30 @@ import { useMemo } from "react";
 const AdministrationDashboard = () => {
   const navigate = useNavigate();
 
+  // Fetch October payments
+  const { data: octoberPayments } = useQuery({
+    queryKey: ['october-payments'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('amount_paid, payment_date')
+        .not('payment_date', 'is', null);
+      
+      if (error) throw error;
+      
+      // Filter for October 2025 payments and sum
+      const octoberSum = (data || [])
+        .filter((payment: any) => {
+          if (!payment.payment_date) return false;
+          const date = new Date(payment.payment_date);
+          return date.getMonth() === 9 && date.getFullYear() === 2025; // October is month 9 (0-indexed)
+        })
+        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+      
+      return octoberSum;
+    }
+  });
+
   // Fetch athletes with attendance data
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['admin-athletes-attendance'],
@@ -207,7 +231,7 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "Outstanding Payments", value: "$2,340", color: "destructive" },
+    { label: "October Payments", value: `€${octoberPayments?.toFixed(2) || "0.00"}`, color: "success" },
     { label: "This Month Sessions", value: "156", color: "warning" }
   ];
 
