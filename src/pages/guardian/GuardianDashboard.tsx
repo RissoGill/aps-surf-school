@@ -743,7 +743,7 @@ const GuardianDashboard = () => {
                   <Button
                     key={child.athlete_id}
                     variant={selectedAthleteId === child.athlete_id ? "default" : "outline"}
-                    className={`h-auto py-4 px-4 flex flex-col items-start gap-2 ${
+                    className={`h-auto py-3 px-4 ${
                       selectedAthleteId === child.athlete_id 
                         ? 'bg-primary text-primary-foreground' 
                         : 'hover:bg-primary/10'
@@ -752,17 +752,6 @@ const GuardianDashboard = () => {
                   >
                     <div className="font-semibold text-base">
                       {child.first_name}
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      <Badge 
-                        variant="secondary" 
-                        className={selectedAthleteId === child.athlete_id ? 'bg-primary-foreground/20' : ''}
-                      >
-                        {child.surf_level || 'Beginner'}
-                      </Badge>
-                      <span className="text-muted-foreground">
-                        {child.trainings_per_week || 0}x/week
-                      </span>
                     </div>
                   </Button>
                 ))}
