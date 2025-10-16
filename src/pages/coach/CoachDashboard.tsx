@@ -545,6 +545,92 @@ const CoachDashboard = () => {
     return uniqueDates.size;
   }, [athletes, coachData]);
 
+  // Calculate training days by month
+  const trainingDaysByMonth = useMemo(() => {
+    if (!athletes) return {};
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const coachMatchesCoach = (coach: string) => {
+      const tUpper = coach.trim().toUpperCase();
+      const tLower = coach.trim().toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
+    const byMonth: Record<string, Set<string>> = {};
+    for (const athlete of athletes) {
+      for (const record of athlete.attendance) {
+        if (!record.coach || !record.date) continue;
+        if (!coachMatchesCoach(record.coach)) continue;
+        
+        const yearMonth = record.date.slice(0, 7); // "2025-01"
+        if (!byMonth[yearMonth]) {
+          byMonth[yearMonth] = new Set();
+        }
+        byMonth[yearMonth].add(record.date);
+      }
+    }
+
+    // Convert to counts and sort by date descending
+    const result: Record<string, number> = {};
+    Object.keys(byMonth).sort().reverse().forEach(ym => {
+      result[ym] = byMonth[ym].size;
+    });
+    return result;
+  }, [athletes, coachData]);
+
+  // Calculate training days by year
+  const trainingDaysByYear = useMemo(() => {
+    if (!athletes) return {};
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const coachMatchesCoach = (coach: string) => {
+      const tUpper = coach.trim().toUpperCase();
+      const tLower = coach.trim().toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
+    const byYear: Record<string, Set<string>> = {};
+    for (const athlete of athletes) {
+      for (const record of athlete.attendance) {
+        if (!record.coach || !record.date) continue;
+        if (!coachMatchesCoach(record.coach)) continue;
+        
+        const year = record.date.slice(0, 4); // "2025"
+        if (!byYear[year]) {
+          byYear[year] = new Set();
+        }
+        byYear[year].add(record.date);
+      }
+    }
+
+    // Convert to counts and sort by year descending
+    const result: Record<string, number> = {};
+    Object.keys(byYear).sort().reverse().forEach(y => {
+      result[y] = byYear[y].size;
+    });
+    return result;
+  }, [athletes, coachData]);
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -636,6 +722,59 @@ const CoachDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Training Days Breakdown */}
+        {!isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* By Month */}
+            <Card className="shadow-soft">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Training Days by Month</CardTitle>
+                <CardDescription>Monthly breakdown of training sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {Object.keys(trainingDaysByMonth).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No training data available</p>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {Object.entries(trainingDaysByMonth).map(([month, count]) => {
+                      const [year, monthNum] = month.split('-');
+                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                      return (
+                        <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                          <span className="text-sm font-medium">{monthName} {year}</span>
+                          <Badge variant="secondary">{count} days</Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* By Year */}
+            <Card className="shadow-soft">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Training Days by Year</CardTitle>
+                <CardDescription>Annual breakdown of training sessions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {Object.keys(trainingDaysByYear).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No training data available</p>
+                ) : (
+                  <div className="space-y-2">
+                    {Object.entries(trainingDaysByYear).map(([year, count]) => (
+                      <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                        <span className="text-sm font-medium">{year}</span>
+                        <Badge variant="secondary">{count} days</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Search Bar */}
         <div ref={searchRef} className="relative mb-6">
