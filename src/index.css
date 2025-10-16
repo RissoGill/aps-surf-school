@@ -145,6 +145,11 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+
+  /* Make all Lucide icons use APS primary color */
+  svg[class*="lucide"] {
+    @apply text-primary;
+  }
 }
 
 /* APS Component Utilities */
