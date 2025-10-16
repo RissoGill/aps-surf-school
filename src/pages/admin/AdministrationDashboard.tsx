@@ -39,7 +39,7 @@ const AdministrationDashboard = () => {
       const octoberPaid = octoberPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // October outstanding
+      // October outstanding (amount_due minus amount_paid for non-fully-paid)
       const octoberOutstanding = octoberPayments
         .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
@@ -51,10 +51,7 @@ const AdministrationDashboard = () => {
       // Filter for payments from September 2025 onwards
       const septemberCutoff = new Date('2025-09-01');
       const paymentsFromSept = allPayments.filter((payment: any) => {
-        if (payment.payment_date) {
-          return new Date(payment.payment_date) >= septemberCutoff;
-        }
-        // Also include by year/month if no payment_date
+        // Filter by year and month fields
         if (payment.year && payment.month) {
           const monthIndex = new Date(`${payment.month} 1, ${payment.year}`).getMonth();
           const paymentDate = new Date(payment.year, monthIndex, 1);
@@ -67,7 +64,7 @@ const AdministrationDashboard = () => {
       const annualFeesReceived = paymentsFromSept
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Outstanding fees from September 2025 onwards
+      // Outstanding fees from September 2025 onwards (only non-Paid status)
       const septemberOnwardsOutstanding = paymentsFromSept
         .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
