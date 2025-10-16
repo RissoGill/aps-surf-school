@@ -38,12 +38,13 @@ const GuardianLogin = () => {
       const candidateIds = identifier.includes('@') ? [identifier] : [identifier, `${identifier}@aps.com`];
 
       // Query the Users table to validate credentials (accept code or email)
-      const { data: userRecord, error } = await supabase
+      const { data: userRecords, error } = await supabase
         .from('users')
         .select('*')
         .in('guardian_id', candidateIds)
-        .eq('guardian_password', password)
-        .maybeSingle();
+        .eq('guardian_password', password);
+      
+      const userRecord = userRecords?.[0];
 
       if (error || !userRecord) {
         toast({
