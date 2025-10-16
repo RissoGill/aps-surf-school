@@ -786,7 +786,7 @@ const CoachDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
-              <img src={surfboardIcon} alt="Surfboard" className="h-6 w-6 mx-auto mb-2 opacity-90" />
+              <img src={surfboardIcon} alt="Surfboard" className="h-10 w-10 mx-auto mb-2 opacity-90" />
               {isLoading ? (
                 <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
