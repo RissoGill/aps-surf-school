@@ -293,34 +293,34 @@ const AthleteDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="w-full bg-muted/50 p-1 flex gap-1">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
+              className="flex-1 data-[state=active]:bg-view data-[state=active]:text-view-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
+              className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
+              className="flex-1 data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
+              className="flex-1 data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Champs
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-foreground text-xs sm:text-sm font-semibold px-1"
+              className="flex-1 data-[state=active]:bg-success data-[state=active]:text-success-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Media
             </TabsTrigger>
