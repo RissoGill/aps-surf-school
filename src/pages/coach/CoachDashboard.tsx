@@ -253,9 +253,12 @@ const CoachDashboard = () => {
       console.log('Fetched athletes:', athletesData?.length);
       console.log('Fetched attendance records:', attendanceData?.length);
 
-      // Include all attendance records that have a valid date (ignore status)
+      // Include attendance records that have a valid date and valid status (Present, Absent, Justified)
+      const validStatuses = new Set(['present', 'absent', 'justified']);
       const filteredAttendance = (attendanceData || []).filter((att: any) => {
-        return !!att.date;
+        if (!att?.date) return false;
+        const status = typeof att?.status === 'string' ? att.status.trim().toLowerCase() : '';
+        return validStatuses.has(status);
       });
 
       // Build coach_id -> coach name map (first + last name, fallback to first name)
