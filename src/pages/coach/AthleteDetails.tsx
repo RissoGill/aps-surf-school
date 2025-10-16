@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Phone, Mail, Car, Camera, Save, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,8 +111,9 @@ const AthleteDetails = () => {
 
       if (error) throw error;
 
-      // Refetch the attendance data
-      queryClient.invalidateQueries({ queryKey: ['attendance', id] });
+      // Invalidate all attendance-related queries
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
       
       setEditingAttendance(null);
       setEditedRecord({});
@@ -126,6 +127,37 @@ const AthleteDetails = () => {
       toast({
         title: "Error",
         description: `Failed to update table row: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAttendance = async (recordId: string) => {
+    if (!confirm('Are you sure you want to delete this attendance record?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('attendance')
+        .delete()
+        .eq('id', recordId);
+
+      if (error) throw error;
+
+      // Invalidate all attendance-related queries to refresh statistics
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+      
+      toast({
+        title: "Attendance Deleted",
+        description: "Attendance record has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting attendance:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete attendance record: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -447,25 +479,37 @@ const AthleteDetails = () => {
                         <div key={session.Id} className="border border-border rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
                             <h4 className="font-medium">{session.Date || 'N/A'}</h4>
-                            {editingAttendance === session.Id ? (
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleSaveAttendance(session.Id)}
-                                className="touch-friendly"
-                              >
-                                <Save className="h-4 w-4 mr-1" />
-                                Save
-                              </Button>
-                            ) : (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => startEditing(session)}
-                                className="touch-friendly"
-                              >
-                                Edit
-                              </Button>
-                            )}
+                            <div className="flex gap-2">
+                              {editingAttendance === session.Id ? (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleSaveAttendance(session.Id)}
+                                  className="touch-friendly"
+                                >
+                                  <Save className="h-4 w-4 mr-1" />
+                                  Save
+                                </Button>
+                              ) : (
+                                <>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => startEditing(session)}
+                                    className="touch-friendly"
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleDeleteAttendance(session.Id)}
+                                    className="touch-friendly"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
