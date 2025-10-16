@@ -162,7 +162,12 @@ const AthleteDashboard = () => {
   const { data: attendanceRecords = [], isLoading: isLoadingAttendance } = useQuery({
     queryKey: ['attendance', athleteId],
     queryFn: async () => {
-      if (!athleteId) return [];
+      if (!athleteId) {
+        console.log('No athleteId available for attendance query');
+        return [];
+      }
+      
+      console.log('Fetching attendance for athlete:', athleteId);
       
       const { data, error } = await supabase
         .from('attendance')
@@ -170,12 +175,21 @@ const AthleteDashboard = () => {
         .eq('athlete_id', athleteId)
         .order('date', { ascending: false });
       
-      if (error) throw error;
+      console.log('Attendance query result:', { data, error, count: data?.length || 0 });
+      
+      if (error) {
+        console.error('Error fetching attendance:', error);
+        throw error;
+      }
       
       // Only include attendance records that have a status
       const filteredData = (data || []).filter((record: any) => {
-        return record.status && record.status.trim() !== '';
+        const hasStatus = record.status && record.status.trim() !== '';
+        console.log('Record status check:', record.id, record.status, hasStatus);
+        return hasStatus;
       });
+      
+      console.log('Filtered attendance records:', filteredData.length, 'of', data?.length || 0);
       
       return filteredData as AttendanceRecord[];
     },
