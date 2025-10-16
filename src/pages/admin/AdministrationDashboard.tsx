@@ -14,9 +14,9 @@ import { useMemo } from "react";
 const AdministrationDashboard = () => {
   const navigate = useNavigate();
 
-  // Fetch October payments
-  const { data: octoberPaymentsData } = useQuery({
-    queryKey: ['october-payments'],
+  // Fetch payment data
+  const { data: paymentsData } = useQuery({
+    queryKey: ['all-payments-summary'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
@@ -24,8 +24,10 @@ const AdministrationDashboard = () => {
       
       if (error) throw error;
       
+      const allPayments = data || [];
+      
       // Filter for October 2025 payments
-      const octoberPayments = (data || []).filter((payment: any) => {
+      const octoberPayments = allPayments.filter((payment: any) => {
         const isOctober2025 = payment.month === 'October' && payment.year === 2025;
         const hasPaymentDateInOctober = payment.payment_date && 
           new Date(payment.payment_date).getMonth() === 9 && 
@@ -33,12 +35,12 @@ const AdministrationDashboard = () => {
         return isOctober2025 || hasPaymentDateInOctober;
       });
       
-      // Sum paid amounts
-      const paidSum = octoberPayments
+      // October paid sum
+      const octoberPaid = octoberPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Sum outstanding (amount_due - amount_paid for unpaid/partial payments)
-      const outstandingSum = octoberPayments
+      // October outstanding
+      const octoberOutstanding = octoberPayments
         .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
@@ -46,7 +48,40 @@ const AdministrationDashboard = () => {
           return sum + (due - paid);
         }, 0);
       
-      return { paid: paidSum, outstanding: outstandingSum };
+      // Filter for payments from September 2025 onwards
+      const septemberCutoff = new Date('2025-09-01');
+      const paymentsFromSept = allPayments.filter((payment: any) => {
+        if (payment.payment_date) {
+          return new Date(payment.payment_date) >= septemberCutoff;
+        }
+        // Also include by year/month if no payment_date
+        if (payment.year && payment.month) {
+          const monthIndex = new Date(`${payment.month} 1, ${payment.year}`).getMonth();
+          const paymentDate = new Date(payment.year, monthIndex, 1);
+          return paymentDate >= septemberCutoff;
+        }
+        return false;
+      });
+      
+      // Annual fees received from Sept 2025 onwards
+      const annualFeesReceived = paymentsFromSept
+        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+      
+      // Total outstanding fees (all unpaid amounts)
+      const totalOutstanding = allPayments
+        .filter((payment: any) => payment.status !== 'Paid')
+        .reduce((sum: number, payment: any) => {
+          const due = payment.amount_due || 0;
+          const paid = payment.amount_paid || 0;
+          return sum + (due - paid);
+        }, 0);
+      
+      return { 
+        octoberPaid, 
+        octoberOutstanding,
+        annualFeesReceived,
+        totalOutstanding
+      };
     }
   });
 
@@ -243,8 +278,10 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "October Payments", value: `€${octoberPaymentsData?.paid.toFixed(2) || "0.00"}`, color: "success" },
-    { label: "Outstanding Oct Fees", value: `€${octoberPaymentsData?.outstanding.toFixed(2) || "0.00"}`, color: "destructive" }
+    { label: "October Payments", value: `€${paymentsData?.octoberPaid.toFixed(2) || "0.00"}`, color: "success" },
+    { label: "Outstanding Oct Fees", value: `€${paymentsData?.octoberOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
+    { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
+    { label: "Total Outstanding", value: `€${paymentsData?.totalOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
   ];
 
   return (
