@@ -71,11 +71,11 @@ const AttendanceRecords = () => {
         coaches.map((c: any) => [c.coach_id, c.first_name || "Unknown Coach"])
       );
 
-      // Filter: only records with status and from September 2025 onwards
+      // Filter: only records with specific status values (Present, Absent, Justified) and from September 2025 onwards
+      const validStatuses = ['Present', 'Absent', 'Justified'];
       const filteredAttendance = (attendanceRes.data || []).filter((record: any) => {
-        // Must have a non-empty status
-        const hasStatus = record.status && String(record.status).trim().length > 0;
-        if (!hasStatus) return false;
+        // Must have one of the valid status values
+        if (!record.status || !validStatuses.includes(record.status)) return false;
         
         if (!record.date) return false;
         const recordDate = new Date(record.date);
