@@ -196,6 +196,14 @@ const CoachDashboard = () => {
         .select('*')
         .order('first_name', { ascending: true });
       
+      // Fetch coaches to map coach_id -> coach name
+      const { data: coachesData, error: coachesError } = await supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name');
+      if (coachesError) {
+        console.warn('Error fetching coaches:', coachesError);
+      }
+      
       if (athletesError) {
         console.error('Error fetching athletes:', athletesError);
         throw athletesError;
@@ -250,6 +258,15 @@ const CoachDashboard = () => {
         return !!att.date;
       });
 
+      // Build coach_id -> coach name map (first + last name, fallback to first name)
+      const coachNameById: Record<string, string> = {};
+      (coachesData || []).forEach((c: any) => {
+        const key = String(c?.coach_id || '').trim().toLowerCase();
+        if (!key) return;
+        const full = [c?.first_name, c?.last_name].filter(Boolean).join(' ').trim();
+        coachNameById[key] = full || c?.first_name || 'Unknown Coach';
+      });
+
       console.log('Attendance records with date:', filteredAttendance.length);
 
       // Group attendance by athlete_id (case-insensitive, trimmed) for reliable mapping
@@ -261,7 +278,7 @@ const CoachDashboard = () => {
           id: att.id,
           date: att.date,
           status: att.status,
-          coach: att?.coach_id ?? null,
+          coach: att?.coach_id ? (coachNameById[String(att.coach_id).trim().toLowerCase()] || "Unknown Coach") : null,
           beach_location: att?.beach_location ?? null,
           notes: att?.notes ?? null,
           athlete_id: att?.athlete_id ?? null,
