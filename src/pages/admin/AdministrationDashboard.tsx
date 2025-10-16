@@ -24,6 +24,9 @@ const AdministrationDashboard = () => {
       ]);
 
       if (athletesRes.error) throw athletesRes.error;
+      if (coachesRes.error) throw coachesRes.error;
+
+      console.log('Coaches fetched:', coachesRes.data?.length, coachesRes.data);
 
       // Fetch attendance with pagination
       const pageSize = 1000;
