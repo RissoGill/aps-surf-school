@@ -116,7 +116,7 @@ const AttendanceRecords = () => {
                       <TableHead>Athlete</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Coach ID</TableHead>
+                      <TableHead>Coach</TableHead>
                       <TableHead>Beach</TableHead>
                       <TableHead>Notes</TableHead>
                     </TableRow>
