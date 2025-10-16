@@ -443,10 +443,34 @@ const GuardianDashboard = () => {
       if (guardianRole === 'family') {
         console.log('Fetching all athletes for guardian_id:', guardianId);
         
+        // Step 1: Get athlete_ids from users table
+        const { data: userRecords, error: usersError } = await supabase
+          .from('users')
+          .select('athlete_id')
+          .eq('guardian_id', guardianId);
+        
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          return [];
+        }
+        
+        if (!userRecords || userRecords.length === 0) {
+          console.log('No users found for guardian_id:', guardianId);
+          return [];
+        }
+        
+        const athleteIds = userRecords.map(u => u.athlete_id).filter(Boolean);
+        console.log('Found athlete IDs:', athleteIds);
+        
+        if (athleteIds.length === 0) {
+          return [];
+        }
+        
+        // Step 2: Fetch athletes from atletas table
         const { data, error } = await supabase
           .from('atletas')
           .select('*')
-          .eq('guardian_id', guardianId);
+          .in('athlete_id', athleteIds);
         
         console.log('Family athletes query result:', { data, error });
         
@@ -915,25 +939,41 @@ const GuardianDashboard = () => {
                         className="p-4 border rounded-lg border-border"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{getMonthName(payment.month)} {payment.year}</h4>
+                          <div>
+                            <p className="font-medium">{getMonthName(payment.month)} {payment.year}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Due: {payment.year}-{payment.month}-05
+                            </p>
+                          </div>
                           <Badge className={statusInfo.color}>
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {statusInfo.status}
                           </Badge>
                         </div>
-                        
-                        <div className="text-sm text-muted-foreground space-y-1">
-                          <p>Amount Due: <span className="font-medium">{formatCurrency(payment.amount_due)}</span></p>
-                          <p>Amount Paid: <span className="font-medium text-success">{formatCurrency(payment.amount_paid || 0)}</span></p>
-                          {payment.payment_date && (
-                            <p>Payment Date: <span className="font-medium">{payment.payment_date}</span></p>
-                          )}
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Amount Due:</p>
+                            <p className="font-medium">{formatCurrency(payment.amount_due || 0)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Amount Paid:</p>
+                            <p className="font-medium">{formatCurrency(payment.amount_paid || 0)}</p>
+                          </div>
                         </div>
+                        {payment.payment_date && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Paid on: {new Date(payment.payment_date).toLocaleDateString('pt-PT', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                          </p>
+                        )}
                       </div>
                     );
                   })}
-                  {(!filteredPayments || filteredPayments.length === 0) && (
-                    <p className="text-sm text-muted-foreground text-center py-4">No payment records found</p>
+                  {filteredPayments?.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No payments found</p>
                   )}
                 </div>
               </CardContent>
@@ -942,13 +982,13 @@ const GuardianDashboard = () => {
 
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
-            <AttendanceTab athleteId={athlete.athlete_id} />
-            <AnnualAttendanceSummaryWrapper athleteId={athlete.athlete_id} />
+            {athlete && <AnnualAttendanceSummaryWrapper athleteId={athlete.athlete_id} />}
+            {athlete && <AttendanceTab athleteId={athlete.athlete_id} />}
           </TabsContent>
 
           {/* Media Tab */}
-          <TabsContent value="media" className="space-y-4">
-            <MediaTab athleteId={athlete.athlete_id} />
+          <TabsContent value="media">
+            {athlete && <MediaTab athleteId={athlete.athlete_id} />}
           </TabsContent>
         </Tabs>
       </main>
