@@ -10,7 +10,7 @@ interface AttendanceRecord {
   id: string;
   date: string | null;
   status: string | null;
-  trainer: string | null;
+  coach: string | null;
   beach_location: string | null;
   notes: string | null;
 }
@@ -194,10 +194,10 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                               <span className="text-muted-foreground">Status:</span>
                               <p className="font-medium">{record.status || 'Not set'}</p>
                             </div>
-                            {record.trainer && (
+                            {record.coach && (
                               <div>
-                                <span className="text-muted-foreground">Trainer:</span>
-                                <p className="font-medium">{record.trainer}</p>
+                                <span className="text-muted-foreground">Coach:</span>
+                                <p className="font-medium">{record.coach}</p>
                               </div>
                             )}
                             {record.beach_location && (

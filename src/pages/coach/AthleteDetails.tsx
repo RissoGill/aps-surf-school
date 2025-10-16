@@ -42,7 +42,7 @@ interface AttendanceRecord {
   Id: string;
   Date: string | null;
   status: string | null;
-  treinador: string | null;
+  coach: string | null;
   praia: string | null;
   notas: string | null;
 }
@@ -135,7 +135,7 @@ const AthleteDetails = () => {
     setEditingAttendance(record.Id);
     setEditedRecord({
       status: record.status,
-      treinador: record.treinador,
+      coach: record.coach,
       praia: record.praia,
       notas: record.notas,
     });
@@ -486,11 +486,11 @@ const AthleteDetails = () => {
                             </div>
 
                             <div>
-                              <p className="text-sm text-muted-foreground mb-1">Trainer</p>
+                              <p className="text-sm text-muted-foreground mb-1">Coach</p>
                               {editingAttendance === session.Id ? (
                                 <Select
-                                  value={editedRecord.treinador || session.treinador || ''}
-                                  onValueChange={(value) => updateAttendanceField('treinador', value)}
+                                  value={editedRecord.coach || session.coach || ''}
+                                  onValueChange={(value) => updateAttendanceField('coach', value)}
                                 >
                                   <SelectTrigger className="touch-friendly">
                                     <SelectValue />
@@ -502,7 +502,7 @@ const AthleteDetails = () => {
                                   </SelectContent>
                                 </Select>
                               ) : (
-                                <p className="font-medium">{session.treinador || 'N/A'}</p>
+                                <p className="font-medium">{session.coach || 'N/A'}</p>
                               )}
                             </div>
                           </div>

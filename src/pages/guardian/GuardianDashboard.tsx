@@ -17,7 +17,7 @@ interface AttendanceRecord {
   Id: string;
   Date: string | null;
   status: string | null;
-  trainer: string | null;
+  coach: string | null;
   beach_location: string | null;
   notes: string | null;
   photos: string[] | null;
@@ -49,7 +49,7 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
         Id: record.id,
         Date: record.date,
         status: record.status,
-        trainer: record.trainer,
+        coach: record.coach_id,
         beach_location: record.beach_location,
         notes: record.notes,
         photos: record.photos,
@@ -105,9 +105,9 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
                     </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                    {record.trainer && (
+                    {record.coach && (
                       <div>
-                        <span className="font-medium">Trainer:</span> {record.trainer}
+                        <span className="font-medium">Coach:</span> {record.coach}
                       </div>
                     )}
                     {record.beach_location && (
@@ -149,7 +149,7 @@ const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) =>
           id: record.id,
           date: record.date,
           status: record.status,
-          trainer: record.trainer,
+          coach: record.coach_id,
           beach_location: record.beach_location,
           notes: record.notes,
         }));
@@ -177,7 +177,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
         Id: record.id,
         Date: record.date,
         status: record.status,
-        trainer: record.trainer,
+        coach: record.coach_id,
         beach_location: record.beach_location,
         notes: record.notes,
         photos: record.photos,
@@ -186,18 +186,18 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
     },
   });
 
-  const allPhotos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
-  const allVideos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
+  const allPhotos: Array<{ url: string; date: string | null; coach: string | null }> = [];
+  const allVideos: Array<{ url: string; date: string | null; coach: string | null }> = [];
   
   attendanceRecords.forEach(record => {
     if (record.photos && Array.isArray(record.photos)) {
       record.photos.forEach(url => {
-        allPhotos.push({ url, date: record.Date, trainer: record.trainer });
+        allPhotos.push({ url, date: record.Date, coach: record.coach });
       });
     }
     if (record.videos && Array.isArray(record.videos)) {
       record.videos.forEach(url => {
-        allVideos.push({ url, date: record.Date, trainer: record.trainer });
+        allVideos.push({ url, date: record.Date, coach: record.coach });
       });
     }
   });
@@ -264,9 +264,9 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                                 })}
                               </p>
                             )}
-                            {photo.trainer && (
+                            {photo.coach && (
                               <p className="text-xs text-muted-foreground truncate">
-                                Coach: {photo.trainer}
+                                Coach: {photo.coach}
                               </p>
                             )}
                           </div>
@@ -325,9 +325,9 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                                 })}
                               </p>
                             )}
-                            {video.trainer && (
+                            {video.coach && (
                               <p className="text-xs text-muted-foreground truncate">
-                                Coach: {video.trainer}
+                                Coach: {video.coach}
                               </p>
                             )}
                           </div>

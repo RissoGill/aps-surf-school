@@ -29,7 +29,7 @@ interface AttendanceRecord {
   id: string;
   date: string | null;
   status: string | null;
-  trainer: string | null;
+  coach: string | null;
   beach_location: string | null;
   notes: string | null;
   athlete_id: string | null;
@@ -69,7 +69,7 @@ const CoachDashboard = () => {
   const [newAttendance, setNewAttendance] = useState({
     date: new Date().toISOString().split('T')[0],
     status: "",
-    treinador: "",
+    coach: "",
     praia: "",
     notas: ""
   });
@@ -261,7 +261,7 @@ const CoachDashboard = () => {
           id: att.id,
           date: att.date,
           status: att.status,
-          trainer: att?.coach_id ?? null,
+          coach: att?.coach_id ?? null,
           beach_location: att?.beach_location ?? null,
           notes: att?.notes ?? null,
           athlete_id: att?.athlete_id ?? null,
@@ -370,7 +370,7 @@ const CoachDashboard = () => {
       setNewAttendance({
         date: new Date().toISOString().split('T')[0],
         status: "",
-        treinador: "",
+        coach: "",
         praia: "",
         notas: ""
       });
@@ -462,9 +462,9 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const trainerMatchesCoach = (trainer: string) => {
-      const tUpper = trainer.trim().toUpperCase();
-      const tLower = trainer.trim().toLowerCase();
+    const coachMatchesCoach = (coach: string) => {
+      const tUpper = coach.trim().toUpperCase();
+      const tLower = coach.trim().toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
         (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
@@ -477,8 +477,8 @@ const CoachDashboard = () => {
     const uniqueDates = new Set<string>();
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.trainer || !record.date) continue;
-        if (trainerMatchesCoach(record.trainer)) {
+        if (!record.coach || !record.date) continue;
+        if (coachMatchesCoach(record.coach)) {
           uniqueDates.add(record.date);
         }
       }
@@ -496,9 +496,9 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const trainerMatchesCoach = (trainer: string) => {
-      const tUpper = trainer.trim().toUpperCase();
-      const tLower = trainer.trim().toLowerCase();
+    const coachMatchesCoach = (coach: string) => {
+      const tUpper = coach.trim().toUpperCase();
+      const tLower = coach.trim().toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
         (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
@@ -514,8 +514,8 @@ const CoachDashboard = () => {
     const uniqueDates = new Set<string>();
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.trainer || !record.date) continue;
-        if (!trainerMatchesCoach(record.trainer)) continue;
+        if (!record.coach || !record.date) continue;
+        if (!coachMatchesCoach(record.coach)) continue;
         if (record.date.slice(0, 7) === currentYm) {
           uniqueDates.add(record.date);
         }
@@ -760,11 +760,11 @@ const CoachDashboard = () => {
                             </div>
                             
                             <div className="space-y-2">
-                              <Label>Trainer</Label>
+                              <Label>Coach</Label>
                               <Input
-                                value={newAttendance.treinador}
-                                onChange={(e) => setNewAttendance({ ...newAttendance, treinador: e.target.value })}
-                                placeholder="Enter trainer name"
+                                value={newAttendance.coach}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, coach: e.target.value })}
+                                placeholder="Enter coach name"
                               />
                             </div>
                             

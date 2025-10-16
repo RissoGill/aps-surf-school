@@ -6,7 +6,7 @@ interface AttendanceRecord {
   id: string;
   date: string | null;
   status: string | null;
-  trainer: string | null;
+  coach: string | null;
   beach_location: string | null;
   notes: string | null;
 }

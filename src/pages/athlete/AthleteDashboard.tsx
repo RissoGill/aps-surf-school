@@ -41,7 +41,7 @@ interface AttendanceRecord {
   id: string;
   date: string | null;
   status: string | null;
-  trainer: string | null;
+  coach: string | null;
   beach_location: string | null;
   notes: string | null;
   photos: string[] | null;
@@ -543,8 +543,8 @@ const AthleteDashboard = () => {
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground">Trainer:</span> 
-                              <span className="font-medium">{record.trainer || 'N/A'}</span>
+                              <span className="text-muted-foreground">Coach:</span> 
+                              <span className="font-medium">{record.coach || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3 text-muted-foreground" />
@@ -638,18 +638,18 @@ const AthleteDashboard = () => {
                     ))}
                   </div>
                 ) : (() => {
-                  const allPhotos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
-                  const allVideos: Array<{ url: string; date: string | null; trainer: string | null }> = [];
+                  const allPhotos: Array<{ url: string; date: string | null; coach: string | null }> = [];
+                  const allVideos: Array<{ url: string; date: string | null; coach: string | null }> = [];
                   
                   attendanceRecords.forEach(record => {
                     if (record.photos && Array.isArray(record.photos)) {
                       record.photos.forEach(url => {
-                        allPhotos.push({ url, date: record.date, trainer: record.trainer });
+                        allPhotos.push({ url, date: record.date, coach: record.coach });
                       });
                     }
                     if (record.videos && Array.isArray(record.videos)) {
                       record.videos.forEach(url => {
-                        allVideos.push({ url, date: record.date, trainer: record.trainer });
+                        allVideos.push({ url, date: record.date, coach: record.coach });
                       });
                     }
                   });
@@ -700,9 +700,9 @@ const AthleteDashboard = () => {
                                           })}
                                         </p>
                                       )}
-                                      {photo.trainer && (
+                                      {photo.coach && (
                                         <p className="text-xs text-muted-foreground truncate">
-                                          Coach: {photo.trainer}
+                                          Coach: {photo.coach}
                                         </p>
                                       )}
                                     </div>
@@ -761,9 +761,9 @@ const AthleteDashboard = () => {
                                           })}
                                         </p>
                                       )}
-                                      {video.trainer && (
+                                      {video.coach && (
                                         <p className="text-xs text-muted-foreground truncate">
-                                          Coach: {video.trainer}
+                                          Coach: {video.coach}
                                         </p>
                                       )}
                                     </div>
