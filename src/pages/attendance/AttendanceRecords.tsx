@@ -73,7 +73,10 @@ const AttendanceRecords = () => {
 
       // Filter: only records with status and from September 2025 onwards
       const filteredAttendance = (attendanceRes.data || []).filter((record: any) => {
-        if (!record.status) return false;
+        // Must have a non-empty status
+        const hasStatus = record.status && String(record.status).trim().length > 0;
+        if (!hasStatus) return false;
+        
         if (!record.date) return false;
         const recordDate = new Date(record.date);
         const septemberCutoff = new Date('2025-09-01');
