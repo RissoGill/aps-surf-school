@@ -15,26 +15,38 @@ const AdministrationDashboard = () => {
   const navigate = useNavigate();
 
   // Fetch October payments
-  const { data: octoberPayments } = useQuery({
+  const { data: octoberPaymentsData } = useQuery({
     queryKey: ['october-payments'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select('amount_paid, payment_date')
-        .not('payment_date', 'is', null);
+        .select('amount_paid, amount_due, payment_date, status, month, year');
       
       if (error) throw error;
       
-      // Filter for October 2025 payments and sum
-      const octoberSum = (data || [])
-        .filter((payment: any) => {
-          if (!payment.payment_date) return false;
-          const date = new Date(payment.payment_date);
-          return date.getMonth() === 9 && date.getFullYear() === 2025; // October is month 9 (0-indexed)
-        })
+      // Filter for October 2025 payments
+      const octoberPayments = (data || []).filter((payment: any) => {
+        const isOctober2025 = payment.month === 'October' && payment.year === 2025;
+        const hasPaymentDateInOctober = payment.payment_date && 
+          new Date(payment.payment_date).getMonth() === 9 && 
+          new Date(payment.payment_date).getFullYear() === 2025;
+        return isOctober2025 || hasPaymentDateInOctober;
+      });
+      
+      // Sum paid amounts
+      const paidSum = octoberPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      return octoberSum;
+      // Sum outstanding (amount_due - amount_paid for unpaid/partial payments)
+      const outstandingSum = octoberPayments
+        .filter((payment: any) => payment.status !== 'Paid')
+        .reduce((sum: number, payment: any) => {
+          const due = payment.amount_due || 0;
+          const paid = payment.amount_paid || 0;
+          return sum + (due - paid);
+        }, 0);
+      
+      return { paid: paidSum, outstanding: outstandingSum };
     }
   });
 
@@ -231,8 +243,8 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "October Payments", value: `€${octoberPayments?.toFixed(2) || "0.00"}`, color: "success" },
-    { label: "This Month Sessions", value: "156", color: "warning" }
+    { label: "October Payments", value: `€${octoberPaymentsData?.paid.toFixed(2) || "0.00"}`, color: "success" },
+    { label: "Outstanding Oct Fees", value: `€${octoberPaymentsData?.outstanding.toFixed(2) || "0.00"}`, color: "destructive" }
   ];
 
   return (
