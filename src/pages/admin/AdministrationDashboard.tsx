@@ -67,8 +67,8 @@ const AdministrationDashboard = () => {
       const annualFeesReceived = paymentsFromSept
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Total outstanding fees (all unpaid amounts)
-      const totalOutstanding = allPayments
+      // Outstanding fees from September 2025 onwards
+      const septemberOnwardsOutstanding = paymentsFromSept
         .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
@@ -80,7 +80,7 @@ const AdministrationDashboard = () => {
         octoberPaid, 
         octoberOutstanding,
         annualFeesReceived,
-        totalOutstanding
+        septemberOnwardsOutstanding
       };
     }
   });
@@ -281,7 +281,7 @@ const AdministrationDashboard = () => {
     { label: "October Payments", value: `€${paymentsData?.octoberPaid.toFixed(2) || "0.00"}`, color: "success" },
     { label: "Outstanding Oct Fees", value: `€${paymentsData?.octoberOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
     { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
-    { label: "Total Outstanding", value: `€${paymentsData?.totalOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
+    { label: "Outstanding (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
   ];
 
   return (
