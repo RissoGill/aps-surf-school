@@ -487,6 +487,19 @@ const CoachDashboard = () => {
     return undefined;
   }, [coachData]);
 
+  const EXCLUDED_DATES_BY_COACH: Record<string, Set<string>> = {
+    T01: new Set(['2025-09-01']),
+  };
+
+  const isExcludedDateForCoach = (record?: { date?: string | null; coach_id?: string | null }) => {
+    if (!record?.date) return false;
+    const cid = String(record.coach_id ?? '').trim().toUpperCase();
+    const excluded = EXCLUDED_DATES_BY_COACH[cid];
+    if (!excluded) return false;
+    const d = String(record.date).slice(0, 10);
+    return excluded.has(d);
+  };
+
   // Calculate total training days for this coach
   const totalTrainingSessions = useMemo(() => {
     if (!athletes) return 0;
@@ -519,9 +532,9 @@ const CoachDashboard = () => {
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
-        if (coachMatchesCoach(record.coach, record.coach_id)) {
-          uniqueDates.add(record.date);
-        }
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
+        uniqueDates.add(record.date);
       }
     }
 
@@ -561,12 +574,12 @@ const CoachDashboard = () => {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
         if (record.date.slice(0, 7) === currentYm) {
           uniqueDates.add(record.date);
         }
       }
     }
-
     return uniqueDates.size;
   }, [athletes, coachData]);
 
@@ -600,6 +613,7 @@ const CoachDashboard = () => {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
         const yearMonth = record.date.slice(0, 7);
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = new Set();
@@ -645,6 +659,7 @@ const CoachDashboard = () => {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
         
         const year = record.date.slice(0, 4);
         if (!byYear[year]) {
@@ -691,6 +706,7 @@ const CoachDashboard = () => {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
         
         const yearMonth = record.date.slice(0, 7);
         if (!byMonth[yearMonth]) {
