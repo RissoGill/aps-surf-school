@@ -18,7 +18,7 @@ interface AttendanceRecord {
   Id: string;
   Date: string | null;
   status: string | null;
-  coach_id: string | null;
+  coach_name: string | null;
   praia: string | null;
   notas: string | null;
   athlete_name: string;
@@ -28,7 +28,7 @@ const AttendanceRecords = () => {
   const { data: attendanceRecords, isLoading, error } = useQuery({
     queryKey: ["attendance-records"],
     queryFn: async () => {
-      const [attendanceRes, athletesRes] = await Promise.all([
+      const [attendanceRes, athletesRes, coachesRes] = await Promise.all([
         supabase
           .from("attendance")
           .select(`
@@ -43,20 +43,32 @@ const AttendanceRecords = () => {
           .order("date", { ascending: false }),
         supabase
           .from("atletas")
-          .select("athlete_id, first_name, last_name")
+          .select("athlete_id, first_name, last_name"),
+        supabase
+          .from("coach")
+          .select("coach_id, first_name")
       ]);
 
       if (attendanceRes.error) throw attendanceRes.error;
       if (athletesRes.error) {
         console.warn("Error fetching athletes:", athletesRes.error.message);
       }
+      if (coachesRes.error) {
+        console.warn("Error fetching coaches:", coachesRes.error.message);
+      }
 
       const athletes = athletesRes.data || [];
+      const coaches = coachesRes.data || [];
+      
       const nameById = new Map(
         athletes.map((a: any) => [
           a.athlete_id,
           ("" + `${a.first_name || ""} ${a.last_name || ""}`.trim()) || "Unknown Athlete",
         ])
+      );
+      
+      const coachNameById = new Map(
+        coaches.map((c: any) => [c.coach_id, c.first_name || "Unknown Coach"])
       );
 
       // Filter: only records with status and from September 2025 onwards
@@ -72,7 +84,7 @@ const AttendanceRecords = () => {
         Id: record.id,
         Date: record.date,
         status: record.status,
-        coach_id: record.coach_id,
+        coach_name: record.coach_id ? coachNameById.get(record.coach_id) || "Unknown Coach" : "Unknown Coach",
         praia: record.beach_location,
         notas: record.notes,
         athlete_name: record.athlete_id ? nameById.get(record.athlete_id) || "Unknown Athlete" : "Unknown Athlete",
@@ -130,7 +142,7 @@ const AttendanceRecords = () => {
                           </TableCell>
                           <TableCell>{record.Date || "-"}</TableCell>
                           <TableCell>{record.status || "-"}</TableCell>
-                          <TableCell>{record.coach_id || "-"}</TableCell>
+                          <TableCell>{record.coach_name || "-"}</TableCell>
                           <TableCell>{record.praia || "-"}</TableCell>
                           <TableCell className="max-w-xs truncate">
                             {record.notas || "-"}
