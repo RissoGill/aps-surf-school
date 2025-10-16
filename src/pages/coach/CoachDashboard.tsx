@@ -545,91 +545,75 @@ const CoachDashboard = () => {
     return uniqueDates.size;
   }, [athletes, coachData]);
 
-  // Calculate training days by month
-  const trainingDaysByMonth = useMemo(() => {
+  // Calculate training days by month for each coach
+  const trainingDaysByCoachByMonth = useMemo(() => {
     if (!athletes) return {};
 
-    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
-    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
-    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
-    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
-
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
-      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
-      return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
-        (firstName && tokens.includes(firstName)) ||
-        (lastName && tokens.includes(lastName)) ||
-        (fullName && tLower === fullName)
-      );
-    };
-
-    const byMonth: Record<string, Set<string>> = {};
+    const byCoachByMonth: Record<string, Record<string, Set<string>>> = {};
+    
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
         if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
         
+        const coachName = record.coach;
         const yearMonth = record.date.slice(0, 7); // "2025-01"
-        if (!byMonth[yearMonth]) {
-          byMonth[yearMonth] = new Set();
+        
+        if (!byCoachByMonth[coachName]) {
+          byCoachByMonth[coachName] = {};
         }
-        byMonth[yearMonth].add(record.date);
+        if (!byCoachByMonth[coachName][yearMonth]) {
+          byCoachByMonth[coachName][yearMonth] = new Set();
+        }
+        byCoachByMonth[coachName][yearMonth].add(record.date);
       }
     }
 
-    // Convert to counts and sort by date descending
-    const result: Record<string, number> = {};
-    Object.keys(byMonth).sort().reverse().forEach(ym => {
-      result[ym] = byMonth[ym].size;
+    // Convert to counts
+    const result: Record<string, Record<string, number>> = {};
+    Object.entries(byCoachByMonth).forEach(([coach, monthData]) => {
+      result[coach] = {};
+      Object.keys(monthData).sort().reverse().forEach(ym => {
+        result[coach][ym] = monthData[ym].size;
+      });
     });
+    
     return result;
-  }, [athletes, coachData]);
+  }, [athletes]);
 
-  // Calculate training days by year
-  const trainingDaysByYear = useMemo(() => {
+  // Calculate training days by year for each coach
+  const trainingDaysByCoachByYear = useMemo(() => {
     if (!athletes) return {};
 
-    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
-    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
-    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
-    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
-
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
-      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
-      return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
-        (firstName && tokens.includes(firstName)) ||
-        (lastName && tokens.includes(lastName)) ||
-        (fullName && tLower === fullName)
-      );
-    };
-
-    const byYear: Record<string, Set<string>> = {};
+    const byCoachByYear: Record<string, Record<string, Set<string>>> = {};
+    
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
         if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
         
+        const coachName = record.coach;
         const year = record.date.slice(0, 4); // "2025"
-        if (!byYear[year]) {
-          byYear[year] = new Set();
+        
+        if (!byCoachByYear[coachName]) {
+          byCoachByYear[coachName] = {};
         }
-        byYear[year].add(record.date);
+        if (!byCoachByYear[coachName][year]) {
+          byCoachByYear[coachName][year] = new Set();
+        }
+        byCoachByYear[coachName][year].add(record.date);
       }
     }
 
-    // Convert to counts and sort by year descending
-    const result: Record<string, number> = {};
-    Object.keys(byYear).sort().reverse().forEach(y => {
-      result[y] = byYear[y].size;
+    // Convert to counts
+    const result: Record<string, Record<string, number>> = {};
+    Object.entries(byCoachByYear).forEach(([coach, yearData]) => {
+      result[coach] = {};
+      Object.keys(yearData).sort().reverse().forEach(y => {
+        result[coach][y] = yearData[y].size;
+      });
     });
+    
     return result;
-  }, [athletes, coachData]);
+  }, [athletes]);
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -723,56 +707,64 @@ const CoachDashboard = () => {
           </Card>
         </div>
 
-        {/* Training Days Breakdown */}
-        {!isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* By Month */}
-            <Card className="shadow-soft">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Training Days by Month</CardTitle>
-                <CardDescription>Monthly breakdown of training sessions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {Object.keys(trainingDaysByMonth).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No training data available</p>
-                ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {Object.entries(trainingDaysByMonth).map(([month, count]) => {
-                      const [year, monthNum] = month.split('-');
-                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                      return (
-                        <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                          <span className="text-sm font-medium">{monthName} {year}</span>
-                          <Badge variant="secondary">{count} days</Badge>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* By Year */}
-            <Card className="shadow-soft">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Training Days by Year</CardTitle>
-                <CardDescription>Annual breakdown of training sessions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {Object.keys(trainingDaysByYear).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No training data available</p>
-                ) : (
-                  <div className="space-y-2">
-                    {Object.entries(trainingDaysByYear).map(([year, count]) => (
-                      <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                        <span className="text-sm font-medium">{year}</span>
-                        <Badge variant="secondary">{count} days</Badge>
+        {/* Training Days Breakdown by Coach */}
+        {!isLoading && Object.keys(trainingDaysByCoachByMonth).length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-foreground mb-4">Training Days by Coach</h3>
+            <div className="space-y-6">
+              {Object.entries(trainingDaysByCoachByMonth).sort(([a], [b]) => a.localeCompare(b)).map(([coach, monthData]) => (
+                <Card key={coach} className="shadow-soft">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <User className="h-5 w-5 text-primary" />
+                      {coach}
+                    </CardTitle>
+                    <CardDescription>Training session breakdown</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Monthly breakdown */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
+                        {Object.keys(monthData).length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
+                        ) : (
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {Object.entries(monthData).map(([month, count]) => {
+                              const [year, monthNum] = month.split('-');
+                              const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                              return (
+                                <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                                  <span className="text-sm font-medium">{monthName} {year}</span>
+                                  <Badge variant="secondary">{count} days</Badge>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      
+                      {/* Yearly breakdown */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
+                        {!trainingDaysByCoachByYear[coach] || Object.keys(trainingDaysByCoachByYear[coach]).length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {Object.entries(trainingDaysByCoachByYear[coach]).map(([year, count]) => (
+                              <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                                <span className="text-sm font-medium">{year}</span>
+                                <Badge variant="secondary">{count} days</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
