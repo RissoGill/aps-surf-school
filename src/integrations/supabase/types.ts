@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      Atletas: {
+      atletas: {
         Row: {
           address: string | null
           athlete_id: string
@@ -86,51 +86,58 @@ export type Database = {
         }
         Relationships: []
       }
-      Attendance: {
+      attendance: {
         Row: {
           athlete_id: string | null
           beach_location: string | null
+          coach_id: string | null
           date: string | null
           id: string
           notes: string | null
-          photos: string[] | null
+          photos: string | null
           status: string | null
-          trainer: string | null
-          videos: string[] | null
+          videos: string | null
         }
         Insert: {
           athlete_id?: string | null
           beach_location?: string | null
+          coach_id?: string | null
           date?: string | null
           id: string
           notes?: string | null
-          photos?: string[] | null
+          photos?: string | null
           status?: string | null
-          trainer?: string | null
-          videos?: string[] | null
+          videos?: string | null
         }
         Update: {
           athlete_id?: string | null
           beach_location?: string | null
+          coach_id?: string | null
           date?: string | null
           id?: string
           notes?: string | null
-          photos?: string[] | null
+          photos?: string | null
           status?: string | null
-          trainer?: string | null
-          videos?: string[] | null
+          videos?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "Attendance_athlete_id_fkey"
+            foreignKeyName: "attendance_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "Atletas"
+            referencedRelation: "atletas"
             referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "attendance_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach"
+            referencedColumns: ["coach_id"]
           },
         ]
       }
-      Campeonatos: {
+      campeonatos: {
         Row: {
           categoria: string | null
           data_fim: string | null
@@ -181,19 +188,19 @@ export type Database = {
             foreignKeyName: "campeonatos_atletas_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "Atletas"
+            referencedRelation: "atletas"
             referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "campeonatos_atletas_campeonato_id_fkey"
             columns: ["campeonato_id"]
             isOneToOne: false
-            referencedRelation: "Campeonatos"
+            referencedRelation: "campeonatos"
             referencedColumns: ["id"]
           },
         ]
       }
-      Coach: {
+      coach: {
         Row: {
           auth_uid: string | null
           coach_id: string
@@ -220,7 +227,7 @@ export type Database = {
         }
         Relationships: []
       }
-      Estagio: {
+      estagio: {
         Row: {
           data_fim: string | null
           data_inicio: string | null
@@ -265,19 +272,19 @@ export type Database = {
             foreignKeyName: "estagio_atletas_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "Atletas"
+            referencedRelation: "atletas"
             referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "estagio_atletas_estagios_id_fkey"
             columns: ["estagios_id"]
             isOneToOne: false
-            referencedRelation: "Estagio"
+            referencedRelation: "estagio"
             referencedColumns: ["id"]
           },
         ]
       }
-      Payments: {
+      payments: {
         Row: {
           amount_due: number | null
           amount_paid: number | null
@@ -313,12 +320,12 @@ export type Database = {
             foreignKeyName: "Payments_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
-            referencedRelation: "Atletas"
+            referencedRelation: "atletas"
             referencedColumns: ["athlete_id"]
           },
         ]
       }
-      Users: {
+      users: {
         Row: {
           athlete_id: string | null
           athlete_password: string | null
