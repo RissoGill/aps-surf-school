@@ -15,7 +15,7 @@ const AdministrationDashboard = () => {
   const navigate = useNavigate();
 
   // Fetch athletes with attendance data
-  const { data: athletes, isLoading } = useQuery({
+  const { data: queryData, isLoading } = useQuery({
     queryKey: ['admin-athletes-attendance'],
     queryFn: async () => {
       const [athletesRes, coachesRes] = await Promise.all([
@@ -92,9 +92,15 @@ const AdministrationDashboard = () => {
         return { ...athlete, attendance: list };
       });
 
-      return athletesWithAttendance;
+      return {
+        athletes: athletesWithAttendance,
+        coachesCount: coachesRes.data?.length || 0
+      };
     },
   });
+
+  const athletes = queryData?.athletes;
+  const coachesCount = queryData?.coachesCount || 0;
 
   // Calculate training days by coach by month
   const trainingDaysByCoachByMonth = useMemo(() => {
@@ -197,7 +203,7 @@ const AdministrationDashboard = () => {
 
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
-    { label: "Active Coaches", value: "6", color: "success" },
+    { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
     { label: "Outstanding Payments", value: "$2,340", color: "destructive" },
     { label: "This Month Sessions", value: "156", color: "warning" }
   ];
