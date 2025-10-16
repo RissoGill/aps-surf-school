@@ -30,6 +30,7 @@ interface AttendanceRecord {
   date: string | null;
   status: string | null;
   coach: string | null;
+  coach_id?: string | null;
   beach_location: string | null;
   notes: string | null;
   athlete_id: string | null;
@@ -180,6 +181,18 @@ const CoachDashboard = () => {
           queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'attendance'
+        },
+        () => {
+          // Invalidate and refetch when attendance is deleted
+          queryClient.invalidateQueries({ queryKey: ['athletes-with-attendance'] });
+        }
+      )
       .subscribe();
 
     return () => {
@@ -282,6 +295,7 @@ const CoachDashboard = () => {
           date: att.date,
           status: att.status,
           coach: att?.coach_id ? (coachNameById[String(att.coach_id).trim().toLowerCase()] || "Unknown Coach") : null,
+          coach_id: att?.coach_id ?? null,
           beach_location: att?.beach_location ?? null,
           notes: att?.notes ?? null,
           athlete_id: att?.athlete_id ?? null,
@@ -482,12 +496,19 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      // Prefer strict coach_id match when available
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      // Fallback to name matching
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tUpper = coach.toUpperCase();
+      const tLower = coach.toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
         (firstName && tokens.includes(firstName)) ||
         (lastName && tokens.includes(lastName)) ||
         (fullName && tLower === fullName)
@@ -497,8 +518,8 @@ const CoachDashboard = () => {
     const uniqueDates = new Set<string>();
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.coach || !record.date) continue;
-        if (coachMatchesCoach(record.coach)) {
+        if (!record.date) continue;
+        if (coachMatchesCoach(record.coach, record.coach_id)) {
           uniqueDates.add(record.date);
         }
       }
@@ -516,12 +537,16 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tLower = coach.toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
         (firstName && tokens.includes(firstName)) ||
         (lastName && tokens.includes(lastName)) ||
         (fullName && tLower === fullName)
@@ -534,8 +559,8 @@ const CoachDashboard = () => {
     const uniqueDates = new Set<string>();
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
-        if (!record.coach || !record.date) continue;
-        if (!coachMatchesCoach(record.coach)) continue;
+        if (!record.date) continue;
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         if (record.date.slice(0, 7) === currentYm) {
           uniqueDates.add(record.date);
         }
@@ -554,12 +579,16 @@ const CoachDashboard = () => {
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
 
-    const coachMatchesCoach = (coach: string) => {
-      const tUpper = coach.trim().toUpperCase();
-      const tLower = coach.trim().toLowerCase();
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tLower = coach.toLowerCase();
       const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
       return (
-        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
         (firstName && tokens.includes(firstName)) ||
         (lastName && tokens.includes(lastName)) ||
         (fullName && tLower === fullName)
