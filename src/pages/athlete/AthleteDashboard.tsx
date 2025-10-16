@@ -307,35 +307,41 @@ const AthleteDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="w-full bg-muted/50 p-1 flex gap-1">
+          <TabsList className="w-full h-auto flex flex-wrap justify-start gap-1 bg-muted/50 p-2 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="flex-1 data-[state=active]:bg-view data-[state=active]:text-view-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
+              <User className="h-3 w-3 mr-1 inline sm:hidden" />
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
+              <Clock className="h-3 w-3 mr-1 inline sm:hidden" />
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="flex-1 data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
+              <Calendar className="h-3 w-3 mr-1 inline sm:hidden" />
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="flex-1 data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
-              Champs
+              <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
+              <span className="hidden sm:inline">Championships</span>
+              <span className="sm:hidden">Champs</span>
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="flex-1 data-[state=active]:bg-success data-[state=active]:text-success-foreground text-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
+              <ImageIcon className="h-3 w-3 mr-1 inline sm:hidden" />
               Media
             </TabsTrigger>
           </TabsList>
