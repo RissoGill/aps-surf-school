@@ -196,7 +196,7 @@ const AdministrationDashboard = () => {
   ];
 
   const quickStats = [
-    { label: "Total Athletes", value: "48", color: "primary" },
+    { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: "6", color: "success" },
     { label: "Outstanding Payments", value: "$2,340", color: "destructive" },
     { label: "This Month Sessions", value: "156", color: "warning" }
