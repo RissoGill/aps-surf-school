@@ -96,7 +96,7 @@ const AthletesList = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-xl font-bold truncate">
+                      <CardTitle className="text-2xl font-bold truncate">
                         {athlete.first_name} {athlete.last_name}
                       </CardTitle>
                       {athlete.surf_level && (

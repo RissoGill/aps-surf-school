@@ -296,31 +296,31 @@ const AthleteDashboard = () => {
           <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-sm sm:text-base font-semibold px-2"
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm sm:text-base font-semibold px-2"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-sm sm:text-base font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-sm sm:text-base font-semibold px-2"
+              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Championships
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-sm sm:text-base font-semibold px-2"
+              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Media
             </TabsTrigger>
@@ -330,7 +330,7 @@ const AthleteDashboard = () => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="text-xl font-bold">Personal Information</CardTitle>
+                <CardTitle className="text-2xl font-bold">Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -370,7 +370,7 @@ const AthleteDashboard = () => {
 
             <Card className="shadow-soft border-l-4 border-l-success">
               <CardHeader className="bg-success/5">
-                <CardTitle className="text-xl font-bold">Emergency Contacts</CardTitle>
+                <CardTitle className="text-2xl font-bold">Emergency Contacts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -411,7 +411,7 @@ const AthleteDashboard = () => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
                   <Calendar className="h-6 w-6 text-primary" />
                   Training Schedule
                 </CardTitle>

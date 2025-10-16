@@ -60,7 +60,7 @@ const AdministrationDashboard = () => {
                 <Settings className="h-8 w-8 text-secondary-foreground" />
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Admin Dashboard</h2>
-              <p className="text-base text-muted-foreground font-medium">Complete school management access</p>
+              <p className="text-muted-foreground">Complete school management access</p>
             </div>
           </CardContent>
         </Card>
@@ -79,7 +79,7 @@ const AdministrationDashboard = () => {
 
         {/* Admin Actions */}
         <div className="space-y-4">
-          <h3 className="text-xl font-bold text-foreground mb-4">Management Tools</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-4">Management Tools</h3>
           
           {adminActions.map((action, index) => (
             <Card 
@@ -128,7 +128,7 @@ const AdministrationDashboard = () => {
         {/* Recent Activity */}
         <Card className="shadow-soft mt-6">
           <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
+            <CardTitle className="text-2xl font-bold">Recent Activity</CardTitle>
             <CardDescription>Latest system changes and updates</CardDescription>
           </CardHeader>
           <CardContent>

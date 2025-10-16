@@ -91,7 +91,7 @@ const AttendanceRecords = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Attendance Records</CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription>
               View all attendance records with athlete information (from September 2025 onwards)
             </CardDescription>
           </CardHeader>

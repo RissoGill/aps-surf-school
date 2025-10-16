@@ -99,7 +99,7 @@ const UserManagement = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-foreground">Users</h2>
-            <p className="text-base text-muted-foreground font-medium">{filteredUsers.length} total users</p>
+            <p className="text-muted-foreground">{filteredUsers.length} total users</p>
           </div>
           
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

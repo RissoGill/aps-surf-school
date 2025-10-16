@@ -136,7 +136,7 @@ const PaymentManagement = () => {
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-foreground">Payments</h2>
-          <p className="text-base text-muted-foreground font-medium">{filteredPayments.length} payment records</p>
+          <p className="text-muted-foreground">{filteredPayments.length} payment records</p>
         </div>
 
         {/* Search and Filter */}
@@ -194,8 +194,8 @@ const PaymentManagement = () => {
         {/* Payments List */}
         <Card className="shadow-medium">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+              <CreditCard className="h-6 w-6" />
               Payment Records
             </CardTitle>
             <CardDescription>Manage monthly payments and track status</CardDescription>
