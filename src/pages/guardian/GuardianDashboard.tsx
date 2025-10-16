@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download } from "lucide-react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download, Trophy, Plane } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -348,6 +348,184 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
+  const { data: championships = [], isLoading } = useQuery({
+    queryKey: ['guardian-championships', athleteId],
+    queryFn: async () => {
+      // Get championship registrations for this athlete
+      const { data: registrations, error: regError } = await supabase
+        .from('campeonatos_atletas')
+        .select('campeonato_id')
+        .eq('athlete_id', athleteId);
+      
+      if (regError) throw regError;
+      if (!registrations || registrations.length === 0) return [];
+      
+      const championshipIds = registrations.map(r => r.campeonato_id);
+      
+      // Get championship details
+      const { data, error } = await supabase
+        .from('campeonatos')
+        .select('*')
+        .in('id', championshipIds)
+        .order('data_inicio', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  return (
+    <Card className="shadow-soft">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+          <Trophy className="h-6 w-6" />
+          Championships
+        </CardTitle>
+        <CardDescription>Registered championships and competitions</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          </div>
+        ) : championships.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No championship registrations found
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {championships.map((championship: any) => (
+              <div key={championship.id} className="border border-border rounded-lg p-4">
+                <h3 className="font-semibold text-lg mb-2">{championship.nome_campeonato}</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {championship.categoria && (
+                    <div>
+                      <span className="text-muted-foreground">Category:</span>
+                      <p className="font-medium">{championship.categoria}</p>
+                    </div>
+                  )}
+                  {championship.gender && (
+                    <div>
+                      <span className="text-muted-foreground">Gender:</span>
+                      <p className="font-medium">{championship.gender}</p>
+                    </div>
+                  )}
+                  {championship.local && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Location:</span>
+                      <p className="font-medium">{championship.local}</p>
+                    </div>
+                  )}
+                  {championship.data_inicio && (
+                    <div>
+                      <span className="text-muted-foreground">Start:</span>
+                      <p className="font-medium">
+                        {new Date(championship.data_inicio).toLocaleDateString('pt-PT')}
+                      </p>
+                    </div>
+                  )}
+                  {championship.data_fim && (
+                    <div>
+                      <span className="text-muted-foreground">End:</span>
+                      <p className="font-medium">
+                        {new Date(championship.data_fim).toLocaleDateString('pt-PT')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
+  const { data: estagios = [], isLoading } = useQuery({
+    queryKey: ['guardian-estagios', athleteId],
+    queryFn: async () => {
+      // Get estagio registrations for this athlete
+      const { data: registrations, error: regError } = await supabase
+        .from('estagio_atletas')
+        .select('estagios_id')
+        .eq('athlete_id', athleteId);
+      
+      if (regError) throw regError;
+      if (!registrations || registrations.length === 0) return [];
+      
+      const estagioIds = registrations.map(r => r.estagios_id);
+      
+      // Get estagio details
+      const { data, error } = await supabase
+        .from('estagio')
+        .select('*')
+        .in('id', estagioIds)
+        .order('data_inicio', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  return (
+    <Card className="shadow-soft">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+          <Plane className="h-6 w-6" />
+          Estágios
+        </CardTitle>
+        <CardDescription>Training camps and internships</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          </div>
+        ) : estagios.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No estágios registrations found
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {estagios.map((estagio: any) => (
+              <div key={estagio.id} className="border border-border rounded-lg p-4">
+                <h3 className="font-semibold text-lg mb-2">{estagio.nome_estagio}</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {estagio.local && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Location:</span>
+                      <p className="font-medium">{estagio.local}</p>
+                    </div>
+                  )}
+                  {estagio.data_inicio && (
+                    <div>
+                      <span className="text-muted-foreground">Start:</span>
+                      <p className="font-medium">
+                        {new Date(estagio.data_inicio).toLocaleDateString('pt-PT')}
+                      </p>
+                    </div>
+                  )}
+                  {estagio.data_fim && (
+                    <div>
+                      <span className="text-muted-foreground">End:</span>
+                      <p className="font-medium">
+                        {new Date(estagio.data_fim).toLocaleDateString('pt-PT')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
@@ -782,7 +960,7 @@ const GuardianDashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger 
               value="overview" 
               className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm font-semibold px-2"
@@ -806,6 +984,18 @@ const GuardianDashboard = () => {
               className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs sm:text-sm font-semibold px-2"
             >
               Media
+            </TabsTrigger>
+            <TabsTrigger 
+              value="championships" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm font-semibold px-2"
+            >
+              Championships
+            </TabsTrigger>
+            <TabsTrigger 
+              value="estagios" 
+              className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground text-xs sm:text-sm font-semibold px-2"
+            >
+              Estágios
             </TabsTrigger>
           </TabsList>
 
@@ -978,6 +1168,16 @@ const GuardianDashboard = () => {
           {/* Media Tab */}
           <TabsContent value="media">
             {athlete && <MediaTab athleteId={athlete.athlete_id} />}
+          </TabsContent>
+
+          {/* Championships Tab */}
+          <TabsContent value="championships">
+            {athlete && <ChampionshipsTab athleteId={athlete.athlete_id} />}
+          </TabsContent>
+
+          {/* Estágios Tab */}
+          <TabsContent value="estagios">
+            {athlete && <EstagiosTab athleteId={athlete.athlete_id} />}
           </TabsContent>
         </Tabs>
       </main>
