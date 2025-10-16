@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -629,6 +629,64 @@ const CoachDashboard = () => {
     return result;
   }, [athletes, coachData]);
 
+  // Track individual dates by month for dropdown
+  const trainingDatesByMonth = useMemo(() => {
+    if (!athletes || !coachData) return {};
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const coachMatchesCoach = (coach: string) => {
+      const tUpper = coach.trim().toUpperCase();
+      const tLower = coach.trim().toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (coachId && (tUpper === coachId || tUpper.includes(coachId))) ||
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
+    const byMonth: Record<string, string[]> = {};
+    for (const athlete of athletes) {
+      for (const record of athlete.attendance) {
+        if (!record.coach || !record.date) continue;
+        if (!coachMatchesCoach(record.coach)) continue;
+        
+        const yearMonth = record.date.slice(0, 7);
+        if (!byMonth[yearMonth]) {
+          byMonth[yearMonth] = [];
+        }
+        if (!byMonth[yearMonth].includes(record.date)) {
+          byMonth[yearMonth].push(record.date);
+        }
+      }
+    }
+
+    // Sort dates within each month
+    Object.keys(byMonth).forEach(ym => {
+      byMonth[ym].sort().reverse();
+    });
+
+    return byMonth;
+  }, [athletes, coachData]);
+
+  // State for expanded months
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+
+  const toggleMonth = (month: string) => {
+    const newExpanded = new Set(expandedMonths);
+    if (newExpanded.has(month)) {
+      newExpanded.delete(month);
+    } else {
+      newExpanded.add(month);
+    }
+    setExpandedMonths(newExpanded);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Coach Dashboard" showBack backTo="/" />
@@ -729,10 +787,47 @@ const CoachDashboard = () => {
                       {Object.entries(trainingDaysByMonth).map(([month, count]) => {
                         const [year, monthNum] = month.split('-');
                         const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                        const isExpanded = expandedMonths.has(month);
+                        const dates = trainingDatesByMonth[month] || [];
+                        
                         return (
-                          <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                            <span className="text-sm font-medium">{monthName} {year}</span>
-                            <Badge variant="secondary">{count} days</Badge>
+                          <div key={month} className="border border-border rounded-lg overflow-hidden">
+                            <button
+                              onClick={() => toggleMonth(month)}
+                              className="w-full flex items-center justify-between py-2 px-3 hover:bg-accent transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="text-sm font-medium">{monthName} {year}</span>
+                              </div>
+                              <Badge variant="secondary">{count} days</Badge>
+                            </button>
+                            
+                            {isExpanded && (
+                              <div className="bg-muted/30 px-3 py-2 border-t border-border">
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                  {dates.map((date) => {
+                                    const dateObj = new Date(date);
+                                    const dayName = dateObj.toLocaleDateString('default', { weekday: 'short' });
+                                    const dayNum = dateObj.getDate();
+                                    return (
+                                      <div
+                                        key={date}
+                                        className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
+                                      >
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{dayName}, {dayNum}</span>
+                                        <span className="ml-auto text-xs opacity-70">{date}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
