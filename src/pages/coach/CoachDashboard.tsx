@@ -327,8 +327,8 @@ const CoachDashboard = () => {
     },
   });
 
-  const handleSaveAttendance = async () => {
-    if (!selectedAthleteId || !newAttendance.status) {
+  const handleSaveAttendance = async (athleteId: string) => {
+    if (!athleteId || !newAttendance.status) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -347,7 +347,7 @@ const CoachDashboard = () => {
       // Upload photos
       for (const photo of uploadedPhotos) {
         const fileExt = photo.name.split('.').pop();
-        const fileName = `${selectedAthleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
+        const fileName = `${athleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('attendance-media')
           .upload(fileName, photo);
@@ -364,7 +364,7 @@ const CoachDashboard = () => {
       // Upload videos
       for (const video of uploadedVideos) {
         const fileExt = video.name.split('.').pop();
-        const fileName = `${selectedAthleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
+        const fileName = `${athleteId}/${Date.now()}-${Math.random()}.${fileExt}`;
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('attendance-media')
           .upload(fileName, video);
@@ -382,8 +382,8 @@ const CoachDashboard = () => {
       const { error } = await supabase
         .from('attendance')
         .insert({
-          id: `${selectedAthleteId}-${newAttendance.date}-${Date.now()}`,
-          athlete_id: selectedAthleteId,
+          id: `${athleteId}-${newAttendance.date}-${Date.now()}`,
+          athlete_id: athleteId,
           date: newAttendance.date,
           status: newAttendance.status,
           coach_id: coachData?.coach_id || null,
@@ -1158,7 +1158,7 @@ const CoachDashboard = () => {
                             <Button 
                               onClick={() => {
                                 setSelectedAthleteId(athlete.athlete_id);
-                                handleSaveAttendance();
+                                handleSaveAttendance(athlete.athlete_id);
                               }} 
                               className="w-full" 
                               disabled={isUploading}
