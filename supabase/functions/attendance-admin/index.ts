@@ -11,9 +11,9 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 });
 
 const corsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "POST,GET,PATCH,DELETE,OPTIONS",
-  "access-control-allow-headers": "content-type, authorization",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST,GET,PATCH,DELETE,OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
@@ -23,6 +23,7 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
+    console.log('attendance-admin call', { method: req.method, path: url.pathname });
 
     if (req.method === "PATCH") {
       const { id, updates } = await req.json();

@@ -1,1 +1,4 @@
 project_id = "bzzzecvzoahauqrhkvds"
+
+[functions.attendance-admin]
+verify_jwt = false
