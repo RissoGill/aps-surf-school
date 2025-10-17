@@ -38,6 +38,58 @@ serve(async (req) => {
         if (key in updates) cleanUpdates[key] = updates[key];
       }
 
+      const newId = (cleanUpdates as any).id as string | undefined;
+      const hasIdChange = !!newId && newId !== id;
+
+      if (hasIdChange) {
+        const { id: _omitId, ...nonIdUpdates } = cleanUpdates as any;
+        console.log("Attempting ID change", { from: id, to: newId, nonIdUpdates });
+
+        // Check if target ID already exists
+        const { data: target, error: selErr } = await supabase
+          .from("attendance")
+          .select("id")
+          .eq("id", newId)
+          .maybeSingle();
+        if (selErr) {
+          console.error("Select target error:", selErr);
+          return new Response(JSON.stringify({ error: selErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+        }
+
+        if (target) {
+          // Merge: update existing target row, then delete old row
+          const { error: updTargetErr } = await supabase
+            .from("attendance")
+            .update(nonIdUpdates)
+            .eq("id", newId);
+          if (updTargetErr) {
+            console.error("Update target error:", updTargetErr);
+            return new Response(JSON.stringify({ error: updTargetErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+          }
+          const { error: delErr } = await supabase
+            .from("attendance")
+            .delete()
+            .eq("id", id);
+          if (delErr) {
+            console.error("Delete old error:", delErr);
+            return new Response(JSON.stringify({ error: delErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+          }
+          return new Response(JSON.stringify({ success: true, merged: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
+        } else {
+          // Safe to update primary key and other fields in place
+          const { error: updErr } = await supabase
+            .from("attendance")
+            .update(cleanUpdates)
+            .eq("id", id);
+          if (updErr) {
+            console.error("Update (id change) error:", updErr);
+            return new Response(JSON.stringify({ error: updErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+          }
+          return new Response(JSON.stringify({ success: true, moved: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
+        }
+      }
+
+      // Simple update without ID change
       const { error } = await supabase
         .from("attendance")
         .update(cleanUpdates)
