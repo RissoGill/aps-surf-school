@@ -337,6 +337,15 @@ const CoachDashboard = () => {
       return;
     }
 
+    if (!coachData?.coach_id) {
+      toast({
+        title: "Error",
+        description: "Coach profile not loaded. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUploading(true);
 
     try {
