@@ -27,15 +27,11 @@ const AdministrationDashboard = () => {
       const allPayments = data || [];
       
       // Filter for October 2025 payments
-      const octoberPayments = allPayments.filter((payment: any) => {
-        const isOctober2025 = payment.month === 'October' && payment.year === 2025;
-        const hasPaymentDateInOctober = payment.payment_date && 
-          new Date(payment.payment_date).getMonth() === 9 && 
-          new Date(payment.payment_date).getFullYear() === 2025;
-        return isOctober2025 || hasPaymentDateInOctober;
-      });
+      const octoberPayments = allPayments.filter((payment: any) => 
+        payment.month === 'October' && payment.year === 2025
+      );
       
-      // October paid sum
+      // October paid sum - sum all amount_paid for October
       const octoberPaid = octoberPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
