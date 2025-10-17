@@ -348,6 +348,7 @@ export type Database = {
       }
       users: {
         Row: {
+          admin_id: string | null
           athlete_id: string | null
           athlete_password: string | null
           athlete_role: string | null
@@ -358,6 +359,7 @@ export type Database = {
           id: number
         }
         Insert: {
+          admin_id?: string | null
           athlete_id?: string | null
           athlete_password?: string | null
           athlete_role?: string | null
@@ -368,6 +370,7 @@ export type Database = {
           id: number
         }
         Update: {
+          admin_id?: string | null
           athlete_id?: string | null
           athlete_password?: string | null
           athlete_role?: string | null
