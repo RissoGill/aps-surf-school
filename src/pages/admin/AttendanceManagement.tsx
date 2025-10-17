@@ -89,14 +89,17 @@ const AttendanceManagement = () => {
         ])
       );
 
-      // Map records with coach names
-      const records = (attendanceRes.data || []).map(record => {
-        const coachKey = String(record.coach_id || '').trim().toUpperCase();
-        return {
-          ...record,
-          coach_name: record.coach_id ? (coachMap.get(coachKey) || `Coach ${record.coach_id}`) : 'Not assigned'
-        } as AttendanceRecord;
-      });
+      // Map records with coach names and filter by valid statuses
+      const validStatuses = ['Present', 'Absent', 'Justified'];
+      const records = (attendanceRes.data || [])
+        .filter(record => record.status && validStatuses.includes(record.status))
+        .map(record => {
+          const coachKey = String(record.coach_id || '').trim().toUpperCase();
+          return {
+            ...record,
+            coach_name: record.coach_id ? (coachMap.get(coachKey) || `Coach ${record.coach_id}`) : 'Not assigned'
+          } as AttendanceRecord;
+        });
 
       return records;
     },
