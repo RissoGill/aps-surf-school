@@ -10,6 +10,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
+import { AdminAttendanceManagement } from "@/components/admin/AdminAttendanceManagement";
 import { AttendanceManagementCard } from "@/components/admin/AttendanceManagementCard";
 
 const AdministrationDashboard = () => {
@@ -359,6 +360,11 @@ const AdministrationDashboard = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Attendance Management */}
+        <div className="mt-6">
+          <AdminAttendanceManagement />
         </div>
 
         {/* Recent Activity */}
