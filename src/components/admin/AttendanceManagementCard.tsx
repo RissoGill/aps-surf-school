@@ -68,17 +68,18 @@ export function AttendanceManagementCard() {
         ])
       );
 
-      const fromSeptember = (attendanceRes.data || []).filter(r => r?.date && new Date(r.date) >= new Date('2025-09-01'));
-
-      return fromSeptember.map(record => {
+      // Map all records (no date/status filtering)
+      const allRecords = (attendanceRes.data || []).map(record => {
         const athleteKey = String(record.athlete_id || '').trim().toUpperCase();
         const coachKey = String(record.coach_id || '').trim().toUpperCase();
-        return ({
+        return {
           ...record,
           athlete_name: athleteMap.get(athleteKey) || record.athlete_id || 'Unknown',
           coach_name: record.coach_id ? (coachMap.get(coachKey) || `Coach ${record.coach_id}`) : 'Not assigned'
-        });
+        } as any;
       });
+
+      return allRecords;
     }
   });
 
@@ -190,7 +191,7 @@ export function AttendanceManagementCard() {
                 <TableBody>
                   {attendanceRecords.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{record.date ? new Date(record.date).toLocaleDateString() : '-'}</TableCell>
                       <TableCell>{record.athlete_name}</TableCell>
                       <TableCell>{record.coach_name || '-'}</TableCell>
                       <TableCell>
