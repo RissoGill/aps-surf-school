@@ -123,25 +123,27 @@ const AdministrationDashboard = () => {
         attendanceData = results.flatMap((r: any) => r.data || []);
       }
 
-      // Build coach name map
+      // Build coach name map (case-insensitive)
       const coachNameById: Record<string, string> = {};
       (coachesRes.data || []).forEach((c: any) => {
-        const key = String(c?.coach_id || '').trim().toLowerCase();
-        if (!key) return;
+        if (!c?.coach_id) return;
+        const key = String(c.coach_id).trim().toLowerCase();
         const full = [c?.first_name, c?.last_name].filter(Boolean).join(' ').trim();
         coachNameById[key] = full || c?.first_name || 'Unknown Coach';
       });
+      
+      console.log('Coach name map:', coachNameById);
 
-      // Filter attendance: valid status and from Sept 2025
-      const validStatuses = new Set(['present', 'absent', 'justified']);
+      // Filter attendance: from Sept 2025 onwards (removed status filter to include incomplete records)
       const filteredAttendance = (attendanceData || []).filter((att: any) => {
         if (!att?.date) return false;
-        const status = typeof att?.status === 'string' ? att.status.trim().toLowerCase() : '';
-        if (!validStatuses.has(status)) return false;
         const recordDate = new Date(att.date);
         const septemberCutoff = new Date('2025-09-01');
         return recordDate >= septemberCutoff;
       });
+
+      console.log('Filtered attendance from Sept 2025:', filteredAttendance.length);
+      console.log('October 2025 records:', filteredAttendance.filter((a: any) => a.date?.startsWith('2025-10')).length);
 
       // Group attendance by athlete
       const attendanceByAthlete: Record<string, any[]> = {};
@@ -152,7 +154,9 @@ const AdministrationDashboard = () => {
           id: att.id,
           date: att.date,
           status: att.status,
-          coach: att?.coach_id ? (coachNameById[String(att.coach_id).trim().toLowerCase()] || "Unknown Coach") : null,
+          coach: att?.coach_id 
+            ? (coachNameById[String(att.coach_id).trim().toLowerCase()] || `Coach ${att.coach_id}`) 
+            : 'Not Assigned',
           beach_location: att?.beach_location ?? null,
           notes: att?.notes ?? null,
           athlete_id: att?.athlete_id ?? null,
