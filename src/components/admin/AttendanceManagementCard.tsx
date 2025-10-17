@@ -106,8 +106,13 @@ export function AttendanceManagementCard() {
       
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-attendance-records'] });
+      // Invalidate athlete dashboard cache
+      if (selectedRecord?.athlete_id) {
+        queryClient.invalidateQueries({ queryKey: ['attendance', selectedRecord.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['athlete-attendance', selectedRecord.athlete_id] });
+      }
       toast({ title: "Success", description: "Attendance record updated successfully" });
       setEditDialogOpen(false);
     },
@@ -132,6 +137,11 @@ export function AttendanceManagementCard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-attendance-records'] });
+      // Invalidate athlete dashboard cache
+      if (selectedRecord?.athlete_id) {
+        queryClient.invalidateQueries({ queryKey: ['attendance', selectedRecord.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['athlete-attendance', selectedRecord.athlete_id] });
+      }
       toast({ title: "Success", description: "Attendance record deleted successfully" });
       setDeleteDialogOpen(false);
     },
