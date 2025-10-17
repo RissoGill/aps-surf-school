@@ -24,51 +24,65 @@ interface Payment {
   athlete_name?: string;
 }
 
+interface Athlete {
+  athlete_id: string;
+  first_name: string;
+  last_name: string;
+}
+
 const PaymentManagement = () => {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
 
-  // Fetch payments with athlete names
-  const { data: payments = [], isLoading } = useQuery({
-    queryKey: ['admin-payments'],
+  // Fetch all athletes for search
+  const { data: athletes } = useQuery({
+    queryKey: ['athletes-search'],
     queryFn: async () => {
-      const [paymentsRes, athletesRes] = await Promise.all([
-        supabase
-          .from('payments')
-          .select('*')
-          .order('year', { ascending: false })
-          .order('month', { ascending: false }),
-        supabase
-          .from('atletas')
-          .select('athlete_id, first_name, last_name')
-      ]);
-
-      if (paymentsRes.error) throw paymentsRes.error;
-      if (athletesRes.error) throw athletesRes.error;
-
-      // Create athlete name map
-      const athleteMap = new Map(
-        (athletesRes.data || []).map(a => [
-          String(a.athlete_id || '').trim().toUpperCase(),
-          `${a.first_name || ''} ${a.last_name || ''}`.trim()
-        ])
-      );
-
-      // Map payments with athlete names
-      return (paymentsRes.data || []).map(payment => {
-        const athleteKey = String(payment.athlete_id || '').trim().toUpperCase();
-        return {
-          ...payment,
-          athlete_name: athleteMap.get(athleteKey) || payment.athlete_id || 'Unknown'
-        } as Payment;
-      });
+      const { data, error } = await supabase
+        .from('atletas')
+        .select('athlete_id, first_name, last_name')
+        .order('first_name');
+      
+      if (error) throw error;
+      return data as Athlete[];
     }
   });
 
-  // Filter payments by search query
-  const filteredPayments = payments.filter(payment =>
-    payment.athlete_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch payments for selected athlete
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ['athlete-payments', selectedAthlete?.athlete_id],
+    queryFn: async () => {
+      if (!selectedAthlete) return [];
+
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('athlete_id', selectedAthlete.athlete_id)
+        .order('year', { ascending: false })
+        .order('month', { ascending: false });
+
+      if (error) throw error;
+
+      return (data || []).map(payment => ({
+        ...payment,
+        athlete_name: `${selectedAthlete.first_name} ${selectedAthlete.last_name}`
+      })) as Payment[];
+    },
+    enabled: !!selectedAthlete
+  });
+
+  // Filter athletes based on search
+  const filteredAthletes = athletes?.filter(athlete => 
+    `${athlete.first_name} ${athlete.last_name}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const handleAthleteSelect = (athlete: Athlete) => {
+    setSelectedAthlete(athlete);
+    setSearchTerm(`${athlete.first_name} ${athlete.last_name}`);
+  };
 
   // Calculate payment status
   const getPaymentStatus = (payment: Payment) => {
@@ -84,7 +98,7 @@ const PaymentManagement = () => {
     }
   };
 
-  // Calculate summary statistics
+  // Calculate summary statistics for selected athlete
   const totalPaid = payments
     .reduce((sum, p) => sum + (p.amount_paid || 0), 0);
 
@@ -100,109 +114,158 @@ const PaymentManagement = () => {
       <main className="mobile-container py-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Payments</h2>
-          <p className="text-muted-foreground">{filteredPayments.length} payment records</p>
+          <h2 className="text-2xl font-bold text-foreground">Payment Management</h2>
+          <p className="text-muted-foreground">Search for an athlete to view their payments</p>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by athlete name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 touch-friendly"
-            />
-          </div>
-        </div>
-
-        {/* Financial Summary Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <DollarSign className="h-6 w-6 text-success mx-auto mb-2" />
-              <p className="text-lg font-bold text-foreground">€{totalPaid.toFixed(2)}</p>
-              <p className="text-xs text-muted-foreground">Total Paid</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-              <p className="text-lg font-bold text-foreground">€{totalOutstanding.toFixed(2)}</p>
-              <p className="text-xs text-muted-foreground">Outstanding</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-soft col-span-2">
-            <CardContent className="p-4 text-center">
-              <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-xl font-bold text-foreground">€{totalDue.toFixed(2)}</p>
-              <p className="text-sm text-muted-foreground">Total Amount Due</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Payments Table */}
-        <Card className="shadow-medium">
+        <Card className="shadow-soft mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-              <CreditCard className="h-6 w-6" />
-              Payment Records
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              <CreditCard className="h-6 w-6 text-primary" />
+              Athlete Payment Search
             </CardTitle>
-            <CardDescription>View and manage athlete payments</CardDescription>
+            <CardDescription>Search for an athlete to view and manage their payment records</CardDescription>
           </CardHeader>
-          
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading payments...</div>
-            ) : filteredPayments.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No payments found</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Athlete</TableHead>
-                      <TableHead>Period</TableHead>
-                      <TableHead>Amount Due</TableHead>
-                      <TableHead>Amount Paid</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredPayments.map((payment) => {
-                      const status = getPaymentStatus(payment);
-                      const StatusIcon = status.icon;
-                      
-                      return (
-                        <TableRow key={payment.payment_id}>
-                          <TableCell className="font-medium">{payment.athlete_name}</TableCell>
-                          <TableCell>{payment.month} {payment.year}</TableCell>
-                          <TableCell>€{(payment.amount_due || 0).toFixed(2)}</TableCell>
-                          <TableCell>€{(payment.amount_paid || 0).toFixed(2)}</TableCell>
-                          <TableCell>
-                            <Badge className={status.color}>
-                              <StatusIcon className="h-3 w-3 mr-1" />
-                              {status.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {payment.payment_date 
-                              ? new Date(payment.payment_date).toLocaleDateString()
-                              : '-'}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+          <CardContent className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search athlete by name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 touch-friendly"
+              />
+              
+              {/* Search Results Dropdown */}
+              {searchTerm && !selectedAthlete && filteredAthletes.length > 0 && (
+                <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+                  <CardContent className="p-2">
+                    {filteredAthletes.map((athlete) => (
+                      <Button
+                        key={athlete.athlete_id}
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => handleAthleteSelect(athlete)}
+                      >
+                        {athlete.first_name} {athlete.last_name}
+                      </Button>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Clear Selection */}
+            {selectedAthlete && (
+              <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
+                <div>
+                  <p className="font-medium">Selected Athlete:</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedAthlete.first_name} {selectedAthlete.last_name}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedAthlete(null);
+                    setSearchTerm("");
+                  }}
+                >
+                  Clear
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Payment Records - Only show when athlete selected */}
+        {selectedAthlete && (
+          <>
+            {/* Financial Summary Cards */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <Card className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <DollarSign className="h-6 w-6 text-success mx-auto mb-2" />
+                  <p className="text-lg font-bold text-foreground">€{totalPaid.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Total Paid</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
+                  <p className="text-lg font-bold text-foreground">€{totalOutstanding.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Outstanding</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="shadow-soft col-span-2">
+                <CardContent className="p-4 text-center">
+                  <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-xl font-bold text-foreground">€{totalDue.toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">Total Amount Due</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Payments Table */}
+            <Card className="shadow-medium">
+              <CardHeader>
+                <CardTitle>Payment Records</CardTitle>
+                <CardDescription>Payment history for {selectedAthlete.first_name} {selectedAthlete.last_name}</CardDescription>
+              </CardHeader>
+              
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading payments...</div>
+                ) : payments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">No payment records found</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Period</TableHead>
+                          <TableHead>Amount Due</TableHead>
+                          <TableHead>Amount Paid</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payments.map((payment) => {
+                          const status = getPaymentStatus(payment);
+                          const StatusIcon = status.icon;
+                          
+                          return (
+                            <TableRow key={payment.payment_id}>
+                              <TableCell className="font-medium">{payment.month} {payment.year}</TableCell>
+                              <TableCell>€{(payment.amount_due || 0).toFixed(2)}</TableCell>
+                              <TableCell>€{(payment.amount_paid || 0).toFixed(2)}</TableCell>
+                              <TableCell>
+                                <Badge className={status.color}>
+                                  <StatusIcon className="h-3 w-3 mr-1" />
+                                  {status.label}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                {payment.payment_date 
+                                  ? new Date(payment.payment_date).toLocaleDateString()
+                                  : '-'}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
       </main>
 
       <SponsorBanner />
