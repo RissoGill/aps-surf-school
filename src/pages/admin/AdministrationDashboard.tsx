@@ -26,17 +26,22 @@ const AdministrationDashboard = () => {
       
       const allPayments = data || [];
       
-      // Filter for October 2025 payments
-      const octoberPayments = allPayments.filter((payment: any) => 
-        payment.month === 'October' && payment.year === 2025
+      // Get current month and year
+      const now = new Date();
+      const currentMonth = now.toLocaleString('default', { month: 'long' });
+      const currentYear = now.getFullYear();
+      
+      // Filter for current month payments
+      const currentMonthPayments = allPayments.filter((payment: any) => 
+        payment.month === currentMonth && payment.year === currentYear
       );
       
-      // October paid sum - sum all amount_paid for October
-      const octoberPaid = octoberPayments
+      // Current month paid sum - sum all amount_paid for current month
+      const currentMonthPaid = currentMonthPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // October outstanding (amount_due minus amount_paid for non-fully-paid)
-      const octoberOutstanding = octoberPayments
+      // Current month outstanding (amount_due minus amount_paid for non-fully-paid)
+      const currentMonthOutstanding = currentMonthPayments
         .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
@@ -70,8 +75,8 @@ const AdministrationDashboard = () => {
         }, 0);
       
       return { 
-        octoberPaid, 
-        octoberOutstanding,
+        currentMonthPaid, 
+        currentMonthOutstanding,
         annualFeesReceived,
         septemberOnwardsOutstanding
       };
@@ -271,8 +276,8 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "Current Month", value: `€${paymentsData?.octoberPaid.toFixed(2) || "0.00"}`, color: "success" },
-    { label: "Outstanding Oct Fees", value: `€${paymentsData?.octoberOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
+    { label: "Current Month", value: `€${paymentsData?.currentMonthPaid.toFixed(2) || "0.00"}`, color: "success" },
+    { label: "Outstanding (Month)", value: `€${paymentsData?.currentMonthOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
     { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
     { label: "Outstanding (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
   ];
