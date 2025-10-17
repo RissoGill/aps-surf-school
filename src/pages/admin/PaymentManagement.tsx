@@ -1,132 +1,97 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { DollarSign, Search, CheckCircle, AlertCircle, Clock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 
-// Mock payment data
-const mockPayments = [
-  {
-    id: 1,
-    athleteName: "Emma Johnson",
-    guardianName: "Sarah Johnson",
-    month: "September 2024",
-    amount: 180,
-    dueDate: "2024-09-05",
-    status: "Paid",
-    paidDate: "2024-09-03",
-    method: "Credit Card"
-  },
-  {
-    id: 2,
-    athleteName: "Liam Smith",
-    guardianName: "Lisa Smith", 
-    month: "September 2024",
-    amount: 160,
-    dueDate: "2024-09-05",
-    status: "Overdue",
-    paidDate: null,
-    method: null
-  },
-  {
-    id: 3,
-    athleteName: "Sofia Rodriguez",
-    guardianName: "Carmen Rodriguez",
-    month: "September 2024", 
-    amount: 200,
-    dueDate: "2024-09-05",
-    status: "Paid",
-    paidDate: "2024-09-01",
-    method: "Bank Transfer"
-  },
-  {
-    id: 4,
-    athleteName: "Emma Johnson",
-    guardianName: "Sarah Johnson",
-    month: "October 2024",
-    amount: 180,
-    dueDate: "2024-10-05",
-    status: "Pending",
-    paidDate: null,
-    method: null
-  }
-];
+interface Payment {
+  payment_id: string;
+  athlete_id: string;
+  year: number;
+  month: string;
+  amount_due: number;
+  amount_paid: number;
+  status: string;
+  payment_date: string | null;
+  athlete_name?: string;
+}
 
 const PaymentManagement = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [payments, setPayments] = useState(mockPayments);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
 
-  const filteredPayments = payments.filter(payment => {
-    const matchesSearch = payment.athleteName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         payment.guardianName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === "All" || payment.status === filterStatus;
-    return matchesSearch && matchesStatus;
+  // Fetch payments with athlete names
+  const { data: payments = [], isLoading } = useQuery({
+    queryKey: ['admin-payments'],
+    queryFn: async () => {
+      const [paymentsRes, athletesRes] = await Promise.all([
+        supabase
+          .from('payments')
+          .select('*')
+          .order('year', { ascending: false })
+          .order('month', { ascending: false }),
+        supabase
+          .from('atletas')
+          .select('athlete_id, first_name, last_name')
+      ]);
+
+      if (paymentsRes.error) throw paymentsRes.error;
+      if (athletesRes.error) throw athletesRes.error;
+
+      // Create athlete name map
+      const athleteMap = new Map(
+        (athletesRes.data || []).map(a => [
+          String(a.athlete_id || '').trim().toUpperCase(),
+          `${a.first_name || ''} ${a.last_name || ''}`.trim()
+        ])
+      );
+
+      // Map payments with athlete names
+      return (paymentsRes.data || []).map(payment => {
+        const athleteKey = String(payment.athlete_id || '').trim().toUpperCase();
+        return {
+          ...payment,
+          athlete_name: athleteMap.get(athleteKey) || payment.athlete_id || 'Unknown'
+        } as Payment;
+      });
+    }
   });
 
-  const getStatusInfo = (payment: any) => {
-    const today = new Date();
-    const dueDate = new Date(payment.dueDate);
-    
-    if (payment.status === "Paid") {
-      return { 
-        status: "Paid", 
-        color: "bg-success/10 text-success", 
-        icon: CheckCircle 
-      };
-    } else if (today > dueDate) {
-      return { 
-        status: "Overdue", 
-        color: "bg-destructive/10 text-destructive", 
-        icon: AlertCircle 
-      };
+  // Filter payments by search query
+  const filteredPayments = payments.filter(payment =>
+    payment.athlete_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate payment status
+  const getPaymentStatus = (payment: Payment) => {
+    const amountDue = payment.amount_due || 0;
+    const amountPaid = payment.amount_paid || 0;
+
+    if (amountPaid === 0) {
+      return { label: "Unpaid", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
+    } else if (amountPaid >= amountDue) {
+      return { label: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
     } else {
-      return { 
-        status: "Pending", 
-        color: "bg-warning/10 text-warning", 
-        icon: Clock 
-      };
+      return { label: "Partial", color: "bg-warning/10 text-warning", icon: Clock };
     }
   };
 
-  const markAsPaid = (paymentId: number) => {
-    setPayments(payments.map(payment => 
-      payment.id === paymentId 
-        ? { 
-            ...payment, 
-            status: "Paid", 
-            paidDate: new Date().toISOString().split('T')[0],
-            method: "Manual Entry"
-          }
-        : payment
-    ));
-    
-    toast({
-      title: "Payment Marked as Paid",
-      description: "Payment status has been updated successfully.",
-    });
-  };
+  // Calculate summary statistics
+  const totalPaid = payments
+    .reduce((sum, p) => sum + (p.amount_paid || 0), 0);
 
-  const totalPending = payments
-    .filter(p => p.status === "Pending" || p.status === "Overdue")
-    .reduce((sum, p) => sum + p.amount, 0);
+  const totalDue = payments
+    .reduce((sum, p) => sum + (p.amount_due || 0), 0);
 
-  const totalOverdue = payments
-    .filter(p => p.status === "Overdue")
-    .reduce((sum, p) => sum + p.amount, 0);
-
-  const totalPaidThisMonth = payments
-    .filter(p => p.status === "Paid" && p.month.includes("September"))
-    .reduce((sum, p) => sum + p.amount, 0);
+  const totalOutstanding = totalDue - totalPaid;
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -139,29 +104,17 @@ const PaymentManagement = () => {
           <p className="text-muted-foreground">{filteredPayments.length} payment records</p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="space-y-4 mb-6">
+        {/* Search Bar */}
+        <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search by athlete or guardian name..."
+              placeholder="Search by athlete name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 touch-friendly"
             />
           </div>
-          
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Statuses</SelectItem>
-              <SelectItem value="Paid">Paid</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Overdue">Overdue</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Financial Summary Cards */}
@@ -169,104 +122,83 @@ const PaymentManagement = () => {
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <DollarSign className="h-6 w-6 text-success mx-auto mb-2" />
-              <p className="text-lg font-bold text-foreground">${totalPaidThisMonth}</p>
-              <p className="text-xs text-muted-foreground">Collected This Month</p>
+              <p className="text-lg font-bold text-foreground">€{totalPaid.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">Total Paid</p>
             </CardContent>
           </Card>
           
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-              <p className="text-lg font-bold text-foreground">${totalOverdue}</p>
-              <p className="text-xs text-muted-foreground">Overdue Amount</p>
+              <p className="text-lg font-bold text-foreground">€{totalOutstanding.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">Outstanding</p>
             </CardContent>
           </Card>
           
           <Card className="shadow-soft col-span-2">
             <CardContent className="p-4 text-center">
-              <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
-              <p className="text-xl font-bold text-foreground">${totalPending}</p>
-              <p className="text-sm text-muted-foreground">Total Outstanding</p>
+              <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
+              <p className="text-xl font-bold text-foreground">€{totalDue.toFixed(2)}</p>
+              <p className="text-sm text-muted-foreground">Total Amount Due</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Payments List */}
+        {/* Payments Table */}
         <Card className="shadow-medium">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl font-bold">
               <CreditCard className="h-6 w-6" />
               Payment Records
             </CardTitle>
-            <CardDescription>Manage monthly payments and track status</CardDescription>
+            <CardDescription>View and manage athlete payments</CardDescription>
           </CardHeader>
           
-          <CardContent className="p-0">
-            {filteredPayments.length === 0 ? (
-              <div className="p-6 text-center">
-                <p className="text-muted-foreground">No payments found</p>
-              </div>
+          <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading payments...</div>
+            ) : filteredPayments.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No payments found</div>
             ) : (
-              <div className="space-y-0">
-                {filteredPayments.map((payment) => {
-                  const statusInfo = getStatusInfo(payment);
-                  const StatusIcon = statusInfo.icon;
-                  
-                  return (
-                    <div 
-                      key={payment.id} 
-                      className={`p-4 border-b border-border last:border-b-0 ${
-                        statusInfo.status === "Overdue" ? "bg-destructive/5" : ""
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-medium text-foreground">{payment.athleteName}</h3>
-                          <p className="text-sm text-muted-foreground">Guardian: {payment.guardianName}</p>
-                          <p className="text-xs text-muted-foreground">{payment.month}</p>
-                        </div>
-                        
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">${payment.amount}</p>
-                          <Badge className={statusInfo.color}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
-                            {statusInfo.status}
-                          </Badge>
-                        </div>
-                      </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Athlete</TableHead>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Amount Due</TableHead>
+                      <TableHead>Amount Paid</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPayments.map((payment) => {
+                      const status = getPaymentStatus(payment);
+                      const StatusIcon = status.icon;
                       
-                      <div className="text-xs text-muted-foreground space-y-1 mb-3">
-                        <p>Due Date: {new Date(payment.dueDate).toLocaleDateString()}</p>
-                        {payment.paidDate && (
-                          <p className="text-success">
-                            Paid: {new Date(payment.paidDate).toLocaleDateString()}
-                            {payment.method && ` via ${payment.method}`}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {payment.status !== "Paid" && (
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 touch-friendly"
-                            variant={statusInfo.status === "Overdue" ? "destructive" : "default"}
-                            onClick={() => markAsPaid(payment.id)}
-                          >
-                            Mark as Paid
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1 touch-friendly"
-                          >
-                            Send Reminder
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      return (
+                        <TableRow key={payment.payment_id}>
+                          <TableCell className="font-medium">{payment.athlete_name}</TableCell>
+                          <TableCell>{payment.month} {payment.year}</TableCell>
+                          <TableCell>€{(payment.amount_due || 0).toFixed(2)}</TableCell>
+                          <TableCell>€{(payment.amount_paid || 0).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <Badge className={status.color}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {status.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {payment.payment_date 
+                              ? new Date(payment.payment_date).toLocaleDateString()
+                              : '-'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </CardContent>
