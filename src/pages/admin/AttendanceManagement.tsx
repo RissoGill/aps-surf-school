@@ -109,19 +109,30 @@ const AttendanceManagement = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      const { error } = await supabase
-        .from('attendance')
-        .update(updates)
-        .eq('id', id);
-      
-      if (error) throw error;
+      const res = await fetch('https://bzzzecvzoahauqrhkvds.functions.supabase.co/functions/v1/attendance-admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, updates })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update attendance');
+      }
     },
     onSuccess: () => {
+      // Invalidate all relevant caches across dashboards
       queryClient.invalidateQueries({ queryKey: ['athlete-attendance'] });
+      if (selectedAthlete?.athlete_id) {
+        queryClient.invalidateQueries({ queryKey: ['attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-media', selectedAthlete.athlete_id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
       toast({ title: "Success", description: "Attendance record updated successfully" });
       setEditDialogOpen(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ 
         title: "Error", 
         description: error.message,
@@ -133,19 +144,29 @@ const AttendanceManagement = () => {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('attendance')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const res = await fetch('https://bzzzecvzoahauqrhkvds.functions.supabase.co/functions/v1/attendance-admin', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to delete attendance');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['athlete-attendance'] });
+      if (selectedAthlete?.athlete_id) {
+        queryClient.invalidateQueries({ queryKey: ['attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', selectedAthlete.athlete_id] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-media', selectedAthlete.athlete_id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
       toast({ title: "Success", description: "Attendance record deleted successfully" });
       setDeleteDialogOpen(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({ 
         title: "Error", 
         description: error.message,
