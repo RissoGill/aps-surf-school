@@ -194,9 +194,16 @@ const AttendanceManagement = () => {
 
   const handleSaveEdit = () => {
     if (!selectedRecord) return;
+
+    // Build updates and keep ID consistent with new date if it changed
+    const updates: any = { ...editForm };
+    if (editForm.date && editForm.date !== selectedRecord.date) {
+      updates.id = `${selectedRecord.athlete_id}-${editForm.date}`;
+    }
+
     updateMutation.mutate({
       id: selectedRecord.id,
-      updates: editForm
+      updates
     });
   };
 
