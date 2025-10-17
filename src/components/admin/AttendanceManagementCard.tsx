@@ -51,6 +51,9 @@ export function AttendanceManagementCard() {
       if (athletesRes.error) throw athletesRes.error;
       if (coachesRes.error) throw coachesRes.error;
 
+      console.log('Raw attendance records:', attendanceRes.data?.length);
+      console.log('October records:', attendanceRes.data?.filter(r => r.date?.startsWith('2025-10')).length);
+
       // Create lookup maps
       const athleteMap = new Map(
         athletesRes.data?.map(a => [
@@ -68,7 +71,7 @@ export function AttendanceManagementCard() {
       return attendanceRes.data?.map(record => ({
         ...record,
         athlete_name: athleteMap.get(record.athlete_id) || record.athlete_id,
-        coach_name: coachMap.get(record.coach_id) || record.coach_id
+        coach_name: record.coach_id ? (coachMap.get(record.coach_id) || record.coach_id) : 'Not assigned'
       })) || [];
     }
   });
@@ -183,7 +186,7 @@ export function AttendanceManagementCard() {
                     <TableRow key={record.id}>
                       <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
                       <TableCell>{record.athlete_name}</TableCell>
-                      <TableCell>{record.coach_name}</TableCell>
+                      <TableCell>{record.coach_name || '-'}</TableCell>
                       <TableCell>
                         {record.status ? (
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
