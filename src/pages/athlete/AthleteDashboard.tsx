@@ -110,54 +110,42 @@ const AthleteDashboard = () => {
 
   const athleteId = athlete?.athlete_id;
 
-  // Real-time subscription for attendance updates
-  useEffect(() => {
-    if (!athleteId) return;
+// Real-time subscription for attendance updates
+useEffect(() => {
+  if (!athleteId) return;
 
-    const channel = supabase
-      .channel('athlete-attendance-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'attendance',
-          filter: `athlete_id=eq.${athleteId}`
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'attendance',
-          filter: `athlete_id=eq.${athleteId}`
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'campeonatos_atletas',
-          filter: `athlete_id=eq.${athleteId}`
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['athlete-championship-registrations', athleteId] });
-        }
-      )
-      .subscribe();
+  const channel = supabase
+    .channel('athlete-attendance-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'attendance',
+        filter: `athlete_id=eq.${athleteId}`
+      },
+      () => {
+        queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'campeonatos_atletas',
+        filter: `athlete_id=eq.${athleteId}`
+      },
+      () => {
+        queryClient.invalidateQueries({ queryKey: ['athlete-championship-registrations', athleteId] });
+      }
+    )
+    .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [athleteId, queryClient]);
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [athleteId, queryClient]);
 
   const { data: attendanceRecords = [], isLoading: isLoadingAttendance } = useQuery({
     queryKey: ['attendance', athleteId],

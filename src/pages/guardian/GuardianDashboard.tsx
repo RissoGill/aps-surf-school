@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download, Trophy, Plane } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,19 @@ interface AttendanceRecord {
 }
 
 const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!athleteId) return;
+    const channel = supabase
+      .channel(`guardian-attendance-${athleteId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance', filter: `athlete_id=eq.${athleteId}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['guardian-attendance', athleteId] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', athleteId] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-media', athleteId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [athleteId, queryClient]);
   const { data: attendanceRecords = [], isLoading } = useQuery({
     queryKey: ['guardian-attendance', athleteId],
     queryFn: async () => {
@@ -132,6 +145,17 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
 };
 
 const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!athleteId) return;
+    const channel = supabase
+      .channel(`guardian-annual-attendance-${athleteId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance', filter: `athlete_id=eq.${athleteId}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', athleteId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [athleteId, queryClient]);
   const { data: attendanceRecords = [] } = useQuery({
     queryKey: ['guardian-annual-attendance', athleteId],
     queryFn: async () => {
@@ -162,6 +186,17 @@ const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) =>
 };
 
 const MediaTab = ({ athleteId }: { athleteId: string }) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (!athleteId) return;
+    const channel = supabase
+      .channel(`guardian-media-attendance-${athleteId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance', filter: `athlete_id=eq.${athleteId}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['guardian-media', athleteId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [athleteId, queryClient]);
   const { data: attendanceRecords = [], isLoading } = useQuery({
     queryKey: ['guardian-media', athleteId],
     queryFn: async () => {
