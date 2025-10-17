@@ -269,11 +269,11 @@ const AdministrationDashboard = () => {
       action: "Payment Settings"
     },
     {
-      title: "Attendance Overview",
-      description: "View and edit attendance records for all athletes",
+      title: "Attendance Management",
+      description: "Search athletes and manage their attendance records",
       icon: Calendar,
       color: "secondary",
-      action: "View Attendance"
+      action: "Manage Attendance"
     }
   ];
 
@@ -334,6 +334,9 @@ const AdministrationDashboard = () => {
                     break;
                   case "Payment Administration":
                     navigate("/admin/payments");
+                    break;
+                  case "Attendance Management":
+                    navigate("/admin/attendance");
                     break;
                   default:
                     break;

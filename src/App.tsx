@@ -16,6 +16,7 @@ import AdministrationDashboard from "./pages/admin/AdministrationDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import AthleteManagement from "./pages/admin/AthleteManagement";
 import PaymentManagement from "./pages/admin/PaymentManagement";
+import AttendanceManagement from "./pages/admin/AttendanceManagement";
 import AthletesList from "./pages/attendance/AthletesList";
 import AttendanceRecords from "./pages/attendance/AttendanceRecords";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/athletes" element={<AthleteManagement />} />
           <Route path="/admin/payments" element={<PaymentManagement />} />
+          <Route path="/admin/attendance" element={<AttendanceManagement />} />
           
           {/* Attendance Routes */}
           <Route path="/attendance/athletes" element={<AthletesList />} />
