@@ -18,7 +18,7 @@ interface AttendanceRecord {
   id: string;
   athlete_id: string;
   date: string;
-  status: string;
+  status: string | null;
   coach_id: string;
   beach_location: string | null;
   notes: string | null;
@@ -178,13 +178,17 @@ export const AttendanceManagement = () => {
                     <TableCell>{record.athlete_name}</TableCell>
                     <TableCell>{record.coach_name}</TableCell>
                     <TableCell>
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                        record.status.toLowerCase() === 'present' ? 'bg-success/10 text-success' :
-                        record.status.toLowerCase() === 'absent' ? 'bg-destructive/10 text-destructive' :
-                        'bg-warning/10 text-warning'
-                      }`}>
-                        {record.status}
-                      </span>
+                      {record.status ? (
+                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                          record.status.toLowerCase() === 'present' ? 'bg-success/10 text-success' :
+                          record.status.toLowerCase() === 'absent' ? 'bg-destructive/10 text-destructive' :
+                          'bg-warning/10 text-warning'
+                        }`}>
+                          {record.status}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
                     </TableCell>
                     <TableCell>{record.beach_location || '-'}</TableCell>
                     <TableCell className="text-right">
