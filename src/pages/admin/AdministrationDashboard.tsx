@@ -271,7 +271,7 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "October Payments", value: `€${paymentsData?.octoberPaid.toFixed(2) || "0.00"}`, color: "success" },
+    { label: "Current Month", value: `€${paymentsData?.octoberPaid.toFixed(2) || "0.00"}`, color: "success" },
     { label: "Outstanding Oct Fees", value: `€${paymentsData?.octoberOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
     { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
     { label: "Outstanding (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
