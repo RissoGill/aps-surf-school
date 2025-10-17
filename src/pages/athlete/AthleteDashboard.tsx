@@ -159,29 +159,58 @@ useEffect(() => {
       
       console.log('Fetching attendance for athlete:', athleteId);
       
-      const { data, error } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('athlete_id', athleteId)
-        .order('date', { ascending: false });
+      const [attendanceRes, coachesRes] = await Promise.all([
+        supabase
+          .from('attendance')
+          .select('*')
+          .eq('athlete_id', athleteId)
+          .order('date', { ascending: false }),
+        supabase
+          .from('coach')
+          .select('coach_id, first_name, last_name')
+      ]);
       
-      console.log('Attendance query result:', { data, error, count: data?.length || 0 });
+      console.log('Attendance query result:', { data: attendanceRes.data, error: attendanceRes.error, count: attendanceRes.data?.length || 0 });
       
-      if (error) {
-        console.error('Error fetching attendance:', error);
-        throw error;
+      if (attendanceRes.error) {
+        console.error('Error fetching attendance:', attendanceRes.error);
+        throw attendanceRes.error;
       }
+
+      if (coachesRes.error) {
+        console.error('Error fetching coaches:', coachesRes.error);
+      }
+
+      // Create coach name map
+      const coachMap = new Map(
+        (coachesRes.data || []).map(c => [
+          String(c.coach_id || '').trim().toUpperCase(),
+          `${c.first_name || ''} ${c.last_name || ''}`.trim()
+        ])
+      );
       
-      // Only include attendance records that have a status
-      const filteredData = (data || []).filter((record: any) => {
+      // Only include attendance records that have a status and map coach names
+      const filteredData = (attendanceRes.data || []).filter((record: any) => {
         const hasStatus = record.status && record.status.trim() !== '';
         console.log('Record status check:', record.id, record.status, hasStatus);
         return hasStatus;
+      }).map((record: any) => {
+        const coachKey = String(record.coach_id || '').trim().toUpperCase();
+        return {
+          id: record.id,
+          date: record.date,
+          status: record.status,
+          coach: record.coach_id ? (coachMap.get(coachKey) || `Coach ${record.coach_id}`) : 'Not assigned',
+          beach_location: record.beach_location,
+          notes: record.notes,
+          photos: record.photos,
+          videos: record.videos
+        } as AttendanceRecord;
       });
       
-      console.log('Filtered attendance records:', filteredData.length, 'of', data?.length || 0);
+      console.log('Filtered attendance records:', filteredData.length, 'of', attendanceRes.data?.length || 0);
       
-      return filteredData as AttendanceRecord[];
+      return filteredData;
     },
     enabled: !!athleteId,
   });
