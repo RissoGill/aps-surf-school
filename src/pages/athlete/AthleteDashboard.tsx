@@ -121,11 +121,13 @@ useEffect(() => {
       {
         event: '*',
         schema: 'public',
-        table: 'attendance',
-        filter: `athlete_id=eq.${athleteId}`
+        table: 'attendance'
       },
-      () => {
-        queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+      (payload) => {
+        const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
+        if (changedAthleteId === athleteId) {
+          queryClient.invalidateQueries({ queryKey: ['attendance', athleteId] });
+        }
       }
     )
     .on(
