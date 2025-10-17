@@ -43,6 +43,7 @@ const AttendanceManagement = () => {
   const [editForm, setEditForm] = useState({
     date: "",
     status: "",
+    coach_id: "",
     beach_location: "",
     notes: ""
   });
@@ -202,6 +203,7 @@ const AttendanceManagement = () => {
     setEditForm({
       date: record.date,
       status: record.status || "",
+      coach_id: record.coach_id || "",
       beach_location: record.beach_location || "",
       notes: record.notes || ""
     });
