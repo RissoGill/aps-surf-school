@@ -84,6 +84,18 @@ export function AttendanceManagementCard() {
     }
   });
 
+  // Fetch coaches for selection in edit dialog
+  const { data: coaches } = useQuery({
+    queryKey: ['coaches-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name');
+      if (error) throw error;
+      return data as { coach_id: string; first_name: string | null; last_name: string | null }[];
+    }
+  });
+
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
@@ -151,9 +163,11 @@ export function AttendanceManagementCard() {
 
   const handleSaveEdit = () => {
     if (!selectedRecord) return;
+    const updates: any = { ...editForm };
+    if (!updates.coach_id) delete updates.coach_id;
     updateMutation.mutate({
       id: selectedRecord.id,
-      updates: editForm
+      updates
     });
   };
 

@@ -58,9 +58,29 @@ serve(async (req) => {
 
         if (target) {
           // Merge: update existing target row, then delete old row
+          // Fetch source row to preserve fields like coach_id when not explicitly provided
+          const { data: source, error: srcErr } = await supabase
+            .from("attendance")
+            .select("coach_id, athlete_id")
+            .eq("id", id)
+            .maybeSingle();
+          if (srcErr) {
+            console.error("Select source error:", srcErr);
+          }
+
+          const finalUpdates: Record<string, unknown> = { ...nonIdUpdates };
+          // Preserve coach_id from source if not included in updates
+          if (!("coach_id" in finalUpdates) && source?.coach_id) {
+            finalUpdates.coach_id = source.coach_id;
+          }
+          // Ensure athlete_id consistency if not explicitly changed
+          if (!("athlete_id" in finalUpdates) && source?.athlete_id) {
+            finalUpdates.athlete_id = source.athlete_id;
+          }
+
           const { error: updTargetErr } = await supabase
             .from("attendance")
-            .update(nonIdUpdates)
+            .update(finalUpdates)
             .eq("id", newId);
           if (updTargetErr) {
             console.error("Update target error:", updTargetErr);
