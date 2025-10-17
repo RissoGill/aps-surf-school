@@ -54,25 +54,31 @@ export function AttendanceManagementCard() {
       console.log('Raw attendance records:', attendanceRes.data?.length);
       console.log('October records:', attendanceRes.data?.filter(r => r.date?.startsWith('2025-10')).length);
 
-      // Create lookup maps
+      // Create lookup maps (normalized)
       const athleteMap = new Map(
-        athletesRes.data?.map(a => [
-          a.athlete_id,
-          `${a.first_name} ${a.last_name}`
+        (athletesRes.data || []).map(a => [
+          String(a.athlete_id || '').trim().toUpperCase(),
+          `${a.first_name || ''} ${a.last_name || ''}`.trim()
         ])
       );
       const coachMap = new Map(
-        coachesRes.data?.map(c => [
-          c.coach_id,
-          `${c.first_name} ${c.last_name}`
+        (coachesRes.data || []).map(c => [
+          String(c.coach_id || '').trim().toUpperCase(),
+          [c.first_name, c.last_name].filter(Boolean).join(' ').trim() || c.first_name || 'Unknown Coach'
         ])
       );
 
-      return attendanceRes.data?.map(record => ({
-        ...record,
-        athlete_name: athleteMap.get(record.athlete_id) || record.athlete_id,
-        coach_name: record.coach_id ? (coachMap.get(record.coach_id) || record.coach_id) : 'Not assigned'
-      })) || [];
+      const fromSeptember = (attendanceRes.data || []).filter(r => r?.date && new Date(r.date) >= new Date('2025-09-01'));
+
+      return fromSeptember.map(record => {
+        const athleteKey = String(record.athlete_id || '').trim().toUpperCase();
+        const coachKey = String(record.coach_id || '').trim().toUpperCase();
+        return ({
+          ...record,
+          athlete_name: athleteMap.get(athleteKey) || record.athlete_id || 'Unknown',
+          coach_name: record.coach_id ? (coachMap.get(coachKey) || `Coach ${record.coach_id}`) : 'Not assigned'
+        });
+      });
     }
   });
 
