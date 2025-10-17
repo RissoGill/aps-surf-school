@@ -824,7 +824,7 @@ const CoachDashboard = () => {
         {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
           <Card className="shadow-soft mb-6">
             <CardHeader>
-              <CardTitle className="text-lg">Training Session History</CardTitle>
+              <CardTitle className="text-lg">Your Training Session History</CardTitle>
               <CardDescription>Detailed breakdown of your training days</CardDescription>
             </CardHeader>
             <CardContent>
