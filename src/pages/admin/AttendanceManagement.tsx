@@ -184,13 +184,11 @@ const AttendanceManagement = () => {
       beach_location: record.beach_location || "",
       notes: record.notes || ""
     });
-    setViewDialogOpen(false);
     setEditDialogOpen(true);
   };
 
   const handleDelete = (record: AttendanceRecord) => {
     setSelectedRecord(record);
-    setViewDialogOpen(false);
     setDeleteDialogOpen(true);
   };
 
@@ -298,6 +296,7 @@ const AttendanceManagement = () => {
                         <TableHead>Status</TableHead>
                         <TableHead>Beach</TableHead>
                         <TableHead>Notes</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -326,6 +325,30 @@ const AttendanceManagement = () => {
                           </TableCell>
                           <TableCell>{record.beach_location || '-'}</TableCell>
                           <TableCell className="max-w-xs truncate">{record.notes || '-'}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(record);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(record);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
