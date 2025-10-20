@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, Search, CheckCircle, AlertCircle, Clock, CreditCard } from "lucide-react";
+import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -187,7 +187,7 @@ const PaymentManagement = () => {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <DollarSign className="h-6 w-6 text-success mx-auto mb-2" />
+                  <Euro className="h-6 w-6 text-success mx-auto mb-2" />
                   <p className="text-lg font-bold text-foreground">€{totalPaid.toFixed(2)}</p>
                   <p className="text-xs text-muted-foreground">Total Paid</p>
                 </CardContent>
