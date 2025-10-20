@@ -64,20 +64,40 @@ const PaymentManagement = () => {
 
       if (error) throw error;
 
-      // Filter payments from September 2025 to September 2026
-      const months2025 = ["September", "October", "November", "December"];
-      const months2026 = ["January", "February", "March", "April", "May", "June", "July", "August", "September"];
+      // Robust filter: September 2025 through September 2026 (inclusive)
+      const monthMap: Record<string, number> = {
+        january: 1, jan: 1, janeiro: 1,
+        february: 2, feb: 2, fevereiro: 2,
+        march: 3, mar: 3, marco: 3, 'março': 3,
+        april: 4, apr: 4, abril: 4,
+        may: 5, mai: 5, maio: 5,
+        june: 6, jun: 6, junho: 6,
+        july: 7, jul: 7, julho: 7,
+        august: 8, aug: 8, agosto: 8,
+        september: 9, sep: 9, sept: 9, setembro: 9,
+        october: 10, oct: 10, outubro: 10,
+        november: 11, nov: 11, novembro: 11,
+        december: 12, dec: 12, dezembro: 12,
+      };
 
-      const filteredData = (data || []).filter(payment => {
-        const year = payment.year;
-        const month = payment.month;
+      const normalize = (s?: string) =>
+        (s || '')
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '');
 
-        if (year === 2025) {
-          return months2025.includes(month);
-        } else if (year === 2026) {
-          return months2026.includes(month);
-        }
-        return false;
+      const toSerial = (y: number, m: number) => y * 12 + m;
+      const startSerial = toSerial(2025, 9); // Sep 2025
+      const endSerial = toSerial(2026, 9);   // Sep 2026
+
+      const filteredData = (data || []).filter((p: any) => {
+        const y = Number(p.year);
+        const mName = normalize(p.month);
+        const m = monthMap[mName];
+        if (!y || !m) return false;
+        const serial = toSerial(y, m);
+        return serial >= startSerial && serial <= endSerial;
       });
 
       return filteredData.map(payment => ({
