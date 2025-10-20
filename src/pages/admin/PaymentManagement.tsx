@@ -64,7 +64,25 @@ const PaymentManagement = () => {
 
       if (error) throw error;
 
-      return (data || []).map(payment => ({
+      // Filter payments from September 2025 to September 2026
+      const monthOrder = [
+        "September", "October", "November", "December",
+        "January", "February", "March", "April", "May", "June", "July", "August", "September"
+      ];
+
+      const filteredData = (data || []).filter(payment => {
+        const year = payment.year;
+        const month = payment.month;
+
+        if (year === 2025) {
+          return monthOrder.indexOf(month) >= 0 && monthOrder.indexOf(month) <= 3; // Sept-Dec
+        } else if (year === 2026) {
+          return monthOrder.indexOf(month) >= 4 && monthOrder.indexOf(month) <= 12; // Jan-Sept
+        }
+        return false;
+      });
+
+      return filteredData.map(payment => ({
         ...payment,
         athlete_name: `${selectedAthlete.first_name} ${selectedAthlete.last_name}`
       })) as Payment[];
