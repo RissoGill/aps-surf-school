@@ -65,19 +65,17 @@ const PaymentManagement = () => {
       if (error) throw error;
 
       // Filter payments from September 2025 to September 2026
-      const monthOrder = [
-        "September", "October", "November", "December",
-        "January", "February", "March", "April", "May", "June", "July", "August", "September"
-      ];
+      const months2025 = ["September", "October", "November", "December"];
+      const months2026 = ["January", "February", "March", "April", "May", "June", "July", "August", "September"];
 
       const filteredData = (data || []).filter(payment => {
         const year = payment.year;
         const month = payment.month;
 
         if (year === 2025) {
-          return monthOrder.indexOf(month) >= 0 && monthOrder.indexOf(month) <= 3; // Sept-Dec
+          return months2025.includes(month);
         } else if (year === 2026) {
-          return monthOrder.indexOf(month) >= 4 && monthOrder.indexOf(month) <= 12; // Jan-Sept
+          return months2026.includes(month);
         }
         return false;
       });
