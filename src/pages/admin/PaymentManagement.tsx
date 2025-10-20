@@ -100,7 +100,18 @@ const PaymentManagement = () => {
         return serial >= startSerial && serial <= endSerial;
       });
 
-      return filteredData.map(payment => ({
+      // Sort chronologically: Sep 2025 → Sep 2026
+      const sortedData = filteredData.sort((a: any, b: any) => {
+        const yA = Number(a.year);
+        const yB = Number(b.year);
+        const mA = monthMap[normalize(a.month)] || 0;
+        const mB = monthMap[normalize(b.month)] || 0;
+        const serialA = toSerial(yA, mA);
+        const serialB = toSerial(yB, mB);
+        return serialA - serialB; // Ascending order (earliest first)
+      });
+
+      return sortedData.map(payment => ({
         ...payment,
         athlete_name: `${selectedAthlete.first_name} ${selectedAthlete.last_name}`
       })) as Payment[];
@@ -250,7 +261,7 @@ const PaymentManagement = () => {
             <Card className="shadow-medium">
               <CardHeader>
                 <CardTitle>Payment Records</CardTitle>
-                <CardDescription>Payment history for {selectedAthlete.first_name} {selectedAthlete.last_name}</CardDescription>
+                <CardDescription>Payment history for {selectedAthlete.first_name} {selectedAthlete.last_name} (September 2025 - September 2026)</CardDescription>
               </CardHeader>
               
               <CardContent>
