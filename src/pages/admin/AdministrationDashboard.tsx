@@ -51,13 +51,13 @@ const AdministrationDashboard = () => {
       const currentMonthPaid = currentMonthPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Current month outstanding (amount_due minus amount_paid for non-fully-paid)
+      // Current month outstanding (amount_due minus amount_paid for all payments)
       const currentMonthOutstanding = currentMonthPayments
-        .filter((payment: any) => payment.status !== 'Paid')
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
           const paid = payment.amount_paid || 0;
-          return sum + (due - paid);
+          const remaining = due - paid;
+          return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
       // Filter for payments from September 2025 onwards
@@ -76,13 +76,24 @@ const AdministrationDashboard = () => {
       const annualFeesReceived = paymentsFromSept
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Outstanding fees from September 2025 onwards (only non-Paid status)
+      // Get current month serial number for comparison
+      const currentMonthSerial = now.getFullYear() * 12 + now.getMonth() + 1;
+      
+      // Outstanding fees from September 2025 onwards (only current and past months)
       const septemberOnwardsOutstanding = paymentsFromSept
-        .filter((payment: any) => payment.status !== 'Paid')
+        .filter((payment: any) => {
+          // Calculate payment month serial
+          const monthIndex = new Date(`${payment.month} 1, ${payment.year}`).getMonth();
+          const paymentSerial = payment.year * 12 + monthIndex + 1;
+          
+          // Only include current month and past months
+          return paymentSerial <= currentMonthSerial;
+        })
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
           const paid = payment.amount_paid || 0;
-          return sum + (due - paid);
+          const remaining = due - paid;
+          return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
       return { 
