@@ -145,14 +145,95 @@ const PaymentManagement = () => {
     }
   };
 
-  // Calculate summary statistics for selected athlete
-  const totalPaid = payments
-    .reduce((sum, p) => sum + (p.amount_paid || 0), 0);
+  // Calculate Outstanding (current + past unpaid months only)
+  const calculateOutstanding = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // 1-12
+    const currentSerial = currentYear * 12 + currentMonth;
+    
+    const monthMap: Record<string, number> = {
+      january: 1, jan: 1, janeiro: 1,
+      february: 2, feb: 2, fevereiro: 2,
+      march: 3, mar: 3, marco: 3, 'março': 3,
+      april: 4, apr: 4, abril: 4,
+      may: 5, mai: 5, maio: 5,
+      june: 6, jun: 6, junho: 6,
+      july: 7, jul: 7, julho: 7,
+      august: 8, aug: 8, agosto: 8,
+      september: 9, sep: 9, sept: 9, setembro: 9,
+      october: 10, oct: 10, outubro: 10,
+      november: 11, nov: 11, novembro: 11,
+      december: 12, dec: 12, dezembro: 12,
+    };
 
-  const totalDue = payments
-    .reduce((sum, p) => sum + (p.amount_due || 0), 0);
+    const normalize = (s?: string) =>
+      (s || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '');
+    
+    return payments
+      .filter(p => {
+        const y = Number(p.year);
+        const mName = normalize(p.month);
+        const m = monthMap[mName] || 0;
+        const serial = y * 12 + m;
+        
+        // Only include current month and past months
+        return serial <= currentSerial;
+      })
+      .reduce((sum, p) => {
+        const due = p.amount_due || 0;
+        const paid = p.amount_paid || 0;
+        const remaining = due - paid;
+        return sum + (remaining > 0 ? remaining : 0);
+      }, 0);
+  };
 
-  const totalOutstanding = totalDue - totalPaid;
+  // Calculate Next Payment (following month)
+  const calculateNextPayment = () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // 1-12
+    const nextSerial = (currentYear * 12 + currentMonth) + 1; // Next month
+    
+    const monthMap: Record<string, number> = {
+      january: 1, jan: 1, janeiro: 1,
+      february: 2, feb: 2, fevereiro: 2,
+      march: 3, mar: 3, marco: 3, 'março': 3,
+      april: 4, apr: 4, abril: 4,
+      may: 5, mai: 5, maio: 5,
+      june: 6, jun: 6, junho: 6,
+      july: 7, jul: 7, julho: 7,
+      august: 8, aug: 8, agosto: 8,
+      september: 9, sep: 9, sept: 9, setembro: 9,
+      october: 10, oct: 10, outubro: 10,
+      november: 11, nov: 11, novembro: 11,
+      december: 12, dec: 12, dezembro: 12,
+    };
+
+    const normalize = (s?: string) =>
+      (s || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '');
+    
+    const nextPayment = payments.find(p => {
+      const y = Number(p.year);
+      const mName = normalize(p.month);
+      const m = monthMap[mName] || 0;
+      const serial = y * 12 + m;
+      return serial === nextSerial;
+    });
+    
+    return nextPayment?.amount_due || 0;
+  };
+
+  const outstanding = calculateOutstanding();
+  const nextPayment = calculateNextPayment();
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -234,25 +315,19 @@ const PaymentManagement = () => {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <Euro className="h-6 w-6 text-success mx-auto mb-2" />
-                  <p className="text-lg font-bold text-foreground">€{totalPaid.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">Total Paid</p>
+                  <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
+                  <p className="text-lg font-bold text-foreground">€{outstanding.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Outstanding</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Current & past unpaid</p>
                 </CardContent>
               </Card>
               
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-                  <p className="text-lg font-bold text-foreground">€{totalOutstanding.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">Outstanding</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft col-span-2">
-                <CardContent className="p-4 text-center">
                   <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-xl font-bold text-foreground">€{totalDue.toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">Total Amount Due</p>
+                  <p className="text-lg font-bold text-foreground">€{nextPayment.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">Next Payment</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Due by 5th of month</p>
                 </CardContent>
               </Card>
             </div>
