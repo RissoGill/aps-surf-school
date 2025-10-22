@@ -76,15 +76,24 @@ const AdministrationDashboard = () => {
       const annualFeesReceived = paymentsFromSept
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
+      // Month name to number mapping for consistent calculation
+      const monthNameToNumber: { [key: string]: number } = {
+        'January': 1, 'February': 2, 'March': 3, 'April': 4,
+        'May': 5, 'June': 6, 'July': 7, 'August': 8,
+        'September': 9, 'October': 10, 'November': 11, 'December': 12
+      };
+      
       // Get current month serial number for comparison
-      const currentMonthSerial = now.getFullYear() * 12 + now.getMonth() + 1;
+      const currentMonthSerial = now.getFullYear() * 12 + (now.getMonth() + 1);
       
       // Outstanding fees from September 2025 onwards (only current and past months)
       const septemberOnwardsOutstanding = paymentsFromSept
         .filter((payment: any) => {
-          // Calculate payment month serial
-          const monthIndex = new Date(`${payment.month} 1, ${payment.year}`).getMonth();
-          const paymentSerial = payment.year * 12 + monthIndex + 1;
+          // Use month name mapping instead of Date parsing
+          const paymentMonthNumber = monthNameToNumber[payment.month];
+          if (!paymentMonthNumber) return false; // Skip invalid month names
+          
+          const paymentSerial = payment.year * 12 + paymentMonthNumber;
           
           // Only include current month and past months
           return paymentSerial <= currentMonthSerial;
