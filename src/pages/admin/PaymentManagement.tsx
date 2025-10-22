@@ -198,7 +198,9 @@ const PaymentManagement = () => {
       if (error) throw error;
 
       // Refresh data
-      await queryClient.invalidateQueries({ queryKey: ['athlete-payments'] });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['athlete-payments', selectedAthlete?.athlete_id] 
+      });
 
       toast({
         title: "Success",
