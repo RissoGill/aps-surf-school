@@ -344,7 +344,7 @@ const PaymentManagement = () => {
         <Card className="shadow-soft mb-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
-              <CreditCard className="h-6 w-6 text-primary" />
+              <Euro className="h-6 w-6 text-primary" />
               Athlete Payment Search
             </CardTitle>
             <CardDescription>Search for an athlete to view and manage their payment records</CardDescription>
