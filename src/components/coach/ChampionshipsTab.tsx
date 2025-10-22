@@ -88,6 +88,7 @@ export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabPro
       const { error } = await supabase
         .from('campeonatos_atletas')
         .insert({
+          id: crypto.randomUUID(),
           campeonato_id: championshipId,
           athlete_id: athleteId,
         });
