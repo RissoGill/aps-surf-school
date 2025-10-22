@@ -1,279 +1,345 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Plus, Search, Edit, Trash2, Users, UserPlus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { z } from "zod";
 
-// Mock user data
-const mockUsers = [
-  { id: 1, name: "Coach Maria Santos", email: "maria@apssurfschool.com", role: "Coach", status: "Active", createdDate: "2024-01-15" },
-  { id: 2, name: "Emma Johnson", email: "emma@email.com", role: "Athlete", status: "Active", createdDate: "2024-03-10" },
-  { id: 3, name: "Sarah Johnson", email: "sarah.johnson@email.com", role: "Guardian", status: "Active", createdDate: "2024-03-10" },
-  { id: 4, name: "Coach John Smith", email: "john@apssurfschool.com", role: "Coach", status: "Active", createdDate: "2024-02-01" },
-  { id: 5, name: "Admin Alice", email: "admin@apssurfschool.com", role: "Administration", status: "Active", createdDate: "2024-01-01" },
-];
+const userEditSchema = z.object({
+  first_name: z.string().min(1, "First name is required").max(100),
+  last_name: z.string().min(1, "Last name is required").max(100),
+  email: z.string().email("Invalid email").max(255),
+  phone: z.string().max(20).nullable().optional(),
+  role: z.enum(['admin', 'moderator', 'user']).optional(),
+});
+
+type UserData = {
+  coach_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: number | null;
+  auth_uid: string;
+  role?: 'admin' | 'moderator' | 'user';
+};
 
 const UserManagement = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterRole, setFilterRole] = useState("All");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    role: "",
-    password: ""
-  });
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [editForm, setEditForm] = useState<Partial<UserData>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch coaches
+      const { data: coachesData, error: coachError } = await supabase
+        .from('coach')
+        .select('*');
+
+      if (coachError) throw coachError;
+
+      // Fetch user roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Combine coach data with roles
+      const usersWithRoles = coachesData?.map(coach => {
+        const userRole = rolesData?.find(r => r.user_id === coach.auth_uid);
+        return {
+          ...coach,
+          role: userRole?.role as 'admin' | 'moderator' | 'user' | undefined
+        };
+      }) || [];
+
+      setUsers(usersWithRoles);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = filterRole === "All" || user.role === filterRole;
-    return matchesSearch && matchesRole;
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+    const search = searchQuery.toLowerCase();
+    return fullName.includes(search) || user.email.toLowerCase().includes(search);
   });
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "Coach": return "bg-primary/10 text-primary";
-      case "Athlete": return "bg-success/10 text-success";
-      case "Guardian": return "bg-warning/10 text-warning";
-      case "Administration": return "bg-secondary/50 text-secondary-foreground";
-      default: return "bg-muted/50 text-muted-foreground";
+  const handleUserSelect = (user: UserData) => {
+    setSelectedUser(user);
+    setEditForm(user);
+    setDropdownOpen(false);
+  };
+
+  const handleSave = async () => {
+    if (!selectedUser) return;
+
+    try {
+      // Validate the form data
+      const validatedData = userEditSchema.parse(editForm);
+      setIsSaving(true);
+
+      // Update coach table
+      const { error: coachError } = await supabase
+        .from('coach')
+        .update({
+          first_name: validatedData.first_name,
+          last_name: validatedData.last_name,
+          email: validatedData.email,
+          phone: validatedData.phone ? parseInt(validatedData.phone) : null,
+        })
+        .eq('coach_id', selectedUser.coach_id);
+
+      if (coachError) throw coachError;
+
+      // Update user role if changed
+      if (validatedData.role && validatedData.role !== selectedUser.role) {
+        // First delete existing role
+        await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', selectedUser.auth_uid);
+
+        // Then insert new role
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({
+            user_id: selectedUser.auth_uid,
+            role: validatedData.role
+          });
+
+        if (roleError) throw roleError;
+      }
+
+      toast.success("User updated successfully");
+      
+      // Refresh the user list
+      await fetchUsers();
+      
+      // Update selected user
+      const updatedUser = { ...selectedUser, ...editForm };
+      setSelectedUser(updatedUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      } else {
+        console.error('Error updating user:', error);
+        toast.error("Failed to update user");
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleAddUser = () => {
-    if (!newUser.name || !newUser.email || !newUser.role) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newUserWithId = {
-      ...newUser,
-      id: users.length + 1,
-      status: "Active",
-      createdDate: new Date().toISOString().split('T')[0]
-    };
-
-    setUsers([...users, newUserWithId]);
-    setNewUser({ name: "", email: "", role: "", password: "" });
-    setIsAddDialogOpen(false);
-    
-    toast({
-      title: "User Added",
-      description: `${newUser.name} has been successfully added.`,
-    });
+  const handleCancel = () => {
+    setEditForm(selectedUser || {});
   };
 
-  const handleDeleteUser = (userId: number) => {
-    setUsers(users.filter(user => user.id !== userId));
-    toast({
-      title: "User Deleted",
-      description: "User has been successfully removed.",
-    });
-  };
-
-  const roleOptions = ["Coach", "Athlete", "Guardian", "Administration"];
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
+        <main className="mobile-container py-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">Loading users...</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
-        {/* Header Actions */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Users</h2>
-            <p className="text-muted-foreground">{filteredUsers.length} total users</p>
-          </div>
-          
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="touch-friendly">
-                <Plus className="h-4 w-4 mr-1" />
-                Add User
+        {/* Search Dropdown */}
+        <div className="mb-6">
+          <Label className="mb-2 block">Search User</Label>
+          <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-full justify-between"
+              >
+                {selectedUser 
+                  ? `${selectedUser.first_name} ${selectedUser.last_name}` 
+                  : "Select a user..."}
+                <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New User</DialogTitle>
-                <DialogDescription>
-                  Create a new user account for the APS system.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={newUser.name}
-                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    placeholder="Enter email address"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={newUser.role} onValueChange={(value) => setNewUser({...newUser, role: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {roleOptions.map(role => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Temporary Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                    placeholder="Enter temporary password"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleAddUser}>
-                  Add User
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="space-y-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by name or email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 touch-friendly"
-            />
-          </div>
-          
-          <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All Roles</SelectItem>
-              {roleOptions.map(role => (
-                <SelectItem key={role} value={role}>{role}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Users className="h-6 w-6 text-primary mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">{users.length}</p>
-              <p className="text-sm text-muted-foreground">Total Users</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <UserPlus className="h-6 w-6 text-success mx-auto mb-2" />
-              <p className="text-2xl font-bold text-foreground">
-                {users.filter(u => u.createdDate >= "2024-09-01").length}
-              </p>
-              <p className="text-sm text-muted-foreground">Added This Month</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Users List */}
-        <Card className="shadow-medium">
-          <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>Manage system users and their permissions</CardDescription>
-          </CardHeader>
-          
-          <CardContent className="p-0">
-            {filteredUsers.length === 0 ? (
-              <div className="p-6 text-center">
-                <p className="text-muted-foreground">No users found</p>
-              </div>
-            ) : (
-              <div className="space-y-0">
-                {filteredUsers.map((user) => (
-                  <div key={user.id} className="p-4 border-b border-border last:border-b-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-foreground">{user.name}</h3>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <p className="text-xs text-muted-foreground">Created: {user.createdDate}</p>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Badge className={getRoleColor(user.role)}>
-                          {user.role}
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 touch-friendly">
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 touch-friendly text-destructive hover:text-destructive"
-                        onClick={() => handleDeleteUser(user.id)}
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0" align="start">
+              <Command>
+                <CommandInput 
+                  placeholder="Search users..." 
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                />
+                <CommandList>
+                  <CommandEmpty>No users found.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredUsers.map((user) => (
+                      <CommandItem
+                        key={user.coach_id}
+                        value={`${user.first_name} ${user.last_name}`}
+                        onSelect={() => handleUserSelect(user)}
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {user.first_name} {user.last_name}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {user.email}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* User Details */}
+        {selectedUser && (
+          <Card className="shadow-medium">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle>User Details</CardTitle>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    <Save className="h-4 w-4 mr-1" />
+                    {isSaving ? "Saving..." : "Save"}
+                  </Button>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            
+            <CardContent>
+              <Tabs defaultValue="personal" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                  <TabsTrigger value="account">Account</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="personal" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">First Name</Label>
+                    <Input
+                      id="first_name"
+                      value={editForm.first_name || ''}
+                      onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">Last Name</Label>
+                    <Input
+                      id="last_name"
+                      value={editForm.last_name || ''}
+                      onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={editForm.email || ''}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      value={editForm.phone?.toString() || ''}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value ? parseInt(e.target.value) : null })}
+                    />
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="account" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Select 
+                      value={editForm.role || ''} 
+                      onValueChange={(value) => setEditForm({ ...editForm, role: value as 'admin' | 'moderator' | 'user' })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="moderator">Moderator</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>User ID</Label>
+                    <Input value={selectedUser.coach_id} disabled />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Auth UID</Label>
+                    <Input value={selectedUser.auth_uid || 'Not linked'} disabled />
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
+
+        {!selectedUser && (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">Select a user to view and edit details</p>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       <SponsorBanner />
