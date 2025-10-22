@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, Users, DollarSign, Calendar, UserPlus, User } from "lucide-react";
+import { Settings, Users, Euro, Calendar, UserPlus, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -295,7 +295,7 @@ const AdministrationDashboard = () => {
     {
       title: "Payment Administration",
       description: "Set fees, mark payments, and view financial reports",
-      icon: DollarSign,
+      icon: Euro,
       color: "warning",
       action: "Payment Settings"
     },
