@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard } from "lucide-react";
+import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { z } from "zod";
 
 interface Payment {
   payment_id: string;
@@ -30,10 +32,31 @@ interface Athlete {
   last_name: string;
 }
 
+// Validation schema for payment edits
+const paymentEditSchema = z.object({
+  amount_due: z.number().min(0, "Amount due must be positive"),
+  amount_paid: z.number().min(0, "Amount paid must be positive"),
+  status: z.enum(["Paid", "Unpaid", "Partial"]),
+  payment_date: z.string().nullable()
+});
+
 const PaymentManagement = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{
+    amount_due: string;
+    amount_paid: string;
+    status: string;
+    payment_date: string;
+  }>({
+    amount_due: "",
+    amount_paid: "",
+    status: "",
+    payment_date: ""
+  });
 
   // Fetch all athletes for search
   const { data: athletes } = useQuery({
@@ -129,6 +152,75 @@ const PaymentManagement = () => {
   const handleAthleteSelect = (athlete: Athlete) => {
     setSelectedAthlete(athlete);
     setSearchTerm(`${athlete.first_name} ${athlete.last_name}`);
+  };
+
+  const handleEditStart = (payment: Payment) => {
+    setEditingPaymentId(payment.payment_id);
+    setEditForm({
+      amount_due: payment.amount_due.toString(),
+      amount_paid: payment.amount_paid.toString(),
+      status: payment.status,
+      payment_date: payment.payment_date || ""
+    });
+  };
+
+  const handleEditCancel = () => {
+    setEditingPaymentId(null);
+    setEditForm({
+      amount_due: "",
+      amount_paid: "",
+      status: "",
+      payment_date: ""
+    });
+  };
+
+  const handleEditSave = async (paymentId: string) => {
+    try {
+      // Validate input
+      const validated = paymentEditSchema.parse({
+        amount_due: parseFloat(editForm.amount_due),
+        amount_paid: parseFloat(editForm.amount_paid),
+        status: editForm.status,
+        payment_date: editForm.payment_date || null
+      });
+
+      // Update in Supabase
+      const { error } = await supabase
+        .from('payments')
+        .update({
+          amount_due: validated.amount_due,
+          amount_paid: validated.amount_paid,
+          status: validated.status,
+          payment_date: validated.payment_date
+        })
+        .eq('payment_id', paymentId);
+
+      if (error) throw error;
+
+      // Refresh data
+      await queryClient.invalidateQueries({ queryKey: ['athlete-payments'] });
+
+      toast({
+        title: "Success",
+        description: "Payment updated successfully"
+      });
+
+      handleEditCancel();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update payment",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   // Calculate payment status
@@ -354,28 +446,116 @@ const PaymentManagement = () => {
                           <TableHead>Amount Paid</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {payments.map((payment) => {
                           const status = getPaymentStatus(payment);
                           const StatusIcon = status.icon;
+                          const isEditing = editingPaymentId === payment.payment_id;
                           
                           return (
                             <TableRow key={payment.payment_id}>
                               <TableCell className="font-medium">{payment.month} {payment.year}</TableCell>
-                              <TableCell>€{(payment.amount_due || 0).toFixed(2)}</TableCell>
-                              <TableCell>€{(payment.amount_paid || 0).toFixed(2)}</TableCell>
+                              
+                              {/* Amount Due */}
                               <TableCell>
-                                <Badge className={status.color}>
-                                  <StatusIcon className="h-3 w-3 mr-1" />
-                                  {status.label}
-                                </Badge>
+                                {isEditing ? (
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={editForm.amount_due}
+                                    onChange={(e) => setEditForm({ ...editForm, amount_due: e.target.value })}
+                                    className="w-24"
+                                  />
+                                ) : (
+                                  `€${(payment.amount_due || 0).toFixed(2)}`
+                                )}
                               </TableCell>
+                              
+                              {/* Amount Paid */}
                               <TableCell>
-                                {payment.payment_date 
-                                  ? new Date(payment.payment_date).toLocaleDateString()
-                                  : '-'}
+                                {isEditing ? (
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={editForm.amount_paid}
+                                    onChange={(e) => setEditForm({ ...editForm, amount_paid: e.target.value })}
+                                    className="w-24"
+                                  />
+                                ) : (
+                                  `€${(payment.amount_paid || 0).toFixed(2)}`
+                                )}
+                              </TableCell>
+                              
+                              {/* Status */}
+                              <TableCell>
+                                {isEditing ? (
+                                  <Select
+                                    value={editForm.status}
+                                    onValueChange={(value) => setEditForm({ ...editForm, status: value })}
+                                  >
+                                    <SelectTrigger className="w-28">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Paid">Paid</SelectItem>
+                                      <SelectItem value="Partial">Partial</SelectItem>
+                                      <SelectItem value="Unpaid">Unpaid</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <Badge className={status.color}>
+                                    <StatusIcon className="h-3 w-3 mr-1" />
+                                    {status.label}
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              
+                              {/* Payment Date */}
+                              <TableCell>
+                                {isEditing ? (
+                                  <Input
+                                    type="date"
+                                    value={editForm.payment_date}
+                                    onChange={(e) => setEditForm({ ...editForm, payment_date: e.target.value })}
+                                    className="w-36"
+                                  />
+                                ) : (
+                                  payment.payment_date 
+                                    ? new Date(payment.payment_date).toLocaleDateString()
+                                    : '-'
+                                )}
+                              </TableCell>
+                              
+                              {/* Actions */}
+                              <TableCell>
+                                {isEditing ? (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => handleEditSave(payment.payment_id)}
+                                    >
+                                      <Save className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={handleEditCancel}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleEditStart(payment)}
+                                  >
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
