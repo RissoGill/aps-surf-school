@@ -133,13 +133,29 @@ useEffect(() => {
     .on(
       'postgres_changes',
       {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
-        table: 'campeonatos_atletas',
-        filter: `athlete_id=eq.${athleteId}`
+        table: 'campeonatos_atletas'
       },
-      () => {
-        queryClient.invalidateQueries({ queryKey: ['athlete-championship-registrations', athleteId] });
+      (payload) => {
+        const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
+        if (changedAthleteId === athleteId) {
+          queryClient.invalidateQueries({ queryKey: ['athlete-championship-registrations', athleteId] });
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'estagio_atletas'
+      },
+      (payload) => {
+        const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
+        if (changedAthleteId === athleteId) {
+          queryClient.invalidateQueries({ queryKey: ['athlete-estagios', athleteId] });
+        }
       }
     )
     .subscribe();
