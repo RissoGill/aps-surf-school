@@ -410,7 +410,7 @@ const PaymentManagement = () => {
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
                   <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-                  <p className="text-lg font-bold text-foreground">€{outstanding.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-destructive">€{outstanding.toFixed(2)}</p>
                   <p className="text-xs text-muted-foreground">Outstanding</p>
                   <p className="text-[10px] text-muted-foreground mt-1">Current & past unpaid</p>
                 </CardContent>
