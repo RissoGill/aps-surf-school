@@ -539,7 +539,7 @@ const PaymentManagement = () => {
                                       size="sm"
                                       onClick={() => handleEditSave(payment.payment_id)}
                                     >
-                                      <Save className="h-4 w-4" />
+                                      <Save className="h-4 w-4 text-white" />
                                     </Button>
                                     <Button
                                       size="sm"
