@@ -42,9 +42,12 @@ const AdministrationDashboard = () => {
       const currentMonth = now.toLocaleString('default', { month: 'long' });
       const currentYear = now.getFullYear();
       
+      // Helper to normalize month names for comparison
+      const normalizeMonth = (month: string) => month?.trim().toLowerCase();
+      
       // Filter for current month payments
       const currentMonthPayments = allPayments.filter((payment: any) => 
-        payment.month === currentMonth && payment.year === currentYear
+        normalizeMonth(payment.month) === normalizeMonth(currentMonth) && payment.year === currentYear
       );
       
       // Current month paid sum - sum all amount_paid for current month
@@ -61,13 +64,23 @@ const AdministrationDashboard = () => {
         }, 0);
       
       // Filter for payments from September 2025 onwards
-      const septemberCutoff = new Date('2025-09-01');
       const paymentsFromSept = allPayments.filter((payment: any) => {
         // Filter by year and month fields
         if (payment.year && payment.month) {
-          const monthIndex = new Date(`${payment.month} 1, ${payment.year}`).getMonth();
-          const paymentDate = new Date(payment.year, monthIndex, 1);
-          return paymentDate >= septemberCutoff;
+          // Month name to number mapping (case-insensitive)
+          const monthMap: { [key: string]: number } = {
+            'january': 1, 'february': 2, 'march': 3, 'april': 4,
+            'may': 5, 'june': 6, 'july': 7, 'august': 8,
+            'september': 9, 'october': 10, 'november': 11, 'december': 12
+          };
+          
+          const monthNum = monthMap[normalizeMonth(payment.month)];
+          if (!monthNum) return false;
+          
+          const paymentSerial = payment.year * 12 + monthNum;
+          const septemberSerial = 2025 * 12 + 9; // September 2025
+          
+          return paymentSerial >= septemberSerial;
         }
         return false;
       });
@@ -76,21 +89,21 @@ const AdministrationDashboard = () => {
       const annualFeesReceived = paymentsFromSept
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Month name to number mapping for consistent calculation
-      const monthNameToNumber: { [key: string]: number } = {
-        'January': 1, 'February': 2, 'March': 3, 'April': 4,
-        'May': 5, 'June': 6, 'July': 7, 'August': 8,
-        'September': 9, 'October': 10, 'November': 11, 'December': 12
-      };
-      
       // Get current month serial number for comparison
       const currentMonthSerial = now.getFullYear() * 12 + (now.getMonth() + 1);
+      
+      // Month name to number mapping (case-insensitive)
+      const monthNameToNumber: { [key: string]: number } = {
+        'january': 1, 'february': 2, 'march': 3, 'april': 4,
+        'may': 5, 'june': 6, 'july': 7, 'august': 8,
+        'september': 9, 'october': 10, 'november': 11, 'december': 12
+      };
       
       // Outstanding fees from September 2025 onwards (only current and past months)
       const septemberOnwardsOutstanding = paymentsFromSept
         .filter((payment: any) => {
-          // Use month name mapping instead of Date parsing
-          const paymentMonthNumber = monthNameToNumber[payment.month];
+          // Use month name mapping with case-insensitive comparison
+          const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
           if (!paymentMonthNumber) return false; // Skip invalid month names
           
           const paymentSerial = payment.year * 12 + paymentMonthNumber;
