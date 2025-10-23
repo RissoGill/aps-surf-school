@@ -31,11 +31,23 @@ const AdministrationDashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
-        .select('amount_paid, amount_due, payment_date, status, month, year');
+        .select(`
+          amount_paid, 
+          amount_due, 
+          payment_date, 
+          status, 
+          month, 
+          year,
+          athlete_id,
+          atletas!inner(surf_level)
+        `);
       
       if (error) throw error;
       
-      const allPayments = data || [];
+      const allPayments = (data || []).map((payment: any) => ({
+        ...payment,
+        surf_level: payment.atletas?.surf_level
+      }));
       
       // Get current month and year
       const now = new Date();
@@ -44,6 +56,10 @@ const AdministrationDashboard = () => {
       
       // Helper to normalize month names for comparison
       const normalizeMonth = (month: string) => month?.trim().toLowerCase();
+      
+      // Helper to normalize surf_level for comparison
+      const normalizeSurfLevel = (level: string | null | undefined) => 
+        level?.trim().toLowerCase() || '';
       
       // Filter for current month payments
       const currentMonthPayments = allPayments.filter((payment: any) => 
@@ -54,8 +70,19 @@ const AdministrationDashboard = () => {
       const currentMonthPaid = currentMonthPayments
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Current month outstanding (amount_due minus amount_paid for all payments)
-      const currentMonthOutstanding = currentMonthPayments
+      // Current month outstanding for Learning level
+      const currentMonthOutstandingLearning = currentMonthPayments
+        .filter((payment: any) => normalizeSurfLevel(payment.surf_level) === 'learning')
+        .reduce((sum: number, payment: any) => {
+          const due = payment.amount_due || 0;
+          const paid = payment.amount_paid || 0;
+          const remaining = due - paid;
+          return sum + (remaining > 0 ? remaining : 0);
+        }, 0);
+      
+      // Current month outstanding for Competition level
+      const currentMonthOutstandingCompetition = currentMonthPayments
+        .filter((payment: any) => normalizeSurfLevel(payment.surf_level) === 'competition')
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
           const paid = payment.amount_paid || 0;
@@ -99,17 +126,28 @@ const AdministrationDashboard = () => {
         'september': 9, 'october': 10, 'november': 11, 'december': 12
       };
       
-      // Outstanding fees from September 2025 onwards (only current and past months)
-      const septemberOnwardsOutstanding = paymentsFromSept
+      // Outstanding fees from September 2025 onwards for Learning level (only current and past months)
+      const septemberOnwardsOutstandingLearning = paymentsFromSept
         .filter((payment: any) => {
-          // Use month name mapping with case-insensitive comparison
           const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
-          if (!paymentMonthNumber) return false; // Skip invalid month names
-          
+          if (!paymentMonthNumber) return false;
           const paymentSerial = payment.year * 12 + paymentMonthNumber;
-          
-          // Only include current month and past months
-          return paymentSerial <= currentMonthSerial;
+          return paymentSerial <= currentMonthSerial && normalizeSurfLevel(payment.surf_level) === 'learning';
+        })
+        .reduce((sum: number, payment: any) => {
+          const due = payment.amount_due || 0;
+          const paid = payment.amount_paid || 0;
+          const remaining = due - paid;
+          return sum + (remaining > 0 ? remaining : 0);
+        }, 0);
+      
+      // Outstanding fees from September 2025 onwards for Competition level (only current and past months)
+      const septemberOnwardsOutstandingCompetition = paymentsFromSept
+        .filter((payment: any) => {
+          const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
+          if (!paymentMonthNumber) return false;
+          const paymentSerial = payment.year * 12 + paymentMonthNumber;
+          return paymentSerial <= currentMonthSerial && normalizeSurfLevel(payment.surf_level) === 'competition';
         })
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
@@ -120,9 +158,11 @@ const AdministrationDashboard = () => {
       
       return { 
         currentMonthPaid, 
-        currentMonthOutstanding,
+        currentMonthOutstandingLearning,
+        currentMonthOutstandingCompetition,
         annualFeesReceived,
-        septemberOnwardsOutstanding
+        septemberOnwardsOutstandingLearning,
+        septemberOnwardsOutstandingCompetition
       };
     }
   });
@@ -325,9 +365,11 @@ const AdministrationDashboard = () => {
     { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
     { label: "Current Month", value: `€${paymentsData?.currentMonthPaid.toFixed(2) || "0.00"}`, color: "success" },
-    { label: "Outstanding (Month)", value: `€${paymentsData?.currentMonthOutstanding.toFixed(2) || "0.00"}`, color: "destructive" },
+    { label: "Outstanding Learning (Month)", value: `€${paymentsData?.currentMonthOutstandingLearning.toFixed(2) || "0.00"}`, color: "destructive" },
+    { label: "Outstanding Competition (Month)", value: `€${paymentsData?.currentMonthOutstandingCompetition.toFixed(2) || "0.00"}`, color: "destructive" },
     { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
-    { label: "Outstanding (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstanding.toFixed(2) || "0.00"}`, color: "warning" }
+    { label: "Outstanding Learning (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstandingLearning.toFixed(2) || "0.00"}`, color: "warning" },
+    { label: "Outstanding Competition (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstandingCompetition.toFixed(2) || "0.00"}`, color: "warning" }
   ];
 
   return (
