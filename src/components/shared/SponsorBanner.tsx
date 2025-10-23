@@ -35,31 +35,31 @@ const SponsorBanner = () => {
           <h3 className="text-sm font-medium text-muted-foreground mb-4 text-center">
             Our Partners
           </h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="flex flex-wrap justify-center items-center gap-6">
             <img 
               src={oceanEarthLogo} 
               alt="Ocean & Earth" 
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 w-auto object-contain"
             />
             <img 
               src={surfersLogo} 
               alt="Surfers" 
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 w-auto object-contain"
             />
             <img 
               src={eqLogo} 
               alt="EQ" 
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 w-auto object-contain"
             />
             <img 
               src={quintaMarinhaLogo} 
               alt="Quinta da Marinha Health Club" 
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 w-auto object-contain"
             />
             <img 
               src={cultoImagemLogo} 
               alt="Culto da Imagem" 
-              className="h-8 w-auto object-contain mx-auto"
+              className="h-8 w-auto object-contain"
             />
           </div>
         </div>
