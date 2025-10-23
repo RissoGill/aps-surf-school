@@ -36,7 +36,6 @@ interface Athlete {
 const paymentEditSchema = z.object({
   amount_due: z.number().min(0, "Amount due must be positive"),
   amount_paid: z.number().min(0, "Amount paid must be positive"),
-  status: z.enum(["Paid", "Unpaid", "Partial"]),
   payment_date: z.string().nullable()
 });
 
@@ -180,9 +179,21 @@ const PaymentManagement = () => {
       const validated = paymentEditSchema.parse({
         amount_due: parseFloat(editForm.amount_due),
         amount_paid: parseFloat(editForm.amount_paid),
-        status: editForm.status,
         payment_date: editForm.payment_date || null
       });
+
+      // Auto-calculate status based on amounts
+      const amountDue = validated.amount_due;
+      const amountPaid = validated.amount_paid;
+      let calculatedStatus: "Paid" | "Unpaid" | "Partial";
+      
+      if (amountPaid === 0) {
+        calculatedStatus = "Unpaid";
+      } else if (amountPaid >= amountDue) {
+        calculatedStatus = "Paid";
+      } else {
+        calculatedStatus = "Partial";
+      }
 
       // Update in Supabase
       const { error } = await supabase
@@ -190,7 +201,7 @@ const PaymentManagement = () => {
         .update({
           amount_due: validated.amount_due,
           amount_paid: validated.amount_paid,
-          status: validated.status,
+          status: calculatedStatus,
           payment_date: validated.payment_date
         })
         .eq('payment_id', paymentId);
@@ -491,29 +502,14 @@ const PaymentManagement = () => {
                                 )}
                               </TableCell>
                               
-                              {/* Status */}
-                              <TableCell>
-                                {isEditing ? (
-                                  <Select
-                                    value={editForm.status}
-                                    onValueChange={(value) => setEditForm({ ...editForm, status: value })}
-                                  >
-                                    <SelectTrigger className="w-28">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Paid">Paid</SelectItem>
-                                      <SelectItem value="Partial">Partial</SelectItem>
-                                      <SelectItem value="Unpaid">Unpaid</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                ) : (
-                                  <Badge className={status.color}>
-                                    <StatusIcon className="h-3 w-3 mr-1" />
-                                    {status.label}
-                                  </Badge>
-                                )}
-                              </TableCell>
+              {/* Status */}
+              <TableCell>
+                <Badge className={status.color}>
+                  <StatusIcon className="h-3 w-3 mr-1" />
+                  {status.label}
+                  {isEditing && <span className="ml-1 text-[10px]">(auto)</span>}
+                </Badge>
+              </TableCell>
                               
                               {/* Payment Date */}
                               <TableCell>
