@@ -51,7 +51,7 @@ const AdministrationDashboard = () => {
       
       // Get current month and year
       const now = new Date();
-      const currentMonth = now.toLocaleString('default', { month: 'long' });
+      const currentMonthNumber = now.getMonth() + 1; // 1-12
       const currentYear = now.getFullYear();
       
       // Helper to normalize month names for comparison
@@ -61,10 +61,18 @@ const AdministrationDashboard = () => {
       const normalizeSurfLevel = (level: string | null | undefined) => 
         level?.trim().toLowerCase() || '';
       
-      // Filter for current month payments
-      const currentMonthPayments = allPayments.filter((payment: any) => 
-        normalizeMonth(payment.month) === normalizeMonth(currentMonth) && payment.year === currentYear
-      );
+      // Month name to number mapping (case-insensitive)
+      const monthNameToNumber: { [key: string]: number } = {
+        'january': 1, 'february': 2, 'march': 3, 'april': 4,
+        'may': 5, 'june': 6, 'july': 7, 'august': 8,
+        'september': 9, 'october': 10, 'november': 11, 'december': 12
+      };
+      
+      // Filter for current month payments using numeric comparison to avoid locale issues
+      const currentMonthPayments = allPayments.filter((payment: any) => {
+        const monthNum = monthNameToNumber[normalizeMonth(payment.month)];
+        return monthNum === currentMonthNumber && payment.year === currentYear;
+      });
       
       // Current month paid sum - sum all amount_paid for current month
       const currentMonthPaid = currentMonthPayments
@@ -119,12 +127,7 @@ const AdministrationDashboard = () => {
       // Get current month serial number for comparison
       const currentMonthSerial = now.getFullYear() * 12 + (now.getMonth() + 1);
       
-      // Month name to number mapping (case-insensitive)
-      const monthNameToNumber: { [key: string]: number } = {
-        'january': 1, 'february': 2, 'march': 3, 'april': 4,
-        'may': 5, 'june': 6, 'july': 7, 'august': 8,
-        'september': 9, 'october': 10, 'november': 11, 'december': 12
-      };
+      // Mapping defined above for month name to number
       
       // Outstanding fees from September 2025 onwards for Learning level (only current and past months)
       const septemberOnwardsOutstandingLearning = paymentsFromSept
@@ -361,15 +364,17 @@ const AdministrationDashboard = () => {
     }
   ];
 
+  const fmt = (n: number | undefined) => (typeof n === 'number' && isFinite(n) ? n.toFixed(2) : '0.00');
+
   const quickStats = [
-    { label: "Total Athletes", value: athletes?.length.toString() || "0", color: "primary" },
+    { label: "Total Athletes", value: athletes?.length?.toString() || "0", color: "primary" },
     { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
-    { label: "Current Month", value: `€${paymentsData?.currentMonthPaid.toFixed(2) || "0.00"}`, color: "success" },
-    { label: "Outstanding Learning (Month)", value: `€${paymentsData?.currentMonthOutstandingLearning.toFixed(2) || "0.00"}`, color: "destructive" },
-    { label: "Outstanding Competition (Month)", value: `€${paymentsData?.currentMonthOutstandingCompetition.toFixed(2) || "0.00"}`, color: "destructive" },
-    { label: "Annual Fees (Sept+)", value: `€${paymentsData?.annualFeesReceived.toFixed(2) || "0.00"}`, color: "primary" },
-    { label: "Outstanding Learning (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstandingLearning.toFixed(2) || "0.00"}`, color: "warning" },
-    { label: "Outstanding Competition (Sept+)", value: `€${paymentsData?.septemberOnwardsOutstandingCompetition.toFixed(2) || "0.00"}`, color: "warning" }
+    { label: "Current Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
+    { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
+    { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
+    { label: "Annual Fees (Sept+)", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
+    { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
+    { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" }
   ];
 
   return (
