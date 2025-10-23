@@ -516,8 +516,8 @@ const PaymentManagement = () => {
                                 {isEditing ? (
                                   <Input
                                     type="date"
-                                    value={editForm.payment_date}
-                                    onChange={(e) => setEditForm({ ...editForm, payment_date: e.target.value })}
+                                    value={editForm.payment_date || ''}
+                                    onChange={(e) => setEditForm({ ...editForm, payment_date: e.target.value || null })}
                                     className="w-36"
                                   />
                                 ) : (
