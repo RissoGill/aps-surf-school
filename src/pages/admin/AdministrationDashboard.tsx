@@ -392,65 +392,91 @@ const AdministrationDashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {quickStats.map((stat, index) => (
-            <Card key={index} className="shadow-soft">
-              <CardContent className="p-4 text-center">
-                <p className={`text-2xl font-bold text-${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {quickStats.map((stat, index) => {
+            const colorClass = 
+              stat.color === "primary" ? "text-primary" :
+              stat.color === "success" ? "text-success" :
+              stat.color === "destructive" ? "text-destructive" :
+              stat.color === "warning" ? "text-warning" :
+              stat.color === "secondary" ? "text-secondary" :
+              "text-foreground";
+            
+            return (
+              <Card key={index} className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <p className={`text-2xl font-bold ${colorClass}`}>{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Admin Actions */}
         <div className="space-y-4">
           <h3 className="text-2xl font-bold text-foreground mb-4">Management Tools</h3>
           
-          {adminActions.map((action, index) => (
-            <Card 
-              key={index} 
-              className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
-              onClick={() => {
-                switch(action.title) {
-                  case "Manage Users":
-                    navigate("/admin/users");
-                    break;
-                  case "Athlete Management":
-                    navigate("/admin/athletes");
-                    break;
-                  case "Payment Administration":
-                    navigate("/admin/payments");
-                    break;
-                  case "Attendance Management":
-                    navigate("/admin/attendance");
-                    break;
-                  default:
-                    break;
-                }
-              }}
-            >
-              <CardContent className="p-0">
-                <div className="flex items-center p-4">
-                  <div className={`w-12 h-12 rounded-full bg-${action.color}/10 flex items-center justify-center mr-4 flex-shrink-0`}>
-                    <action.icon className={`h-6 w-6 text-${action.color}`} />
-                  </div>
+          {adminActions.map((action, index) => {
+            const bgColorClass = 
+              action.color === "primary" ? "bg-primary/10" :
+              action.color === "success" ? "bg-success/10" :
+              action.color === "warning" ? "bg-warning/10" :
+              action.color === "secondary" ? "bg-secondary/10" :
+              "bg-primary/10";
+            
+            const textColorClass = 
+              action.color === "primary" ? "text-primary" :
+              action.color === "success" ? "text-success" :
+              action.color === "warning" ? "text-warning" :
+              action.color === "secondary" ? "text-secondary" :
+              "text-primary";
+            
+            return (
+              <Card 
+                key={index} 
+                className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+                onClick={() => {
+                  switch(action.title) {
+                    case "Manage Users":
+                      navigate("/admin/users");
+                      break;
+                    case "Athlete Management":
+                      navigate("/admin/athletes");
+                      break;
+                    case "Payment Administration":
+                      navigate("/admin/payments");
+                      break;
+                    case "Attendance Management":
+                      navigate("/admin/attendance");
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+              >
+                <CardContent className="p-0">
+                  <div className="flex items-center p-4">
+                    <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center mr-4 flex-shrink-0`}>
+                      <action.icon className={`h-6 w-6 ${textColorClass}`} />
+                    </div>
                   
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-foreground mb-1">{action.title}</h4>
-                    <p className="text-sm text-muted-foreground">{action.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-foreground mb-1">{action.title}</h4>
+                      <p className="text-sm text-muted-foreground">{action.description}</p>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="ml-4 touch-friendly"
+                    >
+                      {action.action}
+                    </Button>
                   </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="ml-4 touch-friendly"
-                  >
-                    {action.action}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Recent Activity */}
