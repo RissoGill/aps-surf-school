@@ -61,9 +61,6 @@ const SponsorBanner = () => {
               alt="Culto da Imagem" 
               className="h-8 w-auto object-contain mx-auto"
             />
-            <div className="h-8 w-full bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">Partner 6</span>
-            </div>
           </div>
         </div>
 
