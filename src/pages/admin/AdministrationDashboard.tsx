@@ -381,7 +381,6 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
-    { label: "October Received", value: `€${fmt(paymentsData?.octoberReceived)}` , color: "primary" },
     { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
     { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
