@@ -384,7 +384,11 @@ const AdministrationDashboard = () => {
       value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
       color: "primary" 
     },
-    { label: "Active Coaches", value: coachesCount.toString(), color: "success" }
+    { 
+      label: "Total Competition Athletes", 
+      value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'competition').length || 0).toString(), 
+      color: "success" 
+    }
   ];
 
   return (
