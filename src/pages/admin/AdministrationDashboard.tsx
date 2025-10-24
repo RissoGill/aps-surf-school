@@ -378,7 +378,7 @@ const AdministrationDashboard = () => {
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
     { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
-    { label: "Annual Fees (Sept+)", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
+    { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
     { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" }
   ];
