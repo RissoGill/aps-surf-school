@@ -165,13 +165,19 @@ const AdministrationDashboard = () => {
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
+      // October payments received (sum of all amount_paid for October)
+      const octoberReceived = allPayments
+        .filter((payment: any) => normalizeMonth(payment.month) === 'october')
+        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+      
       return { 
         currentMonthPaid, 
         currentMonthOutstandingLearning,
         currentMonthOutstandingCompetition,
         annualFeesReceived,
         septemberOnwardsOutstandingLearning,
-        septemberOnwardsOutstandingCompetition
+        septemberOnwardsOutstandingCompetition,
+        octoberReceived
       };
     }
   });
@@ -375,6 +381,7 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
+    { label: "October Received", value: `€${fmt(paymentsData?.octoberReceived)}` , color: "primary" },
     { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
     { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
