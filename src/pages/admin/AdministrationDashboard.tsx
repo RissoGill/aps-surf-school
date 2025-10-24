@@ -373,12 +373,12 @@ const AdministrationDashboard = () => {
   const fmt = (n: number | undefined) => (typeof n === 'number' && isFinite(n) ? n.toFixed(2) : '0.00');
 
   const quickStats = [
-    { label: "Total Athletes", value: athletes?.length?.toString() || "0", color: "primary" },
-    { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
+    { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
     { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
-    { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
+    { label: "Total Athletes", value: athletes?.length?.toString() || "0", color: "primary" },
+    { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
     { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" }
   ];
