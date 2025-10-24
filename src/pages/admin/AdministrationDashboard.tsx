@@ -39,14 +39,14 @@ const AdministrationDashboard = () => {
           month, 
           year,
           athlete_id,
-          atletas!inner(surf_level)
+          atletas(surf_level)
         `);
       
       if (error) throw error;
       
       const allPayments = (data || []).map((payment: any) => ({
         ...payment,
-        surf_level: payment.atletas?.surf_level
+        surf_level: payment.atletas?.surf_level || null
       }));
       
       // Get current month and year
