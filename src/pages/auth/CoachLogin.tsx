@@ -25,9 +25,9 @@ const CoachLogin = () => {
     setIsLoading(true);
 
     try {
-      // Query Coach table directly with coach_user_id and coach_password
+      // Query coach table directly with coach_user_id and coach_password
       const { data: coach, error } = await supabase
-        .from('Coach')
+        .from('coach')
         .select('coach_id, first_name, last_name, email, coach_user_id')
         .eq('coach_user_id', formData.email)
         .eq('coach_password', formData.password)
