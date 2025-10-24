@@ -25,66 +25,28 @@ const CoachLogin = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      // Query Coach table directly with coach_user_id and coach_password
+      const { data: coach, error } = await supabase
+        .from('Coach')
+        .select('coach_id, first_name, last_name, email, coach_user_id')
+        .eq('coach_user_id', formData.email)
+        .eq('coach_password', formData.password)
+        .maybeSingle();
 
-      if (error) throw error;
-
-      // Fetch coach data to get the name (by auth_uid, then fallback by email)
-      let coachName = "Coach";
-      if (data.user) {
-        const { data: coachByUid } = await supabase
-          .from('Coach')
-          .select('first_name, last_name, coach_id')
-          .eq('auth_uid', data.user.id.toString())
-          .maybeSingle();
-
-        let profile = coachByUid;
-        if (!profile && data.user.email) {
-          const { data: coachByEmail } = await supabase
-            .from('Coach')
-            .select('first_name, last_name, coach_id')
-            .eq('email', data.user.email)
-            .maybeSingle();
-          profile = coachByEmail || null;
-        }
-
-        if (profile) {
-          const parts = [profile.first_name, profile.last_name].filter(Boolean);
-          if (parts.length) {
-            coachName = parts.join(' ');
-          } else if (profile.coach_id) {
-            // Fallback to coach_id mapping
-            const map: Record<string, string> = {
-              T01: 'Nuno Telmo',
-              T02: 'David',
-              T03: 'Danilo',
-              T04: 'Gustavo',
-              T05: 'Aaron',
-              T06: 'Zé',
-              T07: 'Francisco'
-            };
-            const mapped = map[String(profile.coach_id).trim().toUpperCase()];
-            if (mapped) coachName = mapped;
-          }
-        } else {
-          // If no profile found, try mapping from email prefix
-          const map: Record<string, string> = {
-            T01: 'Nuno Telmo',
-            T02: 'David',
-            T03: 'Danilo',
-            T04: 'Gustavo',
-            T05: 'Aaron',
-            T06: 'Zé',
-            T07: 'Francisco'
-          };
-          const emailPrefix = data.user.email ? data.user.email.split('@')[0].toUpperCase() : '';
-          const mapped = map[emailPrefix];
-          if (mapped) coachName = mapped;
-        }
+      if (error || !coach) {
+        throw new Error("Invalid credentials");
       }
+
+      // Store coach info in localStorage for session management
+      localStorage.setItem('coach_session', JSON.stringify({
+        coach_id: coach.coach_id,
+        coach_user_id: coach.coach_user_id,
+        email: coach.email,
+        first_name: coach.first_name,
+        last_name: coach.last_name
+      }));
+
+      const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach';
 
       toast({
         title: "Login Successful",
@@ -95,7 +57,7 @@ const CoachLogin = () => {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid email or password",
+        description: "Invalid coach ID or password",
         variant: "destructive",
       });
     } finally {
