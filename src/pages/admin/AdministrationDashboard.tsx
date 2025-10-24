@@ -377,10 +377,10 @@ const AdministrationDashboard = () => {
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
     { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
-    { label: "Total Athletes", value: athletes?.length?.toString() || "0", color: "primary" },
-    { label: "Active Coaches", value: coachesCount.toString(), color: "success" },
     { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
-    { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" }
+    { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
+    { label: "Total Athletes", value: athletes?.length?.toString() || "0", color: "primary" },
+    { label: "Active Coaches", value: coachesCount.toString(), color: "success" }
   ];
 
   return (
