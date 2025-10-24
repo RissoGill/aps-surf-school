@@ -74,13 +74,14 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber && payment.year === currentYear;
       });
       
-      // Current month paid sum - sum all amount_due for records with status "Paid" or "Parcial"
+      // Current month paid sum - sum amount_paid for records with payment (Paid, Parcial, Partial, Overpaid, etc.)
       const currentMonthPaid = currentMonthPayments
         .filter((payment: any) => {
-          const status = payment.status?.trim().toLowerCase();
-          return status === 'paid' || status === 'parcial';
+          if (!payment.status) return false;
+          const status = payment.status.trim().toLowerCase();
+          return status.includes('paid') || status.includes('parcial') || status.includes('partial');
         })
-        .reduce((sum: number, payment: any) => sum + (payment.amount_due || 0), 0);
+        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
       // Current month outstanding for Learning level
       const currentMonthOutstandingLearning = currentMonthPayments
