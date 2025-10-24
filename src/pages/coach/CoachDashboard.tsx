@@ -86,59 +86,24 @@ const CoachDashboard = () => {
 
   // Check authentication and fetch coach data
   useEffect(() => {
-    const fetchCoachProfile = async (u: { id: string; email?: string | null }) => {
-      try {
-        // Try by auth_uid first
-        const { data: coachByUid, error: uidErr } = await supabase
-          .from('coach')
-          .select('*')
-          .eq('auth_uid', u.id.toString())
-          .maybeSingle();
-        if (uidErr) console.warn('Coach by uid error:', uidErr);
+    // Check localStorage for coach session
+    const coachSession = localStorage.getItem('coach_session');
+    
+    if (!coachSession) {
+      navigate('/login/coach');
+      return;
+    }
 
-        let profile = coachByUid;
-
-        // Fallback by email (exact match), in case auth_uid not linked yet
-        if (!profile && u.email) {
-          const { data: coachByEmail, error: emailErr } = await supabase
-            .from('coach')
-            .select('*')
-            .eq('email', u.email)
-            .maybeSingle();
-          if (emailErr) console.warn('Coach by email error:', emailErr);
-          profile = coachByEmail || null;
-        }
-
-        setCoachData(profile || null);
-        console.log('Coach profile resolved:', profile);
-      } catch (err) {
-        console.error('Unexpected coach fetch error:', err);
-        setCoachData(null);
-      }
-    };
-
-    // 1) Listen first (per best practices)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) {
-        navigate('/login/coach');
-        return;
-      }
-      // Defer supabase calls outside callback to avoid deadlocks
-      setTimeout(() => fetchCoachProfile(session.user), 0);
-    });
-
-    // 2) Then check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session?.user) {
-        navigate('/login/coach');
-        return;
-      }
-      fetchCoachProfile(session.user);
-    });
-
-    return () => subscription.unsubscribe();
+    try {
+      const parsedSession = JSON.parse(coachSession);
+      setUser(parsedSession);
+      setCoachData(parsedSession);
+      console.log('Coach session loaded:', parsedSession);
+    } catch (err) {
+      console.error('Invalid coach session:', err);
+      localStorage.removeItem('coach_session');
+      navigate('/login/coach');
+    }
   }, [navigate]);
 
   // Close dropdown when clicking outside
@@ -457,7 +422,7 @@ const CoachDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('coach_session');
     navigate("/login/coach");
   };
 
