@@ -83,9 +83,10 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+    const email = user.email?.toLowerCase() || '';
     const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || user.email.toLowerCase().includes(search);
+    return fullName.includes(search) || email.includes(search);
   });
 
   const handleUserSelect = (user: UserData) => {
