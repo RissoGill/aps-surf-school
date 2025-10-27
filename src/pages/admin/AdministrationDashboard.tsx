@@ -85,10 +85,33 @@ const AdministrationDashboard = () => {
           .trim();
       
       // Month name to number mapping (case-insensitive)
-      const monthNameToNumber: { [key: string]: number } = {
-        'january': 1, 'february': 2, 'march': 3, 'april': 4,
-        'may': 5, 'june': 6, 'july': 7, 'august': 8,
-        'september': 9, 'october': 10, 'november': 11, 'december': 12
+  const monthNameToNumber: { [key: string]: number } = {
+        // English full + abbr
+        'january': 1, 'jan': 1,
+        'february': 2, 'feb': 2,
+        'march': 3, 'mar': 3,
+        'april': 4, 'apr': 4,
+        'may': 5,
+        'june': 6, 'jun': 6,
+        'july': 7, 'jul': 7,
+        'august': 8, 'aug': 8,
+        'september': 9, 'sep': 9, 'sept': 9,
+        'october': 10, 'oct': 10,
+        'november': 11, 'nov': 11,
+        'december': 12, 'dec': 12,
+        // Portuguese full + abbr
+        'janeiro': 1,
+        'fevereiro': 2, 'fev': 2,
+        'marco': 3, 'março': 3,
+        'abril': 4, 'abr': 4,
+        'maio': 5,
+        'junho': 6,
+        'julho': 7,
+        'agosto': 8, 'ago': 8,
+        'setembro': 9, 'set': 9,
+        'outubro': 10, 'out': 10,
+        'novembro': 11,
+        'dezembro': 12, 'dez': 12,
       };
       
       // Filter for current month payments using numeric comparison to avoid locale issues
@@ -98,13 +121,23 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber && yearNum === currentYear;
       });
       
-      // Total received this month based on month/year fields and Paid/Partial status
-      const currentMonthPaid = currentMonthPayments
+      // Total received this month based on month field only (ignore year) and Paid/Partial/Parcial status
+      const currentMonthPaymentsForPaid = allPayments.filter((payment: any) => {
+        const raw = normalizeMonth(payment.month);
+        let monthNum = monthNameToNumber[raw];
+        if (!monthNum) {
+          const asNum = Number(raw);
+          if (!Number.isNaN(asNum)) monthNum = asNum; // handles "10" or "08"
+        }
+        return monthNum === currentMonthNumber;
+      });
+
+      const currentMonthPaid = currentMonthPaymentsForPaid
         .filter((payment: any) => {
           const s = (payment.status ?? '').toString().trim().toLowerCase();
-          return s === 'paid' || s === 'partial';
+          return s === 'paid' || s === 'partial' || s === 'parcial';
         })
-        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+        .reduce((sum: number, payment: any) => sum + Number(payment.amount_paid ?? 0), 0);
       
       // Current month outstanding for Learning and Pre-Competition levels
       const currentMonthOutstandingLearning = currentMonthPayments
@@ -198,10 +231,10 @@ const AdministrationDashboard = () => {
       
       console.log('Payments summary', {
         currentMonthPaid,
-        currentMonthPaymentsCount: currentMonthPayments.length,
-        statusBreakdown: currentMonthPayments.reduce((acc: any, p: any) => {
+        currentMonthPaymentsCount: currentMonthPaymentsForPaid.length,
+        statusBreakdown: currentMonthPaymentsForPaid.reduce((acc: any, p: any) => {
           const s = normalizeStatus(p.status);
-          acc[s] = (acc[s] || 0) + (p.amount_paid || 0);
+          acc[s] = (acc[s] || 0) + Number(p.amount_paid || 0);
           return acc;
         }, {}),
         currentMonthOutstandingLearning,
