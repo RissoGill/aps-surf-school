@@ -136,124 +136,108 @@ const AdministrationDashboard = () => {
         'dezembro': 12, 'dez': 12,
       };
       
-      // Filter for current month payments using numeric comparison to avoid locale issues
-      const currentMonthPayments = allPayments.filter((payment: any) => {
-        const monthNum = monthNameToNumber[normalizeMonth(payment.month)];
-        const yearNum = Number(payment.year);
-        return monthNum === currentMonthNumber && yearNum === currentYear;
-      });
-      
-      // Total received this month based on month field only (ignore year) and Paid/Partial/Parcial status
-      const currentMonthPaymentsForPaid = allPayments.filter((payment: any) => {
-        const raw = normalizeMonth(payment.month);
-        let monthNum = monthNameToNumber[raw];
-        if (!monthNum) {
-          const asNum = Number(raw);
-          if (!Number.isNaN(asNum)) monthNum = asNum; // handles "10" or "08"
-        }
-        return monthNum === currentMonthNumber;
-      });
 
-      // totalReceivedThisMonth is now fetched directly from database above (lines 49-69)
+      // Current month outstanding for Learning and Pre-Competition (server-side query)
+      const { data: currentMonthLearningRows } = await supabase
+        .from('payments')
+        .select('amount_due, amount_paid, athlete_id')
+        .eq('year', currentYear)
+        .ilike('month', currentMonthName);
       
-      // Current month outstanding for Learning and Pre-Competition levels
-      const currentMonthOutstandingLearning = currentMonthPayments
-        .filter((payment: any) => {
-          const level = normalizeSurfLevel(payment.surf_level);
+      const currentMonthOutstandingLearning = (currentMonthLearningRows || [])
+        .filter((p: any) => {
+          const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const level = levelByAthleteId[aid]?.toLowerCase() || '';
           return level === 'learning' || level === 'pre-competition';
         })
-        .reduce((sum: number, payment: any) => {
-          const due = payment.amount_due || 0;
-          const paid = payment.amount_paid || 0;
-          const remaining = due - paid;
+        .reduce((sum: number, p: any) => {
+          const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
-      // Current month outstanding for Competition level
-      const currentMonthOutstandingCompetition = currentMonthPayments
-        .filter((payment: any) => normalizeSurfLevel(payment.surf_level) === 'competition')
-        .reduce((sum: number, payment: any) => {
-          const due = payment.amount_due || 0;
-          const paid = payment.amount_paid || 0;
-          const remaining = due - paid;
-          return sum + (remaining > 0 ? remaining : 0);
-        }, 0);
-      
-      // Filter for payments from September 2025 onwards
-      const paymentsFromSept = allPayments.filter((payment: any) => {
-        // Filter by year and month fields
-        if (payment.year && payment.month) {
-          // Month name to number mapping (case-insensitive)
-          const monthMap: { [key: string]: number } = {
-            'january': 1, 'february': 2, 'march': 3, 'april': 4,
-            'may': 5, 'june': 6, 'july': 7, 'august': 8,
-            'september': 9, 'october': 10, 'november': 11, 'december': 12
-          };
-          
-          const monthNum = monthMap[normalizeMonth(payment.month)];
-          if (!monthNum) return false;
-          
-          const paymentSerial = payment.year * 12 + monthNum;
-          const septemberSerial = 2025 * 12 + 9; // September 2025
-          
-          return paymentSerial >= septemberSerial;
-        }
-        return false;
-      });
-      
-      // Annual fees received from Sept 2025 onwards
-      const annualFeesReceived = paymentsFromSept
-        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
-      
-      // Get current month serial number for comparison
-      const currentMonthSerial = now.getFullYear() * 12 + (now.getMonth() + 1);
-      
-      // Mapping defined above for month name to number
-      
-      // Outstanding fees from September 2025 onwards for Learning and Pre-Competition levels (only current and past months)
-      const septemberOnwardsOutstandingLearning = paymentsFromSept
-        .filter((payment: any) => {
-          const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
-          if (!paymentMonthNumber) return false;
-          const paymentSerial = payment.year * 12 + paymentMonthNumber;
-          const level = normalizeSurfLevel(payment.surf_level);
-          return paymentSerial <= currentMonthSerial && (level === 'learning' || level === 'pre-competition');
+      // Current month outstanding for Competition (server-side query)
+      const currentMonthOutstandingCompetition = (currentMonthLearningRows || [])
+        .filter((p: any) => {
+          const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const level = levelByAthleteId[aid]?.toLowerCase() || '';
+          return level === 'competition';
         })
-        .reduce((sum: number, payment: any) => {
-          const due = payment.amount_due || 0;
-          const paid = payment.amount_paid || 0;
-          const remaining = due - paid;
+        .reduce((sum: number, p: any) => {
+          const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
-      // Outstanding fees from September 2025 onwards for Competition level (only current and past months)
-      const septemberOnwardsOutstandingCompetition = paymentsFromSept
-        .filter((payment: any) => {
-          const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
-          if (!paymentMonthNumber) return false;
-          const paymentSerial = payment.year * 12 + paymentMonthNumber;
-          return paymentSerial <= currentMonthSerial && normalizeSurfLevel(payment.surf_level) === 'competition';
+      // Annual fees received from September 2025 onwards (server-side query)
+      const { data: sept2025OnwardsRows } = await supabase
+        .from('payments')
+        .select('amount_paid, amount_due, month, year, athlete_id')
+        .gte('year', 2025);
+      
+      const annualFeesReceived = (sept2025OnwardsRows || [])
+        .filter((p: any) => {
+          if (p.year > 2025) return true;
+          if (p.year === 2025) {
+            const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+            return monthNum >= 9; // September onwards
+          }
+          return false;
         })
-        .reduce((sum: number, payment: any) => {
-          const due = payment.amount_due || 0;
-          const paid = payment.amount_paid || 0;
-          const remaining = due - paid;
+        .reduce((sum: number, p: any) => sum + (p.amount_paid || 0), 0);
+      
+      // Outstanding from September 2025 onwards for Learning/Pre-Competition (only past/current months)
+      const currentMonthSerial = currentYear * 12 + currentMonthNumber;
+      
+      const septemberOnwardsOutstandingLearning = (sept2025OnwardsRows || [])
+        .filter((p: any) => {
+          // Only include September 2025 onwards
+          if (p.year < 2025) return false;
+          if (p.year === 2025) {
+            const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+            if (monthNum < 9) return false;
+          }
+          
+          // Only current and past months
+          const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+          const paymentSerial = (p.year || 0) * 12 + monthNum;
+          if (paymentSerial > currentMonthSerial) return false;
+          
+          // Filter by surf level
+          const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const level = levelByAthleteId[aid]?.toLowerCase() || '';
+          return level === 'learning' || level === 'pre-competition';
+        })
+        .reduce((sum: number, p: any) => {
+          const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
-      // October payments received (sum of all amount_paid for October)
-      const octoberReceived = allPayments
-        .filter((payment: any) => normalizeMonth(payment.month) === 'october')
-        .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+      // Outstanding from September 2025 onwards for Competition (only past/current months)
+      const septemberOnwardsOutstandingCompetition = (sept2025OnwardsRows || [])
+        .filter((p: any) => {
+          // Only include September 2025 onwards
+          if (p.year < 2025) return false;
+          if (p.year === 2025) {
+            const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+            if (monthNum < 9) return false;
+          }
+          
+          // Only current and past months
+          const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+          const paymentSerial = (p.year || 0) * 12 + monthNum;
+          if (paymentSerial > currentMonthSerial) return false;
+          
+          // Filter by surf level
+          const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const level = levelByAthleteId[aid]?.toLowerCase() || '';
+          return level === 'competition';
+        })
+        .reduce((sum: number, p: any) => {
+          const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
+          return sum + (remaining > 0 ? remaining : 0);
+        }, 0);
       
-      console.log('Payments summary', {
+      console.info('Financial summary (DB-filtered)', {
         totalReceivedThisMonth,
-        currentMonthPaymentsCount: currentMonthPaymentsForPaid.length,
-        statusBreakdown: currentMonthPaymentsForPaid.reduce((acc: any, p: any) => {
-          const s = normalizeStatus(p.status);
-          acc[s] = (acc[s] || 0) + Number(p.amount_paid || 0);
-          return acc;
-        }, {}),
         currentMonthOutstandingLearning,
         currentMonthOutstandingCompetition,
         annualFeesReceived,
@@ -267,8 +251,7 @@ const AdministrationDashboard = () => {
         currentMonthOutstandingCompetition,
         annualFeesReceived,
         septemberOnwardsOutstandingLearning,
-        septemberOnwardsOutstandingCompetition,
-        octoberReceived
+        septemberOnwardsOutstandingCompetition
       };
     }
   });
