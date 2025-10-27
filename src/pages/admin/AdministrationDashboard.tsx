@@ -75,6 +75,14 @@ const AdministrationDashboard = () => {
       // Helper to normalize surf_level for comparison
       const normalizeSurfLevel = (level: string | null | undefined) => 
         level?.trim().toLowerCase() || '';
+
+      // Helper to normalize status robustly (trim + collapse spaces)
+      const normalizeStatus = (status: string | null | undefined) =>
+        (status ?? '')
+          .toString()
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .trim();
       
       // Month name to number mapping (case-insensitive)
       const monthNameToNumber: { [key: string]: number } = {
@@ -92,9 +100,8 @@ const AdministrationDashboard = () => {
       
       const currentMonthPaid = currentMonthPayments
         .filter((payment: any) => {
-          if (!payment.status) return false; // NULL = Unpaid
-          const status = payment.status.trim().toLowerCase();
-          return status === 'paid' || status === 'partial' || status === 'parcial';
+          const s = normalizeStatus(payment.status);
+          return s === 'paid' || s === 'partial' || s === 'parcial';
         })
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
@@ -190,6 +197,12 @@ const AdministrationDashboard = () => {
       
       console.log('Payments summary', {
         currentMonthPaid,
+        currentMonthPaymentsCount: currentMonthPayments.length,
+        statusBreakdown: currentMonthPayments.reduce((acc: any, p: any) => {
+          const s = normalizeStatus(p.status);
+          acc[s] = (acc[s] || 0) + (p.amount_paid || 0);
+          return acc;
+        }, {}),
         currentMonthOutstandingLearning,
         currentMonthOutstandingCompetition,
         annualFeesReceived,
