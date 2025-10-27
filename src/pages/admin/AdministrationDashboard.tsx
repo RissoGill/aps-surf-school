@@ -132,10 +132,17 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber;
       });
 
-      const currentMonthPaid = currentMonthPaymentsForPaid
+      // Get current month name (e.g., "October", "November")
+      const currentMonthName = new Date().toLocaleString('en-US', { month: 'long' }).toLowerCase();
+      
+      // Total received this month - sum amount_paid where month matches current month and status is Paid or Partial
+      const totalReceivedThisMonth = allPayments
         .filter((payment: any) => {
-          const s = (payment.status ?? '').toString().trim().toLowerCase();
-          return s === 'paid' || s === 'partial' || s === 'parcial';
+          const paymentMonth = normalizeMonth(payment.month);
+          if (!paymentMonth || paymentMonth !== currentMonthName) return false;
+          
+          const s = normalizeStatus(payment.status);
+          return s === 'paid' || s === 'partial';
         })
         .reduce((sum: number, payment: any) => sum + Number(payment.amount_paid ?? 0), 0);
       
@@ -230,7 +237,7 @@ const AdministrationDashboard = () => {
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
       console.log('Payments summary', {
-        currentMonthPaid,
+        totalReceivedThisMonth,
         currentMonthPaymentsCount: currentMonthPaymentsForPaid.length,
         statusBreakdown: currentMonthPaymentsForPaid.reduce((acc: any, p: any) => {
           const s = normalizeStatus(p.status);
@@ -245,7 +252,7 @@ const AdministrationDashboard = () => {
       });
       
       return { 
-        currentMonthPaid, 
+        totalReceivedThisMonth, 
         currentMonthOutstandingLearning,
         currentMonthOutstandingCompetition,
         annualFeesReceived,
@@ -454,6 +461,7 @@ const AdministrationDashboard = () => {
 
   const quickStats = [
     { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
+    { label: "Total Received This Month", value: `€${fmt(paymentsData?.totalReceivedThisMonth)}` , color: "success" },
     { label: "Outstanding Learning/Pre-Comp (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
     { label: "Outstanding Learning/Pre-Comp (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
