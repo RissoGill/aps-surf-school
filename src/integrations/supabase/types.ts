@@ -204,6 +204,8 @@ export type Database = {
         Row: {
           auth_uid: string | null
           coach_id: string
+          coach_password: string | null
+          coach_user_id: string | null
           email: string | null
           first_name: string | null
           last_name: string | null
@@ -212,6 +214,8 @@ export type Database = {
         Insert: {
           auth_uid?: string | null
           coach_id: string
+          coach_password?: string | null
+          coach_user_id?: string | null
           email?: string | null
           first_name?: string | null
           last_name?: string | null
@@ -220,6 +224,8 @@ export type Database = {
         Update: {
           auth_uid?: string | null
           coach_id?: string
+          coach_password?: string | null
+          coach_user_id?: string | null
           email?: string | null
           first_name?: string | null
           last_name?: string | null
