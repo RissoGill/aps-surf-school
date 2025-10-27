@@ -4,16 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 const AdministrationDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [selectedCoach, setSelectedCoach] = useState<string>("");
 
   useEffect(() => {
     const channel = supabase
@@ -562,7 +564,7 @@ const AdministrationDashboard = () => {
         </Card>
 
 
-        {/* Training Days by Coach */}
+        {/* Coach Attendance Management */}
         {isLoading ? (
           <Card className="shadow-soft mt-6">
             <CardHeader>
@@ -575,67 +577,81 @@ const AdministrationDashboard = () => {
         ) : Object.keys(trainingDaysByCoachByMonth).length > 0 && (
           <Card className="shadow-soft mt-6">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                  <User className="h-6 w-6 text-secondary" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="h-6 w-6 text-secondary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold">Coach Attendance Management</CardTitle>
+                    <CardDescription>View training session breakdown by coach</CardDescription>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-2xl font-bold">Training Days by Coach</CardTitle>
-                  <CardDescription>Session breakdown for each coach</CardDescription>
-                </div>
+              </div>
+              <div className="mt-4">
+                <Select value={selectedCoach} onValueChange={setSelectedCoach}>
+                  <SelectTrigger className="w-full md:w-64 bg-background">
+                    <SelectValue placeholder="Choose Coach" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {Object.keys(trainingDaysByCoachByMonth).sort((a, b) => a.localeCompare(b)).map((coach) => (
+                      <SelectItem key={coach} value={coach}>
+                        {coach}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {Object.entries(trainingDaysByCoachByMonth).sort(([a], [b]) => a.localeCompare(b)).map(([coach, monthData]) => (
-                  <div key={coach} className="border border-border rounded-lg p-4">
-                    <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <User className="h-5 w-5 text-primary" />
-                      {coach}
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Monthly breakdown */}
-                      <div>
-                        <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h5>
-                        {Object.keys(monthData).length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
-                        ) : (
-                          <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {Object.entries(monthData).map(([month, count]) => {
-                              const [year, monthNum] = month.split('-');
-                              const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                              return (
-                                <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                                  <span className="text-sm font-medium">{monthName} {year}</span>
-                                  <Badge variant="secondary">{count} days</Badge>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Yearly breakdown */}
-                      <div>
-                        <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h5>
-                        {!trainingDaysByCoachByYear[coach] || Object.keys(trainingDaysByCoachByYear[coach]).length === 0 ? (
-                          <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {Object.entries(trainingDaysByCoachByYear[coach]).map(([year, count]) => (
-                              <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                                <span className="text-sm font-medium">{year}</span>
+            {selectedCoach && (
+              <CardContent>
+                <div className="border border-border rounded-lg p-4">
+                  <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <User className="h-5 w-5 text-primary" />
+                    {selectedCoach}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Monthly breakdown */}
+                    <div>
+                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h5>
+                      {Object.keys(trainingDaysByCoachByMonth[selectedCoach]).length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
+                      ) : (
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {Object.entries(trainingDaysByCoachByMonth[selectedCoach]).map(([month, count]) => {
+                            const [year, monthNum] = month.split('-');
+                            const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                            return (
+                              <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                                <span className="text-sm font-medium">{monthName} {year}</span>
                                 <Badge variant="secondary">{count} days</Badge>
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Yearly breakdown */}
+                    <div>
+                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h5>
+                      {!trainingDaysByCoachByYear[selectedCoach] || Object.keys(trainingDaysByCoachByYear[selectedCoach]).length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {Object.entries(trainingDaysByCoachByYear[selectedCoach]).map(([year, count]) => (
+                            <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                              <span className="text-sm font-medium">{year}</span>
+                              <Badge variant="secondary">{count} days</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
+                </div>
+              </CardContent>
+            )}
           </Card>
         )}
       </main>
