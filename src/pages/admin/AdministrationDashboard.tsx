@@ -86,9 +86,12 @@ const AdministrationDashboard = () => {
         })
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
-      // Current month outstanding for Learning level
+      // Current month outstanding for Learning and Pre-Competition levels
       const currentMonthOutstandingLearning = currentMonthPayments
-        .filter((payment: any) => normalizeSurfLevel(payment.surf_level) === 'learning')
+        .filter((payment: any) => {
+          const level = normalizeSurfLevel(payment.surf_level);
+          return level === 'learning' || level === 'pre-competition';
+        })
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
           const paid = payment.amount_paid || 0;
@@ -137,13 +140,14 @@ const AdministrationDashboard = () => {
       
       // Mapping defined above for month name to number
       
-      // Outstanding fees from September 2025 onwards for Learning level (only current and past months)
+      // Outstanding fees from September 2025 onwards for Learning and Pre-Competition levels (only current and past months)
       const septemberOnwardsOutstandingLearning = paymentsFromSept
         .filter((payment: any) => {
           const paymentMonthNumber = monthNameToNumber[normalizeMonth(payment.month)];
           if (!paymentMonthNumber) return false;
           const paymentSerial = payment.year * 12 + paymentMonthNumber;
-          return paymentSerial <= currentMonthSerial && normalizeSurfLevel(payment.surf_level) === 'learning';
+          const level = normalizeSurfLevel(payment.surf_level);
+          return paymentSerial <= currentMonthSerial && (level === 'learning' || level === 'pre-competition');
         })
         .reduce((sum: number, payment: any) => {
           const due = payment.amount_due || 0;
@@ -383,9 +387,9 @@ const AdministrationDashboard = () => {
   const quickStats = [
     { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
     { label: "Total Received This Month", value: `€${fmt(paymentsData?.currentMonthPaid)}` , color: "success" },
-    { label: "Outstanding Learning (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
+    { label: "Outstanding Learning/Pre-Comp (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
-    { label: "Outstanding Learning (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
+    { label: "Outstanding Learning/Pre-Comp (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
     { 
       label: "Total Learning Athletes", 
