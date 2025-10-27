@@ -564,7 +564,7 @@ const AdministrationDashboard = () => {
 
         {/* Training Days by Coach */}
         {isLoading ? (
-          <Card className="shadow-soft mb-6">
+          <Card className="shadow-soft mt-6">
             <CardHeader>
               <Skeleton className="h-6 w-48" />
             </CardHeader>
@@ -573,23 +573,30 @@ const AdministrationDashboard = () => {
             </CardContent>
           </Card>
         ) : Object.keys(trainingDaysByCoachByMonth).length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-foreground mb-4">Training Days by Coach</h3>
-            <div className="space-y-6">
-              {Object.entries(trainingDaysByCoachByMonth).sort(([a], [b]) => a.localeCompare(b)).map(([coach, monthData]) => (
-                <Card key={coach} className="shadow-soft">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
+          <Card className="shadow-soft mt-6">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="h-6 w-6 text-secondary" />
+                </div>
+                <div>
+                  <CardTitle className="text-2xl font-bold">Training Days by Coach</CardTitle>
+                  <CardDescription>Session breakdown for each coach</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {Object.entries(trainingDaysByCoachByMonth).sort(([a], [b]) => a.localeCompare(b)).map(([coach, monthData]) => (
+                  <div key={coach} className="border border-border rounded-lg p-4">
+                    <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <User className="h-5 w-5 text-primary" />
                       {coach}
-                    </CardTitle>
-                    <CardDescription>Training session breakdown</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                    </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Monthly breakdown */}
                       <div>
-                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
+                        <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h5>
                         {Object.keys(monthData).length === 0 ? (
                           <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
                         ) : (
@@ -610,7 +617,7 @@ const AdministrationDashboard = () => {
                       
                       {/* Yearly breakdown */}
                       <div>
-                        <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
+                        <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h5>
                         {!trainingDaysByCoachByYear[coach] || Object.keys(trainingDaysByCoachByYear[coach]).length === 0 ? (
                           <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
                         ) : (
@@ -625,11 +632,11 @@ const AdministrationDashboard = () => {
                         )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </main>
 
