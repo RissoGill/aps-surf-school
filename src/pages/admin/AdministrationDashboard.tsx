@@ -31,25 +31,38 @@ const AdministrationDashboard = () => {
   const { data: paymentsData } = useQuery({
     queryKey: ['all-payments-summary'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: paymentsRaw, error: paymentsError } = await supabase
         .from('payments')
         .select(`
-          amount_paid, 
-          amount_due, 
-          payment_date, 
-          status, 
-          month, 
+          amount_paid,
+          amount_due,
+          payment_date,
+          status,
+          month,
           year,
-          athlete_id,
-          atletas(surf_level)
+          athlete_id
         `);
       
-      if (error) throw error;
+      if (paymentsError) throw paymentsError;
       
-      const allPayments = (data || []).map((payment: any) => ({
-        ...payment,
-        surf_level: payment.atletas?.surf_level || null
-      }));
+      // Fetch surf levels separately (no FK defined between payments and atletas)
+      const { data: atletasRows } = await supabase
+        .from('atletas')
+        .select('athlete_id, surf_level');
+      
+      const levelByAthleteId: Record<string, string | null> = {};
+      (atletasRows || []).forEach((a: any) => {
+        const key = String(a.athlete_id || '').trim().toLowerCase();
+        if (key) levelByAthleteId[key] = a?.surf_level ?? null;
+      });
+      
+      const allPayments = (paymentsRaw || []).map((payment: any) => {
+        const aid = String(payment.athlete_id || '').trim().toLowerCase();
+        return {
+          ...payment,
+          surf_level: levelByAthleteId[aid] ?? null,
+        };
+      });
       
       // Get current month and year
       const now = new Date();
@@ -174,6 +187,15 @@ const AdministrationDashboard = () => {
       const octoberReceived = allPayments
         .filter((payment: any) => normalizeMonth(payment.month) === 'october')
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
+      
+      console.log('Payments summary', {
+        currentMonthPaid,
+        currentMonthOutstandingLearning,
+        currentMonthOutstandingCompetition,
+        annualFeesReceived,
+        septemberOnwardsOutstandingLearning,
+        septemberOnwardsOutstandingCompetition
+      });
       
       return { 
         currentMonthPaid, 
