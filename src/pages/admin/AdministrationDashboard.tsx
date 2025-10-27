@@ -132,19 +132,39 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber;
       });
 
-      // Get current month name (e.g., "October", "November")
-      const currentMonthName = new Date().toLocaleString('en-US', { month: 'long' }).toLowerCase();
-      
-      // Total received this month - sum amount_paid where month matches current month and status is Paid or Partial
+      // Helper to get month number from various formats (EN/PT names, abbreviations, numeric)
+      const getMonthNumberFromAny = (m: any) => {
+        const raw = normalizeMonth((m ?? '').toString());
+        if (raw in monthNameToNumber) return monthNameToNumber[raw];
+        const asNum = Number(raw.replace(/^0+/, ''));
+        if (!Number.isNaN(asNum)) return asNum; // handles "10", "08"
+        return undefined;
+      };
+
+      const allowedStatuses = new Set(['paid', 'partial', 'parcial']);
+
+      // Total received this month - use month field only and include Paid/Partial/Parcial
       const totalReceivedThisMonth = allPayments
         .filter((payment: any) => {
-          const paymentMonth = normalizeMonth(payment.month);
-          if (!paymentMonth || paymentMonth !== currentMonthName) return false;
-          
+          const monthNum = getMonthNumberFromAny(payment.month);
+          if (monthNum !== currentMonthNumber) return false;
           const s = normalizeStatus(payment.status);
-          return s === 'paid' || s === 'partial';
+          return allowedStatuses.has(s);
         })
         .reduce((sum: number, payment: any) => sum + Number(payment.amount_paid ?? 0), 0);
+
+      // Temporary debug to validate month parsing
+      console.log('TRTM debug', {
+        currentMonthNumber,
+        recognizedMonthsThisMonth: allPayments
+          .filter((p: any) => getMonthNumberFromAny(p.month) === currentMonthNumber)
+          .map((p: any) => p.month),
+        unrecognizedMonthSamples: allPayments
+          .filter((p: any) => getMonthNumberFromAny(p.month) === undefined)
+          .slice(0, 10)
+          .map((p: any) => p.month),
+        totalReceivedThisMonth
+      });
       
       // Current month outstanding for Learning and Pre-Competition levels
       const currentMonthOutstandingLearning = currentMonthPayments
