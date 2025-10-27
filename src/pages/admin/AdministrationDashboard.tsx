@@ -388,13 +388,13 @@ const AdministrationDashboard = () => {
     { 
       label: "Total Learning Athletes", 
       value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
-      color: "primary",
+      color: "success",
       span: "col-span-1"
     },
     { 
       label: "Total Pre-Competition Athletes", 
       value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'pre-competition').length || 0).toString(), 
-      color: "secondary",
+      color: "success",
       span: "col-span-1"
     },
     { 
