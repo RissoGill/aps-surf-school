@@ -472,9 +472,9 @@ const AthleteManagement = () => {
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Beginner">Beginner</SelectItem>
-                            <SelectItem value="Intermediate">Intermediate</SelectItem>
-                            <SelectItem value="Advanced">Advanced</SelectItem>
+                            <SelectItem value="learning">Learning</SelectItem>
+                            <SelectItem value="pre-competition">Pre-Competition</SelectItem>
+                            <SelectItem value="competition">Competition</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
