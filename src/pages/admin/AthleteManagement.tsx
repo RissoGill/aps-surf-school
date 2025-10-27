@@ -122,19 +122,33 @@ const AthleteManagement = () => {
       // Validate input
       const validated = athleteEditSchema.parse(formToValidate);
 
-      // Update in Supabase
-      const { error } = await supabase
+      // Update in Supabase and return the updated row
+      const { data: updatedAthlete, error: updateError } = await supabase
         .from('atletas')
         .update(validated)
-        .eq('athlete_id', selectedAthlete.athlete_id);
+        .eq('athlete_id', selectedAthlete.athlete_id)
+        .select()
+        .maybeSingle();
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      if (!updatedAthlete) {
+        console.warn('Update returned no row. Possible RLS or no match for athlete_id.', {
+          athlete_id: selectedAthlete.athlete_id,
+        });
+        toast({
+          title: 'Update not applied',
+          description: 'No changes were saved. Please ensure you have permission and try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       // Refresh data
       await queryClient.invalidateQueries({ queryKey: ['athletes-all'] });
 
-      // Update selected athlete
-      setSelectedAthlete({ ...selectedAthlete, ...validated });
+      // Update selected athlete with value returned by DB
+      setSelectedAthlete(updatedAthlete as Athlete);
 
       toast({
         title: "Success",
