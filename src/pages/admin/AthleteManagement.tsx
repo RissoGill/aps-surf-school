@@ -51,7 +51,7 @@ const athleteEditSchema = z.object({
   father_name: z.string().trim().max(100).nullable(),
   father_email: z.string().trim().email("Invalid email").max(255).nullable().or(z.literal("")),
   father_phone: z.string().trim().max(20).nullable(),
-  surf_level: z.string().nullable(),
+  surf_level: z.enum(["learning", "pre-competition", "competition"]).nullable(),
   trainings_per_week: z.number().min(0).max(7).nullable(),
   training_days: z.string().trim().max(100).nullable(),
   transport: z.boolean().nullable(),
