@@ -536,34 +536,6 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
-        {/* Recent Activity */}
-        <Card className="shadow-soft mt-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Recent Activity</CardTitle>
-            <CardDescription>Latest system changes and updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[
-                { action: "New athlete enrolled", details: "Sofia Martinez - Beginner level", time: "2 hours ago" },
-                { action: "Payment received", details: "Emma Johnson - September fee", time: "4 hours ago" },
-                { action: "Attendance updated", details: "Coach Maria updated 5 records", time: "6 hours ago" },
-                { action: "Coach added", details: "New coach profile: Alex Thompson", time: "1 day ago" }
-              ].map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 border border-border rounded-lg">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.details}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-
         {/* Coach Attendance Management */}
         {isLoading ? (
           <Card className="shadow-soft mt-6">
