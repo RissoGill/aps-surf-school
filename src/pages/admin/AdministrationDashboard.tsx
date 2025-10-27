@@ -73,15 +73,15 @@ const AdministrationDashboard = () => {
       // Filter for current month payments using numeric comparison to avoid locale issues
       const currentMonthPayments = allPayments.filter((payment: any) => {
         const monthNum = monthNameToNumber[normalizeMonth(payment.month)];
-        return monthNum === currentMonthNumber && payment.year === currentYear;
+        const yearNum = Number(payment.year);
+        return monthNum === currentMonthNumber && yearNum === currentYear;
       });
       
-      // Current month paid sum - sum all amount_paid except Unpaid status
       const currentMonthPaid = currentMonthPayments
         .filter((payment: any) => {
           if (!payment.status) return false; // NULL = Unpaid
           const status = payment.status.trim().toLowerCase();
-          return !status.includes('unpaid'); // Exclude only Unpaid
+          return status === 'paid' || status === 'partial' || status === 'parcial';
         })
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
