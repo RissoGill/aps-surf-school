@@ -98,11 +98,11 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber && yearNum === currentYear;
       });
       
-      const currentMonthPaid = currentMonthPayments
-        .filter((payment: any) => {
-          const s = normalizeStatus(payment.status);
-          return s === 'paid' || s === 'partial' || s === 'parcial';
-        })
+      const ym = `${currentYear}-${String(currentMonthNumber).padStart(2, '0')}`;
+      
+      // Total actually received this calendar month (by payment_date), regardless of which month the fee is for
+      const currentMonthPaid = allPayments
+        .filter((payment: any) => typeof payment.payment_date === 'string' && payment.payment_date.startsWith(ym))
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
       // Current month outstanding for Learning and Pre-Competition levels
