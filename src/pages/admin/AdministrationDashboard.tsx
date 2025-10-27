@@ -68,6 +68,28 @@ const AdministrationDashboard = () => {
       const now = new Date();
       const currentMonthNumber = now.getMonth() + 1; // 1-12
       const currentYear = now.getFullYear();
+      const currentMonthName = now.toLocaleString('en-US', { month: 'long' });
+      
+      // Fetch current month total with dedicated server-filtered query
+      const { data: monthRows, error: monthErr } = await supabase
+        .from('payments')
+        .select('amount_paid, status, month, year')
+        .eq('year', currentYear)
+        .ilike('month', currentMonthName)
+        .or('status.ilike.Paid%,status.ilike.Partial%');
+      
+      if (monthErr) console.error('Month query error:', monthErr);
+      
+      const totalReceivedThisMonth = (monthRows || [])
+        .reduce((sum, r) => sum + Number(r.amount_paid || 0), 0);
+      
+      console.info('TRTM month sum', {
+        month: currentMonthName,
+        year: currentYear,
+        count: monthRows?.length || 0,
+        totalReceivedThisMonth,
+        sample: monthRows?.slice(0, 3)
+      });
       
       // Helper to normalize month names for comparison
       const normalizeMonth = (month: string) => month?.trim().toLowerCase();
@@ -132,39 +154,7 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber;
       });
 
-      // Helper to get month number from various formats (EN/PT names, abbreviations, numeric)
-      const getMonthNumberFromAny = (m: any) => {
-        const raw = normalizeMonth((m ?? '').toString());
-        if (raw in monthNameToNumber) return monthNameToNumber[raw];
-        const asNum = Number(raw.replace(/^0+/, ''));
-        if (!Number.isNaN(asNum)) return asNum; // handles "10", "08"
-        return undefined;
-      };
-
-      const allowedStatuses = new Set(['paid', 'partial', 'parcial']);
-
-      // Total received this month - use month field only and include Paid/Partial/Parcial
-      const totalReceivedThisMonth = allPayments
-        .filter((payment: any) => {
-          const monthNum = getMonthNumberFromAny(payment.month);
-          if (monthNum !== currentMonthNumber) return false;
-          const s = normalizeStatus(payment.status);
-          return allowedStatuses.has(s);
-        })
-        .reduce((sum: number, payment: any) => sum + Number(payment.amount_paid ?? 0), 0);
-
-      // Temporary debug to validate month parsing
-      console.log('TRTM debug', {
-        currentMonthNumber,
-        recognizedMonthsThisMonth: allPayments
-          .filter((p: any) => getMonthNumberFromAny(p.month) === currentMonthNumber)
-          .map((p: any) => p.month),
-        unrecognizedMonthSamples: allPayments
-          .filter((p: any) => getMonthNumberFromAny(p.month) === undefined)
-          .slice(0, 10)
-          .map((p: any) => p.month),
-        totalReceivedThisMonth
-      });
+      // totalReceivedThisMonth is now fetched directly from database above (lines 49-69)
       
       // Current month outstanding for Learning and Pre-Competition levels
       const currentMonthOutstandingLearning = currentMonthPayments
