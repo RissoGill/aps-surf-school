@@ -76,13 +76,12 @@ const AdministrationDashboard = () => {
         return monthNum === currentMonthNumber && payment.year === currentYear;
       });
       
-      // Current month paid sum - treat NULL as Unpaid, include Paid/Overpaid fully and Partial/Parcial partial amounts
+      // Current month paid sum - sum all amount_paid except Unpaid status
       const currentMonthPaid = currentMonthPayments
         .filter((payment: any) => {
           if (!payment.status) return false; // NULL = Unpaid
           const status = payment.status.trim().toLowerCase();
-          if (status.includes('unpaid')) return false;
-          return status.includes('partial') || status.includes('parcial') || status.includes('paid');
+          return !status.includes('unpaid'); // Exclude only Unpaid
         })
         .reduce((sum: number, payment: any) => sum + (payment.amount_paid || 0), 0);
       
