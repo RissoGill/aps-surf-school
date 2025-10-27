@@ -388,12 +388,20 @@ const AdministrationDashboard = () => {
     { 
       label: "Total Learning Athletes", 
       value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
-      color: "primary" 
+      color: "primary",
+      span: "col-span-1"
+    },
+    { 
+      label: "Total Pre-Competition Athletes", 
+      value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'pre-competition').length || 0).toString(), 
+      color: "secondary",
+      span: "col-span-1"
     },
     { 
       label: "Total Competition Athletes", 
       value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'competition').length || 0).toString(), 
-      color: "success" 
+      color: "success",
+      span: "col-span-1"
     }
   ];
 
@@ -417,7 +425,29 @@ const AdministrationDashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {quickStats.map((stat, index) => {
+          {quickStats.slice(0, -3).map((stat, index) => {
+            const colorClass = 
+              stat.color === "primary" ? "text-primary" :
+              stat.color === "success" ? "text-success" :
+              stat.color === "destructive" ? "text-destructive" :
+              stat.color === "warning" ? "text-warning" :
+              stat.color === "secondary" ? "text-secondary" :
+              "text-foreground";
+            
+            return (
+              <Card key={index} className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <p className={`text-2xl font-bold ${colorClass}`}>{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Athletes Level Stats - 3 in a row */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {quickStats.slice(-3).map((stat, index) => {
             const colorClass = 
               stat.color === "primary" ? "text-primary" :
               stat.color === "success" ? "text-success" :
