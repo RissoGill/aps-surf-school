@@ -477,6 +477,11 @@ const AthleteManagement = () => {
                 <TabsContent value="training" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <Label htmlFor="plan_type">Plan Type</Label>
+                      <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.plan_type || "-"}</p>
+                    </div>
+
+                    <div>
                       <Label htmlFor="surf_level">Surf Level</Label>
                       {isEditing ? (
                         <Select

@@ -983,10 +983,17 @@ const GuardianDashboard = () => {
               <h2 className="text-2xl font-bold text-foreground mb-2">
                 {athlete.first_name} {athlete.last_name}
               </h2>
-              <Badge className="bg-gradient-primary text-white border-none mb-2 shadow-soft">
-                {athlete.surf_level || 'Beginner'} Level
-              </Badge>
-              <p className="text-muted-foreground">
+              <div className="flex flex-col items-center gap-2">
+                <Badge className="bg-gradient-primary text-white border-none shadow-soft">
+                  {athlete.surf_level || 'Beginner'} Level
+                </Badge>
+                {athlete.plan_type && (
+                  <Badge variant="outline" className="border-primary/30">
+                    {athlete.plan_type}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-muted-foreground mt-2">
                 {athlete.trainings_per_week || 0} sessions per week
               </p>
             </div>
