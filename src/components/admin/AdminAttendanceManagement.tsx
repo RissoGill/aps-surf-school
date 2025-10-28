@@ -94,12 +94,47 @@ export const AdminAttendanceManagement = () => {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Get the attendance record before deleting to check if we need to decrement tokens
+      const { data: attendanceRecord } = await supabase
+        .from('attendance')
+        .select('athlete_id')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('attendance')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      // If athlete has Pack plan, decrement used_tokens
+      if (attendanceRecord?.athlete_id) {
+        const { data: athleteData } = await supabase
+          .from('atletas')
+          .select('plan_type')
+          .eq('athlete_id', attendanceRecord.athlete_id)
+          .single();
+
+        if (athleteData?.plan_type === 'Pack') {
+          const { data: packData } = await supabase
+            .from('packs')
+            .select('*')
+            .eq('athlete_id', attendanceRecord.athlete_id)
+            .eq('active', true)
+            .order('purchase_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (packData && parseInt(packData.used_tokens || '0') > 0) {
+            const newUsedTokens = (parseInt(packData.used_tokens || '0') - 1).toString();
+            await supabase
+              .from('packs')
+              .update({ used_tokens: newUsedTokens })
+              .eq('id', packData.id);
+          }
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-attendance-all'] });

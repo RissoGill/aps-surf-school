@@ -139,12 +139,46 @@ const AthleteDetails = () => {
     }
 
     try {
+      // Get attendance record to check athlete_id
+      const { data: attendanceRecord } = await supabase
+        .from('attendance')
+        .select('athlete_id')
+        .eq('id', recordId)
+        .single();
+
       const { error } = await supabase
         .from('attendance')
         .delete()
         .eq('id', recordId);
 
       if (error) throw error;
+
+      // Decrement tokens if Pack plan
+      if (attendanceRecord?.athlete_id) {
+        const { data: athleteData } = await supabase
+          .from('atletas')
+          .select('plan_type')
+          .eq('athlete_id', attendanceRecord.athlete_id)
+          .single();
+
+        if (athleteData?.plan_type === 'Pack') {
+          const { data: packData } = await supabase
+            .from('packs')
+            .select('*')
+            .eq('athlete_id', attendanceRecord.athlete_id)
+            .eq('active', true)
+            .order('purchase_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (packData && parseInt(packData.used_tokens || '0') > 0) {
+            await supabase
+              .from('packs')
+              .update({ used_tokens: (parseInt(packData.used_tokens || '0') - 1).toString() })
+              .eq('id', packData.id);
+          }
+        }
+      }
 
       // Force immediate refetch of all attendance queries
       await queryClient.invalidateQueries({ queryKey: ['attendance'], refetchType: 'all' });

@@ -315,6 +315,54 @@ const CoachDashboard = () => {
     setIsUploading(true);
 
     try {
+      // Check if athlete has a Pack plan and validate tokens
+      const { data: athleteData, error: athleteError } = await supabase
+        .from('atletas')
+        .select('plan_type')
+        .eq('athlete_id', athleteId)
+        .single();
+
+      if (athleteError) throw athleteError;
+
+      if (athleteData?.plan_type === 'Pack') {
+        // Find active pack for this athlete
+        const { data: packData, error: packError } = await supabase
+          .from('packs')
+          .select('*')
+          .eq('athlete_id', athleteId)
+          .eq('active', true)
+          .order('purchase_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (packError) throw packError;
+
+        if (!packData) {
+          toast({
+            title: "No Active Pack",
+            description: "This athlete doesn't have an active pack. Please purchase a pack first.",
+            variant: "destructive",
+          });
+          setIsUploading(false);
+          return;
+        }
+
+        // Check remaining tokens
+        const totalTokens = parseInt(packData.total_tokens || '0');
+        const usedTokens = parseInt(packData.used_tokens || '0');
+        const remainingTokens = totalTokens - usedTokens;
+
+        if (remainingTokens <= 0) {
+          toast({
+            title: "No Remaining Passes",
+            description: "No remaining passes for this student. All tokens have been used.",
+            variant: "destructive",
+          });
+          setIsUploading(false);
+          return;
+        }
+      }
+
       // Upload photos and videos to storage
       const photoUrls: string[] = [];
       const videoUrls: string[] = [];
@@ -369,6 +417,32 @@ const CoachDashboard = () => {
         });
 
       if (error) throw error;
+
+      // If athlete has Pack plan, increment used_tokens
+      const { data: athleteCheckData } = await supabase
+        .from('atletas')
+        .select('plan_type')
+        .eq('athlete_id', athleteId)
+        .single();
+
+      if (athleteCheckData?.plan_type === 'Pack') {
+        const { data: packData } = await supabase
+          .from('packs')
+          .select('*')
+          .eq('athlete_id', athleteId)
+          .eq('active', true)
+          .order('purchase_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (packData) {
+          const newUsedTokens = (parseInt(packData.used_tokens || '0') + 1).toString();
+          await supabase
+            .from('packs')
+            .update({ used_tokens: newUsedTokens })
+            .eq('id', packData.id);
+        }
+      }
 
       toast({
         title: "Success",
