@@ -59,6 +59,7 @@ interface Athlete {
   pickup_address: string | null;
   dropoff_address: string | null;
   photo_url: string | null;
+  plan_type: string | null;
   attendance: AttendanceRecord[];
 }
 

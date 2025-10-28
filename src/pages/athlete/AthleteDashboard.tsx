@@ -35,6 +35,7 @@ interface Athlete {
   pickup_address: string | null;
   dropoff_address: string | null;
   auth_uid: string | null;
+  plan_type: string | null;
 }
 
 interface AttendanceRecord {

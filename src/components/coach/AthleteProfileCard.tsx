@@ -23,6 +23,7 @@ interface AthleteProfileCardProps {
     transport: boolean | null;
     pickup_address: string | null;
     dropoff_address: string | null;
+    plan_type: string | null;
   };
   getLevelColor: (level: string) => string;
 }
@@ -65,13 +66,18 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
       </div>
 
       {/* Training Information */}
-      {(athlete.training_days || athlete.trainings_per_week) && (
+      {(athlete.training_days || athlete.trainings_per_week || athlete.plan_type) && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
             Training Schedule
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm pl-6">
+            {athlete.plan_type && (
+              <div className="text-muted-foreground">
+                <span className="font-medium">Plan:</span> {athlete.plan_type}
+              </div>
+            )}
             {athlete.training_days && (
               <div className="text-muted-foreground">
                 <span className="font-medium">Days:</span> {athlete.training_days}

@@ -35,6 +35,7 @@ interface Athlete {
   pickup_address: string | null;
   dropoff_address: string | null;
   guardian_id: string | null;
+  plan_type: string | null;
 }
 
 // Validation schema for athlete edits
