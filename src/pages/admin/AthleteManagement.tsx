@@ -391,13 +391,14 @@ const AthleteManagement = () => {
                             id="mother_name"
                             value={editForm.mother_name || ""}
                             onChange={(e) => setEditForm({ ...editForm, mother_name: e.target.value })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.mother_name || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.mother_name || "-"}</p>
                         )}
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <Label htmlFor="mother_phone">Mother's Phone</Label>
                         {isEditing ? (
                           <Input
@@ -405,13 +406,14 @@ const AthleteManagement = () => {
                             type="number"
                             value={editForm.mother_phone || ""}
                             onChange={(e) => setEditForm({ ...editForm, mother_phone: e.target.value ? parseInt(e.target.value) : null })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.mother_phone || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.mother_phone || "-"}</p>
                         )}
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <Label htmlFor="mother_email">Mother's Email</Label>
                         {isEditing ? (
                           <Input
@@ -419,9 +421,10 @@ const AthleteManagement = () => {
                             type="email"
                             value={editForm.mother_email || ""}
                             onChange={(e) => setEditForm({ ...editForm, mother_email: e.target.value })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.mother_email || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-all">{selectedAthlete.mother_email || "-"}</p>
                         )}
                       </div>
                     </div>
@@ -437,26 +440,28 @@ const AthleteManagement = () => {
                             id="father_name"
                             value={editForm.father_name || ""}
                             onChange={(e) => setEditForm({ ...editForm, father_name: e.target.value })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.father_name || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.father_name || "-"}</p>
                         )}
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <Label htmlFor="father_phone">Father's Phone</Label>
                         {isEditing ? (
                           <Input
                             id="father_phone"
                             value={editForm.father_phone || ""}
                             onChange={(e) => setEditForm({ ...editForm, father_phone: e.target.value })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.father_phone || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.father_phone || "-"}</p>
                         )}
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <Label htmlFor="father_email">Father's Email</Label>
                         {isEditing ? (
                           <Input
@@ -464,9 +469,10 @@ const AthleteManagement = () => {
                             type="email"
                             value={editForm.father_email || ""}
                             onChange={(e) => setEditForm({ ...editForm, father_email: e.target.value })}
+                            className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.father_email || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-all">{selectedAthlete.father_email || "-"}</p>
                         )}
                       </div>
                     </div>
