@@ -138,7 +138,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
                   {athlete.mother_phone && (
                     <p className="flex items-center gap-1">
                       <Phone className="h-3 w-3" />
-                      {athlete.mother_phone}
+                      +{athlete.mother_phone}
                     </p>
                   )}
                   {athlete.mother_email && (
