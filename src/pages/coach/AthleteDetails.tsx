@@ -377,7 +377,7 @@ const AthleteDetails = () => {
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   <p><span className="text-muted-foreground">Name:</span> {athlete.mother_name || 'N/A'}</p>
-                  <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone || 'N/A'}</p>
+                  <p><span className="text-muted-foreground">Phone:</span> {athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</p>
                   <p><span className="text-muted-foreground">Email:</span> {athlete.mother_email || 'N/A'}</p>
                 </CardContent>
               </Card>

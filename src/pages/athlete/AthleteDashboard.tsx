@@ -477,7 +477,7 @@ useEffect(() => {
                       </h4>
                       <div className="text-sm space-y-1">
                         <p><span className="text-muted-foreground">Name:</span> <span className="font-medium">{athlete.mother_name || 'N/A'}</span></p>
-                        <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{athlete.mother_phone || 'N/A'}</span></p>
+                        <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
                         <p><span className="text-muted-foreground">Email:</span> <span className="font-medium">{athlete.mother_email || 'N/A'}</span></p>
                       </div>
                     </div>

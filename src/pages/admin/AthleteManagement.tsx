@@ -409,7 +409,7 @@ const AthleteManagement = () => {
                             className="w-full"
                           />
                         ) : (
-                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.mother_phone || "-"}</p>
+                          <p className="text-sm text-muted-foreground mt-1 break-words">{selectedAthlete.mother_phone ? `+${selectedAthlete.mother_phone}` : "-"}</p>
                         )}
                       </div>
 
