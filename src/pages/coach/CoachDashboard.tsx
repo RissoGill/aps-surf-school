@@ -24,6 +24,7 @@ import { AttendanceMediaGallery } from "@/components/coach/AttendanceMediaGaller
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChampionshipsTab } from "@/components/coach/ChampionshipsTab";
 import { EstagiosTab } from "@/components/coach/EstagiosTab";
+import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
 
 interface AttendanceRecord {
   id: string;
@@ -925,6 +926,11 @@ const CoachDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Bulk Attendance Registration */}
+        {coachData?.coach_id && (
+          <BulkAttendanceRegistration coachId={coachData.coach_id} />
+        )}
 
         {/* Training Days Breakdown */}
         {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
