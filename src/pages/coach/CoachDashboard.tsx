@@ -85,26 +85,60 @@ const CoachDashboard = () => {
   const queryClient = useQueryClient();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Check authentication and fetch coach data
+  // Check authentication and fetch coach data using Supabase Auth
   useEffect(() => {
-    // Check localStorage for coach session
-    const coachSession = localStorage.getItem('coach_session');
-    
-    if (!coachSession) {
-      navigate('/login/coach');
-      return;
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        setUser(null);
+        setCoachData(null);
+        navigate('/login/coach');
+        return;
+      }
 
-    try {
-      const parsedSession = JSON.parse(coachSession);
-      setUser(parsedSession);
-      setCoachData(parsedSession);
-      console.log('Coach session loaded:', parsedSession);
-    } catch (err) {
-      console.error('Invalid coach session:', err);
-      localStorage.removeItem('coach_session');
-      navigate('/login/coach');
-    }
+      setUser(session.user);
+      supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name, email, coach_user_id')
+        .eq('auth_uid', session.user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (error || !data) {
+            console.error('Coach profile not found for auth user:', error);
+            navigate('/login/coach');
+            return;
+          }
+          setCoachData(data);
+          // Keep for UI-only convenience, not auth
+          localStorage.setItem('coach_session', JSON.stringify(data));
+        });
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) {
+        navigate('/login/coach');
+        return;
+      }
+
+      setUser(session.user);
+      supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name, email, coach_user_id')
+        .eq('auth_uid', session.user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (error || !data) {
+            console.error('Coach profile not found for auth user:', error);
+            navigate('/login/coach');
+            return;
+          }
+          setCoachData(data);
+          localStorage.setItem('coach_session', JSON.stringify(data));
+        });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   // Close dropdown when clicking outside
@@ -497,8 +531,14 @@ const CoachDashboard = () => {
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem('coach_session');
-    navigate("/login/coach");
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Sign out error', e);
+    } finally {
+      localStorage.removeItem('coach_session');
+      navigate("/login/coach");
+    }
   };
 
   const coachDisplayName = useMemo(() => {
