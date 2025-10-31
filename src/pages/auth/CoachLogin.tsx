@@ -25,19 +25,29 @@ const CoachLogin = () => {
     setIsLoading(true);
 
     try {
-      // Query coach table directly with coach_user_id and coach_password
-      const { data: coach, error } = await supabase
-        .from('coach')
-        .select('coach_id, first_name, last_name, email, coach_user_id')
-        .eq('coach_user_id', formData.email)
-        .eq('coach_password', formData.password)
-        .maybeSingle();
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      if (error || !coach) {
-        throw new Error("Invalid credentials");
+      if (authError || !authData.user) {
+        throw new Error(authError?.message || "Invalid credentials");
       }
 
-      // Store coach info in localStorage for session management
+      // Fetch coach data using auth_uid
+      const { data: coach, error: coachError } = await supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name, email, coach_user_id')
+        .eq('auth_uid', authData.user.id)
+        .maybeSingle();
+
+      if (coachError || !coach) {
+        await supabase.auth.signOut();
+        throw new Error("Coach profile not found");
+      }
+
+      // Store coach info in localStorage for quick access
       localStorage.setItem('coach_session', JSON.stringify({
         coach_id: coach.coach_id,
         coach_user_id: coach.coach_user_id,
@@ -57,7 +67,7 @@ const CoachLogin = () => {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: "Invalid coach ID or password",
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
     } finally {
