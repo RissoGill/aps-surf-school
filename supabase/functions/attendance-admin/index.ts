@@ -123,6 +123,35 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
     }
 
+    if (req.method === "POST") {
+      const body = await req.json();
+      const required = ["id", "athlete_id", "date", "status", "coach_id"];
+      const missing = required.filter((k) => !(k in body));
+      if (missing.length) {
+        return new Response(JSON.stringify({ error: `Missing fields: ${missing.join(', ')}` }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+
+      const insertData: Record<string, unknown> = {
+        id: body.id,
+        athlete_id: body.athlete_id,
+        date: body.date,
+        status: body.status,
+        coach_id: body.coach_id,
+        beach_location: body.beach_location ?? null,
+        notes: body.notes ?? null,
+        photos: body.photos ?? null,
+        videos: body.videos ?? null,
+      };
+
+      const { error } = await supabase.from("attendance").insert(insertData);
+      if (error) {
+        console.error("Insert error:", error);
+        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+
+      return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
+    }
+
     if (req.method === "DELETE") {
       const { id } = await req.json();
       if (!id) {

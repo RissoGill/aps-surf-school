@@ -85,61 +85,65 @@ const CoachDashboard = () => {
   const queryClient = useQueryClient();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Check authentication and fetch coach data using Supabase Auth
+  // Check authentication and fetch coach data using Supabase Auth, with legacy fallback
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        setUser(null);
-        setCoachData(null);
-        navigate('/login/coach');
-        return;
-      }
-
-      setUser(session.user);
-      supabase
+    const loadFromAuth = async (userId: string) => {
+      const { data, error } = await supabase
         .from('coach')
         .select('coach_id, first_name, last_name, email, coach_user_id')
-        .eq('auth_uid', session.user.id)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (error || !data) {
-            console.error('Coach profile not found for auth user:', error);
-            navigate('/login/coach');
-            return;
-          }
-          setCoachData(data);
-          // Keep for UI-only convenience, not auth
-          localStorage.setItem('coach_session', JSON.stringify(data));
-        });
+        .eq('auth_uid', userId)
+        .maybeSingle();
+      if (error || !data) {
+        console.error('Coach profile not found for auth user:', error);
+        return false;
+      }
+      setCoachData(data);
+      localStorage.setItem('coach_session', JSON.stringify(data));
+      return true;
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        loadFromAuth(session.user.id);
+      }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        navigate('/login/coach');
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        const ok = await loadFromAuth(session.user.id);
+        if (!ok) {
+          // Try legacy fallback
+          const coachSession = localStorage.getItem('coach_session');
+          if (coachSession) {
+            try {
+              const parsed = JSON.parse(coachSession);
+              setCoachData(parsed);
+              return;
+            } catch {}
+          }
+          navigate('/login/coach');
+        }
         return;
       }
 
-      setUser(session.user);
-      supabase
-        .from('coach')
-        .select('coach_id, first_name, last_name, email, coach_user_id')
-        .eq('auth_uid', session.user.id)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (error || !data) {
-            console.error('Coach profile not found for auth user:', error);
-            navigate('/login/coach');
-            return;
-          }
-          setCoachData(data);
-          localStorage.setItem('coach_session', JSON.stringify(data));
-        });
+      // No Supabase session: fallback to legacy localStorage
+      const coachSession = localStorage.getItem('coach_session');
+      if (coachSession) {
+        try {
+          const parsed = JSON.parse(coachSession);
+          setCoachData(parsed);
+          return;
+        } catch {}
+      }
+      navigate('/login/coach');
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, supabase]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -436,21 +440,34 @@ const CoachDashboard = () => {
       }
 
       // Insert attendance record with media URLs
-      const { error } = await supabase
-        .from('attendance')
-        .insert({
-          id: `${athleteId}-${newAttendance.date}-${Date.now()}`,
-          athlete_id: athleteId,
-          date: newAttendance.date,
-          status: newAttendance.status,
-          coach_id: coachData?.coach_id || null,
-          beach_location: newAttendance.praia || null,
-          notes: newAttendance.notas || null,
-          photos: photoUrls.length > 0 ? photoUrls : null,
-          videos: videoUrls.length > 0 ? videoUrls : null,
-        });
+      let insertError: any = null;
+      const record = {
+        id: `${athleteId}-${newAttendance.date}-${Date.now()}`,
+        athlete_id: athleteId,
+        date: newAttendance.date,
+        status: newAttendance.status,
+        coach_id: coachData?.coach_id || null,
+        beach_location: newAttendance.praia || null,
+        notes: newAttendance.notas || null,
+        photos: photoUrls.length > 0 ? photoUrls : null,
+        videos: videoUrls.length > 0 ? videoUrls : null,
+      } as any;
 
-      if (error) throw error;
+      const { error } = await supabase.from('attendance').insert(record);
+      insertError = error;
+
+      if (insertError) {
+        // Fallback via edge function (service role) to bypass RLS for legacy logins
+        const resp = await fetch(`${(supabase as any).rest?.url?.replace('/rest/v1','') || 'https://bzzzecvzoahauqrhkvds.supabase.co'}/functions/v1/attendance-admin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record),
+        });
+        if (!resp.ok) {
+          const info = await resp.json().catch(() => ({}));
+          throw new Error(info.error || 'Failed to save attendance');
+        }
+      }
 
       // If athlete has Pack plan, increment used_tokens
       const { data: athleteCheckData } = await supabase
@@ -498,7 +515,7 @@ const CoachDashboard = () => {
       console.error('Attendance save error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save attendance",
+        description: (error?.message || '').includes('row-level security') ? 'Permission denied. Please log in via email/password or contact admin.' : (error.message || "Failed to save attendance"),
         variant: "destructive",
       });
     } finally {

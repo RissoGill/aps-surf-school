@@ -25,49 +25,57 @@ const CoachLogin = () => {
     setIsLoading(true);
 
     try {
-      // Sign in with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
+      const identifier = formData.email.trim();
+      const isEmail = identifier.includes('@');
 
-      if (authError || !authData.user) {
-        throw new Error(authError?.message || "Invalid credentials");
+      if (isEmail) {
+        // Try Supabase Auth first when an email is provided
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: identifier,
+          password: formData.password,
+        });
+  
+        if (!authError && authData.user) {
+          const { data: coach, error: coachError } = await supabase
+            .from('coach')
+            .select('coach_id, first_name, last_name, email, coach_user_id')
+            .eq('auth_uid', authData.user.id)
+            .maybeSingle();
+  
+          if (coachError || !coach) {
+            await supabase.auth.signOut();
+            throw new Error("Coach profile not found");
+          }
+  
+          localStorage.setItem('coach_session', JSON.stringify(coach));
+          const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach';
+          toast({ title: "Login Successful", description: `Welcome back, ${coachName}!` });
+          navigate("/dashboard/coach");
+          return;
+        }
       }
 
-      // Fetch coach data using auth_uid
-      const { data: coach, error: coachError } = await supabase
+      // Fallback: legacy login via coach_user_id + coach_password (no Supabase session)
+      const { data: legacyCoach, error: legacyErr } = await supabase
         .from('coach')
         .select('coach_id, first_name, last_name, email, coach_user_id')
-        .eq('auth_uid', authData.user.id)
+        .eq('coach_user_id', identifier)
+        .eq('coach_password', formData.password)
         .maybeSingle();
 
-      if (coachError || !coach) {
-        await supabase.auth.signOut();
-        throw new Error("Coach profile not found");
+      if (legacyErr || !legacyCoach) {
+        throw new Error("Invalid credentials");
       }
 
-      // Store coach info in localStorage for quick access
-      localStorage.setItem('coach_session', JSON.stringify({
-        coach_id: coach.coach_id,
-        coach_user_id: coach.coach_user_id,
-        email: coach.email,
-        first_name: coach.first_name,
-        last_name: coach.last_name
-      }));
-
-      const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach';
-
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${coachName}!`,
-      });
+      localStorage.setItem('coach_session', JSON.stringify(legacyCoach));
+      const legacyName = [legacyCoach.first_name, legacyCoach.last_name].filter(Boolean).join(' ') || 'Coach';
+      toast({ title: "Login Successful", description: `Welcome back, ${legacyName}!` });
       navigate("/dashboard/coach");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid email or password",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     } finally {
@@ -101,12 +109,12 @@ const CoachLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email or Coach ID</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="coach@apssurfschool.com"
+                  placeholder="coach@apssurfschool.com or T01"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
