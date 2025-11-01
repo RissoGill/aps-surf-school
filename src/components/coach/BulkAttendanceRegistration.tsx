@@ -105,6 +105,31 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
     setIsSubmitting(true);
 
     try {
+      // Check for duplicate attendance records (same date and shift)
+      const { data: existingRecords, error: duplicateCheckError } = await supabase
+        .from('attendance')
+        .select('athlete_id')
+        .in('athlete_id', selectedAthletes)
+        .eq('date', selectedDate)
+        .eq('shift', selectedShift);
+
+      if (duplicateCheckError) {
+        console.error('Error checking duplicates:', duplicateCheckError);
+      }
+
+      if (existingRecords && existingRecords.length > 0) {
+        const duplicateAthleteIds = existingRecords.map(r => r.athlete_id);
+        const duplicateNames = duplicateAthleteIds.map(id => getAthleteName(id)).join(', ');
+        
+        toast({
+          title: "Duplicate Attendance Detected",
+          description: `The following athletes already have attendance registered for ${selectedDate} (${selectedShift}): ${duplicateNames}`,
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Check pack tokens for Pack athletes before creating records
       const packAthletes = selectedAthletes.filter(id => {
         const athlete = athletes.find(a => a.athlete_id === id);
