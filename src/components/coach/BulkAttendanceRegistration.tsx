@@ -239,24 +239,22 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label htmlFor="training-date" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Select Training Date
-            </Label>
+            <Label htmlFor="training-date">Training Date</Label>
             <Input
               id="training-date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full"
             />
           </div>
 
           {/* Shift Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="training-shift">Shift *</Label>
+            <Label htmlFor="training-shift">Shift</Label>
             <Select value={selectedShift} onValueChange={setSelectedShift}>
-              <SelectTrigger id="training-shift">
-                <SelectValue />
+              <SelectTrigger id="training-shift" className="w-full">
+                <SelectValue placeholder="Select shift" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Morning">Morning</SelectItem>
@@ -267,10 +265,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
           {/* Status Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="attendance-status">Status</Label>
+            <Label htmlFor="attendance-status">Attendance Status</Label>
             <Select value={attendanceStatus} onValueChange={setAttendanceStatus}>
-              <SelectTrigger id="attendance-status">
-                <SelectValue />
+              <SelectTrigger id="attendance-status" className="w-full">
+                <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Present">Present</SelectItem>
