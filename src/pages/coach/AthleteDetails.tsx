@@ -322,7 +322,7 @@ const AthleteDetails = () => {
               value="attendance" 
               className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm font-semibold px-2"
             >
-              Attendance
+              Upload media
             </TabsTrigger>
           </TabsList>
 
@@ -464,14 +464,14 @@ const AthleteDetails = () => {
             </Card>
           </TabsContent>
 
-          {/* Attendance (COACH EDITABLE) */}
+          {/* Upload Media (COACH EDITABLE) */}
           <TabsContent value="attendance" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
                   <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    {getMonthName(selectedMonth.month, selectedMonth.year)} Attendance
+                    <Camera className="h-5 w-5 text-primary" />
+                    {getMonthName(selectedMonth.month, selectedMonth.year)} Media
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Button 
@@ -493,7 +493,7 @@ const AthleteDetails = () => {
                   </div>
                 </div>
                 <CardDescription className="text-primary font-medium">
-                  ✏️ Editable by Coach
+                  Upload photos and videos with date and location
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -513,7 +513,10 @@ const AthleteDetails = () => {
                       getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((session) => (
                         <div key={session.Id} className="border border-border rounded-lg p-4 space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{session.Date || 'N/A'}</h4>
+                            <h4 className="font-medium flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {session.Date || 'N/A'}
+                            </h4>
                             <div className="flex gap-2">
                               {editingAttendance === session.Id ? (
                                 <Button 
@@ -547,61 +550,18 @@ const AthleteDetails = () => {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Status</p>
-                              {editingAttendance === session.Id ? (
-                                <Select
-                                  value={editedRecord.status || session.status || ''}
-                                  onValueChange={(value) => updateAttendanceField('status', value)}
-                                >
-                                  <SelectTrigger className="touch-friendly">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {statusOptions.map(status => (
-                                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <Badge className={getStatusColor(session.status || '')}>
-                                  {session.status || 'N/A'}
-                                </Badge>
-                              )}
-                            </div>
-
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">Coach</p>
-                              {editingAttendance === session.Id ? (
-                                <Select
-                                  value={editedRecord.coach || session.coach || ''}
-                                  onValueChange={(value) => updateAttendanceField('coach', value)}
-                                >
-                                  <SelectTrigger className="touch-friendly">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {coaches.map(coach => (
-                                      <SelectItem key={coach} value={coach}>{coach}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              ) : (
-                                <p className="font-medium">{session.coach || 'N/A'}</p>
-                              )}
-                            </div>
-                          </div>
-
                           <div>
-                            <p className="text-sm text-muted-foreground mb-1">Beach Location</p>
+                            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              Beach Location
+                            </p>
                             {editingAttendance === session.Id ? (
                               <Select
                                 value={editedRecord.praia || session.praia || ''}
                                 onValueChange={(value) => updateAttendanceField('praia', value)}
                               >
                                 <SelectTrigger className="touch-friendly">
-                                  <SelectValue />
+                                  <SelectValue placeholder="Select location" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {beaches.map(beach => (
@@ -610,36 +570,20 @@ const AthleteDetails = () => {
                                 </SelectContent>
                               </Select>
                             ) : (
-                              <p className="font-medium">{session.praia || 'N/A'}</p>
+                              <p className="font-medium">{session.praia || 'Not specified'}</p>
                             )}
                           </div>
 
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-1">Coach Observations</p>
-                            {editingAttendance === session.Id ? (
-                              <Textarea
-                                value={editedRecord.notas || session.notas || ''}
-                                onChange={(e) => updateAttendanceField('notas', e.target.value)}
-                                placeholder="Add your observations about this session..."
-                                className="touch-friendly"
-                              />
-                            ) : (
-                              <p className="text-sm bg-muted/50 p-2 rounded">{session.notas || 'No notes'}</p>
-                            )}
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="flex-1 touch-friendly">
+                              <Camera className="h-4 w-4 mr-1" />
+                              Upload Photo
+                            </Button>
+                            <Button variant="outline" size="sm" className="flex-1 touch-friendly">
+                              <Camera className="h-4 w-4 mr-1" />
+                              Upload Video
+                            </Button>
                           </div>
-
-                          {editingAttendance === session.Id && (
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm" className="flex-1 touch-friendly">
-                                <Camera className="h-4 w-4 mr-1" />
-                                Upload Photo
-                              </Button>
-                              <Button variant="outline" size="sm" className="flex-1 touch-friendly">
-                                <Camera className="h-4 w-4 mr-1" />
-                                Upload Video
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       ))
                     )}
@@ -648,28 +592,6 @@ const AthleteDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Summary */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle>Monthly Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-2xl font-bold text-success">12</p>
-                    <p className="text-xs text-muted-foreground">Present</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-warning">1</p>
-                    <p className="text-xs text-muted-foreground">Justified</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-destructive">0</p>
-                    <p className="text-xs text-muted-foreground">Absent</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
         </>
