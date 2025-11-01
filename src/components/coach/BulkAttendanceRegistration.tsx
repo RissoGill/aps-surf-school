@@ -253,8 +253,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           <div className="space-y-2">
             <Label htmlFor="training-shift">Shift</Label>
             <Select value={selectedShift} onValueChange={setSelectedShift}>
-              <SelectTrigger id="training-shift" className="w-full">
-                <SelectValue placeholder="Select shift" />
+              <SelectTrigger id="training-shift">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Morning">Morning</SelectItem>
@@ -265,10 +265,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
           {/* Status Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="attendance-status">Attendance Status</Label>
+            <Label htmlFor="attendance-status">Status</Label>
             <Select value={attendanceStatus} onValueChange={setAttendanceStatus}>
-              <SelectTrigger id="attendance-status" className="w-full">
-                <SelectValue placeholder="Select status" />
+              <SelectTrigger id="attendance-status">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Present">Present</SelectItem>
