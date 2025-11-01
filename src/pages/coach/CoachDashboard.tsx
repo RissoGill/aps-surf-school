@@ -1122,7 +1122,7 @@ const CoachDashboard = () => {
                             value="add"
                             className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm px-2"
                           >
-                            Attendance
+                            Upload media
                           </TabsTrigger>
                           <TabsTrigger 
                             value="registrations"
@@ -1150,7 +1150,7 @@ const CoachDashboard = () => {
                         
                         <TabsContent value="add" className="space-y-4">
                           <div className="pt-4 space-y-4">
-                            <h3 className="text-lg font-semibold">Record Attendance for {athlete.first_name} {athlete.last_name}</h3>
+                            <h3 className="text-lg font-semibold">Upload Media for {athlete.first_name} {athlete.last_name}</h3>
                             
                             <div className="space-y-2">
                               <Label>Date</Label>
@@ -1162,43 +1162,11 @@ const CoachDashboard = () => {
                             </div>
                             
                             <div className="space-y-2">
-                              <Label>Status *</Label>
-                              <Select value={newAttendance.status} onValueChange={(value) => setNewAttendance({ ...newAttendance, status: value })}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Present">Present</SelectItem>
-                                  <SelectItem value="Absent">Absent</SelectItem>
-                                  <SelectItem value="Justified">Justified</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label>Coach</Label>
-                              <Input
-                                value={newAttendance.coach}
-                                onChange={(e) => setNewAttendance({ ...newAttendance, coach: e.target.value })}
-                                placeholder="Enter coach name"
-                              />
-                            </div>
-                            
-                            <div className="space-y-2">
                               <Label>Beach Location</Label>
                               <Input
                                 value={newAttendance.praia}
                                 onChange={(e) => setNewAttendance({ ...newAttendance, praia: e.target.value })}
                                 placeholder="Enter beach name"
-                              />
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <Label>Notes</Label>
-                              <Textarea
-                                value={newAttendance.notas}
-                                onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
-                                placeholder="Enter any notes"
                               />
                             </div>
                             
@@ -1294,7 +1262,7 @@ const CoachDashboard = () => {
                                   Uploading...
                                 </>
                               ) : (
-                                "Save Attendance"
+                                "Upload Media"
                               )}
                             </Button>
                           </div>
