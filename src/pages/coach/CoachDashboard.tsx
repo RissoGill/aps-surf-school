@@ -1020,43 +1020,56 @@ const CoachDashboard = () => {
           </Card>
         )}
 
-        {/* Search Bar */}
-        <div ref={searchRef} className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Search athletes by name..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowDropdown(true);
-            }}
-            onFocus={() => setShowDropdown(true)}
-            className="pl-10 touch-friendly shadow-soft"
-          />
-          
-          {/* Autocomplete Dropdown */}
-          {showDropdown && searchQuery && filteredAthletes.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-              {filteredAthletes.slice(0, 5).map((athlete) => (
-                <button
-                  key={athlete.athlete_id}
-                  onClick={() => handleSelectAthlete(athlete)}
-                  className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
-                >
-                  <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">
-                      {athlete.first_name} {athlete.last_name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
-                    </p>
-                  </div>
-                </button>
-              ))}
+        {/* Search Athletes Card */}
+        <Card className="shadow-soft mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Search athletes by Name
+            </CardTitle>
+            <CardDescription>
+              Find and select athletes to view their details
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div ref={searchRef} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                placeholder="Search athletes by name..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                className="pl-10 touch-friendly"
+              />
+              
+              {/* Autocomplete Dropdown */}
+              {showDropdown && searchQuery && filteredAthletes.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {filteredAthletes.slice(0, 5).map((athlete) => (
+                    <button
+                      key={athlete.athlete_id}
+                      onClick={() => handleSelectAthlete(athlete)}
+                      className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
+                    >
+                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">
+                          {athlete.first_name} {athlete.last_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Athletes List - Only shown when searching */}
         {searchQuery && (
