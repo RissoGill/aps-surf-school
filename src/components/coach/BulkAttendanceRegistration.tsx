@@ -218,7 +218,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       <CardHeader>
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          <CardTitle>Register Attendance</CardTitle>
+          <CardTitle>Bulk Attendance Registration</CardTitle>
         </div>
         <CardDescription>
           Quickly mark attendance for multiple athletes at once
