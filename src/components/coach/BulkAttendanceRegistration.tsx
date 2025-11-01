@@ -21,6 +21,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
   const [attendanceStatus, setAttendanceStatus] = useState("Present");
+  const [selectedShift, setSelectedShift] = useState("Morning");
   const [beachLocation, setBeachLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,6 +93,15 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       return;
     }
 
+    if (!selectedShift) {
+      toast({
+        title: "Shift Required",
+        description: "Please select a shift (Morning or Afternoon).",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -142,6 +152,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           athlete_id: athleteId,
           date: selectedDate,
           status: attendanceStatus,
+          shift: selectedShift,
           coach_id: coachId,
           beach_location: beachLocation || null,
           notes: notes || null,
@@ -225,7 +236,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Date Picker */}
           <div className="space-y-2">
             <Label htmlFor="training-date" className="flex items-center gap-2">
@@ -238,6 +249,20 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
             />
+          </div>
+
+          {/* Shift Dropdown */}
+          <div className="space-y-2">
+            <Label htmlFor="training-shift">Shift *</Label>
+            <Select value={selectedShift} onValueChange={setSelectedShift}>
+              <SelectTrigger id="training-shift">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Morning">Morning</SelectItem>
+                <SelectItem value="Afternoon">Afternoon</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Status Dropdown */}
