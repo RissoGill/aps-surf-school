@@ -130,45 +130,11 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         return;
       }
 
-      // Check pack tokens for Pack athletes before creating records
+      // Get athletes with pack plans (no longer blocking, just tracking)
       const packAthletes = selectedAthletes.filter(id => {
         const athlete = athletes.find(a => a.athlete_id === id);
         return athlete?.plan_type === 'Pack';
       });
-
-      if (packAthletes.length > 0) {
-        const { data: packs, error: packsError } = await supabase
-          .from('packs')
-          .select('athlete_id, total_tokens, used_tokens')
-          .in('athlete_id', packAthletes)
-          .eq('active', true);
-
-        if (packsError) throw packsError;
-
-        const insufficientTokens: string[] = [];
-        packAthletes.forEach(athleteId => {
-          const pack = packs?.find(p => p.athlete_id === athleteId);
-          if (!pack) {
-            insufficientTokens.push(athleteId);
-            return;
-          }
-          const remaining = parseInt(pack.total_tokens || '0') - parseInt(pack.used_tokens || '0');
-          if (remaining <= 0) {
-            insufficientTokens.push(athleteId);
-          }
-        });
-
-        if (insufficientTokens.length > 0) {
-          const names = insufficientTokens.map(id => getAthleteName(id)).join(', ');
-          toast({
-            title: "Insufficient Pack Tokens",
-            description: `The following athletes don't have pack tokens: ${names}`,
-            variant: "destructive",
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      }
 
       // Create attendance records for all selected athletes
       const attendancePromises = selectedAthletes.map(async (athleteId) => {
@@ -200,7 +166,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           }
         }
 
-        // Increment pack tokens if Pack athlete
+        // Increment pack tokens if Pack athlete (allow negative balance)
         const athlete = athletes.find(a => a.athlete_id === athleteId);
         if (athlete?.plan_type === 'Pack') {
           const { data: packData } = await supabase

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
@@ -25,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChampionshipsTab } from "@/components/coach/ChampionshipsTab";
 import { EstagiosTab } from "@/components/coach/EstagiosTab";
 import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
+import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 
 interface AttendanceRecord {
   id: string;
@@ -333,10 +335,10 @@ const CoachDashboard = () => {
   });
 
   const handleSaveAttendance = async (athleteId: string) => {
-    if (!athleteId || !newAttendance.status) {
+    if (!athleteId || !newAttendance.date) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in the date before uploading",
         variant: "destructive",
       });
       return;
@@ -354,54 +356,6 @@ const CoachDashboard = () => {
     setIsUploading(true);
 
     try {
-      // Check if athlete has a Pack plan and validate tokens
-      const { data: athleteData, error: athleteError } = await supabase
-        .from('atletas')
-        .select('plan_type')
-        .eq('athlete_id', athleteId)
-        .single();
-
-      if (athleteError) throw athleteError;
-
-      if (athleteData?.plan_type === 'Pack') {
-        // Find active pack for this athlete
-        const { data: packData, error: packError } = await supabase
-          .from('packs')
-          .select('*')
-          .eq('athlete_id', athleteId)
-          .eq('active', true)
-          .order('purchase_date', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (packError) throw packError;
-
-        if (!packData) {
-          toast({
-            title: "No Active Pack",
-            description: "This athlete doesn't have an active pack. Please purchase a pack first.",
-            variant: "destructive",
-          });
-          setIsUploading(false);
-          return;
-        }
-
-        // Check remaining tokens
-        const totalTokens = parseInt(packData.total_tokens || '0');
-        const usedTokens = parseInt(packData.used_tokens || '0');
-        const remainingTokens = totalTokens - usedTokens;
-
-        if (remainingTokens <= 0) {
-          toast({
-            title: "No Remaining Passes",
-            description: "No remaining passes for this student. All tokens have been used.",
-            variant: "destructive",
-          });
-          setIsUploading(false);
-          return;
-        }
-      }
-
       // Upload photos and videos to storage
       const photoUrls: string[] = [];
       const videoUrls: string[] = [];
@@ -446,10 +400,10 @@ const CoachDashboard = () => {
         id: `${athleteId}-${newAttendance.date}-${Date.now()}`,
         athlete_id: athleteId,
         date: newAttendance.date,
-        status: newAttendance.status,
+        status: 'Present',
         coach_id: coachData?.coach_id || null,
         beach_location: newAttendance.praia || null,
-        notes: newAttendance.notas || null,
+        notes: null,
         photos: photoUrls.length > 0 ? photoUrls : null,
         videos: videoUrls.length > 0 ? videoUrls : null,
       } as any;
@@ -470,7 +424,7 @@ const CoachDashboard = () => {
         }
       }
 
-      // If athlete has Pack plan, increment used_tokens
+      // If athlete has Pack plan, increment used_tokens (allow negative balance)
       const { data: athleteCheckData } = await supabase
         .from('atletas')
         .select('plan_type')
@@ -1134,7 +1088,13 @@ const CoachDashboard = () => {
                         
                         <TabsContent value="view" className="space-y-4">
                           {/* Athlete Profile Information */}
-                          <div className="pt-4">
+                          <div className="pt-4 space-y-4">
+                            <PackBalanceAlert 
+                              athleteId={athlete.athlete_id} 
+                              athleteName={`${athlete.first_name} ${athlete.last_name}`}
+                              showFor="coach"
+                            />
+                            
                             <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
                           </div>
 

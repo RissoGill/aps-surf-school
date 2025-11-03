@@ -14,6 +14,7 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
+import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 
 interface Athlete {
   athlete_id: string;
@@ -330,6 +331,13 @@ useEffect(() => {
       </div>
       
       <main className="mobile-container py-6">
+        {athlete && (
+          <PackBalanceAlert 
+            athleteId={athlete.athlete_id} 
+            showFor="athlete"
+          />
+        )}
+        
         {/* Athlete Info Header */}
         <Card className="shadow-medium mb-6">
           <CardContent className="p-6">

@@ -32,6 +32,7 @@ export type Database = {
           mother_phone: number | null
           phone: string | null
           pickup_address: string | null
+          plan_type: string | null
           sql_line: string | null
           surf_level: string | null
           training_days: string | null
@@ -55,6 +56,7 @@ export type Database = {
           mother_phone?: number | null
           phone?: string | null
           pickup_address?: string | null
+          plan_type?: string | null
           sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           mother_phone?: number | null
           phone?: string | null
           pickup_address?: string | null
+          plan_type?: string | null
           sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null
@@ -95,6 +98,7 @@ export type Database = {
           id: string
           notes: string | null
           photos: string | null
+          shift: string | null
           status: string | null
           videos: string | null
         }
@@ -106,6 +110,7 @@ export type Database = {
           id: string
           notes?: string | null
           photos?: string | null
+          shift?: string | null
           status?: string | null
           videos?: string | null
         }
@@ -117,6 +122,7 @@ export type Database = {
           id?: string
           notes?: string | null
           photos?: string | null
+          shift?: string | null
           status?: string | null
           videos?: string | null
         }
@@ -290,6 +296,51 @@ export type Database = {
           },
         ]
       }
+      packs: {
+        Row: {
+          active: boolean | null
+          athlete_id: string
+          id: string
+          payment_id: string | null
+          purchase_date: string | null
+          total_tokens: string | null
+          used_tokens: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          athlete_id: string
+          id: string
+          payment_id?: string | null
+          purchase_date?: string | null
+          total_tokens?: string | null
+          used_tokens?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          athlete_id?: string
+          id?: string
+          payment_id?: string | null
+          purchase_date?: string | null
+          total_tokens?: string | null
+          used_tokens?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packs_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "atletas"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "packs_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["payment_id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_due: number | null
@@ -298,6 +349,7 @@ export type Database = {
           month: string | null
           payment_date: string | null
           payment_id: string
+          plan_type: string | null
           status: string | null
           year: number | null
         }
@@ -308,6 +360,7 @@ export type Database = {
           month?: string | null
           payment_date?: string | null
           payment_id: string
+          plan_type?: string | null
           status?: string | null
           year?: number | null
         }
@@ -318,6 +371,7 @@ export type Database = {
           month?: string | null
           payment_date?: string | null
           payment_id?: string
+          plan_type?: string | null
           status?: string | null
           year?: number | null
         }
