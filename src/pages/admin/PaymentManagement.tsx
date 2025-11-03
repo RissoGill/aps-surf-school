@@ -23,6 +23,7 @@ interface Payment {
   amount_paid: number;
   status: string;
   payment_date: string | null;
+  plan_type: string | null;
   athlete_name?: string;
 }
 
@@ -36,7 +37,8 @@ interface Athlete {
 const paymentEditSchema = z.object({
   amount_due: z.number().min(0, "Amount due must be positive"),
   amount_paid: z.number().min(0, "Amount paid must be positive"),
-  payment_date: z.string().nullable()
+  payment_date: z.string().nullable(),
+  plan_type: z.string().nullable()
 });
 
 const PaymentManagement = () => {
@@ -50,11 +52,13 @@ const PaymentManagement = () => {
     amount_paid: string;
     status: string;
     payment_date: string;
+    plan_type: string;
   }>({
     amount_due: "",
     amount_paid: "",
     status: "",
-    payment_date: ""
+    payment_date: "",
+    plan_type: ""
   });
 
   // Fetch all athletes for search
@@ -159,7 +163,8 @@ const PaymentManagement = () => {
       amount_due: payment.amount_due.toString(),
       amount_paid: payment.amount_paid.toString(),
       status: payment.status,
-      payment_date: payment.payment_date || ""
+      payment_date: payment.payment_date || "",
+      plan_type: payment.plan_type || ""
     });
   };
 
@@ -169,7 +174,8 @@ const PaymentManagement = () => {
       amount_due: "",
       amount_paid: "",
       status: "",
-      payment_date: ""
+      payment_date: "",
+      plan_type: ""
     });
   };
 
@@ -179,7 +185,8 @@ const PaymentManagement = () => {
       const validated = paymentEditSchema.parse({
         amount_due: parseFloat(editForm.amount_due),
         amount_paid: parseFloat(editForm.amount_paid),
-        payment_date: editForm.payment_date || null
+        payment_date: editForm.payment_date || null,
+        plan_type: editForm.plan_type || null
       });
 
       // Auto-calculate status based on amounts
@@ -202,7 +209,8 @@ const PaymentManagement = () => {
           amount_due: validated.amount_due,
           amount_paid: validated.amount_paid,
           status: calculatedStatus,
-          payment_date: validated.payment_date
+          payment_date: validated.payment_date,
+          plan_type: validated.plan_type
         })
         .eq('payment_id', paymentId);
 
@@ -455,6 +463,7 @@ const PaymentManagement = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Period</TableHead>
+                          <TableHead>Plan Type</TableHead>
                           <TableHead>Amount Due</TableHead>
                           <TableHead>Amount Paid</TableHead>
                           <TableHead>Status</TableHead>
@@ -471,6 +480,28 @@ const PaymentManagement = () => {
                           return (
                             <TableRow key={payment.payment_id}>
                               <TableCell className="font-medium">{payment.month} {payment.year}</TableCell>
+                              
+                              {/* Plan Type */}
+                              <TableCell>
+                                {isEditing ? (
+                                  <Select
+                                    value={editForm.plan_type || ''}
+                                    onValueChange={(value) => setEditForm({ ...editForm, plan_type: value })}
+                                  >
+                                    <SelectTrigger className="w-32">
+                                      <SelectValue placeholder="Select plan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="month">Month</SelectItem>
+                                      <SelectItem value="pack1">Pack 1</SelectItem>
+                                      <SelectItem value="pack5">Pack 5</SelectItem>
+                                      <SelectItem value="pack10">Pack 10</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  payment.plan_type || '-'
+                                )}
+                              </TableCell>
                               
                               {/* Amount Due */}
                               <TableCell>
