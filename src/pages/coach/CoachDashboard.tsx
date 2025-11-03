@@ -897,7 +897,7 @@ const CoachDashboard = () => {
               ) : (
                 <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
               )}
-              <p className="text-sm text-muted-foreground">Total Days</p>
+              <p className="text-sm text-muted-foreground">Total Sessions</p>
             </CardContent>
           </Card>
         </div>
