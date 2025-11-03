@@ -800,7 +800,7 @@ useEffect(() => {
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm font-bold text-foreground">
-                                    {pack.total_tokens} tokens
+                                    {pack.total_tokens} sessions
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     Payment: {pack.payment_id}
