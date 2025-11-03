@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { Calendar, ChevronDown, ChevronUp, User, MapPin } from "lucide-react";
 
 interface AttendanceRecord {
   id: string;
@@ -22,6 +26,9 @@ interface AnnualSummary {
 }
 
 export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryProps) => {
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Group attendance by year - keep original status for display, but count separately
   const annualSummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
@@ -58,6 +65,26 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
   if (sortedSummaries.length === 0) {
     return null;
   }
+
+  // Set default selected year to most recent
+  if (!selectedYear && sortedSummaries.length > 0) {
+    setSelectedYear(sortedSummaries[0].year.toString());
+  }
+
+  // Filter attendance records for selected year
+  const selectedYearRecords = attendance.filter(record => {
+    if (!record.date || !selectedYear) return false;
+    const recordDate = new Date(record.date);
+    return recordDate.getFullYear() === parseInt(selectedYear);
+  }).sort((a, b) => {
+    if (!a.date || !b.date) return 0;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year);
+    setIsExpanded(false);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -109,6 +136,80 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
             </div>
           </div>
         ))}
+
+        {/* Year selector and details */}
+        <div className="pt-4 border-t space-y-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">View details for:</label>
+            <Select value={selectedYear} onValueChange={handleYearChange}>
+              <SelectTrigger className="w-32 bg-background">
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {sortedSummaries.map((summary) => (
+                  <SelectItem key={summary.year} value={summary.year.toString()}>
+                    {summary.year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedYear && (
+            <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full">
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-2" />
+                      Hide attendance records
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-2" />
+                      Show {selectedYearRecords.length} attendance records
+                    </>
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pt-3">
+                {selectedYearRecords.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No attendance records for {selectedYear}
+                  </p>
+                ) : (
+                  selectedYearRecords.map((record) => (
+                    <div key={record.id} className="border border-border rounded-lg p-3 space-y-2 bg-card">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-sm">{record.date || 'N/A'}</p>
+                        <Badge className={getStatusColor(record.status || '')}>
+                          {getStatusLabel(record.status || 'Unknown')}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-1">
+                          <User className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Coach:</span> 
+                          <span className="font-medium">{record.coach || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-muted-foreground">Beach:</span> 
+                          <span className="font-medium">{record.beach_location || 'N/A'}</span>
+                        </div>
+                        {record.notes && (
+                          <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded">
+                            <span className="font-medium">Notes:</span> {record.notes}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
