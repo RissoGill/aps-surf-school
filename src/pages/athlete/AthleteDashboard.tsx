@@ -359,6 +359,30 @@ useEffect(() => {
     },
     enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
   });
+
+  // Fetch all pack history
+  const { data: packHistory = [] } = useQuery({
+    queryKey: ['pack-history', athleteId],
+    queryFn: async () => {
+      if (!athleteId || !athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('purchase_date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching pack history:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+  });
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Athlete Dashboard" showBack backTo="/" />
@@ -723,7 +747,7 @@ useEffect(() => {
               <CardContent>
                 {isLoadingAttendance ? (
                   <Skeleton className="h-20 w-full" />
-                ) : athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' ? (
+                 ) : athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' ? (
                   // Pack plan summary
                   packBalance ? (
                     <div className="space-y-4">
@@ -746,6 +770,47 @@ useEffect(() => {
                       <div className="text-center text-xs text-muted-foreground pt-2">
                         Pack active since {new Date(packBalance.purchaseDate).toLocaleDateString()}
                       </div>
+
+                      {/* Purchase History */}
+                      {packHistory.length > 0 && (
+                        <div className="pt-4 border-t space-y-3">
+                          <h4 className="text-sm font-semibold text-foreground">Purchase History</h4>
+                          <div className="space-y-2">
+                            {packHistory.map((pack) => (
+                              <div 
+                                key={pack.id} 
+                                className={`flex items-center justify-between p-3 rounded-lg border ${
+                                  pack.active 
+                                    ? 'border-primary bg-primary/5' 
+                                    : 'border-border bg-muted/30'
+                                }`}
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="text-sm font-medium">
+                                      {new Date(pack.purchase_date).toLocaleDateString()}
+                                    </p>
+                                    {pack.active && (
+                                      <Badge className="bg-success text-white text-xs">Active</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {pack.total_tokens} sessions pack
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-bold text-foreground">
+                                    {pack.total_tokens} tokens
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Payment: {pack.payment_id}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="text-center text-muted-foreground py-4">No active pack found</p>
