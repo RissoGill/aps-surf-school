@@ -49,13 +49,26 @@ export async function calculatePackBalance(athleteId: string): Promise<PackBalan
   }
 
   const totalTokens = parseInt(pack.total_tokens) || 0;
-  const usedTokens = parseInt(pack.used_tokens) || 0;
-  const balance = totalTokens - usedTokens;
+
+  // Count actual attendance from purchase date
+  const { data: attendanceRecords, error: attendanceError } = await supabase
+    .from('attendance')
+    .select('date, status')
+    .eq('athlete_id', athleteId)
+    .gte('date', pack.purchase_date)
+    .eq('status', 'Present');
+
+  if (attendanceError) {
+    console.error('Error fetching attendance:', attendanceError);
+  }
+
+  const actualUsedTokens = attendanceRecords?.length || 0;
+  const balance = totalTokens - actualUsedTokens;
 
   return {
     athleteId,
     totalTokens,
-    usedTokens,
+    usedTokens: actualUsedTokens,
     balance,
     isNegative: balance < 0,
     packType: athlete.plan_type,

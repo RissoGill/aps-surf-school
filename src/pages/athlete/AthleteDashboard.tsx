@@ -338,7 +338,7 @@ useEffect(() => {
       const usedTokens = parseInt(pack.used_tokens) || 0;
       const balance = totalTokens - usedTokens;
 
-      // Count attendance from purchase date
+      // Count attendance from purchase date - this is the actual usage
       const purchaseDate = new Date(pack.purchase_date);
       const attendanceFromPurchase = attendanceRecords.filter(record => {
         if (!record.date) return false;
@@ -346,12 +346,15 @@ useEffect(() => {
         return recordDate >= purchaseDate && record.status === "Present";
       });
 
+      const actualUsedTokens = attendanceFromPurchase.length;
+      const actualBalance = totalTokens - actualUsedTokens;
+
       return {
         totalTokens,
-        usedTokens,
-        balance,
+        usedTokens: actualUsedTokens,
+        balance: actualBalance,
         purchaseDate: pack.purchase_date,
-        sessionsUsed: attendanceFromPurchase.length
+        sessionsUsed: actualUsedTokens
       };
     },
     enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
