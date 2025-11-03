@@ -668,7 +668,11 @@ useEffect(() => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Monthly Summary</CardTitle>
+                <CardTitle className="text-2xl font-bold">
+                  {athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' 
+                    ? 'Your pack summary' 
+                    : 'Monthly Summary'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingAttendance ? (
