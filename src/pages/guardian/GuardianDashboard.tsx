@@ -12,6 +12,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
+import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 
 interface AttendanceRecord {
   Id: string;
@@ -976,6 +977,12 @@ const GuardianDashboard = () => {
         {/* Child Info Header */}
         <Card className="shadow-medium mb-6">
           <CardContent className="p-6">
+            <PackBalanceAlert 
+              athleteId={athlete.athlete_id} 
+              athleteName={`${athlete.first_name} ${athlete.last_name}`}
+              showFor="guardian"
+            />
+            
             <div className="text-center">
               <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-warning" />
