@@ -313,6 +313,49 @@ useEffect(() => {
     const absent = currentMonthRecords.filter(r => r.status === "Absent").length;
     return { present, justified, absent };
   };
+
+  // Fetch pack balance for pack athletes
+  const { data: packBalance } = useQuery({
+    queryKey: ['pack-balance', athleteId],
+    queryFn: async () => {
+      if (!athleteId || !athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
+        return null;
+      }
+
+      // Get active pack
+      const { data: pack, error } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .eq('active', true)
+        .order('purchase_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !pack) return null;
+
+      const totalTokens = parseInt(pack.total_tokens) || 0;
+      const usedTokens = parseInt(pack.used_tokens) || 0;
+      const balance = totalTokens - usedTokens;
+
+      // Count attendance from purchase date
+      const purchaseDate = new Date(pack.purchase_date);
+      const attendanceFromPurchase = attendanceRecords.filter(record => {
+        if (!record.date) return false;
+        const recordDate = new Date(record.date);
+        return recordDate >= purchaseDate && record.status === "Present";
+      });
+
+      return {
+        totalTokens,
+        usedTokens,
+        balance,
+        purchaseDate: pack.purchase_date,
+        sessionsUsed: attendanceFromPurchase.length
+      };
+    },
+    enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+  });
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Athlete Dashboard" showBack backTo="/" />
@@ -677,7 +720,35 @@ useEffect(() => {
               <CardContent>
                 {isLoadingAttendance ? (
                   <Skeleton className="h-20 w-full" />
+                ) : athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' ? (
+                  // Pack plan summary
+                  packBalance ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-primary">{packBalance.totalTokens}</p>
+                          <p className="text-xs text-muted-foreground">Total Sessions</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-success">{packBalance.usedTokens}</p>
+                          <p className="text-xs text-muted-foreground">Sessions Used</p>
+                        </div>
+                      </div>
+                      <div className="text-center pt-4 border-t">
+                        <p className={`text-3xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
+                          {packBalance.balance}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Remaining Sessions</p>
+                      </div>
+                      <div className="text-center text-xs text-muted-foreground pt-2">
+                        Pack active since {new Date(packBalance.purchaseDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-4">No active pack found</p>
+                  )
                 ) : (
+                  // Monthly plan summary
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-2xl font-bold text-success">{calculateMonthlySummary().present}</p>
