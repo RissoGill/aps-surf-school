@@ -25,7 +25,7 @@ interface AttendanceRecord {
   videos: string[] | null;
 }
 
-const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
+const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any }) => {
   const queryClient = useQueryClient();
   useEffect(() => {
     if (!athleteId) return;
@@ -35,10 +35,12 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
         queryClient.invalidateQueries({ queryKey: ['guardian-attendance', athleteId] });
         queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', athleteId] });
         queryClient.invalidateQueries({ queryKey: ['guardian-media', athleteId] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-pack-balance', athleteId] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [athleteId, queryClient]);
+  
   const { data: attendanceRecords = [], isLoading } = useQuery({
     queryKey: ['guardian-attendance', athleteId],
     queryFn: async () => {
@@ -72,6 +74,74 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
     },
   });
 
+  // Fetch pack balance for pack athletes
+  const { data: packBalance } = useQuery({
+    queryKey: ['guardian-pack-balance', athleteId],
+    queryFn: async () => {
+      if (!athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
+        return null;
+      }
+
+      // Get active pack
+      const { data: pack, error } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .eq('active', true)
+        .order('purchase_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !pack) return null;
+
+      const totalTokens = parseInt(pack.total_tokens) || 0;
+
+      // Count attendance from purchase date - this is the actual usage
+      const purchaseDate = new Date(pack.purchase_date);
+      const attendanceFromPurchase = attendanceRecords.filter(record => {
+        if (!record.Date) return false;
+        const recordDate = new Date(record.Date);
+        return recordDate >= purchaseDate && record.status === "Present";
+      });
+
+      const actualUsedTokens = attendanceFromPurchase.length;
+      const actualBalance = totalTokens - actualUsedTokens;
+
+      return {
+        totalTokens,
+        usedTokens: actualUsedTokens,
+        balance: actualBalance,
+        purchaseDate: pack.purchase_date,
+        sessionsUsed: actualUsedTokens
+      };
+    },
+    enabled: !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+  });
+
+  // Fetch all pack history
+  const { data: packHistory = [] } = useQuery({
+    queryKey: ['guardian-pack-history', athleteId],
+    queryFn: async () => {
+      if (!athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .order('purchase_date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching pack history:', error);
+        return [];
+      }
+
+      return data || [];
+    },
+    enabled: !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+  });
+
   const getStatusColor = (status: string | null) => {
     if (!status) return "bg-secondary/10 text-secondary-foreground";
     const normalizedStatus = status.toLowerCase();
@@ -81,67 +151,149 @@ const AttendanceTab = ({ athleteId }: { athleteId: string }) => {
     return "bg-secondary/10 text-secondary-foreground";
   };
 
+  const isPack = athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month';
+
   return (
-    <Card className="shadow-soft">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-          <Calendar className="h-6 w-6" />
-          Attendance Records
-        </CardTitle>
-        <CardDescription>Training session attendance history (from September 2025)</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="text-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-          </div>
-        ) : attendanceRecords.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No attendance records found
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {attendanceRecords.map((record) => {
-              const formattedDate = record.Date 
-                ? new Date(record.Date).toLocaleDateString('pt-PT', { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })
-                : '-';
-              
-              return (
-                <div key={record.Id} className="border border-border rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-medium">{formattedDate}</p>
-                    <Badge className={getStatusColor(record.status)}>
-                      {record.status || 'Unknown'}
-                    </Badge>
+    <>
+      {/* Pack Summary for pack athletes */}
+      {isPack && (
+        <Card className="shadow-soft mb-4">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Your pack summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {packBalance ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-primary">{packBalance.totalTokens}</p>
+                    <p className="text-xs text-muted-foreground">Total Sessions</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                    {record.coach && (
-                      <div>
-                        <span className="font-medium">Coach:</span> {record.coach}
-                      </div>
-                    )}
-                    {record.beach_location && (
-                      <div>
-                        <span className="font-medium">Beach:</span> {record.beach_location}
-                      </div>
-                    )}
-                    {record.notes && (
-                      <div className="col-span-2">
-                        <span className="font-medium">Notes:</span> {record.notes}
-                      </div>
-                    )}
+                  <div>
+                    <p className="text-2xl font-bold text-success">{packBalance.usedTokens}</p>
+                    <p className="text-xs text-muted-foreground">Sessions Used</p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                <div className="text-center pt-4 border-t">
+                  <p className={`text-3xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
+                    {packBalance.balance}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Remaining Sessions</p>
+                </div>
+                <div className="text-center text-xs text-muted-foreground pt-2">
+                  Pack active since {new Date(packBalance.purchaseDate).toLocaleDateString()}
+                </div>
+
+                {/* Purchase History */}
+                {packHistory.length > 0 && (
+                  <div className="pt-4 border-t space-y-3">
+                    <h4 className="text-sm font-semibold text-foreground">Purchase History</h4>
+                    <div className="space-y-2">
+                      {packHistory.map((pack) => (
+                        <div 
+                          key={pack.id} 
+                          className={`flex items-center justify-between p-3 rounded-lg border ${
+                            pack.active 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-border bg-muted/30'
+                          }`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-medium">
+                                {new Date(pack.purchase_date).toLocaleDateString()}
+                              </p>
+                              {pack.active && (
+                                <Badge className="bg-success text-white text-xs">Active</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {pack.total_tokens} sessions pack
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-foreground">
+                              {pack.total_tokens} sessions
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Payment: {pack.payment_id}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No active pack found</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Attendance Records */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+            <Calendar className="h-6 w-6" />
+            Attendance Records
+          </CardTitle>
+          <CardDescription>Training session attendance history (from September 2025)</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+            </div>
+          ) : attendanceRecords.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No attendance records found
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {attendanceRecords.map((record) => {
+                const formattedDate = record.Date 
+                  ? new Date(record.Date).toLocaleDateString('pt-PT', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })
+                  : '-';
+                
+                return (
+                  <div key={record.Id} className="border border-border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-medium">{formattedDate}</p>
+                      <Badge className={getStatusColor(record.status)}>
+                        {record.status || 'Unknown'}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                      {record.coach && (
+                        <div>
+                          <span className="font-medium">Coach:</span> {record.coach}
+                        </div>
+                      )}
+                      {record.beach_location && (
+                        <div>
+                          <span className="font-medium">Beach:</span> {record.beach_location}
+                        </div>
+                      )}
+                      {record.notes && (
+                        <div className="col-span-2">
+                          <span className="font-medium">Notes:</span> {record.notes}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </>
   );
 };
 
@@ -1214,7 +1366,7 @@ const GuardianDashboard = () => {
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
             {athlete && <AnnualAttendanceSummaryWrapper athleteId={athlete.athlete_id} />}
-            {athlete && <AttendanceTab athleteId={athlete.athlete_id} />}
+            {athlete && <AttendanceTab athleteId={athlete.athlete_id} athlete={athlete} />}
           </TabsContent>
 
           {/* Media Tab */}
