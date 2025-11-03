@@ -356,6 +356,27 @@ const CoachDashboard = () => {
     setIsUploading(true);
 
     try {
+      // Check for duplicate attendance records for this athlete and date
+      const { data: existingRecords, error: duplicateCheckError } = await supabase
+        .from('attendance')
+        .select('id')
+        .eq('athlete_id', athleteId)
+        .eq('date', newAttendance.date);
+
+      if (duplicateCheckError) {
+        console.error('Error checking duplicates:', duplicateCheckError);
+      }
+
+      if (existingRecords && existingRecords.length > 0) {
+        toast({
+          title: "Duplicate Attendance",
+          description: `Attendance for this athlete on ${newAttendance.date} has already been registered.`,
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        return;
+      }
+
       // Upload photos and videos to storage
       const photoUrls: string[] = [];
       const videoUrls: string[] = [];
