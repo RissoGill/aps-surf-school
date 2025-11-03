@@ -62,6 +62,20 @@ const AttendanceManagement = () => {
     }
   });
 
+  // Fetch all coaches for dropdown
+  const { data: allCoaches } = useQuery({
+    queryKey: ['all-coaches'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name')
+        .order('first_name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   // Fetch attendance records for selected athlete
   const { data: attendanceRecords, isLoading: isLoadingAttendance } = useQuery({
     queryKey: ['athlete-attendance', selectedAthlete?.athlete_id],
@@ -481,6 +495,21 @@ const AttendanceManagement = () => {
                   <SelectItem value="Present">Present</SelectItem>
                   <SelectItem value="Absent">Absent</SelectItem>
                   <SelectItem value="Justified">Justified</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="coach">Coach</Label>
+              <Select value={editForm.coach_id} onValueChange={(value) => setEditForm({ ...editForm, coach_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select coach" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allCoaches?.map((coach) => (
+                    <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                      {coach.first_name} {coach.last_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
