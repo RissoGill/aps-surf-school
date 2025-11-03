@@ -231,68 +231,6 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
           </CardContent>
         </Card>
       )}
-
-      {/* Attendance Records */}
-      <Card className="shadow-soft">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-            <Calendar className="h-6 w-6" />
-            Attendance Records
-          </CardTitle>
-          <CardDescription>Training session attendance history (from September 2025)</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-            </div>
-          ) : attendanceRecords.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No attendance records found
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {attendanceRecords.map((record) => {
-                const formattedDate = record.Date 
-                  ? new Date(record.Date).toLocaleDateString('pt-PT', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })
-                  : '-';
-                
-                return (
-                  <div key={record.Id} className="border border-border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium">{formattedDate}</p>
-                      <Badge className={getStatusColor(record.status)}>
-                        {record.status || 'Unknown'}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                      {record.coach && (
-                        <div>
-                          <span className="font-medium">Coach:</span> {record.coach}
-                        </div>
-                      )}
-                      {record.beach_location && (
-                        <div>
-                          <span className="font-medium">Beach:</span> {record.beach_location}
-                        </div>
-                      )}
-                      {record.notes && (
-                        <div className="col-span-2">
-                          <span className="font-medium">Notes:</span> {record.notes}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </>
   );
 };
