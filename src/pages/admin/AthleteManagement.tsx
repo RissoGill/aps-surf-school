@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, User, Edit2, Save, X } from "lucide-react";
+import { Search, User, Edit2, Save, X, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,7 @@ interface Athlete {
   dropoff_address: string | null;
   guardian_id: string | null;
   plan_type: string | null;
+  is_active: boolean | null;
 }
 
 // Validation schema for athlete edits
@@ -127,6 +128,38 @@ const AthleteManagement = () => {
       setEditForm(selectedAthlete);
     }
     setIsEditing(false);
+  };
+
+  const handleToggleActive = async () => {
+    if (!selectedAthlete) return;
+
+    const newActiveStatus = !selectedAthlete.is_active;
+
+    try {
+      const { data: updatedAthlete, error } = await supabase
+        .from('atletas')
+        .update({ is_active: newActiveStatus })
+        .eq('athlete_id', selectedAthlete.athlete_id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Refresh data
+      await queryClient.invalidateQueries({ queryKey: ['athletes-all'] });
+      setSelectedAthlete(updatedAthlete as Athlete);
+
+      toast({
+        title: "Success",
+        description: `Athlete ${newActiveStatus ? 'activated' : 'deactivated'} successfully`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${newActiveStatus ? 'activate' : 'deactivate'} athlete`,
+        variant: "destructive"
+      });
+    }
   };
 
   const handleEditSave = async () => {
@@ -247,22 +280,54 @@ const AthleteManagement = () => {
             {/* Clear Selection */}
             {selectedAthlete && (
               <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
-                <div>
-                  <p className="font-medium">Selected Athlete:</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">Selected Athlete:</p>
+                    {selectedAthlete.is_active ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        <UserCheck className="h-3 w-3" />
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                        <UserX className="h-3 w-3" />
+                        Inactive
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {selectedAthlete.first_name} {selectedAthlete.last_name} ({selectedAthlete.athlete_id})
                   </p>
                 </div>
                 <div className="flex gap-2">
                   {!isEditing && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleEditStart}
-                    >
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleEditStart}
+                      >
+                        <Edit2 className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant={selectedAthlete.is_active ? "destructive" : "default"}
+                        size="sm"
+                        onClick={handleToggleActive}
+                      >
+                        {selectedAthlete.is_active ? (
+                          <>
+                            <UserX className="h-4 w-4 mr-1" />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Activate
+                          </>
+                        )}
+                      </Button>
+                    </>
                   )}
                   <Button
                     variant="outline"
