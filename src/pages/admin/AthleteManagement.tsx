@@ -45,19 +45,31 @@ const athleteEditSchema = z.object({
   date_of_birth: z.string().nullable(),
   address: z.string().trim().max(255).nullable(),
   email: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    (val) => {
+      if (val === null || val === undefined) return null;
+      const s = String(val).trim();
+      return s === "" ? null : s;
+    },
     z.string().email("Invalid email").max(255).nullable()
   ),
   phone: z.string().trim().max(20).nullable(),
   mother_name: z.string().trim().max(100).nullable(),
   mother_email: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    (val) => {
+      if (val === null || val === undefined) return null;
+      const s = String(val).trim();
+      return s === "" ? null : s;
+    },
     z.string().email("Invalid email").max(255).nullable()
   ),
   mother_phone: z.number().nullable(),
   father_name: z.string().trim().max(100).nullable(),
   father_email: z.preprocess(
-    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    (val) => {
+      if (val === null || val === undefined) return null;
+      const s = String(val).trim();
+      return s === "" ? null : s;
+    },
     z.string().email("Invalid email").max(255).nullable()
   ),
   father_phone: z.string().trim().max(20).nullable(),
