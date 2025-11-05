@@ -279,68 +279,72 @@ const AthleteManagement = () => {
 
             {/* Clear Selection */}
             {selectedAthlete && (
-              <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">Selected Athlete:</p>
-                    {selectedAthlete.is_active ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        <UserCheck className="h-3 w-3" />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
-                        <UserX className="h-3 w-3" />
-                        Inactive
-                      </span>
-                    )}
+              <div className="bg-muted p-4 rounded-lg space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <p className="font-medium">Selected Athlete:</p>
+                      {selectedAthlete.is_active ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          <UserCheck className="h-3 w-3" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                          <UserX className="h-3 w-3" />
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {selectedAthlete.first_name} {selectedAthlete.last_name} ({selectedAthlete.athlete_id})
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedAthlete.first_name} {selectedAthlete.last_name} ({selectedAthlete.athlete_id})
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {!isEditing && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleEditStart}
-                      >
-                        <Edit2 className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant={selectedAthlete.is_active ? "destructive" : "default"}
-                        size="sm"
-                        onClick={handleToggleActive}
-                      >
-                        {selectedAthlete.is_active ? (
-                          <>
-                            <UserX className="h-4 w-4 mr-1" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <UserCheck className="h-4 w-4 mr-1" />
-                            Activate
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  )}
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => {
                       setSelectedAthlete(null);
                       setSearchTerm("");
                       setIsEditing(false);
                     }}
+                    className="shrink-0"
                   >
-                    Clear
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
+                
+                {!isEditing && (
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleEditStart}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Edit2 className="h-4 w-4 mr-1" />
+                      Edit Profile
+                    </Button>
+                    <Button
+                      variant={selectedAthlete.is_active ? "destructive" : "default"}
+                      size="sm"
+                      onClick={handleToggleActive}
+                      className="flex-1 sm:flex-none"
+                    >
+                      {selectedAthlete.is_active ? (
+                        <>
+                          <UserX className="h-4 w-4 mr-1" />
+                          Deactivate
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          Activate
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
