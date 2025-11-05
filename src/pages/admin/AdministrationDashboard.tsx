@@ -45,15 +45,19 @@ const AdministrationDashboard = () => {
       
       if (paymentsError) throw paymentsError;
       
-      // Fetch surf levels separately (no FK defined between payments and atletas)
+      // Fetch surf levels and active status separately (no FK defined between payments and atletas)
       const { data: atletasRows } = await supabase
         .from('atletas')
-        .select('athlete_id, surf_level');
+        .select('athlete_id, surf_level, is_active');
       
       const levelByAthleteId: Record<string, string | null> = {};
+      const isActiveByAthleteId: Record<string, boolean> = {};
       (atletasRows || []).forEach((a: any) => {
         const key = String(a.athlete_id || '').trim().toLowerCase();
-        if (key) levelByAthleteId[key] = a?.surf_level ?? null;
+        if (key) {
+          levelByAthleteId[key] = a?.surf_level ?? null;
+          isActiveByAthleteId[key] = a?.is_active !== false;
+        }
       });
       
       const allPayments = (paymentsRaw || []).map((payment: any) => {
@@ -147,6 +151,8 @@ const AdministrationDashboard = () => {
       const currentMonthOutstandingLearning = (currentMonthLearningRows || [])
         .filter((p: any) => {
           const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const isActive = isActiveByAthleteId[aid] ?? true;
+          if (!isActive) return false;
           const level = levelByAthleteId[aid]?.toLowerCase() || '';
           return level === 'learning' || level === 'pre-competition';
         })
@@ -159,6 +165,8 @@ const AdministrationDashboard = () => {
       const currentMonthOutstandingCompetition = (currentMonthLearningRows || [])
         .filter((p: any) => {
           const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const isActive = isActiveByAthleteId[aid] ?? true;
+          if (!isActive) return false;
           const level = levelByAthleteId[aid]?.toLowerCase() || '';
           return level === 'competition';
         })
@@ -201,8 +209,12 @@ const AdministrationDashboard = () => {
           const paymentSerial = (p.year || 0) * 12 + monthNum;
           if (paymentSerial > currentMonthSerial) return false;
           
-          // Filter by surf level
+          // Filter by active status
           const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const isActive = isActiveByAthleteId[aid] ?? true;
+          if (!isActive) return false;
+          
+          // Filter by surf level
           const level = levelByAthleteId[aid]?.toLowerCase() || '';
           return level === 'learning' || level === 'pre-competition';
         })
@@ -226,8 +238,12 @@ const AdministrationDashboard = () => {
           const paymentSerial = (p.year || 0) * 12 + monthNum;
           if (paymentSerial > currentMonthSerial) return false;
           
-          // Filter by surf level
+          // Filter by active status
           const aid = String(p.athlete_id || '').trim().toLowerCase();
+          const isActive = isActiveByAthleteId[aid] ?? true;
+          if (!isActive) return false;
+          
+          // Filter by surf level
           const level = levelByAthleteId[aid]?.toLowerCase() || '';
           return level === 'competition';
         })
