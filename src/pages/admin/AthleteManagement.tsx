@@ -44,13 +44,22 @@ const athleteEditSchema = z.object({
   last_name: z.string().trim().min(1, "Last name is required").max(100),
   date_of_birth: z.string().nullable(),
   address: z.string().trim().max(255).nullable(),
-  email: z.string().trim().email("Invalid email").max(255).nullable().or(z.literal("")),
+  email: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    z.string().email("Invalid email").max(255).nullable()
+  ),
   phone: z.string().trim().max(20).nullable(),
   mother_name: z.string().trim().max(100).nullable(),
-  mother_email: z.string().trim().email("Invalid email").max(255).nullable().or(z.literal("")),
+  mother_email: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    z.string().email("Invalid email").max(255).nullable()
+  ),
   mother_phone: z.number().nullable(),
   father_name: z.string().trim().max(100).nullable(),
-  father_email: z.string().trim().email("Invalid email").max(255).nullable().or(z.literal("")),
+  father_email: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined) ? null : val,
+    z.string().email("Invalid email").max(255).nullable()
+  ),
   father_phone: z.string().trim().max(20).nullable(),
   surf_level: z.enum(["learning", "pre-competition", "competition"]).nullable(),
   trainings_per_week: z.number().min(0).max(7).nullable(),
