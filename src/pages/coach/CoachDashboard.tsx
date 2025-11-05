@@ -76,7 +76,8 @@ const CoachDashboard = () => {
     status: "",
     coach: "",
     praia: "",
-    notas: ""
+    notas: "",
+    shift: ""
   });
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [uploadedVideos, setUploadedVideos] = useState<File[]>([]);
@@ -344,6 +345,15 @@ const CoachDashboard = () => {
       return;
     }
 
+    if (!newAttendance.shift) {
+      toast({
+        title: "Error",
+        description: "Please select a shift (Morning or Afternoon)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!coachData?.coach_id) {
       toast({
         title: "Error",
@@ -356,12 +366,13 @@ const CoachDashboard = () => {
     setIsUploading(true);
 
     try {
-      // Check for duplicate attendance records for this athlete and date
+      // Check for duplicate attendance records for this athlete, date, and shift
       const { data: existingRecords, error: duplicateCheckError } = await supabase
         .from('attendance')
         .select('id')
         .eq('athlete_id', athleteId)
-        .eq('date', newAttendance.date);
+        .eq('date', newAttendance.date)
+        .eq('shift', newAttendance.shift);
 
       if (duplicateCheckError) {
         console.error('Error checking duplicates:', duplicateCheckError);
@@ -370,7 +381,7 @@ const CoachDashboard = () => {
       if (existingRecords && existingRecords.length > 0) {
         toast({
           title: "Duplicate Attendance",
-          description: `Attendance for this athlete on ${newAttendance.date} has already been registered.`,
+          description: `Attendance for this athlete on ${newAttendance.date} (${newAttendance.shift}) has already been registered.`,
           variant: "destructive",
         });
         setIsUploading(false);
@@ -418,10 +429,11 @@ const CoachDashboard = () => {
       // Insert attendance record with media URLs
       let insertError: any = null;
       const record = {
-        id: `${athleteId}-${newAttendance.date}-${Date.now()}`,
+        id: `${athleteId}-${newAttendance.date}-${newAttendance.shift}-${Date.now()}`,
         athlete_id: athleteId,
         date: newAttendance.date,
         status: 'Present',
+        shift: newAttendance.shift,
         coach_id: coachData?.coach_id || null,
         beach_location: newAttendance.praia || null,
         notes: null,
@@ -482,7 +494,8 @@ const CoachDashboard = () => {
         status: "",
         coach: "",
         praia: "",
-        notas: ""
+        notas: "",
+        shift: ""
       });
       setUploadedPhotos([]);
       setUploadedVideos([]);
@@ -1140,6 +1153,19 @@ const CoachDashboard = () => {
                                 value={newAttendance.date}
                                 onChange={(e) => setNewAttendance({ ...newAttendance, date: e.target.value })}
                               />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Shift *</Label>
+                              <select
+                                value={newAttendance.shift}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, shift: e.target.value })}
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                              >
+                                <option value="">Select shift...</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                              </select>
                             </div>
                             
                             <div className="space-y-2">
