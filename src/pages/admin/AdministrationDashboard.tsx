@@ -461,19 +461,19 @@ const AdministrationDashboard = () => {
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
     { 
       label: "Total Learning Athletes", 
-      value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
+      value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
     },
     { 
       label: "Total Pre-Competition Athletes", 
-      value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'pre-competition').length || 0).toString(), 
+      value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'pre-competition').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
     },
     { 
       label: "Total Competition Athletes", 
-      value: (athletes?.filter((a: any) => a.surf_level?.trim().toLowerCase() === 'competition').length || 0).toString(), 
+      value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'competition').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
     }
