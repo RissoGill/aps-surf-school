@@ -26,6 +26,7 @@ export type Database = {
           father_phone: string | null
           first_name: string | null
           guardian_id: string | null
+          is_active: boolean | null
           last_name: string | null
           mother_email: string | null
           mother_name: string | null
@@ -50,6 +51,7 @@ export type Database = {
           father_phone?: string | null
           first_name?: string | null
           guardian_id?: string | null
+          is_active?: boolean | null
           last_name?: string | null
           mother_email?: string | null
           mother_name?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           father_phone?: string | null
           first_name?: string | null
           guardian_id?: string | null
+          is_active?: boolean | null
           last_name?: string | null
           mother_email?: string | null
           mother_name?: string | null

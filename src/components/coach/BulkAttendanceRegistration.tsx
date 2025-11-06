@@ -171,6 +171,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
             body: JSON.stringify(record),
           });
           if (!resp.ok) {
+            const info = await resp.json().catch(() => ({}));
+            if (resp.status === 409) {
+              throw new Error(`Attendance for this athlete and shift already exists on this date. Athlete: ${getAthleteName(athleteId)}`);
+            }
             throw new Error(`Failed to save attendance for ${getAthleteName(athleteId)}`);
           }
         }

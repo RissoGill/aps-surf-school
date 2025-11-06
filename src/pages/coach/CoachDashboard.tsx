@@ -453,6 +453,15 @@ const CoachDashboard = () => {
         });
         if (!resp.ok) {
           const info = await resp.json().catch(() => ({}));
+          if (resp.status === 409) {
+            toast({
+              title: "Duplicate Attendance",
+              description: "Attendance for this athlete and shift already exists on this date.",
+              variant: "destructive",
+            });
+            setIsUploading(false);
+            return;
+          }
           throw new Error(info.error || 'Failed to save attendance');
         }
       }

@@ -117,6 +117,10 @@ serve(async (req) => {
 
       if (error) {
         console.error("Update error:", error);
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
+          return new Response(JSON.stringify({ error: 'Attendance for this athlete and shift already exists on this date.' }), { status: 409, headers: { "content-type": "application/json", ...corsHeaders } });
+        }
         return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
@@ -146,6 +150,10 @@ serve(async (req) => {
       const { error } = await supabase.from("attendance").insert(insertData);
       if (error) {
         console.error("Insert error:", error);
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
+          return new Response(JSON.stringify({ error: 'Attendance for this athlete and shift already exists on this date.' }), { status: 409, headers: { "content-type": "application/json", ...corsHeaders } });
+        }
         return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
