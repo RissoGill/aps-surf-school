@@ -366,19 +366,24 @@ const CoachDashboard = () => {
     setIsUploading(true);
 
     try {
-      // Check for duplicate attendance records for this athlete, date, and shift
-      const { data: existingRecords, error: duplicateCheckError } = await supabase
+      // Check for duplicate attendance records - case-insensitive
+      const { data: allRecords, error: duplicateCheckError } = await supabase
         .from('attendance')
-        .select('id')
+        .select('id, shift')
         .eq('athlete_id', athleteId)
-        .eq('date', newAttendance.date)
-        .eq('shift', newAttendance.shift);
+        .eq('date', newAttendance.date);
 
       if (duplicateCheckError) {
         console.error('Error checking duplicates:', duplicateCheckError);
       }
 
-      if (existingRecords && existingRecords.length > 0) {
+      // Filter with case-insensitive, trimmed comparison to match database trigger
+      const normalizedShift = newAttendance.shift.trim().toLowerCase();
+      const existingRecords = allRecords?.filter(r => 
+        r.shift?.trim().toLowerCase() === normalizedShift
+      ) || [];
+
+      if (existingRecords.length > 0) {
         toast({
           title: "Duplicate Attendance",
           description: "Attendance for this athlete and shift already exists on this date.",

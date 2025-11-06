@@ -114,25 +114,30 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
     setIsSubmitting(true);
 
     try {
-      // Check for duplicate attendance records (same date and shift)
-      const { data: existingRecords, error: duplicateCheckError } = await supabase
+      // Check for duplicate attendance records (same date and shift) - case-insensitive
+      const { data: allRecords, error: duplicateCheckError } = await supabase
         .from('attendance')
-        .select('athlete_id')
+        .select('athlete_id, shift')
         .in('athlete_id', selectedAthletes)
-        .eq('date', selectedDate)
-        .eq('shift', selectedShift);
+        .eq('date', selectedDate);
 
       if (duplicateCheckError) {
         console.error('Error checking duplicates:', duplicateCheckError);
       }
 
-      if (existingRecords && existingRecords.length > 0) {
+      // Filter with case-insensitive, trimmed comparison to match database trigger
+      const normalizedShift = selectedShift.trim().toLowerCase();
+      const existingRecords = allRecords?.filter(r => 
+        r.shift?.trim().toLowerCase() === normalizedShift
+      ) || [];
+
+      if (existingRecords.length > 0) {
         const duplicateAthleteIds = existingRecords.map(r => r.athlete_id);
         const duplicateNames = duplicateAthleteIds.map(id => getAthleteName(id)).join(', ');
         
         toast({
           title: "Duplicate Attendance",
-          description: `Attendance for this athlete and shift already exists on this date. Athletes: ${duplicateNames}`,
+          description: `Attendance already exists for this date and shift: ${duplicateNames}`,
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -173,7 +178,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           if (!resp.ok) {
             const info = await resp.json().catch(() => ({}));
             if (resp.status === 409) {
-              throw new Error(`Attendance for this athlete and shift already exists on this date. Athlete: ${getAthleteName(athleteId)}`);
+              console.warn(`Duplicate attendance for ${getAthleteName(athleteId)} - skipping`);
+              return; // Skip this athlete silently (already handled by client check)
             }
             throw new Error(`Failed to save attendance for ${getAthleteName(athleteId)}`);
           }
