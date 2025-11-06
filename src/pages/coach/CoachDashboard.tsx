@@ -989,97 +989,11 @@ const CoachDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Training Days Breakdown */}
-        {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
-          <Card className="shadow-soft mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Your Training Session History</CardTitle>
-              <CardDescription>Detailed breakdown of your training days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Monthly breakdown */}
-                <div>
-                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
-                  {Object.keys(trainingDaysByMonth).length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
-                  ) : (
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {Object.entries(trainingDaysByMonth).map(([month, count]) => {
-                        const [year, monthNum] = month.split('-');
-                        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                        const isExpanded = expandedMonths.has(month);
-                        const dates = trainingDatesByMonth[month] || [];
-                        
-                        return (
-                          <div key={month} className="border border-border rounded-lg overflow-hidden">
-                            <button
-                              onClick={() => toggleMonth(month)}
-                              className="w-full flex items-center justify-between py-2 px-3 hover:bg-accent transition-colors"
-                            >
-                              <div className="flex items-center gap-2">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                )}
-                                <span className="text-sm font-medium">{monthName} {year}</span>
-                              </div>
-                              <Badge variant="secondary">{count} days</Badge>
-                            </button>
-                            
-                            {isExpanded && (
-                              <div className="bg-muted/30 px-3 py-2 border-t border-border">
-                                <div className="space-y-1 max-h-40 overflow-y-auto">
-                                  {dates.map((date) => {
-                                    const dateObj = new Date(date);
-                                    const dayName = dateObj.toLocaleDateString('default', { weekday: 'short' });
-                                    const dayNum = dateObj.getDate();
-                                    return (
-                                      <div
-                                        key={date}
-                                        className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
-                                      >
-                                        <Calendar className="h-3 w-3" />
-                                        <span>{dayName}, {dayNum}</span>
-                                        <span className="ml-auto text-xs opacity-70">{date}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Yearly breakdown */}
-                <div>
-                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
-                  {Object.keys(trainingDaysByYear).length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {Object.entries(trainingDaysByYear).map(([year, count]) => (
-                        <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                          <span className="text-sm font-medium">{year}</span>
-                          <Badge variant="secondary">{count} days</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Athletes List appears here when searching */}
 
         {/* Athletes List - Only shown when searching */}
         {searchQuery && (
-        <Card className="shadow-medium">
+        <Card className="shadow-medium mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -1329,6 +1243,94 @@ const CoachDashboard = () => {
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* Training Days Breakdown */}
+        {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
+          <Card className="shadow-soft mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg">Your Training Session History</CardTitle>
+              <CardDescription>Detailed breakdown of your training days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Monthly breakdown */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
+                  {Object.keys(trainingDaysByMonth).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {Object.entries(trainingDaysByMonth).map(([month, count]) => {
+                        const [year, monthNum] = month.split('-');
+                        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
+                        const isExpanded = expandedMonths.has(month);
+                        const dates = trainingDatesByMonth[month] || [];
+                        
+                        return (
+                          <div key={month} className="border border-border rounded-lg overflow-hidden">
+                            <button
+                              onClick={() => toggleMonth(month)}
+                              className="w-full flex items-center justify-between py-2 px-3 hover:bg-accent transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="text-sm font-medium">{monthName} {year}</span>
+                              </div>
+                              <Badge variant="secondary">{count} days</Badge>
+                            </button>
+                            
+                            {isExpanded && (
+                              <div className="bg-muted/30 px-3 py-2 border-t border-border">
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                  {dates.map((date) => {
+                                    const dateObj = new Date(date);
+                                    const dayName = dateObj.toLocaleDateString('default', { weekday: 'short' });
+                                    const dayNum = dateObj.getDate();
+                                    return (
+                                      <div
+                                        key={date}
+                                        className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
+                                      >
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{dayName}, {dayNum}</span>
+                                        <span className="ml-auto text-xs opacity-70">{date}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Yearly breakdown */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
+                  {Object.keys(trainingDaysByYear).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {Object.entries(trainingDaysByYear).map(([year, count]) => (
+                        <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                          <span className="text-sm font-medium">{year}</span>
+                          <Badge variant="secondary">{count} days</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </main>
 
