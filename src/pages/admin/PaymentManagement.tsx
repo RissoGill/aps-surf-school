@@ -179,6 +179,99 @@ const PaymentManagement = () => {
     });
   };
 
+  const handlePackCreation = async (
+    athleteId: string,
+    planType: string,
+    paymentDate: string,
+    paymentId: string
+  ) => {
+    try {
+      // Extract total tokens from plan type (pack1 -> 1, pack5 -> 5, pack10 -> 10)
+      const tokenMatch = planType.match(/pack(\d+)/);
+      if (!tokenMatch) return; // Not a pack plan
+
+      const totalTokens = tokenMatch[1];
+
+      // Check for existing active pack and get its balance
+      const { data: existingPack } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', athleteId)
+        .eq('active', true)
+        .order('purchase_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let carriedOverTokens = 0;
+      
+      // Calculate negative balance to carry forward
+      if (existingPack) {
+        const existingTotal = parseInt(existingPack.total_tokens) || 0;
+        const existingUsed = parseInt(existingPack.used_tokens) || 0;
+        const balance = existingTotal - existingUsed;
+        
+        if (balance < 0) {
+          carriedOverTokens = Math.abs(balance);
+          
+          toast({
+            title: "Negative Balance Carried Forward",
+            description: `Previous pack had -${Math.abs(balance)} sessions. This will be deducted from the new pack.`,
+            variant: "default"
+          });
+        }
+
+        // Deactivate the old pack
+        await supabase
+          .from('packs')
+          .update({ active: false })
+          .eq('id', existingPack.id);
+      }
+
+      // Insert new pack record
+      const { error: insertError } = await supabase
+        .from('packs')
+        .insert({
+          athlete_id: athleteId,
+          total_tokens: totalTokens,
+          used_tokens: carriedOverTokens > 0 ? carriedOverTokens.toString() : '0',
+          purchase_date: paymentDate,
+          active: true,
+          payment_id: paymentId
+        });
+
+      if (insertError) {
+        console.error('Pack creation error:', insertError);
+        throw insertError;
+      }
+
+      // Update athlete's plan_type to match the pack
+      const { error: updateError } = await supabase
+        .from('atletas')
+        .update({ plan_type: planType })
+        .eq('athlete_id', athleteId);
+
+      if (updateError) {
+        console.error('Athlete plan_type update error:', updateError);
+      }
+
+      // Invalidate pack balance query for immediate UI update
+      await queryClient.invalidateQueries({ 
+        queryKey: ['pack-balance', athleteId] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['atletas'] 
+      });
+
+    } catch (error) {
+      console.error('Error in pack creation:', error);
+      toast({
+        title: "Warning",
+        description: "Payment saved but pack creation had issues. Please verify pack records.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleEditSave = async (paymentId: string) => {
     try {
       // Validate input
@@ -216,6 +309,16 @@ const PaymentManagement = () => {
 
       if (error) throw error;
 
+      // Check if this is a pack payment and handle pack creation
+      if (validated.plan_type && ['pack1', 'pack5', 'pack10'].includes(validated.plan_type)) {
+        await handlePackCreation(
+          selectedAthlete!.athlete_id,
+          validated.plan_type,
+          validated.payment_date || new Date().toISOString().split('T')[0],
+          paymentId
+        );
+      }
+
       // Refresh data
       await queryClient.invalidateQueries({ 
         queryKey: ['athlete-payments', selectedAthlete?.athlete_id] 
@@ -223,7 +326,9 @@ const PaymentManagement = () => {
 
       toast({
         title: "Success",
-        description: "Payment updated successfully"
+        description: validated.plan_type && ['pack1', 'pack5', 'pack10'].includes(validated.plan_type)
+          ? "Payment and pack record created successfully"
+          : "Payment updated successfully"
       });
 
       handleEditCancel();
