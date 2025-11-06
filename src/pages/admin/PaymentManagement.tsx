@@ -599,19 +599,24 @@ const PaymentManagement = () => {
                     size="sm" 
                     className="ml-4"
                     onClick={async () => {
-                      await handlePackCreation(
-                        selectedAthlete!.athlete_id,
-                        packPayment.plan_type!,
-                        packPayment.payment_date!,
-                        packPayment.payment_id
-                      );
-                      await queryClient.invalidateQueries({ 
-                        queryKey: ['athlete-packs', selectedAthlete?.athlete_id] 
-                      });
-                      toast({
-                        title: "Success",
-                        description: "Pack record created successfully"
-                      });
+                      try {
+                        await handlePackCreation(
+                          selectedAthlete!.athlete_id,
+                          packPayment.plan_type!,
+                          packPayment.payment_date!,
+                          packPayment.payment_id
+                        );
+                        await queryClient.invalidateQueries({ 
+                          queryKey: ['athlete-packs', selectedAthlete?.athlete_id] 
+                        });
+                        toast({
+                          title: "Success",
+                          description: "Pack record created successfully"
+                        });
+                      } catch (error) {
+                        // Error toast already shown in handlePackCreation
+                        console.error('Pack creation failed:', error);
+                      }
                     }}
                   >
                     Create Pack Record
