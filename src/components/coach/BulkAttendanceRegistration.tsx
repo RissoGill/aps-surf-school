@@ -122,8 +122,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         const duplicateNames = duplicateAthleteIds.map(id => getAthleteName(id)).join(', ');
         
         toast({
-          title: "Duplicate Attendance Detected",
-          description: `The following athletes already have attendance registered for ${selectedDate} (${selectedShift}): ${duplicateNames}`,
+          title: "Duplicate Attendance",
+          description: `Attendance for this athlete and shift already exists on this date. Athletes: ${duplicateNames}`,
           variant: "destructive",
         });
         setIsSubmitting(false);

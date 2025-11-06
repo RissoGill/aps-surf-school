@@ -381,7 +381,7 @@ const CoachDashboard = () => {
       if (existingRecords && existingRecords.length > 0) {
         toast({
           title: "Duplicate Attendance",
-          description: `Attendance for this athlete on ${newAttendance.date} (${newAttendance.shift}) has already been registered.`,
+          description: "Attendance for this athlete and shift already exists on this date.",
           variant: "destructive",
         });
         setIsUploading(false);
