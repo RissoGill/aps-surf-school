@@ -450,23 +450,39 @@ const CoachDashboard = () => {
       insertError = error;
 
       if (insertError) {
+        // Check if it's a duplicate error
+        const errorMsg = insertError.message || '';
+        if (errorMsg.includes('Attendance for this athlete and shift already exists on this date') || insertError.code === 'P0001') {
+          toast({
+            title: "Duplicate Attendance",
+            description: "Attendance for this athlete and shift already exists on this date.",
+            variant: "destructive",
+          });
+          setIsUploading(false);
+          return;
+        }
+
         // Fallback via edge function (service role) to bypass RLS for legacy logins
-        const resp = await fetch(`${(supabase as any).rest?.url?.replace('/rest/v1','') || 'https://bzzzecvzoahauqrhkvds.supabase.co'}/functions/v1/attendance-admin`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(record),
+        const { data, error: invokeError } = await supabase.functions.invoke('attendance-admin', {
+          body: record,
         });
-        if (!resp.ok) {
-          const info = await resp.json().catch(() => ({}));
-          if (resp.status === 409) {
-            toast({
-              title: "Duplicate Attendance",
-              description: "Attendance for this athlete and shift already exists on this date.",
-              variant: "destructive",
-            });
-            setIsUploading(false);
-            return;
-          }
+
+        if (invokeError) {
+          throw new Error(`Failed to save attendance: ${invokeError.message}`);
+        }
+
+        if (data?.duplicate) {
+          toast({
+            title: "Duplicate Attendance",
+            description: "Attendance for this athlete and shift already exists on this date.",
+            variant: "destructive",
+          });
+          setIsUploading(false);
+          return;
+        }
+
+        if (!data?.success) {
+          const info = data || {};
           throw new Error(info.error || 'Failed to save attendance');
         }
       }

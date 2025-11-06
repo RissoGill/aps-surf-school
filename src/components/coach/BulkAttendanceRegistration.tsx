@@ -131,14 +131,22 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         r.shift?.trim().toLowerCase() === normalizedShift
       ) || [];
 
-      if (existingRecords.length > 0) {
-        const duplicateAthleteIds = existingRecords.map(r => r.athlete_id);
-        const duplicateNames = duplicateAthleteIds.map(id => getAthleteName(id)).join(', ');
-        
+      // Build list of duplicates and athletes to insert
+      const duplicateAthleteIds = new Set(existingRecords.map(r => r.athlete_id));
+      const toInsert = selectedAthletes.filter(id => !duplicateAthleteIds.has(id));
+
+      if (duplicateAthleteIds.size > 0) {
+        const duplicateNames = Array.from(duplicateAthleteIds).map(id => getAthleteName(id)).join(', ');
         toast({
-          title: "Duplicate Attendance",
-          description: `Attendance already exists for this date and shift: ${duplicateNames}`,
-          variant: "destructive",
+          title: "Skipping Duplicates",
+          description: `${duplicateAthleteIds.size} athlete(s) already have attendance: ${duplicateNames}. Proceeding with the rest.`,
+        });
+      }
+
+      if (toInsert.length === 0) {
+        toast({
+          title: "No Attendance to Mark",
+          description: "All selected athletes already have attendance for this date and shift.",
         });
         setIsSubmitting(false);
         return;
@@ -150,8 +158,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         return athlete?.plan_type === 'Pack';
       });
 
-      // Create attendance records for all selected athletes
-      const attendancePromises = selectedAthletes.map(async (athleteId) => {
+      // Create attendance records for athletes without duplicates
+      const attendancePromises = toInsert.map(async (athleteId) => {
         const record = {
           id: `${athleteId}-${selectedDate}-${Date.now()}-${Math.random()}`,
           athlete_id: athleteId,
@@ -169,23 +177,33 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         const { error: insertError } = await supabase.from('attendance').insert(record);
 
         if (insertError) {
+          // Check if it's a duplicate error
+          const errorMsg = insertError.message || '';
+          if (errorMsg.includes('Attendance for this athlete and shift already exists on this date') || insertError.code === 'P0001') {
+            console.warn(`Duplicate attendance for ${getAthleteName(athleteId)} - skipping`);
+            return 0; // Skip this athlete
+          }
+
           // Fallback to edge function for RLS bypass
-          const resp = await fetch(`https://bzzzecvzoahauqrhkvds.supabase.co/functions/v1/attendance-admin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(record),
+          const { data, error: invokeError } = await supabase.functions.invoke('attendance-admin', {
+            body: record,
           });
-          if (!resp.ok) {
-            const info = await resp.json().catch(() => ({}));
-            if (resp.status === 409) {
-              console.warn(`Duplicate attendance for ${getAthleteName(athleteId)} - skipping`);
-              return; // Skip this athlete silently (already handled by client check)
-            }
+
+          if (invokeError) {
+            throw new Error(`Failed to save attendance for ${getAthleteName(athleteId)}: ${invokeError.message}`);
+          }
+
+          if (data?.duplicate) {
+            console.warn(`Duplicate attendance for ${getAthleteName(athleteId)} - skipping`);
+            return 0; // Skip this athlete
+          }
+
+          if (!data?.success) {
             throw new Error(`Failed to save attendance for ${getAthleteName(athleteId)}`);
           }
         }
 
-        // Increment pack tokens if Pack athlete (allow negative balance)
+        // Increment pack tokens if Pack athlete
         const athlete = athletes.find(a => a.athlete_id === athleteId);
         if (athlete?.plan_type === 'Pack') {
           const { data: packData } = await supabase
@@ -205,13 +223,17 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               .eq('id', packData.id);
           }
         }
+
+        return 1; // Successfully inserted
       });
 
-      await Promise.all(attendancePromises);
+      const results = await Promise.all(attendancePromises);
+      const successCount = results.filter(r => r === 1).length;
+      const skippedCount = toInsert.length - successCount + duplicateAthleteIds.size;
 
       toast({
         title: "Success",
-        description: `Attendance marked for ${selectedAthletes.length} athlete(s)`,
+        description: `Marked attendance for ${successCount} athlete(s). Skipped ${skippedCount} duplicate(s).`,
       });
 
       // Clear selections

@@ -32,7 +32,7 @@ serve(async (req) => {
       }
 
       // Normalize updates: keep only allowed fields
-      const allowed = ["date", "status", "beach_location", "notes", "coach_id", "photos", "videos", "id", "athlete_id"];
+      const allowed = ["date", "status", "shift", "beach_location", "notes", "coach_id", "photos", "videos", "id", "athlete_id"];
       const cleanUpdates: Record<string, unknown> = {};
       for (const key of allowed) {
         if (key in updates) cleanUpdates[key] = updates[key];
@@ -119,7 +119,15 @@ serve(async (req) => {
         console.error("Update error:", error);
         const errorMsg = error.message || '';
         if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
-          return new Response(JSON.stringify({ error: 'Attendance for this athlete and shift already exists on this date.' }), { status: 409, headers: { "content-type": "application/json", ...corsHeaders } });
+          console.log("Duplicate attendance detected in PATCH - returning success=false");
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              duplicate: true, 
+              message: 'Attendance for this athlete and shift already exists on this date.' 
+            }), 
+            { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
         }
         return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
@@ -141,6 +149,7 @@ serve(async (req) => {
         date: body.date,
         status: body.status,
         coach_id: body.coach_id,
+        shift: typeof body.shift === 'string' ? body.shift.trim() : null,
         beach_location: body.beach_location ?? null,
         notes: body.notes ?? null,
         photos: body.photos ?? null,
@@ -152,7 +161,15 @@ serve(async (req) => {
         console.error("Insert error:", error);
         const errorMsg = error.message || '';
         if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
-          return new Response(JSON.stringify({ error: 'Attendance for this athlete and shift already exists on this date.' }), { status: 409, headers: { "content-type": "application/json", ...corsHeaders } });
+          console.log("Duplicate attendance detected in POST - returning success=false");
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              duplicate: true, 
+              message: 'Attendance for this athlete and shift already exists on this date.' 
+            }), 
+            { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
         }
         return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
