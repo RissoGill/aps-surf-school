@@ -907,19 +907,7 @@ const CoachDashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Wind className="h-6 w-6 text-primary mx-auto mb-2" />
-              {isLoading ? (
-                <Skeleton className="h-8 w-12 mx-auto mb-1" />
-              ) : (
-                <p className="text-2xl font-bold text-foreground">{athletes?.length || 0}</p>
-              )}
-              <p className="text-sm text-muted-foreground">Total Athletes</p>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <Card className="shadow-soft">
             <CardContent className="p-4 text-center">
               <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
