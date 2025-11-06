@@ -20,7 +20,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
-  const [attendanceStatus, setAttendanceStatus] = useState("Present");
+  const [athleteStatuses, setAthleteStatuses] = useState<Record<string, string>>({});
   const [selectedShift, setSelectedShift] = useState("Morning");
   const [beachLocation, setBeachLocation] = useState("");
   const [notes, setNotes] = useState("");
@@ -51,6 +51,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const handleAddAthlete = (athleteId: string) => {
     if (!selectedAthletes.includes(athleteId)) {
       setSelectedAthletes([...selectedAthletes, athleteId]);
+      setAthleteStatuses(prev => ({ ...prev, [athleteId]: "Present" }));
     }
     setSearchQuery("");
     setShowDropdown(false);
@@ -58,15 +59,31 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
   const handleRemoveAthlete = (athleteId: string) => {
     setSelectedAthletes(selectedAthletes.filter(id => id !== athleteId));
+    setAthleteStatuses(prev => {
+      const newStatuses = { ...prev };
+      delete newStatuses[athleteId];
+      return newStatuses;
+    });
   };
 
   const handleSelectAll = () => {
-    setSelectedAthletes(athletes.map(a => a.athlete_id));
+    const allAthleteIds = athletes.map(a => a.athlete_id);
+    setSelectedAthletes(allAthleteIds);
+    const newStatuses: Record<string, string> = {};
+    allAthleteIds.forEach(id => {
+      newStatuses[id] = "Present";
+    });
+    setAthleteStatuses(newStatuses);
     setShowDropdown(false);
   };
 
   const handleClearAll = () => {
     setSelectedAthletes([]);
+    setAthleteStatuses({});
+  };
+
+  const handleStatusChange = (athleteId: string, status: string) => {
+    setAthleteStatuses(prev => ({ ...prev, [athleteId]: status }));
   };
 
   const getAthleteName = (athleteId: string) => {
@@ -84,14 +101,6 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       return;
     }
 
-    if (!attendanceStatus) {
-      toast({
-        title: "Status Required",
-        description: "Please select an attendance status.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!selectedShift) {
       toast({
@@ -142,7 +151,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           id: `${athleteId}-${selectedDate}-${Date.now()}-${Math.random()}`,
           athlete_id: athleteId,
           date: selectedDate,
-          status: attendanceStatus,
+          status: athleteStatuses[athleteId] || "Present",
           shift: selectedShift,
           coach_id: coachId,
           beach_location: beachLocation || null,
@@ -197,6 +206,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
       // Clear selections
       setSelectedAthletes([]);
+      setAthleteStatuses({});
       setBeachLocation("");
       setNotes("");
       
@@ -250,21 +260,6 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               <SelectContent>
                 <SelectItem value="Morning">Morning</SelectItem>
                 <SelectItem value="Afternoon">Afternoon</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Status Dropdown */}
-          <div className="space-y-2">
-            <Label htmlFor="attendance-status">Status</Label>
-            <Select value={attendanceStatus} onValueChange={setAttendanceStatus}>
-              <SelectTrigger id="attendance-status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Present">Present</SelectItem>
-                <SelectItem value="Absent">Absent</SelectItem>
-                <SelectItem value="Justified">Justified</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -333,30 +328,50 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
             )}
           </div>
 
-          {/* Selected Athletes */}
+          {/* Selected Athletes with Status */}
           {selectedAthletes.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {selectedAthletes.map((athleteId) => (
-                <Badge key={athleteId} variant="secondary" className="flex items-center gap-1">
-                  {getAthleteName(athleteId)}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveAthlete(athleteId)}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAll}
-                className="h-6 px-2 text-xs"
-              >
-                Clear All
-              </Button>
+            <div className="space-y-3 mt-4">
+              <div className="flex items-center justify-between">
+                <Label>Selected Athletes ({selectedAthletes.length})</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAll}
+                  className="h-8 px-3 text-xs"
+                >
+                  Clear All
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {selectedAthletes.map((athleteId) => (
+                  <div key={athleteId} className="flex items-center gap-3 p-3 border rounded-lg bg-card">
+                    <div className="flex-1 font-medium">
+                      {getAthleteName(athleteId)}
+                    </div>
+                    <Select 
+                      value={athleteStatuses[athleteId] || "Present"} 
+                      onValueChange={(value) => handleStatusChange(athleteId, value)}
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Present">Present</SelectItem>
+                        <SelectItem value="Absent">Absent</SelectItem>
+                        <SelectItem value="Justified">Justified</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAthlete(athleteId)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
