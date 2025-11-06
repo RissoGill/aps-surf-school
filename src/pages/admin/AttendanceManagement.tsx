@@ -27,6 +27,7 @@ interface AttendanceRecord {
   date: string;
   status: string | null;
   coach_id: string;
+  shift: string | null;
   beach_location: string | null;
   notes: string | null;
   coach_name?: string;
@@ -43,6 +44,7 @@ const AttendanceManagement = () => {
   const [editForm, setEditForm] = useState({
     date: "",
     status: "",
+    shift: "",
     coach_id: "",
     beach_location: "",
     notes: ""
@@ -217,6 +219,7 @@ const AttendanceManagement = () => {
     setEditForm({
       date: record.date,
       status: record.status || "",
+      shift: record.shift || "",
       coach_id: record.coach_id || "",
       beach_location: record.beach_location || "",
       notes: record.notes || ""
@@ -338,6 +341,7 @@ const AttendanceManagement = () => {
                         <TableHead>Date</TableHead>
                         <TableHead>Coach</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Shift</TableHead>
                         <TableHead>Beach</TableHead>
                         <TableHead>Notes</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -367,6 +371,7 @@ const AttendanceManagement = () => {
                               <span className="text-muted-foreground text-xs">-</span>
                             )}
                           </TableCell>
+                          <TableCell>{record.shift || '-'}</TableCell>
                           <TableCell>{record.beach_location || '-'}</TableCell>
                           <TableCell className="max-w-xs truncate">{record.notes || '-'}</TableCell>
                           <TableCell className="text-right">
@@ -432,6 +437,10 @@ const AttendanceManagement = () => {
                 <p className="font-medium">{selectedRecord.status || '-'}</p>
               </div>
               <div>
+                <Label className="text-muted-foreground">Shift</Label>
+                <p className="font-medium">{selectedRecord.shift || '-'}</p>
+              </div>
+              <div>
                 <Label className="text-muted-foreground">Beach Location</Label>
                 <p className="font-medium">{selectedRecord.beach_location || '-'}</p>
               </div>
@@ -495,6 +504,18 @@ const AttendanceManagement = () => {
                   <SelectItem value="Present">Present</SelectItem>
                   <SelectItem value="Absent">Absent</SelectItem>
                   <SelectItem value="Justified">Justified</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="shift">Shift</Label>
+              <Select value={editForm.shift} onValueChange={(value) => setEditForm({ ...editForm, shift: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select shift" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Morning">Morning</SelectItem>
+                  <SelectItem value="Afternoon">Afternoon</SelectItem>
                 </SelectContent>
               </Select>
             </div>
