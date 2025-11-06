@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
@@ -145,6 +146,32 @@ const PaymentManagement = () => {
     enabled: !!selectedAthlete
   });
 
+  // Check if selected athlete has a pack payment without pack record
+  const { data: packRecords } = useQuery({
+    queryKey: ['athlete-packs', selectedAthlete?.athlete_id],
+    queryFn: async () => {
+      if (!selectedAthlete) return [];
+      const { data, error } = await supabase
+        .from('packs')
+        .select('*')
+        .eq('athlete_id', selectedAthlete.athlete_id);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedAthlete
+  });
+
+  // Detect pack payment without pack record
+  const packPayment = payments?.find(p => 
+    p.plan_type && 
+    ['pack1', 'pack5', 'pack10'].includes(p.plan_type) && 
+    p.payment_date
+  );
+  
+  const needsPackCreation = packPayment && !packRecords?.some(
+    pack => pack.payment_id === packPayment.payment_id
+  );
+
   // Filter athletes based on search
   const filteredAthletes = athletes?.filter(athlete => 
     `${athlete.first_name} ${athlete.last_name}`
@@ -177,6 +204,12 @@ const PaymentManagement = () => {
       payment_date: "",
       plan_type: ""
     });
+  };
+
+  // Helper to generate stable pack ID
+  const generatePackId = (athleteId: string, totalTokens: string, dateISO: string) => {
+    const ymd = dateISO.replace(/-/g, '');
+    return `pack${totalTokens}-${athleteId}-${ymd}`;
   };
 
   const handlePackCreation = async (
@@ -227,10 +260,11 @@ const PaymentManagement = () => {
           .eq('id', existingPack.id);
       }
 
-      // Insert new pack record
+      // Insert new pack record with generated ID
       const { error: insertError } = await supabase
         .from('packs')
         .insert({
+          id: generatePackId(athleteId, totalTokens, paymentDate),
           athlete_id: athleteId,
           total_tokens: totalTokens,
           used_tokens: carriedOverTokens > 0 ? carriedOverTokens.toString() : '0',
@@ -549,6 +583,42 @@ const PaymentManagement = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Pack Creation Alert */}
+            {needsPackCreation && packPayment && (
+              <Alert className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Pack Payment Without Pack Record</AlertTitle>
+                <AlertDescription className="flex items-center justify-between">
+                  <span>
+                    Found a {packPayment.plan_type} payment ({packPayment.payment_id}) from {packPayment.payment_date} 
+                    but no corresponding pack record exists.
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="ml-4"
+                    onClick={async () => {
+                      await handlePackCreation(
+                        selectedAthlete!.athlete_id,
+                        packPayment.plan_type!,
+                        packPayment.payment_date!,
+                        packPayment.payment_id
+                      );
+                      await queryClient.invalidateQueries({ 
+                        queryKey: ['athlete-packs', selectedAthlete?.athlete_id] 
+                      });
+                      toast({
+                        title: "Success",
+                        description: "Pack record created successfully"
+                      });
+                    }}
+                  >
+                    Create Pack Record
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Payments Table */}
             <Card className="shadow-medium">
