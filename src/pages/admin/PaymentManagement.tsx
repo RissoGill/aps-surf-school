@@ -161,15 +161,22 @@ const PaymentManagement = () => {
     enabled: !!selectedAthlete
   });
 
-  // Detect pack payment without pack record
-  const packPayment = payments?.find(p => 
+  // Detect pack payment without pack record - check LATEST payment only
+  const packPayments = payments?.filter(p => 
     p.plan_type && 
     ['pack1', 'pack5', 'pack10'].includes(p.plan_type) && 
     p.payment_date
-  );
+  ).sort((a, b) => {
+    // Sort by payment_date descending (latest first)
+    const dateA = new Date(a.payment_date!).getTime();
+    const dateB = new Date(b.payment_date!).getTime();
+    return dateB - dateA;
+  }) || [];
   
-  const needsPackCreation = packPayment && !packRecords?.some(
-    pack => pack.payment_id === packPayment.payment_id
+  const latestPackPayment = packPayments[0];
+  
+  const needsPackCreation = latestPackPayment && !packRecords?.some(
+    pack => pack.payment_id === latestPackPayment.payment_id
   );
 
   // Filter athletes based on search
@@ -219,6 +226,31 @@ const PaymentManagement = () => {
     paymentId: string
   ) => {
     try {
+      // Try Edge Function first (bypasses RLS with service role)
+      const { data: functionResult, error: functionError } = await supabase.functions.invoke('create-pack', {
+        body: { athleteId, planType, paymentDate, paymentId }
+      });
+
+      if (!functionError && functionResult?.ok) {
+        console.info('Pack created via Edge Function:', functionResult.packId);
+        
+        // Invalidate all relevant queries
+        await queryClient.invalidateQueries({ queryKey: ['pack-balance', athleteId] });
+        await queryClient.invalidateQueries({ queryKey: ['athlete-packs', athleteId] });
+        await queryClient.invalidateQueries({ queryKey: ['athlete-payments', athleteId] });
+        await queryClient.invalidateQueries({ queryKey: ['atletas'] });
+        
+        toast({
+          title: "Success",
+          description: "Pack record created successfully"
+        });
+        
+        return;
+      }
+
+      // Log Edge Function error and fall back to direct insert
+      console.warn('Edge Function failed, falling back to direct insert:', functionError);
+
       // Extract total tokens from plan type (pack1 -> 1, pack5 -> 5, pack10 -> 10)
       const tokenMatch = planType.match(/pack(\d+)/);
       if (!tokenMatch) return; // Not a pack plan
@@ -610,13 +642,13 @@ const PaymentManagement = () => {
             </div>
 
             {/* Pack Creation Alert */}
-            {needsPackCreation && packPayment && (
+            {needsPackCreation && latestPackPayment && (
               <Alert className="mb-6">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Pack Payment Without Pack Record</AlertTitle>
                 <AlertDescription className="flex items-center justify-between">
                   <span>
-                    Found a {packPayment.plan_type} payment ({packPayment.payment_id}) from {packPayment.payment_date} 
+                    Found a {latestPackPayment.plan_type} payment ({latestPackPayment.payment_id}) from {latestPackPayment.payment_date} 
                     but no corresponding pack record exists.
                   </span>
                   <Button 
@@ -624,24 +656,12 @@ const PaymentManagement = () => {
                     size="sm" 
                     className="ml-4"
                     onClick={async () => {
-                      try {
-                        await handlePackCreation(
-                          selectedAthlete!.athlete_id,
-                          packPayment.plan_type!,
-                          packPayment.payment_date!,
-                          packPayment.payment_id
-                        );
-                        await queryClient.invalidateQueries({ 
-                          queryKey: ['athlete-packs', selectedAthlete?.athlete_id] 
-                        });
-                        toast({
-                          title: "Success",
-                          description: "Pack record created successfully"
-                        });
-                      } catch (error) {
-                        // Error toast already shown in handlePackCreation
-                        console.error('Pack creation failed:', error);
-                      }
+                      await handlePackCreation(
+                        selectedAthlete!.athlete_id,
+                        latestPackPayment.plan_type!,
+                        latestPackPayment.payment_date!,
+                        latestPackPayment.payment_id
+                      );
                     }}
                   >
                     Create Pack Record
