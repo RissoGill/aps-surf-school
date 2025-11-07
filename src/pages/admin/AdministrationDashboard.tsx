@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Settings, Users, Euro, Calendar, UserPlus, User } from "lucide-react";
+import { ReportsCard } from "@/components/admin/ReportsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -632,6 +633,11 @@ const AdministrationDashboard = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Reports Card */}
+        <div className="mt-6">
+          <ReportsCard />
         </div>
 
         {/* Coach Attendance Management */}
