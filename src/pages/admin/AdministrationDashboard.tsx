@@ -659,8 +659,8 @@ const AdministrationDashboard = () => {
                     <User className="h-6 w-6 text-secondary" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl font-bold">Coach Attendance Management</CardTitle>
-                    <CardDescription>View training session breakdown by coach</CardDescription>
+                    <h4 className="font-medium text-foreground mb-1">Coach Attendance Management</h4>
+                    <p className="text-sm text-muted-foreground">View training session breakdown by coach</p>
                   </div>
                 </div>
               </div>

@@ -302,8 +302,8 @@ export const ReportsCard = () => {
             <FileText className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">Generate Reports</CardTitle>
-            <CardDescription>Create financial, personal, overall, and attendance reports</CardDescription>
+            <h4 className="font-medium text-foreground mb-1">Generate Reports</h4>
+            <p className="text-sm text-muted-foreground">Create financial, personal, overall, and attendance reports</p>
           </div>
         </div>
       </CardHeader>
