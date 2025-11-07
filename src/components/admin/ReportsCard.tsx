@@ -101,10 +101,16 @@ export const ReportsCard = () => {
           break;
 
         case "personal":
-          const { data: athletes, error: athletesError } = await supabase
+          let athletesQuery = supabase
             .from("atletas")
             .select("*")
             .eq("is_active", true);
+
+          if (selectedAthlete) {
+            athletesQuery = athletesQuery.eq("athlete_id", selectedAthlete);
+          }
+          
+          const { data: athletes, error: athletesError } = await athletesQuery;
           
           if (athletesError) throw athletesError;
           data = athletes || [];
@@ -354,7 +360,7 @@ export const ReportsCard = () => {
             </Select>
           </div>
 
-          {(reportType === "financial" || reportType === "attendance") && (
+          {(reportType === "financial" || reportType === "attendance" || reportType === "personal") && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Athlete (Optional)</label>
               <Select value={selectedAthlete} onValueChange={setSelectedAthlete}>
