@@ -77,12 +77,14 @@ const AdministrationDashboard = () => {
       // Fetch current month total - query by year only, filter by month client-side
       const { data: monthRows, error: monthErr } = await supabase
         .from('payments')
-        .select('amount_paid, status, month, year')
+        .select('amount_paid, amount_due, status, month, year, athlete_id')
         .eq('year', currentYear);
       
       if (monthErr) {
         console.error('Month query error:', monthErr);
       }
+      
+      console.info('Month rows sample', monthRows?.slice(0, 3));
       
       // Helper to normalize month names for comparison
       const normalizeMonth = (month: string) => month?.trim().toLowerCase();
