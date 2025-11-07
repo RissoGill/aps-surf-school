@@ -299,6 +299,36 @@ export type Database = {
           },
         ]
       }
+      guardians: {
+        Row: {
+          auth_uid: string
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+        }
+        Insert: {
+          auth_uid: string
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+        }
+        Update: {
+          auth_uid?: string
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+        }
+        Relationships: []
+      }
       packs: {
         Row: {
           active: boolean | null
@@ -466,7 +496,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "coach" | "guardian" | "athlete"
+      app_role: "admin" | "coach" | "guardian" | "athlete" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -594,7 +624,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "coach", "guardian", "athlete"],
+      app_role: ["admin", "coach", "guardian", "athlete", "super_admin"],
     },
   },
 } as const
