@@ -261,10 +261,11 @@ const PaymentManagement = () => {
       }
 
       // Insert new pack record with generated ID
+      const packId = generatePackId(athleteId, totalTokens, paymentDate);
       const { error: insertError } = await supabase
         .from('packs')
         .insert({
-          id: generatePackId(athleteId, totalTokens, paymentDate),
+          id: packId,
           athlete_id: athleteId,
           total_tokens: totalTokens,
           used_tokens: carriedOverTokens > 0 ? carriedOverTokens.toString() : '0',
@@ -274,9 +275,19 @@ const PaymentManagement = () => {
         });
 
       if (insertError) {
-        console.error('Pack creation error:', insertError);
+        console.error('Pack insert failed:', {
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          athleteId,
+          packId
+        });
         throw insertError;
       }
+
+      console.info('Pack created successfully:', { packId, athleteId, totalTokens, paymentId });
 
       // Update athlete's plan_type to match the pack
       const { error: updateError } = await supabase
@@ -288,19 +299,33 @@ const PaymentManagement = () => {
         console.error('Athlete plan_type update error:', updateError);
       }
 
-      // Invalidate pack balance query for immediate UI update
+      // Invalidate all relevant queries for immediate UI update
       await queryClient.invalidateQueries({ 
         queryKey: ['pack-balance', athleteId] 
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['athlete-packs', athleteId] 
       });
       await queryClient.invalidateQueries({ 
         queryKey: ['atletas'] 
       });
 
-    } catch (error) {
-      console.error('Error in pack creation:', error);
+    } catch (error: any) {
+      console.error('Pack creation failed:', {
+        error,
+        message: error?.message,
+        code: error?.code,
+        athleteId
+      });
+      
+      const errorMessage = error?.message || 'Unknown error occurred';
+      const isRLSError = error?.code === '42501' || errorMessage.includes('policy');
+      
       toast({
-        title: "Warning",
-        description: "Payment saved but pack creation had issues. Please verify pack records.",
+        title: isRLSError ? "Permission Error" : "Pack Creation Failed",
+        description: isRLSError 
+          ? "Insufficient permissions to create pack record. Please check RLS policies." 
+          : `Failed to create pack record: ${errorMessage.slice(0, 100)}`,
         variant: "destructive"
       });
     }
