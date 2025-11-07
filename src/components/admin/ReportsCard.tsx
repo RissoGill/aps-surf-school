@@ -69,7 +69,7 @@ export const ReportsCard = () => {
             .gte("payment_date", startStr)
             .lte("payment_date", endStr);
           
-          if (selectedAthlete) {
+          if (selectedAthlete && selectedAthlete !== "all") {
             paymentsQuery = paymentsQuery.eq("athlete_id", selectedAthlete);
           }
           
@@ -90,7 +90,7 @@ export const ReportsCard = () => {
             .gte("date", startStr)
             .lte("date", endStr);
           
-          if (selectedAthlete) {
+          if (selectedAthlete && selectedAthlete !== "all") {
             attendanceQuery = attendanceQuery.eq("athlete_id", selectedAthlete);
           }
           
@@ -106,7 +106,7 @@ export const ReportsCard = () => {
             .select("*")
             .eq("is_active", true);
 
-          if (selectedAthlete) {
+          if (selectedAthlete && selectedAthlete !== "all") {
             athletesQuery = athletesQuery.eq("athlete_id", selectedAthlete);
           }
           
@@ -368,7 +368,7 @@ export const ReportsCard = () => {
                   <SelectValue placeholder="All athletes" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50 max-h-[300px]">
-                  <SelectItem value="">All athletes</SelectItem>
+                  <SelectItem value="all">All athletes</SelectItem>
                   {athletes.map((athlete) => (
                     <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
                       {athlete.first_name} {athlete.last_name}
