@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -28,6 +28,23 @@ export const ReportsCard = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<string>("");
+  const [athletes, setAthletes] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchAthletes = async () => {
+      const { data, error } = await supabase
+        .from("atletas")
+        .select("athlete_id, first_name, last_name")
+        .eq("is_active", true)
+        .order("first_name");
+      
+      if (!error && data) {
+        setAthletes(data);
+      }
+    };
+    fetchAthletes();
+  }, []);
 
   const generateReport = async () => {
     if (!reportType || !startDate || !endDate) {
@@ -43,22 +60,27 @@ export const ReportsCard = () => {
 
       switch (reportType) {
         case "financial":
-          const { data: payments, error: paymentsError } = await supabase
+          let paymentsQuery = supabase
             .from("payments")
             .select(`
               *,
               atletas:athlete_id (first_name, last_name, surf_level)
             `)
             .gte("payment_date", startStr)
-            .lte("payment_date", endStr)
-            .order("payment_date", { ascending: false });
+            .lte("payment_date", endStr);
+          
+          if (selectedAthlete) {
+            paymentsQuery = paymentsQuery.eq("athlete_id", selectedAthlete);
+          }
+          
+          const { data: payments, error: paymentsError } = await paymentsQuery.order("payment_date", { ascending: false });
           
           if (paymentsError) throw paymentsError;
           data = payments || [];
           break;
 
         case "attendance":
-          const { data: attendance, error: attendanceError } = await supabase
+          let attendanceQuery = supabase
             .from("attendance")
             .select(`
               *,
@@ -66,8 +88,13 @@ export const ReportsCard = () => {
               coach:coach_id (first_name, last_name)
             `)
             .gte("date", startStr)
-            .lte("date", endStr)
-            .order("date", { ascending: false });
+            .lte("date", endStr);
+          
+          if (selectedAthlete) {
+            attendanceQuery = attendanceQuery.eq("athlete_id", selectedAthlete);
+          }
+          
+          const { data: attendance, error: attendanceError } = await attendanceQuery.order("date", { ascending: false });
           
           if (attendanceError) throw attendanceError;
           data = attendance || [];
@@ -311,7 +338,10 @@ export const ReportsCard = () => {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-sm font-medium">Report Type</label>
-            <Select value={reportType} onValueChange={(value) => setReportType(value as ReportType)}>
+            <Select value={reportType} onValueChange={(value) => {
+              setReportType(value as ReportType);
+              setSelectedAthlete("");
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select report type" />
               </SelectTrigger>
@@ -323,6 +353,25 @@ export const ReportsCard = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {(reportType === "financial" || reportType === "attendance") && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Athlete (Optional)</label>
+              <Select value={selectedAthlete} onValueChange={setSelectedAthlete}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All athletes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All athletes</SelectItem>
+                  {athletes.map((athlete) => (
+                    <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
+                      {athlete.first_name} {athlete.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Date Range</label>
