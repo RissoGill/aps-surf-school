@@ -106,7 +106,7 @@ const AdministrationLogin = () => {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="admin@apssurfschool.com"
+                  placeholder="admin@aps.com"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
