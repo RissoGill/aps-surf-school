@@ -40,12 +40,12 @@ const AdministrationLogin = () => {
         return;
       }
 
-      // Verify user has admin role
+      // Verify user has admin or super_admin role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
-        .eq('role', 'admin')
+        .in('role', ['admin', 'super_admin'])
         .maybeSingle();
 
       if (roleError || !roleData) {
