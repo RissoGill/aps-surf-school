@@ -74,26 +74,15 @@ const AdministrationDashboard = () => {
       const currentYear = now.getFullYear();
       const currentMonthName = now.toLocaleString('en-US', { month: 'long' });
       
-      // Fetch current month total with dedicated server-filtered query
+      // Fetch current month total - query by year only, filter by month client-side
       const { data: monthRows, error: monthErr } = await supabase
         .from('payments')
         .select('amount_paid, status, month, year')
-        .eq('year', currentYear)
-        .ilike('month', currentMonthName)
-        .or('status.ilike.Paid%,status.ilike.Partial%');
+        .eq('year', currentYear);
       
-      if (monthErr) console.error('Month query error:', monthErr);
-      
-      const totalReceivedThisMonth = (monthRows || [])
-        .reduce((sum, r) => sum + Number(r.amount_paid || 0), 0);
-      
-      console.info('TRTM month sum', {
-        month: currentMonthName,
-        year: currentYear,
-        count: monthRows?.length || 0,
-        totalReceivedThisMonth,
-        sample: monthRows?.slice(0, 3)
-      });
+      if (monthErr) {
+        console.error('Month query error:', monthErr);
+      }
       
       // Helper to normalize month names for comparison
       const normalizeMonth = (month: string) => month?.trim().toLowerCase();
@@ -110,8 +99,8 @@ const AdministrationDashboard = () => {
           .replace(/\s+/g, ' ')
           .trim();
       
-      // Month name to number mapping (case-insensitive)
-  const monthNameToNumber: { [key: string]: number } = {
+      // Month name to number mapping (case-insensitive) - moved up for use in month filtering
+      const monthNameToNumber: { [key: string]: number } = {
         // English full + abbr
         'january': 1, 'jan': 1,
         'february': 2, 'feb': 2,
@@ -140,15 +129,34 @@ const AdministrationDashboard = () => {
         'dezembro': 12, 'dez': 12,
       };
       
-
-      // Current month outstanding for Learning and Pre-Competition (server-side query)
-      const { data: currentMonthLearningRows } = await supabase
-        .from('payments')
-        .select('amount_due, amount_paid, athlete_id')
-        .eq('year', currentYear)
-        .ilike('month', currentMonthName);
+      // Filter to current month client-side and calculate total received
+      const currentMonthPayments = (monthRows || []).filter((p: any) => {
+        const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+        return monthNum === currentMonthNumber;
+      });
       
-      const currentMonthOutstandingLearning = (currentMonthLearningRows || [])
+      const totalReceivedThisMonth = currentMonthPayments
+        .filter((p: any) => {
+          const status = normalizeStatus(p.status);
+          return status.startsWith('paid') || status.startsWith('partial');
+        })
+        .reduce((sum, r) => sum + Number(r.amount_paid || 0), 0);
+      
+      console.info('TRTM month sum (client-filtered)', {
+        month: currentMonthName,
+        monthNumber: currentMonthNumber,
+        year: currentYear,
+        totalRows: monthRows?.length || 0,
+        matchedCurrentMonth: currentMonthPayments.length,
+        totalReceivedThisMonth,
+        sample: currentMonthPayments.slice(0, 3)
+      });
+      
+
+      // Current month outstanding for Learning and Pre-Competition - use monthRows (already fetched by year)
+      const currentMonthOutstandingRows = currentMonthPayments; // Already filtered to current month
+      
+      const currentMonthOutstandingLearning = currentMonthOutstandingRows
         .filter((p: any) => {
           const aid = String(p.athlete_id || '').trim().toLowerCase();
           const isActive = isActiveByAthleteId[aid] ?? true;
@@ -161,8 +169,8 @@ const AdministrationDashboard = () => {
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
-      // Current month outstanding for Competition (server-side query)
-      const currentMonthOutstandingCompetition = (currentMonthLearningRows || [])
+      // Current month outstanding for Competition - reuse same currentMonthOutstandingRows
+      const currentMonthOutstandingCompetition = currentMonthOutstandingRows
         .filter((p: any) => {
           const aid = String(p.athlete_id || '').trim().toLowerCase();
           const isActive = isActiveByAthleteId[aid] ?? true;
