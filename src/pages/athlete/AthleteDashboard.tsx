@@ -160,6 +160,21 @@ useEffect(() => {
         }
       }
     )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'packs'
+      },
+      (payload) => {
+        const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
+        if (changedAthleteId === athleteId) {
+          queryClient.invalidateQueries({ queryKey: ['pack-balance', athleteId] });
+          queryClient.invalidateQueries({ queryKey: ['pack-history', athleteId] });
+        }
+      }
+    )
     .subscribe();
 
   return () => {
@@ -318,7 +333,7 @@ useEffect(() => {
   const { data: packBalance } = useQuery({
     queryKey: ['pack-balance', athleteId],
     queryFn: async () => {
-      if (!athleteId || !athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
+      if (!athleteId) {
         return null;
       }
 
@@ -332,7 +347,10 @@ useEffect(() => {
         .limit(1)
         .maybeSingle();
 
-      if (error || !pack) return null;
+      if (error || !pack) {
+        console.info('No active pack found for athlete', athleteId, { error });
+        return null;
+      }
 
       const totalTokens = parseInt(pack.total_tokens) || 0;
       const usedTokens = parseInt(pack.used_tokens) || 0;
@@ -357,7 +375,7 @@ useEffect(() => {
         sessionsUsed: actualUsedTokens
       };
     },
-    enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+    enabled: !!athleteId,
   });
 
   // Fetch all pack history
@@ -381,7 +399,7 @@ useEffect(() => {
 
       return data || [];
     },
-    enabled: !!athleteId && !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+    enabled: !!athleteId,
   });
   return (
     <div className="min-h-screen bg-gradient-surface">

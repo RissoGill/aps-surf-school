@@ -23,10 +23,6 @@ export async function calculatePackBalance(athleteId: string): Promise<PackBalan
     return null;
   }
 
-  // If not a pack plan, return null
-  if (!athlete.plan_type || athlete.plan_type.toLowerCase() === 'month') {
-    return null;
-  }
 
   // Get active pack
   const { data: pack, error: packError } = await supabase
