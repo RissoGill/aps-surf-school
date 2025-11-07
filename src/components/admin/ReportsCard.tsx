@@ -441,14 +441,14 @@ export const ReportsCard = () => {
         </Button>
 
         {reportData && (
-          <div className="flex gap-2 pt-4 border-t">
-            <Button onClick={viewReport} variant="outline" className="flex-1">
-              <Eye className="mr-2 h-4 w-4" />
-              View Report
-            </Button>
-            <Button onClick={downloadReport} variant="default" className="flex-1">
+          <div className="flex flex-col gap-2 pt-4 border-t">
+            <Button onClick={downloadReport} variant="default" className="w-full">
               <Download className="mr-2 h-4 w-4" />
               Download Report
+            </Button>
+            <Button onClick={viewReport} variant="outline" className="w-full">
+              <Eye className="mr-2 h-4 w-4" />
+              View Report
             </Button>
           </div>
         )}
