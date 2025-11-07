@@ -297,13 +297,15 @@ export const ReportsCard = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-bold flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Generate Reports
-        </CardTitle>
-        <CardDescription>
-          Create financial, personal, overall, and attendance reports
-        </CardDescription>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-bold">Generate Reports</CardTitle>
+            <CardDescription>Create financial, personal, overall, and attendance reports</CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
