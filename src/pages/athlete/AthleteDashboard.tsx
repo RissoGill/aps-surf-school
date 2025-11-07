@@ -15,6 +15,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
+import { calculatePackBalance } from "@/utils/packBalance";
 
 interface Athlete {
   athlete_id: string;
@@ -166,6 +167,21 @@ useEffect(() => {
         event: '*',
         schema: 'public',
         table: 'packs'
+      },
+      (payload) => {
+        const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
+        if (changedAthleteId === athleteId) {
+          queryClient.invalidateQueries({ queryKey: ['pack-balance', athleteId] });
+          queryClient.invalidateQueries({ queryKey: ['pack-history', athleteId] });
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'payments'
       },
       (payload) => {
         const changedAthleteId = (payload.new as any)?.athlete_id ?? (payload.old as any)?.athlete_id;
@@ -332,49 +348,7 @@ useEffect(() => {
   // Fetch pack balance for pack athletes
   const { data: packBalance } = useQuery({
     queryKey: ['pack-balance', athleteId],
-    queryFn: async () => {
-      if (!athleteId) {
-        return null;
-      }
-
-      // Get active pack
-      const { data: pack, error } = await supabase
-        .from('packs')
-        .select('*')
-        .eq('athlete_id', athleteId)
-        .eq('active', true)
-        .order('purchase_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error || !pack) {
-        console.info('No active pack found for athlete', athleteId, { error });
-        return null;
-      }
-
-      const totalTokens = parseInt(pack.total_tokens) || 0;
-      const usedTokens = parseInt(pack.used_tokens) || 0;
-      const balance = totalTokens - usedTokens;
-
-      // Count attendance from purchase date - this is the actual usage
-      const purchaseDate = new Date(pack.purchase_date);
-      const attendanceFromPurchase = attendanceRecords.filter(record => {
-        if (!record.date) return false;
-        const recordDate = new Date(record.date);
-        return recordDate >= purchaseDate && record.status === "Present";
-      });
-
-      const actualUsedTokens = attendanceFromPurchase.length;
-      const actualBalance = totalTokens - actualUsedTokens;
-
-      return {
-        totalTokens,
-        usedTokens: actualUsedTokens,
-        balance: actualBalance,
-        purchaseDate: pack.purchase_date,
-        sessionsUsed: actualUsedTokens
-      };
-    },
+    queryFn: () => calculatePackBalance(athleteId),
     enabled: !!athleteId,
   });
 

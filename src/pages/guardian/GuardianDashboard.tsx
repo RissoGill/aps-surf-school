@@ -13,6 +13,7 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
+import { calculatePackBalance } from "@/utils/packBalance";
 
 interface AttendanceRecord {
   Id: string;
@@ -36,6 +37,14 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
         queryClient.invalidateQueries({ queryKey: ['guardian-annual-attendance', athleteId] });
         queryClient.invalidateQueries({ queryKey: ['guardian-media', athleteId] });
         queryClient.invalidateQueries({ queryKey: ['guardian-pack-balance', athleteId] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'packs', filter: `athlete_id=eq.${athleteId}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['guardian-pack-balance', athleteId] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-pack-history', athleteId] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments', filter: `athlete_id=eq.${athleteId}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ['guardian-pack-balance', athleteId] });
+        queryClient.invalidateQueries({ queryKey: ['guardian-pack-history', athleteId] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -77,45 +86,8 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
   // Fetch pack balance for pack athletes
   const { data: packBalance } = useQuery({
     queryKey: ['guardian-pack-balance', athleteId],
-    queryFn: async () => {
-      if (!athlete?.plan_type || athlete.plan_type.toLowerCase() === 'month') {
-        return null;
-      }
-
-      // Get active pack
-      const { data: pack, error } = await supabase
-        .from('packs')
-        .select('*')
-        .eq('athlete_id', athleteId)
-        .eq('active', true)
-        .order('purchase_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error || !pack) return null;
-
-      const totalTokens = parseInt(pack.total_tokens) || 0;
-
-      // Count attendance from purchase date - this is the actual usage
-      const purchaseDate = new Date(pack.purchase_date);
-      const attendanceFromPurchase = attendanceRecords.filter(record => {
-        if (!record.Date) return false;
-        const recordDate = new Date(record.Date);
-        return recordDate >= purchaseDate && record.status === "Present";
-      });
-
-      const actualUsedTokens = attendanceFromPurchase.length;
-      const actualBalance = totalTokens - actualUsedTokens;
-
-      return {
-        totalTokens,
-        usedTokens: actualUsedTokens,
-        balance: actualBalance,
-        purchaseDate: pack.purchase_date,
-        sessionsUsed: actualUsedTokens
-      };
-    },
-    enabled: !!athlete && athlete.plan_type?.toLowerCase() !== 'month',
+    queryFn: () => calculatePackBalance(athleteId),
+    enabled: !!athleteId
   });
 
   // Fetch all pack history
