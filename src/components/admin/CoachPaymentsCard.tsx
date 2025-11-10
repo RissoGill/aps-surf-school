@@ -234,7 +234,7 @@ export const CoachPaymentsCard = () => {
     ).reduce((sum, p) => sum + Number(p.amount), 0) || 0;
     
     const activeCoaches = coaches?.filter(c => c.status === true).length || 0;
-    const avgMonthly = payments && payments.length > 0 ? allTimeTotal / (activeCoaches * 12) : 0;
+    const avgMonthly = activeCoaches > 0 ? allTimeTotal / (activeCoaches * 12) : 0;
     
     return {
       allTimeTotal,
@@ -244,7 +244,7 @@ export const CoachPaymentsCard = () => {
       avgMonthly,
       currentMonth,
     };
-  }, [payments]);
+  }, [payments, coaches]);
 
   // Filter payments by selected coach and month
   const filteredPayments = payments?.filter(p => {
