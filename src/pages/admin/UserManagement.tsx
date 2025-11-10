@@ -245,6 +245,7 @@ const UserManagement = () => {
                   </Button>
                   <Button
                     size="sm"
+                    variant="default"
                     onClick={handleSave}
                     disabled={isSaving}
                   >

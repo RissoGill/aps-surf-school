@@ -623,7 +623,7 @@ const AdministrationDashboard = () => {
                     </div>
                     
                     <Button 
-                      variant="outline" 
+                      variant="default" 
                       size="sm"
                       className="ml-4 touch-friendly"
                     >

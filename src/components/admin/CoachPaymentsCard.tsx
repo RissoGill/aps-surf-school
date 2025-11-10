@@ -291,7 +291,7 @@ export const CoachPaymentsCard = () => {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button variant="default" className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add Payment
               </Button>
@@ -400,7 +400,7 @@ export const CoachPaymentsCard = () => {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button onClick={handleSubmit} className="flex-1">
+                  <Button onClick={handleSubmit} variant="default" className="flex-1">
                     {editingPayment ? 'Update' : 'Add'} Payment
                   </Button>
                   <Button variant="outline" onClick={handleCloseDialog}>

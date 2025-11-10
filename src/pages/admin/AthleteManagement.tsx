@@ -301,7 +301,7 @@ const AthleteManagement = () => {
                     </p>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       setSelectedAthlete(null);
@@ -363,7 +363,7 @@ const AthleteManagement = () => {
                 </div>
                 {isEditing && (
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={handleEditSave}>
+                    <Button size="sm" variant="default" onClick={handleEditSave}>
                       <Save className="h-4 w-4 mr-1" />
                       Save
                     </Button>

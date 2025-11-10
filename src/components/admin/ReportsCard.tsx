@@ -532,6 +532,7 @@ export const ReportsCard = () => {
         <Button 
           onClick={generateReport} 
           disabled={!reportType || !startDate || !endDate || isGenerating}
+          variant="default"
           className="w-full"
         >
           {isGenerating ? "Generating..." : "Generate Report"}
