@@ -285,7 +285,7 @@ export const CoachPaymentsCard = () => {
               <Euro className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl">Coach Payments</CardTitle>
+              <h4 className="font-medium text-foreground">Coach Payments</h4>
               <CardDescription>Manage payments to coaches</CardDescription>
             </div>
           </div>
