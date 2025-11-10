@@ -100,10 +100,10 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
           <Card key={championship.id} className="shadow-soft border-l-4 border-l-primary">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-4">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-primary" />
                   {championship.nome_campeonato || 'Unnamed Championship'}
-                </CardTitle>
+                </h4>
                 <Badge variant="default" className="bg-success text-success-foreground">
                   Registered
                 </Badge>

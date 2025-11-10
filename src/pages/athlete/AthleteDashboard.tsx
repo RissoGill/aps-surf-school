@@ -493,7 +493,7 @@ useEffect(() => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="text-2xl font-bold">Personal Information</CardTitle>
+                <h4 className="font-medium text-foreground">Personal Information</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -533,7 +533,7 @@ useEffect(() => {
 
             <Card className="shadow-soft border-l-4 border-l-success">
               <CardHeader className="bg-success/5">
-                <CardTitle className="text-2xl font-bold">Emergency Contacts</CardTitle>
+                <h4 className="font-medium text-foreground">Emergency Contacts</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -574,10 +574,10 @@ useEffect(() => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Calendar className="h-6 w-6 text-primary" />
                   Training Schedule
-                </CardTitle>
+                </h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -614,10 +614,10 @@ useEffect(() => {
 
             <Card className="shadow-soft border-l-4 border-l-warning">
               <CardHeader className="bg-warning/5">
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <MapPin className="h-6 w-6 text-warning" />
                   Transportation
-                </CardTitle>
+                </h4>
               </CardHeader>
               <CardContent>
                 {isLoadingAthlete ? (
@@ -656,10 +656,10 @@ useEffect(() => {
             <Card className="shadow-soft border-l-4 border-l-primary">
               <CardHeader className="bg-primary/5">
                 <div className="flex items-center justify-between mb-2">
-                  <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                  <h4 className="font-medium text-foreground flex items-center gap-2">
                     <Calendar className="h-6 w-6 text-primary" />
                     {getMonthName(selectedMonth.month, selectedMonth.year)}
-                  </CardTitle>
+                  </h4>
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="outline" 
@@ -730,11 +730,11 @@ useEffect(() => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">
+                <h4 className="font-medium text-foreground">
                   {athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' 
                     ? 'Your pack summary' 
                     : 'Monthly Summary'}
-                </CardTitle>
+                </h4>
               </CardHeader>
               <CardContent>
                 {isLoadingAttendance ? (
@@ -836,10 +836,10 @@ useEffect(() => {
           <TabsContent value="championships" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Trophy className="h-6 w-6" />
                   My Championships
-                </CardTitle>
+                </h4>
                 <CardDescription>
                   View all championships you are registered for
                 </CardDescription>
@@ -860,10 +860,10 @@ useEffect(() => {
           <TabsContent value="media" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <ImageIcon className="h-6 w-6" />
                   Photos & Videos
-                </CardTitle>
+                </h4>
                 <CardDescription>Media shared by your coaches</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1031,10 +1031,10 @@ useEffect(() => {
           <TabsContent value="estagios">
             <Card className="shadow-soft border-l-4 border-l-estagios">
               <CardHeader className="bg-estagios/5">
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Plane className="h-6 w-6 text-estagios" />
                   Estágios
-                </CardTitle>
+                </h4>
                 <CardDescription>Training camps and internships you are registered for</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

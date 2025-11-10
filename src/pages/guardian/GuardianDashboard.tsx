@@ -131,7 +131,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
       {isPack && (
         <Card className="shadow-soft mb-4">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Your pack summary</CardTitle>
+            <h4 className="font-medium text-foreground">Your pack summary</h4>
           </CardHeader>
           <CardContent>
             {packBalance ? (
@@ -305,10 +305,10 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+        <h4 className="font-medium text-foreground flex items-center gap-2">
           <ImageIcon className="h-6 w-6" />
           Photos & Videos
-        </CardTitle>
+        </h4>
         <CardDescription>Media from training sessions</CardDescription>
       </CardHeader>
       <CardContent>
@@ -483,10 +483,10 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+        <h4 className="font-medium text-foreground flex items-center gap-2">
           <Trophy className="h-6 w-6" />
           Championships
-        </CardTitle>
+        </h4>
         <CardDescription>Registered championships and competitions</CardDescription>
       </CardHeader>
       <CardContent>
@@ -578,10 +578,10 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+        <h4 className="font-medium text-foreground flex items-center gap-2">
           <Plane className="h-6 w-6" />
           Estágios
-        </CardTitle>
+        </h4>
         <CardDescription>Training camps and internships</CardDescription>
       </CardHeader>
       <CardContent>
@@ -1007,10 +1007,10 @@ const GuardianDashboard = () => {
         {guardianRole === 'family' && athletes && athletes.length > 1 && (
           <Card className="shadow-medium mb-6 border-primary/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h4 className="font-medium text-foreground flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
                 Family Area
-              </CardTitle>
+              </h4>
               <CardDescription>Select a child to view their information</CardDescription>
             </CardHeader>
             <CardContent>
@@ -1117,7 +1117,7 @@ const GuardianDashboard = () => {
           <TabsContent value="overview" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Payment Summary</CardTitle>
+                <h4 className="font-medium text-foreground">Payment Summary</h4>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 text-center">
@@ -1138,7 +1138,7 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Recent Payments</CardTitle>
+                <h4 className="font-medium text-foreground">Recent Payments</h4>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -1181,10 +1181,10 @@ const GuardianDashboard = () => {
           <TabsContent value="payments" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
                   Payment Summary
-                </CardTitle>
+                </h4>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 mb-4">
@@ -1206,7 +1206,7 @@ const GuardianDashboard = () => {
             <Card className="shadow-soft">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Payment History</CardTitle>
+                  <h4 className="font-medium text-foreground">Payment History</h4>
                   <select
                     className="text-sm border rounded px-2 py-1"
                     value={selectedYear || ''}
