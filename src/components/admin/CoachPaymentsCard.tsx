@@ -35,6 +35,7 @@ interface Coach {
   first_name: string;
   last_name: string;
   email: string;
+  status: boolean;
 }
 
 const MONTHS = [
@@ -66,7 +67,7 @@ export const CoachPaymentsCard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('coach')
-        .select('coach_id, first_name, last_name, email')
+        .select('coach_id, first_name, last_name, email, status')
         .order('first_name');
       
       if (error) throw error;
@@ -232,7 +233,7 @@ export const CoachPaymentsCard = () => {
       p.payment_year === currentYear && p.payment_month === currentMonth
     ).reduce((sum, p) => sum + Number(p.amount), 0) || 0;
     
-    const activeCoaches = new Set(payments?.map(p => p.coach_id) || []).size;
+    const activeCoaches = coaches?.filter(c => c.status === true).length || 0;
     const avgMonthly = payments && payments.length > 0 ? allTimeTotal / (activeCoaches * 12) : 0;
     
     return {
