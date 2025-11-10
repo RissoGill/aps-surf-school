@@ -143,7 +143,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               </div>
               <span className="text-sm font-medium text-muted-foreground">All Time</span>
             </div>
-            <div className="text-3xl font-bold text-primary">{totalAllTime.toFixed(2)}€</div>
+            <div className="text-2xl font-bold text-primary">{totalAllTime.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">Total paid</p>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               </div>
               <span className="text-sm font-medium text-muted-foreground">This Year</span>
             </div>
-            <div className="text-3xl font-bold text-blue-600">{totalThisYear.toFixed(2)}€</div>
+            <div className="text-2xl font-bold text-blue-600">{totalThisYear.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">{currentYear}</p>
           </CardContent>
         </Card>
@@ -171,7 +171,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
             </div>
             {lastPayment ? (
               <>
-                <div className="text-3xl font-bold text-purple-600">{Number(lastPayment.amount).toFixed(2)}€</div>
+                <div className="text-2xl font-bold text-purple-600">{Number(lastPayment.amount).toFixed(2)}€</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(lastPayment.payment_date), 'dd/MM/yyyy')}
                 </p>
