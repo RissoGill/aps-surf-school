@@ -937,10 +937,10 @@ const CoachDashboard = () => {
         {/* Search Athletes Card */}
         <Card className="shadow-soft mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <h4 className="font-medium text-foreground flex items-center gap-2">
               <Search className="h-5 w-5" />
               Search athletes by Name
-            </CardTitle>
+            </h4>
             <CardDescription>
               Find and select athletes to view their details
             </CardDescription>
@@ -994,10 +994,10 @@ const CoachDashboard = () => {
         {coachData?.coach_id && (
           <Card className="shadow-soft mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <h4 className="font-medium text-foreground flex items-center gap-2">
                 <Euro className="h-5 w-5" />
                 My Payments
-              </CardTitle>
+              </h4>
               <CardDescription>
                 View your payment history and summaries
               </CardDescription>
@@ -1268,7 +1268,7 @@ const CoachDashboard = () => {
         {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
           <Card className="shadow-soft mb-6">
             <CardHeader>
-              <CardTitle className="text-lg">Your Training Session History</CardTitle>
+              <h4 className="font-medium text-foreground">Your Training Session History</h4>
               <CardDescription>Detailed breakdown of your training days</CardDescription>
             </CardHeader>
             <CardContent>

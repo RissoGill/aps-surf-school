@@ -133,7 +133,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
       {/* Payment History Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
+          <h4 className="font-medium text-foreground">Payment History</h4>
           <CardDescription>All payments received</CardDescription>
         </CardHeader>
         <CardContent>
