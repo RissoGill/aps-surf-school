@@ -148,30 +148,30 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+        <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-success/20 rounded-lg">
+                <Calendar className="h-5 w-5 text-success" />
               </div>
               <span className="text-sm font-medium text-muted-foreground">This Year</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">{totalThisYear.toFixed(2)}€</div>
+            <div className="text-2xl font-bold text-success">{totalThisYear.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">{currentYear}</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+        <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Receipt className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-secondary/20 rounded-lg">
+                <Receipt className="h-5 w-5 text-foreground" />
               </div>
               <span className="text-sm font-medium text-muted-foreground">Last Payment</span>
             </div>
             {lastPayment ? (
               <>
-                <div className="text-2xl font-bold text-purple-600">{Number(lastPayment.amount).toFixed(2)}€</div>
+                <div className="text-2xl font-bold text-foreground">{Number(lastPayment.amount).toFixed(2)}€</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(lastPayment.payment_date), 'dd/MM/yyyy')}
                 </p>

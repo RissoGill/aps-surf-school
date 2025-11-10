@@ -147,7 +147,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                   </div>
                 </div>
                 <div className="text-center pt-4 border-t">
-                  <p className={`text-3xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
+                  <p className={`text-2xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
                     {packBalance.balance}
                   </p>
                   <p className="text-xs text-muted-foreground">Remaining Sessions</p>

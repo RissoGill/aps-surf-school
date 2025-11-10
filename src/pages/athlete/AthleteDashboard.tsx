@@ -382,7 +382,7 @@ useEffect(() => {
       {/* Logout Button */}
       <div className="mobile-container pt-4">
         <Button 
-          variant="outline" 
+          variant="default" 
           size="sm" 
           onClick={handleLogout}
           className="ml-auto flex items-center gap-2"
@@ -453,7 +453,7 @@ useEffect(() => {
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Clock className="h-3 w-3 mr-1 inline sm:hidden" />
               Training

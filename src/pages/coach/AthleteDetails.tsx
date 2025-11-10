@@ -305,22 +305,22 @@ const AthleteDetails = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="w-full h-auto flex flex-wrap justify-start gap-1 bg-muted/50 p-2 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm font-semibold px-2"
+              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[120px]"
             >
               Upload media
             </TabsTrigger>
@@ -330,8 +330,8 @@ const AthleteDetails = () => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                  <User className="h-6 w-6" />
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <User className="h-5 w-5" />
                   Personal Information
                 </CardTitle>
                 <CardDescription>Read-only athlete data</CardDescription>
@@ -403,8 +403,8 @@ const AthleteDetails = () => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                  <Calendar className="h-6 w-6" />
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <Calendar className="h-5 w-5" />
                   Training Schedule
                 </CardTitle>
                 <CardDescription>Read-only training information</CardDescription>
@@ -433,8 +433,8 @@ const AthleteDetails = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl font-bold">
-                  <Car className="h-6 w-6" />
+                <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <Car className="h-5 w-5" />
                   Transportation
                 </CardTitle>
               </CardHeader>
