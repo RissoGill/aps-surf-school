@@ -143,7 +143,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               </div>
               <span className="text-sm font-medium text-muted-foreground">All Time</span>
             </div>
-            <div className="text-2xl font-bold text-primary">{totalAllTime.toFixed(2)}€</div>
+            <div className="text-2xl font-medium text-primary">{totalAllTime.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">Total paid</p>
           </CardContent>
         </Card>
@@ -156,7 +156,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               </div>
               <span className="text-sm font-medium text-muted-foreground">This Year</span>
             </div>
-            <div className="text-2xl font-bold text-success">{totalThisYear.toFixed(2)}€</div>
+            <div className="text-2xl font-medium text-success">{totalThisYear.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">{currentYear}</p>
           </CardContent>
         </Card>
@@ -171,7 +171,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
             </div>
             {lastPayment ? (
               <>
-                <div className="text-2xl font-bold text-foreground">{Number(lastPayment.amount).toFixed(2)}€</div>
+                <div className="text-2xl font-medium text-foreground">{Number(lastPayment.amount).toFixed(2)}€</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(lastPayment.payment_date), 'dd/MM/yyyy')}
                 </p>
@@ -274,7 +274,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                             {payment.payment_month} {payment.payment_year}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-bold text-primary text-right whitespace-nowrap">
+                        <TableCell className="font-medium text-primary text-right whitespace-nowrap">
                           {Number(payment.amount).toFixed(2)}€
                         </TableCell>
                         <TableCell className="max-w-md">
