@@ -428,14 +428,14 @@ useEffect(() => {
               </div>
             ) : athlete ? (
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
+                <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
                   <Trophy className="h-10 w-10 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   {athlete.first_name} {athlete.last_name}
                 </h2>
                 {athlete.surf_level && (
-                  <Badge className="bg-gradient-primary text-white border-none mb-2 shadow-soft">{athlete.surf_level}</Badge>
+                  <Badge className="gradient-primary text-white border-none mb-2 shadow-soft">{athlete.surf_level}</Badge>
                 )}
                 <p className="text-muted-foreground">ID: {athlete.athlete_id}</p>
               </div>
@@ -536,7 +536,7 @@ useEffect(() => {
                     <div>
                       <p className="text-muted-foreground mb-1">Level</p>
                       {athlete.surf_level ? (
-                        <Badge className="bg-gradient-primary text-white border-none">{athlete.surf_level}</Badge>
+                        <Badge className="gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
                         <p className="font-medium">N/A</p>
                       )}
@@ -604,7 +604,7 @@ useEffect(() => {
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
                       <div className="flex items-center gap-2">
-                        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-soft">
+                        <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
                         </div>
                         <p className="font-medium">sessions per week</p>

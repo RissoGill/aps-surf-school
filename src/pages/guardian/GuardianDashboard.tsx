@@ -1053,7 +1053,7 @@ const GuardianDashboard = () => {
                 {athlete.first_name} {athlete.last_name}
               </h2>
               <div className="flex flex-col items-center gap-2">
-                <Badge className="bg-gradient-primary text-white border-none shadow-soft">
+                <Badge className="gradient-primary text-white border-none shadow-soft">
                   {athlete.surf_level || 'Beginner'} Level
                 </Badge>
                 {athlete.plan_type && (

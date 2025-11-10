@@ -161,6 +161,11 @@
   .gradient-primary {
     background: var(--gradient-primary);
   }
+
+  /* Backwards compatibility alias for legacy class names */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
   
   .gradient-surface {
     background: var(--gradient-surface);
