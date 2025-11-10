@@ -571,7 +571,7 @@ const AdministrationDashboard = () => {
 
         {/* Admin Actions */}
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-foreground mb-4">Management Tools</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-4 text-center">Management Tools</h3>
           
           {adminActions.map((action, index) => {
             const bgColorClass = 
