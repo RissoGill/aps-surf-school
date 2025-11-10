@@ -60,20 +60,36 @@ export const ReportsCard = () => {
 
       switch (reportType) {
         case "financial":
+          // Generate month/year combinations from date range
+          const months = [];
+          let currentDate = new Date(startDate);
+          while (currentDate <= endDate) {
+            const monthName = format(currentDate, "MMMM");
+            const year = currentDate.getFullYear();
+            months.push({ month: monthName, year });
+            currentDate.setMonth(currentDate.getMonth() + 1);
+          }
+          
           let paymentsQuery = supabase
             .from("payments")
             .select(`
               *,
               atletas:athlete_id (first_name, last_name, surf_level)
-            `)
-            .gte("payment_date", startStr)
-            .lte("payment_date", endStr);
+            `);
+          
+          // Build OR condition: match by payment_date range OR by month/year when payment_date is null
+          const dateConditions = [
+            `and(payment_date.gte.${startStr},payment_date.lte.${endStr})`,
+            ...months.map(m => `and(payment_date.is.null,month.eq.${m.month},year.eq.${m.year})`)
+          ].join(',');
+          
+          paymentsQuery = paymentsQuery.or(dateConditions);
           
           if (selectedAthlete && selectedAthlete !== "all") {
             paymentsQuery = paymentsQuery.eq("athlete_id", selectedAthlete);
           }
           
-          const { data: payments, error: paymentsError } = await paymentsQuery.order("payment_date", { ascending: false });
+          const { data: payments, error: paymentsError } = await paymentsQuery;
           
           if (paymentsError) throw paymentsError;
           data = payments || [];
@@ -182,16 +198,20 @@ export const ReportsCard = () => {
     let tableRows = "";
     
     if (type === "financial") {
-      tableRows = (data as any[]).map(payment => `
+      tableRows = (data as any[]).map(payment => {
+        const displayDate = payment.payment_date || `${payment.month} ${payment.year}`;
+        const outstanding = (parseFloat(payment.amount_due || 0) - parseFloat(payment.amount_paid || 0)).toFixed(2);
+        return `
         <tr>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.athlete_id}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.atletas?.first_name || ""} ${payment.atletas?.last_name || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.payment_date || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${displayDate}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_paid || 0}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_due || 0}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">€${outstanding}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.status || ""}</td>
         </tr>
-      `).join("");
+      `}).join("");
     } else if (type === "attendance") {
       tableRows = (data as any[]).map(att => `
         <tr>
@@ -238,7 +258,7 @@ export const ReportsCard = () => {
     }
 
     const tableHeaders = 
-      type === "financial" ? "<tr><th>Athlete ID</th><th>Name</th><th>Date</th><th>Paid</th><th>Due</th><th>Status</th></tr>" :
+      type === "financial" ? "<tr><th>Athlete ID</th><th>Name</th><th>Date</th><th>Paid</th><th>Due</th><th>Outstanding</th><th>Status</th></tr>" :
       type === "attendance" ? "<tr><th>Date</th><th>Athlete</th><th>Coach</th><th>Status</th><th>Location</th></tr>" :
       type === "personal" ? "<tr><th>Athlete ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Level</th></tr>" :
       "";
