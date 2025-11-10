@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, Users, Euro, Calendar, UserPlus, User } from "lucide-react";
+import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw } from "lucide-react";
 import { ReportsCard } from "@/components/admin/ReportsCard";
 import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo, useEffect, useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 const AdministrationDashboard = () => {
   const navigate = useNavigate();
@@ -447,6 +448,15 @@ const AdministrationDashboard = () => {
     return result;
   }, [athletes]);
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
+    queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
+    toast({
+      title: "Refreshing data...",
+      description: "Loading the latest information",
+    });
+  };
+
   const adminActions = [
     {
       title: "Manage Users",
@@ -512,6 +522,16 @@ const AdministrationDashboard = () => {
       <AppHeader title="Administration" showBack backTo="/" />
       
       <main className="mobile-container py-6">
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Administration Dashboard</h2>
+            <p className="text-muted-foreground">Manage system data and view reports</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
         {/* Admin Header */}
         <Card className="shadow-medium mb-6">
           <CardContent className="p-6">

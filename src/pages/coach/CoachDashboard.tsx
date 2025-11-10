@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind, Euro } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind, Euro, RefreshCw } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -578,6 +578,15 @@ const CoachDashboard = () => {
     }
   };
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['athletes'] });
+    queryClient.invalidateQueries({ queryKey: ['attendance'] });
+    toast({
+      title: "Refreshing data...",
+      description: "Loading the latest information",
+    });
+  };
+
   const coachDisplayName = useMemo(() => {
     if (!coachData) return undefined;
     const c: any = coachData;
@@ -901,10 +910,16 @@ const CoachDashboard = () => {
               Manage your athletes and track their progress
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Quick Stats */}
