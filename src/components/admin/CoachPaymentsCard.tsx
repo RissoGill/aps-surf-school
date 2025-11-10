@@ -300,7 +300,7 @@ export const CoachPaymentsCard = () => {
               <DialogHeader>
                 <DialogTitle>{editingPayment ? 'Edit' : 'Add'} Payment</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4 px-1">
                 <div className="space-y-2">
                   <Label htmlFor="coach">Coach *</Label>
                   <Select
