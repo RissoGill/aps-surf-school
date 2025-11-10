@@ -121,21 +121,21 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                 {summary.total} total
               </Badge>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center font-normal">
               <div>
-                <p className="text-2xl text-success">
+                <p className="text-2xl font-normal text-success">
                   {summary.statusCounts['Present'] || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Present</p>
               </div>
               <div>
-                <p className="text-2xl text-warning">
+                <p className="text-2xl font-normal text-warning">
                   {summary.statusCounts['Justified'] || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Justified</p>
               </div>
               <div>
-                <p className="text-2xl text-destructive">
+                <p className="text-2xl font-normal text-destructive">
                   {summary.statusCounts['Absent'] || 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Not Present</p>
