@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +39,7 @@ interface Athlete {
   dropoff_address: string | null;
   auth_uid: string | null;
   plan_type: string | null;
+  photo_url: string | null;
 }
 
 interface AttendanceRecord {
@@ -428,9 +430,12 @@ useEffect(() => {
               </div>
             ) : athlete ? (
               <div className="text-center">
-                <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-elegant">
-                  <Trophy className="h-10 w-10 text-white" />
-                </div>
+                <Avatar className="h-20 w-20 mx-auto mb-4 shadow-elegant">
+                  <AvatarImage src={athlete.photo_url || undefined} alt={`${athlete.first_name} ${athlete.last_name}`} />
+                  <AvatarFallback className="gradient-primary text-white text-2xl">
+                    {athlete.first_name?.[0]}{athlete.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   {athlete.first_name} {athlete.last_name}
                 </h2>
