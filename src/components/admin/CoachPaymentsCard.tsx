@@ -484,11 +484,11 @@ export const CoachPaymentsCard = () => {
 
         {/* Tabs for different views */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="monthly">By Month</TabsTrigger>
-            <TabsTrigger value="history">Payment History</TabsTrigger>
-          </TabsList>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="monthly" className="text-sm">By Month</TabsTrigger>
+              <TabsTrigger value="history" className="text-sm">Payment History</TabsTrigger>
+            </TabsList>
 
           {/* Overview Tab - All Coaches Summary */}
           <TabsContent value="overview" className="space-y-4">
