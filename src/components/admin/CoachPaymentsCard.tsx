@@ -555,13 +555,13 @@ export const CoachPaymentsCard = () => {
                     )}
                   >
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium flex items-center justify-between">
+                      <CardTitle className="text-xs font-medium flex items-center justify-between">
                         <span>{month} {selectedYear}</span>
                         {hasPayments && <Badge variant="default" className="text-xs">{data.payments.length}</Badge>}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-medium mb-3 text-primary">
+                      <div className="text-xl font-medium mb-3 text-primary">
                         {data.total.toFixed(2)}€
                       </div>
                       {hasPayments ? (
@@ -628,16 +628,16 @@ export const CoachPaymentsCard = () => {
             {/* Payments Table */}
             <div className="rounded-md border">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Coach</TableHead>
-                    <TableHead>Payment Date</TableHead>
-                    <TableHead>For Month/Year</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs">Coach</TableHead>
+                        <TableHead className="text-xs">Payment Date</TableHead>
+                        <TableHead className="text-xs">For Month/Year</TableHead>
+                        <TableHead className="text-xs">Amount</TableHead>
+                        <TableHead className="text-xs">Notes</TableHead>
+                        <TableHead className="text-right text-xs">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
@@ -650,19 +650,19 @@ export const CoachPaymentsCard = () => {
                       const coach = coaches?.find(c => c.coach_id === payment.coach_id);
                       return (
                         <TableRow key={payment.id}>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-sm">
                             {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
                           </TableCell>
-                          <TableCell>{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
+                          <TableCell className="text-sm">{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
                           <TableCell>
                             <Badge variant="outline">
                               {payment.payment_month} {payment.payment_year}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-semibold text-primary">
+                          <TableCell className="font-semibold text-primary text-sm">
                             {Number(payment.amount).toFixed(2)}€
                           </TableCell>
-                          <TableCell className="max-w-xs truncate">
+                          <TableCell className="max-w-xs truncate text-sm">
                             {payment.notes || '-'}
                           </TableCell>
                           <TableCell className="text-right">
