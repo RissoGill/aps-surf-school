@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone, Plane } from "lucide-react";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone, Plane, RefreshCw } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -303,6 +303,14 @@ useEffect(() => {
     navigate("/login/athlete");
   };
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['athlete', userAuthId, userEmail] });
+    toast({
+      title: "Refreshed",
+      description: "Athlete data has been updated",
+    });
+  };
+
   const getMonthName = (month: number, year: number) => {
     const date = new Date(year, month);
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -402,7 +410,16 @@ useEffect(() => {
         
         {/* Athlete Info Header */}
         <Card className="shadow-medium mb-6">
-          <CardContent className="p-6">
+          <CardContent className="p-6 relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleRefresh}
+              className="absolute top-4 right-4 h-8 w-8"
+              title="Refresh data"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
             {isLoadingAthlete ? (
               <div className="text-center">
                 <Skeleton className="w-16 h-16 rounded-full mx-auto mb-4" />
