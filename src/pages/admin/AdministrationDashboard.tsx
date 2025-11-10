@@ -635,11 +635,6 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
-        {/* Reports Card */}
-        <div className="mt-6">
-          <ReportsCard />
-        </div>
-
         {/* Coach Attendance Management */}
         {isLoading ? (
           <Card className="shadow-soft mt-6">
@@ -730,6 +725,11 @@ const AdministrationDashboard = () => {
             )}
           </Card>
         )}
+
+        {/* Reports Card */}
+        <div className="mt-6">
+          <ReportsCard />
+        </div>
       </main>
 
       <SponsorBanner />
