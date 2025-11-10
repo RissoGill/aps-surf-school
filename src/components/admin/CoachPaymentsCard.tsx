@@ -424,7 +424,7 @@ export const CoachPaymentsCard = () => {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">All Time</span>
               </div>
-              <div className="text-3xl font-bold text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-bold text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">Total paid</p>
             </CardContent>
           </Card>
@@ -437,7 +437,7 @@ export const CoachPaymentsCard = () => {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">This Year</span>
               </div>
-              <div className="text-3xl font-bold text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-bold text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">{new Date().getFullYear()}</p>
             </CardContent>
           </Card>
@@ -450,7 +450,7 @@ export const CoachPaymentsCard = () => {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">This Month</span>
               </div>
-              <div className="text-3xl font-bold text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-bold text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">{overallStats.currentMonth}</p>
             </CardContent>
           </Card>
@@ -463,7 +463,7 @@ export const CoachPaymentsCard = () => {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">Coaches</span>
               </div>
-              <div className="text-3xl font-bold text-purple-600">{overallStats.activeCoaches}</div>
+              <div className="text-2xl font-bold text-purple-600">{overallStats.activeCoaches}</div>
               <p className="text-xs text-muted-foreground mt-1">Active</p>
             </CardContent>
           </Card>
@@ -476,7 +476,7 @@ export const CoachPaymentsCard = () => {
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">Average</span>
               </div>
-              <div className="text-3xl font-bold text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
+              <div className="text-2xl font-bold text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
               <p className="text-xs text-muted-foreground mt-1">Per month</p>
             </CardContent>
           </Card>
