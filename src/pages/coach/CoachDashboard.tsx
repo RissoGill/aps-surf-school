@@ -915,7 +915,7 @@ const CoachDashboard = () => {
               {isLoading ? (
                 <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
-                <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
+                <p className="text-2xl font-medium text-foreground">{currentMonthTrainingSessions}</p>
               )}
               <p className="text-sm text-muted-foreground">This Month</p>
             </CardContent>
@@ -927,7 +927,7 @@ const CoachDashboard = () => {
               {isLoading ? (
                 <Skeleton className="h-8 w-12 mx-auto mb-1" />
               ) : (
-                <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
+                <p className="text-2xl font-medium text-foreground">{totalTrainingSessions}</p>
               )}
               <p className="text-sm text-muted-foreground">Total Annual Sessions</p>
             </CardContent>
