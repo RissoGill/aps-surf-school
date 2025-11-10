@@ -415,54 +415,69 @@ export const CoachPaymentsCard = () => {
 
       <CardContent className="p-6">
         {/* Overall Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Euro className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-muted-foreground">All Time</span>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-primary/20 rounded-lg">
+                  <Euro className="h-5 w-5 text-primary" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">All Time</span>
               </div>
-              <div className="text-2xl font-bold text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
+              <div className="text-3xl font-bold text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
+              <p className="text-xs text-muted-foreground mt-1">Total paid</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <CalendarIcon2 className="h-4 w-4 text-blue-600" />
-                <span className="text-xs font-medium text-muted-foreground">This Year</span>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <CalendarIcon2 className="h-5 w-5 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">This Year</span>
               </div>
-              <div className="text-2xl font-bold text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
+              <div className="text-3xl font-bold text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
+              <p className="text-xs text-muted-foreground mt-1">{new Date().getFullYear()}</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="text-xs font-medium text-muted-foreground">{overallStats.currentMonth}</span>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">This Month</span>
               </div>
-              <div className="text-2xl font-bold text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
+              <div className="text-3xl font-bold text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
+              <p className="text-xs text-muted-foreground mt-1">{overallStats.currentMonth}</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-purple-600" />
-                <span className="text-xs font-medium text-muted-foreground">Active Coaches</span>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <Users className="h-5 w-5 text-purple-600" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">Coaches</span>
               </div>
-              <div className="text-2xl font-bold text-purple-600">{overallStats.activeCoaches}</div>
+              <div className="text-3xl font-bold text-purple-600">{overallStats.activeCoaches}</div>
+              <p className="text-xs text-muted-foreground mt-1">Active</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Euro className="h-4 w-4 text-orange-600" />
-                <span className="text-xs font-medium text-muted-foreground">Avg/Month</span>
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-orange-500/20 rounded-lg">
+                  <Euro className="h-5 w-5 text-orange-600" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">Average</span>
               </div>
-              <div className="text-2xl font-bold text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
+              <div className="text-3xl font-bold text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
+              <p className="text-xs text-muted-foreground mt-1">Per month</p>
             </CardContent>
           </Card>
         </div>
