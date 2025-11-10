@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import surfHeroImage from "@/assets/surf-hero.jpg";
+import apsLogoImage from "@/assets/aps-logo.png";
 
 type ReportType = "financial" | "personal" | "overall" | "attendance";
 
@@ -278,7 +278,7 @@ export const ReportsCard = () => {
           .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px solid #0ea5e9;
+            border-bottom: 2px solid #31A896;
             padding-bottom: 20px;
           }
           .logo {
@@ -286,7 +286,7 @@ export const ReportsCard = () => {
             margin-bottom: 20px;
           }
           h1 {
-            color: #0ea5e9;
+            color: #31A896;
             margin: 0;
           }
           .meta {
@@ -300,7 +300,7 @@ export const ReportsCard = () => {
             margin-top: 20px;
           }
           th {
-            background-color: #0ea5e9;
+            background-color: #31A896;
             color: white;
             padding: 12px;
             text-align: left;
@@ -325,7 +325,7 @@ export const ReportsCard = () => {
       </head>
       <body>
         <div class="header">
-          <img src="${surfHeroImage}" alt="Surf School Logo" class="logo" />
+          <img src="${apsLogoImage}" alt="APS Logo" class="logo" />
           <h1>${title}</h1>
           <div class="meta">
             <p>Period: ${format(startDate, "PPP")} - ${format(endDate, "PPP")}</p>
