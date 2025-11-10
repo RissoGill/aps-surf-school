@@ -134,7 +134,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -158,19 +158,6 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
             </div>
             <div className="text-3xl font-bold text-blue-600">{totalThisYear.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-1">{currentYear}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Average</span>
-            </div>
-            <div className="text-3xl font-bold text-green-600">{avgMonthly.toFixed(2)}€</div>
-            <p className="text-xs text-muted-foreground mt-1">Per payment</p>
           </CardContent>
         </Card>
 
