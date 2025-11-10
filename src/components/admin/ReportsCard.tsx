@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import apsLogoImage from "@/assets/aps-logo.png";
 
-type ReportType = "financial" | "personal" | "overall" | "attendance";
+type ReportType = "financial" | "personal" | "overall" | "attendance" | "coach_payments";
 
 interface ReportData {
   title: string;
@@ -30,6 +30,8 @@ export const ReportsCard = () => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [selectedAthlete, setSelectedAthlete] = useState<string>("");
   const [athletes, setAthletes] = useState<any[]>([]);
+  const [coaches, setCoaches] = useState<any[]>([]);
+  const [selectedCoach, setSelectedCoach] = useState<string>("");
 
   useEffect(() => {
     const fetchAthletes = async () => {
@@ -43,7 +45,20 @@ export const ReportsCard = () => {
         setAthletes(data);
       }
     };
+    
+    const fetchCoaches = async () => {
+      const { data, error } = await supabase
+        .from("coach")
+        .select("coach_id, first_name, last_name")
+        .order("first_name");
+      
+      if (!error && data) {
+        setCoaches(data);
+      }
+    };
+    
     fetchAthletes();
+    fetchCoaches();
   }, []);
 
   const generateReport = async () => {
@@ -144,6 +159,27 @@ export const ReportsCard = () => {
             attendance: attendanceRes.data || [],
             athletes: athletesRes.data || []
           }];
+          break;
+
+        case "coach_payments":
+          let coachPaymentsQuery = supabase
+            .from("coach_payments")
+            .select(`
+              *,
+              coach:coach_id (first_name, last_name, email)
+            `)
+            .gte("payment_date", startStr)
+            .lte("payment_date", endStr);
+          
+          if (selectedCoach && selectedCoach !== "all") {
+            coachPaymentsQuery = coachPaymentsQuery.eq("coach_id", selectedCoach);
+          }
+          
+          const { data: coachPayments, error: coachPaymentsError } = 
+            await coachPaymentsQuery.order("payment_date", { ascending: false });
+          
+          if (coachPaymentsError) throw coachPaymentsError;
+          data = coachPayments || [];
           break;
       }
 
@@ -255,12 +291,32 @@ export const ReportsCard = () => {
           <td style="border: 1px solid #ddd; padding: 8px;">${overallData.athletes?.length || 0}</td>
         </tr>
       `;
+    } else if (type === "coach_payments") {
+      const totalAmount = (data as any[]).reduce((sum, p) => sum + Number(p.amount), 0);
+      tableRows = (data as any[]).map(payment => `
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 8px;">${payment.coach?.first_name || ""} ${payment.coach?.last_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${format(new Date(payment.payment_date), "PPP")}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${payment.payment_month}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${payment.payment_year}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">€${Number(payment.amount).toFixed(2)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${payment.notes || "-"}</td>
+        </tr>
+      `).join("");
+      tableRows += `
+        <tr style="background-color: #f0f0f0; font-weight: bold;">
+          <td colspan="4" style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total:</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">€${totalAmount.toFixed(2)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">-</td>
+        </tr>
+      `;
     }
 
     const tableHeaders = 
       type === "financial" ? "<tr><th>Athlete ID</th><th>Name</th><th>Date</th><th>Paid</th><th>Due</th><th>Outstanding</th><th>Status</th></tr>" :
       type === "attendance" ? "<tr><th>Date</th><th>Athlete</th><th>Coach</th><th>Status</th><th>Location</th></tr>" :
       type === "personal" ? "<tr><th>Athlete ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Level</th></tr>" :
+      type === "coach_payments" ? "<tr><th>Coach Name</th><th>Payment Date</th><th>Month</th><th>Year</th><th>Amount</th><th>Notes</th></tr>" :
       "";
 
     return `
@@ -356,7 +412,7 @@ export const ReportsCard = () => {
           </div>
           <div>
             <h4 className="font-medium text-foreground mb-1">Generate Reports</h4>
-            <p className="text-sm text-muted-foreground">Create financial, personal, overall, and attendance reports</p>
+            <p className="text-sm text-muted-foreground">Create financial, personal, overall, attendance, and coach payments reports</p>
           </div>
         </div>
       </CardHeader>
@@ -367,6 +423,7 @@ export const ReportsCard = () => {
             <Select value={reportType} onValueChange={(value) => {
               setReportType(value as ReportType);
               setSelectedAthlete("");
+              setSelectedCoach("");
             }}>
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Select report type" />
@@ -376,6 +433,7 @@ export const ReportsCard = () => {
                 <SelectItem value="personal">Personal/Athletes Report</SelectItem>
                 <SelectItem value="overall">Overall Summary</SelectItem>
                 <SelectItem value="attendance">Attendance Report</SelectItem>
+                <SelectItem value="coach_payments">Coach Payments Report</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -392,6 +450,25 @@ export const ReportsCard = () => {
                   {athletes.map((athlete) => (
                     <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
                       {athlete.first_name} {athlete.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {reportType === "coach_payments" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Coach (Optional)</label>
+              <Select value={selectedCoach} onValueChange={setSelectedCoach}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="All coaches" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-[300px]">
+                  <SelectItem value="all">All coaches</SelectItem>
+                  {coaches.map((coach) => (
+                    <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                      {coach.first_name} {coach.last_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
