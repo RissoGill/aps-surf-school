@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { User, Plus, Trash2, Edit, Euro } from "lucide-react";
+import { User, Plus, Trash2, Edit, Euro, TrendingUp, Calendar as CalendarIcon2, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -47,6 +48,8 @@ export const CoachPaymentsCard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<CoachPayment | null>(null);
   const [selectedCoachFilter, setSelectedCoachFilter] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>("all");
   
   const [formData, setFormData] = useState({
     coach_id: "",
@@ -189,24 +192,86 @@ export const CoachPaymentsCard = () => {
     });
   };
 
-  // Filter payments by selected coach
-  const filteredPayments = payments?.filter(
-    p => selectedCoachFilter === "all" || p.coach_id === selectedCoachFilter
-  );
+  // Get unique years from payments
+  const availableYears = useMemo(() => {
+    const years = new Set(payments?.map(p => p.payment_year) || []);
+    return Array.from(years).sort((a, b) => b - a);
+  }, [payments]);
+
+  // Calculate monthly breakdown
+  const monthlyBreakdown = useMemo(() => {
+    const breakdown: Record<string, { payments: CoachPayment[], total: number }> = {};
+    
+    MONTHS.forEach(month => {
+      breakdown[month] = { payments: [], total: 0 };
+    });
+    
+    payments?.forEach(payment => {
+      if (payment.payment_year === selectedYear) {
+        const month = payment.payment_month;
+        if (breakdown[month]) {
+          breakdown[month].payments.push(payment);
+          breakdown[month].total += Number(payment.amount);
+        }
+      }
+    });
+    
+    return breakdown;
+  }, [payments, selectedYear]);
+
+  // Calculate overall statistics
+  const overallStats = useMemo(() => {
+    const allTimeTotal = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+    const currentYear = new Date().getFullYear();
+    const currentMonth = MONTHS[new Date().getMonth()];
+    
+    const yearTotal = payments?.filter(p => p.payment_year === currentYear)
+      .reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+    
+    const monthTotal = payments?.filter(p => 
+      p.payment_year === currentYear && p.payment_month === currentMonth
+    ).reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+    
+    const activeCoaches = new Set(payments?.map(p => p.coach_id) || []).size;
+    const avgMonthly = payments && payments.length > 0 ? allTimeTotal / (activeCoaches * 12) : 0;
+    
+    return {
+      allTimeTotal,
+      yearTotal,
+      monthTotal,
+      activeCoaches,
+      avgMonthly,
+      currentMonth,
+    };
+  }, [payments]);
+
+  // Filter payments by selected coach and month
+  const filteredPayments = payments?.filter(p => {
+    const coachMatch = selectedCoachFilter === "all" || p.coach_id === selectedCoachFilter;
+    const monthMatch = selectedMonthFilter === "all" || p.payment_month === selectedMonthFilter;
+    return coachMatch && monthMatch;
+  });
 
   // Calculate totals by coach
   const paymentsByCoach = coaches?.map(coach => {
     const coachPayments = payments?.filter(p => p.coach_id === coach.coach_id) || [];
     const total = coachPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const currentYear = new Date().getFullYear();
+    const currentMonth = MONTHS[new Date().getMonth()];
+    
     const yearTotal = coachPayments
       .filter(p => p.payment_year === currentYear)
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+    
+    const monthTotal = coachPayments
+      .filter(p => p.payment_year === currentYear && p.payment_month === currentMonth)
       .reduce((sum, p) => sum + Number(p.amount), 0);
     
     return {
       coach,
       total,
       yearTotal,
+      monthTotal,
       count: coachPayments.length,
     };
   });
@@ -349,124 +414,279 @@ export const CoachPaymentsCard = () => {
       </CardHeader>
 
       <CardContent className="p-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {paymentsByCoach?.slice(0, 3).map(({ coach, total, yearTotal, count }) => (
-            <Card key={coach.coach_id} className="bg-muted/30">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  {coach.first_name} {coach.last_name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-primary">{total.toFixed(2)}€</div>
-                  <div className="text-xs text-muted-foreground">Total all time</div>
-                  <div className="text-sm">
-                    <span className="font-semibold">{yearTotal.toFixed(2)}€</span>
-                    <span className="text-muted-foreground"> this year</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">{count} payment{count !== 1 ? 's' : ''}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Overall Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Euro className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground">All Time</span>
+              </div>
+              <div className="text-2xl font-bold text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CalendarIcon2 className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-muted-foreground">This Year</span>
+              </div>
+              <div className="text-2xl font-bold text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <span className="text-xs font-medium text-muted-foreground">{overallStats.currentMonth}</span>
+              </div>
+              <div className="text-2xl font-bold text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-4 w-4 text-purple-600" />
+                <span className="text-xs font-medium text-muted-foreground">Active Coaches</span>
+              </div>
+              <div className="text-2xl font-bold text-purple-600">{overallStats.activeCoaches}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Euro className="h-4 w-4 text-orange-600" />
+                <span className="text-xs font-medium text-muted-foreground">Avg/Month</span>
+              </div>
+              <div className="text-2xl font-bold text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Filter */}
-        <div className="mb-4">
-          <Label>Filter by Coach</Label>
-          <Select value={selectedCoachFilter} onValueChange={setSelectedCoachFilter}>
-            <SelectTrigger className="w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Coaches</SelectItem>
-              {coaches?.map((coach) => (
-                <SelectItem key={coach.coach_id} value={coach.coach_id}>
-                  {coach.first_name} {coach.last_name}
-                </SelectItem>
+        {/* Tabs for different views */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="monthly">By Month</TabsTrigger>
+            <TabsTrigger value="history">Payment History</TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab - All Coaches Summary */}
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {paymentsByCoach?.map(({ coach, total, yearTotal, monthTotal, count }) => (
+                <Card key={coach.coach_id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <div>{coach.first_name} {coach.last_name}</div>
+                        <div className="text-xs text-muted-foreground font-normal">{count} payments</div>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">This Month</span>
+                      <span className="text-lg font-bold text-green-600">{monthTotal.toFixed(2)}€</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground">This Year</span>
+                      <span className="text-sm font-semibold">{yearTotal.toFixed(2)}€</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      <span className="text-xs text-muted-foreground">All Time</span>
+                      <span className="text-sm">{total.toFixed(2)}€</span>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
+            </div>
+          </TabsContent>
 
-        {/* Payments Table */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Coach</TableHead>
-                <TableHead>Payment Date</TableHead>
-                <TableHead>For Month/Year</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
-                    Loading payments...
-                  </TableCell>
-                </TableRow>
-              ) : filteredPayments && filteredPayments.length > 0 ? (
-                filteredPayments.map((payment) => {
-                  const coach = coaches?.find(c => c.coach_id === payment.coach_id);
-                  return (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">
-                        {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
-                      </TableCell>
-                      <TableCell>{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {payment.payment_month} {payment.payment_year}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-semibold text-primary">
-                        {Number(payment.amount).toFixed(2)}€
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {payment.notes || '-'}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(payment)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (confirm('Are you sure you want to delete this payment?')) {
-                                deleteMutation.mutate(payment.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+          {/* Monthly Breakdown Tab */}
+          <TabsContent value="monthly" className="space-y-4">
+            <div className="flex items-center gap-4 mb-4">
+              <Label>Year</Label>
+              <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableYears.map(year => (
+                    <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {MONTHS.map(month => {
+                const data = monthlyBreakdown[month];
+                const hasPayments = data.payments.length > 0;
+                
+                return (
+                  <Card 
+                    key={month} 
+                    className={cn(
+                      "hover:shadow-md transition-shadow",
+                      hasPayments ? "border-primary/30 bg-primary/5" : "border-muted"
+                    )}
+                  >
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium flex items-center justify-between">
+                        <span>{month} {selectedYear}</span>
+                        {hasPayments && <Badge variant="default" className="text-xs">{data.payments.length}</Badge>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold mb-3 text-primary">
+                        {data.total.toFixed(2)}€
+                      </div>
+                      {hasPayments ? (
+                        <div className="space-y-1">
+                          {data.payments.map(payment => {
+                            const coach = coaches?.find(c => c.coach_id === payment.coach_id);
+                            return (
+                              <div key={payment.id} className="flex justify-between text-xs">
+                                <span className="text-muted-foreground truncate flex-1">
+                                  {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
+                                </span>
+                                <span className="font-medium ml-2">{Number(payment.amount).toFixed(0)}€</span>
+                              </div>
+                            );
+                          })}
                         </div>
+                      ) : (
+                        <div className="text-xs text-muted-foreground">No payments</div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Payment History Tab */}
+          <TabsContent value="history" className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              <div className="space-y-2">
+                <Label>Filter by Coach</Label>
+                <Select value={selectedCoachFilter} onValueChange={setSelectedCoachFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Coaches</SelectItem>
+                    {coaches?.map((coach) => (
+                      <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                        {coach.first_name} {coach.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Filter by Month</Label>
+                <Select value={selectedMonthFilter} onValueChange={setSelectedMonthFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Months</SelectItem>
+                    {MONTHS.map(month => (
+                      <SelectItem key={month} value={month}>{month}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Payments Table */}
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Coach</TableHead>
+                    <TableHead>Payment Date</TableHead>
+                    <TableHead>For Month/Year</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        Loading payments...
                       </TableCell>
                     </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No payments found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                  ) : filteredPayments && filteredPayments.length > 0 ? (
+                    filteredPayments.map((payment) => {
+                      const coach = coaches?.find(c => c.coach_id === payment.coach_id);
+                      return (
+                        <TableRow key={payment.id}>
+                          <TableCell className="font-medium">
+                            {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
+                          </TableCell>
+                          <TableCell>{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {payment.payment_month} {payment.payment_year}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-semibold text-primary">
+                            {Number(payment.amount).toFixed(2)}€
+                          </TableCell>
+                          <TableCell className="max-w-xs truncate">
+                            {payment.notes || '-'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(payment)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this payment?')) {
+                                    deleteMutation.mutate(payment.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No payments found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
