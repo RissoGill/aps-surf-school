@@ -121,18 +121,25 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                 {summary.total} total
               </Badge>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(summary.statusCounts)
-                .filter(([status]) => ["Present", "Absent", "Justified"].includes(status))
-                .map(([status, count]) => (
-                  <Badge 
-                    key={status} 
-                    className={`${getStatusColor(status)} text-xs`}
-                    variant="secondary"
-                  >
-                    {getStatusLabel(status)}: {count}
-                  </Badge>
-                ))}
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-success">
+                  {summary.statusCounts['Present'] || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Present</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-warning">
+                  {summary.statusCounts['Justified'] || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Justified</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-destructive">
+                  {summary.statusCounts['Absent'] || 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Not Present</p>
+              </div>
             </div>
           </div>
         ))}
