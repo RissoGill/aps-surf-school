@@ -907,6 +907,33 @@ const CoachDashboard = () => {
           </Button>
         </div>
 
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="shadow-soft">
+            <CardContent className="p-4 text-center">
+              <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
+              )}
+              <p className="text-sm text-muted-foreground">This Month</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-soft">
+            <CardContent className="p-4 text-center">
+              <Waves className="h-6 w-6 text-warning mx-auto mb-2" />
+              {isLoading ? (
+                <Skeleton className="h-8 w-12 mx-auto mb-1" />
+              ) : (
+                <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
+              )}
+              <p className="text-sm text-muted-foreground">Total Annual Sessions</p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Search Athletes Card */}
         <Card className="shadow-soft mb-6">
           <CardHeader>
@@ -962,33 +989,6 @@ const CoachDashboard = () => {
         {coachData?.coach_id && (
           <BulkAttendanceRegistration coachId={coachData.coach_id} />
         )}
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Calendar className="h-6 w-6 text-success mx-auto mb-2" />
-              {isLoading ? (
-                <Skeleton className="h-8 w-12 mx-auto mb-1" />
-              ) : (
-                <p className="text-2xl font-bold text-foreground">{currentMonthTrainingSessions}</p>
-              )}
-              <p className="text-sm text-muted-foreground">This Month</p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-soft">
-            <CardContent className="p-4 text-center">
-              <Waves className="h-6 w-6 text-warning mx-auto mb-2" />
-              {isLoading ? (
-                <Skeleton className="h-8 w-12 mx-auto mb-1" />
-              ) : (
-                <p className="text-2xl font-bold text-foreground">{totalTrainingSessions}</p>
-              )}
-              <p className="text-sm text-muted-foreground">Total Annual Sessions</p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Coach Payments Section */}
         {coachData?.coach_id && (
