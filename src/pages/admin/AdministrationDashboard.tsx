@@ -559,7 +559,7 @@ const AdministrationDashboard = () => {
             return (
               <Card key={index} className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-bold ${colorClass}`}>{stat.value}</p>
+                  <p className={`text-2xl font-medium ${colorClass}`}>{stat.value}</p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </CardContent>
               </Card>
@@ -581,7 +581,7 @@ const AdministrationDashboard = () => {
             return (
               <Card key={index} className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-bold ${colorClass}`}>{stat.value}</p>
+                  <p className={`text-2xl font-medium ${colorClass}`}>{stat.value}</p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </CardContent>
               </Card>
