@@ -1029,10 +1029,10 @@ useEffect(() => {
 
           {/* Estágios Tab */}
           <TabsContent value="estagios">
-            <Card className="shadow-soft border-l-4 border-l-estagios">
-              <CardHeader className="bg-estagios/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <h4 className="font-medium text-foreground flex items-center gap-2">
-                  <Plane className="h-6 w-6 text-estagios" />
+                  <Plane className="h-6 w-6 text-primary" />
                   Estágios
                 </h4>
                 <CardDescription>Training camps and internships you are registered for</CardDescription>
