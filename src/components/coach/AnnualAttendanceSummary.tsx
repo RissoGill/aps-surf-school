@@ -106,12 +106,11 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
 
   return (
     <Card className="shadow-soft">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          Annual Summary
-        </CardTitle>
-      </CardHeader>
+        <CardHeader>
+          <h4 className="font-medium text-foreground">
+            Annual Summary
+          </h4>
+        </CardHeader>
       <CardContent className="space-y-3">
         {sortedSummaries.map((summary, index) => (
           <div key={index} className="space-y-2">
