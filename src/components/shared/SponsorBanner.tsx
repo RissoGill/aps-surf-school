@@ -6,6 +6,7 @@ import surfersLogo from "@/assets/surfers-logo.png";
 import eqLogo from "@/assets/eq-logo.png";
 import quintaMarinhaLogo from "@/assets/quinta-marinha-logo.png";
 import cultoImagemLogo from "@/assets/culto-imagem-logo.png";
+import fpsCertificationLogo from "@/assets/fps-certification-logo.png";
 
 const SponsorBanner = () => {
   return (
@@ -70,9 +71,11 @@ const SponsorBanner = () => {
             School Verified By
           </h3>
           <div className="flex justify-center items-center gap-6">
-            <div className="h-8 w-20 bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-xs text-muted-foreground">Cert 1</span>
-            </div>
+            <img 
+              src={fpsCertificationLogo} 
+              alt="Federação Portuguesa de Surf - Escola Certificada 2021" 
+              className="h-16 w-auto object-contain"
+            />
             <div className="h-8 w-20 bg-muted rounded-lg flex items-center justify-center">
               <span className="text-xs text-muted-foreground">Cert 2</span>
             </div>
