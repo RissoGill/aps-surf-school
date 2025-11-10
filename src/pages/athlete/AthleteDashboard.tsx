@@ -446,28 +446,28 @@ useEffect(() => {
           <TabsList className="w-full h-auto flex flex-wrap justify-start gap-1 bg-muted/50 p-2 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <User className="h-3 w-3 mr-1 inline sm:hidden" />
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Clock className="h-3 w-3 mr-1 inline sm:hidden" />
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Calendar className="h-3 w-3 mr-1 inline sm:hidden" />
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
               <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
               <span className="hidden sm:inline">Championships</span>
@@ -475,14 +475,14 @@ useEffect(() => {
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <ImageIcon className="h-3 w-3 mr-1 inline sm:hidden" />
               Media
             </TabsTrigger>
             <TabsTrigger 
               value="estagios" 
-              className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
               Estágios
@@ -491,8 +491,8 @@ useEffect(() => {
 
           {/* Personal Data Tab */}
           <TabsContent value="personal" className="space-y-4">
-            <Card className="shadow-soft border-l-4 border-l-primary">
-              <CardHeader className="bg-primary/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <h4 className="font-medium text-foreground">Personal Information</h4>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -531,8 +531,8 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft border-l-4 border-l-success">
-              <CardHeader className="bg-success/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <h4 className="font-medium text-foreground">Emergency Contacts</h4>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -572,8 +572,8 @@ useEffect(() => {
 
           {/* Training Info Tab */}
           <TabsContent value="training" className="space-y-4">
-            <Card className="shadow-soft border-l-4 border-l-primary">
-              <CardHeader className="bg-primary/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Calendar className="h-6 w-6 text-primary" />
                   Training Schedule
@@ -612,8 +612,8 @@ useEffect(() => {
               </CardContent>
             </Card>
 
-            <Card className="shadow-soft border-l-4 border-l-warning">
-              <CardHeader className="bg-warning/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <h4 className="font-medium text-foreground flex items-center gap-2">
                   <MapPin className="h-6 w-6 text-warning" />
                   Transportation
@@ -653,8 +653,8 @@ useEffect(() => {
 
           {/* Attendance Tab */}
           <TabsContent value="attendance" className="space-y-4">
-            <Card className="shadow-soft border-l-4 border-l-primary">
-              <CardHeader className="bg-primary/5">
+            <Card className="shadow-soft">
+              <CardHeader>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-foreground flex items-center gap-2">
                     <Calendar className="h-6 w-6 text-primary" />
