@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind, Euro } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { ChampionshipsTab } from "@/components/coach/ChampionshipsTab";
 import { EstagiosTab } from "@/components/coach/EstagiosTab";
 import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
+import { PaymentsTab } from "@/components/coach/PaymentsTab";
 
 interface AttendanceRecord {
   id: string;
@@ -932,6 +933,24 @@ const CoachDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Coach Payments Section */}
+        {coachData?.coach_id && (
+          <Card className="shadow-soft mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Euro className="h-5 w-5" />
+                My Payments
+              </CardTitle>
+              <CardDescription>
+                View your payment history and summaries
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PaymentsTab coachId={coachData.coach_id} />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Bulk Attendance Registration */}
         {coachData?.coach_id && (

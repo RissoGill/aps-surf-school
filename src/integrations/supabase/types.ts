@@ -242,6 +242,50 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_payments: {
+        Row: {
+          amount: number
+          coach_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_month: string
+          payment_year: number
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          coach_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_date: string
+          payment_month: string
+          payment_year: number
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          coach_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_month?: string
+          payment_year?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_payments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach"
+            referencedColumns: ["coach_id"]
+          },
+        ]
+      }
       estagio: {
         Row: {
           data_fim: string | null
