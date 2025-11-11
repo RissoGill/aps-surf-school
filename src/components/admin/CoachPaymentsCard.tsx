@@ -495,17 +495,19 @@ export const CoachPaymentsCard = () => {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {paymentsByCoach?.map(({ coach, total, yearTotal, monthTotal, count }) => (
-                <Card key={coach.coach_id} className="hover:shadow-md transition-shadow">
+                <Card key={coach.coach_id} className="hover:shadow-md transition-shadow overflow-hidden">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <User className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium truncate">{coach.first_name} {coach.last_name}</div>
-                        <div className="text-xs text-muted-foreground font-normal">{count} payments</div>
+                        <div className="text-sm font-medium text-foreground truncate" title={[coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach'}>
+                          {[coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{count} {count === 1 ? 'payment' : 'payments'}</div>
                       </div>
-                    </CardTitle>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-1.5">
                     <div className="flex justify-between items-center gap-2">
