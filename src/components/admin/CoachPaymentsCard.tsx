@@ -298,7 +298,7 @@ export const CoachPaymentsCard = () => {
   console.debug('CoachPaymentsCard - paymentsByCoach:', paymentsByCoach?.length);
 
   return (
-    <Card className="shadow-soft">
+    <Card>
       <CardHeader className="border-b border-border/40">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -437,67 +437,67 @@ export const CoachPaymentsCard = () => {
       <CardContent className="p-6">
         {/* Overall Statistics */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <Card className="border border-border/50 bg-card">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                  <Euro className="h-5 w-5 text-primary" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <Euro className="h-5 w-5 text-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">All Time</span>
               </div>
-              <div className="text-2xl font-medium text-primary">{overallStats.allTimeTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-medium text-foreground">{overallStats.allTimeTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">Total paid</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
+          <Card className="border border-border/50 bg-card">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <CalendarIcon2 className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <CalendarIcon2 className="h-5 w-5 text-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">This Year</span>
               </div>
-              <div className="text-2xl font-medium text-blue-600">{overallStats.yearTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-medium text-foreground">{overallStats.yearTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">{new Date().getFullYear()}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
+          <Card className="border border-border/50 bg-card">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-green-500/20 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">This Month</span>
               </div>
-              <div className="text-2xl font-medium text-green-600">{overallStats.monthTotal.toFixed(2)}€</div>
+              <div className="text-2xl font-medium text-foreground">{overallStats.monthTotal.toFixed(2)}€</div>
               <p className="text-xs text-muted-foreground mt-1">{overallStats.currentMonth}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20">
+          <Card className="border border-border/50 bg-card">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-purple-500/20 rounded-lg">
-                  <Users className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <Users className="h-5 w-5 text-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">Coaches</span>
               </div>
-              <div className="text-2xl font-medium text-purple-600">{overallStats.activeCoaches}</div>
+              <div className="text-2xl font-medium text-foreground">{overallStats.activeCoaches}</div>
               <p className="text-xs text-muted-foreground mt-1">Active</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20">
+          <Card className="border border-border/50 bg-card">
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-3">
-                <div className="p-2 bg-orange-500/20 rounded-lg">
-                  <Euro className="h-5 w-5 text-orange-600" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <Euro className="h-5 w-5 text-foreground" />
                 </div>
                 <span className="text-sm font-medium text-muted-foreground">Average</span>
               </div>
-              <div className="text-2xl font-medium text-orange-600">{overallStats.avgMonthly.toFixed(0)}€</div>
+              <div className="text-2xl font-medium text-foreground">{overallStats.avgMonthly.toFixed(0)}€</div>
               <p className="text-xs text-muted-foreground mt-1">Per month</p>
             </CardContent>
           </Card>
@@ -531,20 +531,20 @@ export const CoachPaymentsCard = () => {
                         </div>
                       </div>
                     </CardHeader>
-                  <CardContent className="space-y-1.5">
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-xs text-muted-foreground flex-shrink-0">This Month</span>
-                      <span className="text-base font-semibold text-green-600 truncate">{monthTotal.toFixed(2)}€</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-xs text-muted-foreground flex-shrink-0">This Year</span>
-                      <span className="text-base font-semibold truncate">{yearTotal.toFixed(2)}€</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2 pt-1.5 border-t">
-                      <span className="text-xs text-muted-foreground flex-shrink-0">All Time</span>
-                      <span className="text-sm truncate">{total.toFixed(2)}€</span>
-                    </div>
-                  </CardContent>
+                    <CardContent className="space-y-1.5">
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">This Month</span>
+                        <span className="text-base font-semibold truncate">{monthTotal.toFixed(2)}€</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">This Year</span>
+                        <span className="text-base font-semibold truncate">{yearTotal.toFixed(2)}€</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-2 pt-1.5 border-t">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">All Time</span>
+                        <span className="text-sm truncate">{total.toFixed(2)}€</span>
+                      </div>
+                    </CardContent>
                   </Card>
                 );
               })}
@@ -576,8 +576,7 @@ export const CoachPaymentsCard = () => {
                   <Card 
                     key={month} 
                     className={cn(
-                      "hover:shadow-md transition-shadow",
-                      hasPayments ? "border-primary/30 bg-primary/5" : "border-muted"
+                      "hover:shadow-md transition-shadow border border-border/50 bg-card"
                     )}
                   >
                     <CardHeader className="pb-3">
@@ -658,8 +657,8 @@ export const CoachPaymentsCard = () => {
 
             {/* Payments Table */}
             <div className="overflow-x-auto rounded-md border">
-              <Table>
-                    <TableHeader>
+              <Table className="table-fixed">
+                    <TableHeader className="sticky top-0 bg-background z-10">
                       <TableRow>
                         <TableHead className="text-xs">Coach</TableHead>
                         <TableHead className="text-xs">Payment Date</TableHead>
