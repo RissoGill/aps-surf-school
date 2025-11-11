@@ -491,21 +491,21 @@ export const CoachPaymentsCard = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
-              icon={<Euro className="h-3.5 w-3.5 text-primary" />}
+              icon={<Euro className="h-3 w-3 text-primary" />}
               label="Since September"
               value={stats.sinceSeptember}
               iconBgClass="bg-primary/10"
               iconTextClass="text-primary"
             />
             <StatCard
-              icon={<TrendingUp className="h-3.5 w-3.5 text-green-600" />}
+              icon={<TrendingUp className="h-3 w-3 text-green-600" />}
               label="Current Month"
               value={stats.currentMonth}
               iconBgClass="bg-green-500/10"
               iconTextClass="text-green-600"
             />
             <StatCard
-              icon={<CalendarIcon className="h-3.5 w-3.5 text-blue-600" />}
+              icon={<CalendarIcon className="h-3 w-3 text-blue-600" />}
               label="Average per Coach"
               value={stats.average}
               iconBgClass="bg-blue-500/10"
