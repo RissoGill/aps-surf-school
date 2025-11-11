@@ -275,13 +275,47 @@ const AdministrationDashboard = () => {
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
+      // Fetch coach payments from September 2025 onwards
+      const { data: coachPaymentsRows } = await supabase
+        .from('coach_payments')
+        .select('amount, payment_date, payment_year, payment_month')
+        .gte('payment_year', 2025);
+      
+      // Calculate total paid to coaches from September 2025 onwards (up to current month)
+      const totalPaidToCoaches = (coachPaymentsRows || [])
+        .filter((p: any) => {
+          if (p.payment_year < 2025) return false;
+          if (p.payment_year === 2025) {
+            const monthNum = monthNameToNumber[normalizeMonth(p.payment_month)] || 0;
+            if (monthNum < 9) return false;
+          }
+          
+          // Only include up to current month
+          const paymentSerial = (p.payment_year || 0) * 12 + (monthNameToNumber[normalizeMonth(p.payment_month)] || 0);
+          if (paymentSerial > currentMonthSerial) return false;
+          
+          return true;
+        })
+        .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+      
+      // Calculate coach payments made this month (for previous month)
+      const coachPaymentsThisMonth = (coachPaymentsRows || [])
+        .filter((p: any) => {
+          const paymentDate = new Date(p.payment_date);
+          return paymentDate.getMonth() === currentMonthNumber - 1 && 
+                 paymentDate.getFullYear() === currentYear;
+        })
+        .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+      
       console.info('Financial summary (DB-filtered)', {
         totalReceivedThisMonth,
         currentMonthOutstandingLearning,
         currentMonthOutstandingCompetition,
         annualFeesReceived,
         septemberOnwardsOutstandingLearning,
-        septemberOnwardsOutstandingCompetition
+        septemberOnwardsOutstandingCompetition,
+        totalPaidToCoaches,
+        coachPaymentsThisMonth
       });
       
       return { 
@@ -290,7 +324,9 @@ const AdministrationDashboard = () => {
         currentMonthOutstandingCompetition,
         annualFeesReceived,
         septemberOnwardsOutstandingLearning,
-        septemberOnwardsOutstandingCompetition
+        septemberOnwardsOutstandingCompetition,
+        totalPaidToCoaches,
+        coachPaymentsThisMonth
       };
     }
   });
@@ -507,6 +543,8 @@ const AdministrationDashboard = () => {
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
     { label: "Outstanding Learning/Pre-Comp (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
+    { label: "Total Paid to Coaches (Sept+)", value: `€${fmt(paymentsData?.totalPaidToCoaches)}` , color: "secondary" },
+    { label: "Coach Payments This Month", value: `€${fmt(paymentsData?.coachPaymentsThisMonth)}` , color: "secondary" },
     { 
       label: "Total Learning Athletes", 
       value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
