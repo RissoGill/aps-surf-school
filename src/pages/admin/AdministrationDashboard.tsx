@@ -227,10 +227,10 @@ const AdministrationDashboard = () => {
             if (monthNum < 9) return false;
           }
           
-          // Only current and past months
+          // Only past months (exclude current month)
           const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
           const paymentSerial = (p.year || 0) * 12 + monthNum;
-          if (paymentSerial > currentMonthSerial) return false;
+          if (paymentSerial >= currentMonthSerial) return false;
           
           // Filter by active status
           const aid = String(p.athlete_id || '').trim().toLowerCase();
@@ -256,10 +256,10 @@ const AdministrationDashboard = () => {
             if (monthNum < 9) return false;
           }
           
-          // Only current and past months
+          // Only past months (exclude current month)
           const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
           const paymentSerial = (p.year || 0) * 12 + monthNum;
-          if (paymentSerial > currentMonthSerial) return false;
+          if (paymentSerial >= currentMonthSerial) return false;
           
           // Filter by active status
           const aid = String(p.athlete_id || '').trim().toLowerCase();
