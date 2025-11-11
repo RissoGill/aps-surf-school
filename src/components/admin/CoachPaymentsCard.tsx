@@ -322,19 +322,20 @@ export const CoachPaymentsCard = () => {
   }, [payments, selectedCoachFilter, selectedMonthFilter]);
 
   // StatCard subcomponent for KPI cards
-  const StatCard = ({ icon, label, value, iconBgClass }: {
+  const StatCard = ({ icon, label, value, iconBgClass, iconTextClass }: {
     icon: React.ReactNode;
     label: string;
     value: number;
     iconBgClass: string;
+    iconTextClass: string;
   }) => (
     <Card className="overflow-hidden">
       <CardContent className="p-4">
         <div className="grid grid-cols-[auto,1fr] gap-x-3 items-center min-w-0">
-          <div className={`p-2 rounded-md row-span-2 ${iconBgClass}`}>
+          <div className={`p-2 rounded-md ${iconBgClass}`}>
             {icon}
           </div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate min-w-0">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">
             {label}
           </p>
           <p className="col-start-2 text-2xl sm:text-3xl font-bold tracking-tight leading-none whitespace-nowrap">
@@ -488,18 +489,21 @@ export const CoachPaymentsCard = () => {
               label="Since September"
               value={stats.sinceSeptember}
               iconBgClass="bg-primary/10"
+              iconTextClass="text-primary"
             />
             <StatCard
               icon={<TrendingUp className="h-4 w-4 text-green-600" />}
               label="Current Month"
               value={stats.currentMonth}
               iconBgClass="bg-green-500/10"
+              iconTextClass="text-green-600"
             />
             <StatCard
               icon={<CalendarIcon className="h-4 w-4 text-blue-600" />}
               label="Average per Coach"
               value={stats.average}
               iconBgClass="bg-blue-500/10"
+              iconTextClass="text-blue-600"
             />
           </div>
         )}
