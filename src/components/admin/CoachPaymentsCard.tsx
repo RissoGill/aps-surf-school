@@ -322,7 +322,13 @@ export const CoachPaymentsCard = () => {
   }, [payments, selectedCoachFilter, selectedMonthFilter]);
 
   // StatCard subcomponent for KPI cards
-  const StatCard = ({ icon, label, value, iconBgClass, iconTextClass }: {
+  const StatCard = ({
+    icon,
+    label,
+    value,
+    iconBgClass,
+    iconTextClass,
+  }: {
     icon: React.ReactNode;
     label: string;
     value: number;
@@ -330,15 +336,15 @@ export const CoachPaymentsCard = () => {
     iconTextClass: string;
   }) => (
     <Card className="overflow-hidden">
-      <CardContent className="p-3">
-        <div className="grid grid-cols-[auto,1fr] gap-x-3 items-center min-w-0">
-          <div className={`p-2 rounded-md ${iconBgClass}`}>
+      <CardContent className="p-2">
+        <div className="grid grid-cols-[auto,1fr] grid-rows-2 gap-x-2 gap-y-1 items-center min-w-0">
+          <div className={`row-span-2 p-1.5 rounded-md ${iconBgClass}`}>
             {icon}
           </div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">
+          <p className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide truncate min-w-0">
             {label}
           </p>
-          <p className="col-start-2 text-lg sm:text-xl font-bold tracking-tight leading-none whitespace-nowrap">
+          <p className="col-start-2 text-base sm:text-lg font-semibold leading-tight truncate min-w-0">
             {value.toFixed(0)}€
           </p>
         </div>
