@@ -330,7 +330,7 @@ export const CoachPaymentsCard = () => {
     iconTextClass: string;
   }) => (
     <Card className="overflow-hidden">
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         <div className="grid grid-cols-[auto,1fr] gap-x-3 items-center min-w-0">
           <div className={`p-2 rounded-md ${iconBgClass}`}>
             {icon}
@@ -338,7 +338,7 @@ export const CoachPaymentsCard = () => {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">
             {label}
           </p>
-          <p className="col-start-2 text-2xl sm:text-3xl font-bold tracking-tight leading-none whitespace-nowrap">
+          <p className="col-start-2 text-lg sm:text-xl font-bold tracking-tight leading-none whitespace-nowrap">
             {value.toFixed(0)}€
           </p>
         </div>
@@ -485,21 +485,21 @@ export const CoachPaymentsCard = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <StatCard
-              icon={<Euro className="h-4 w-4 text-primary" />}
+              icon={<Euro className="h-3.5 w-3.5 text-primary" />}
               label="Since September"
               value={stats.sinceSeptember}
               iconBgClass="bg-primary/10"
               iconTextClass="text-primary"
             />
             <StatCard
-              icon={<TrendingUp className="h-4 w-4 text-green-600" />}
+              icon={<TrendingUp className="h-3.5 w-3.5 text-green-600" />}
               label="Current Month"
               value={stats.currentMonth}
               iconBgClass="bg-green-500/10"
               iconTextClass="text-green-600"
             />
             <StatCard
-              icon={<CalendarIcon className="h-4 w-4 text-blue-600" />}
+              icon={<CalendarIcon className="h-3.5 w-3.5 text-blue-600" />}
               label="Average per Coach"
               value={stats.average}
               iconBgClass="bg-blue-500/10"
