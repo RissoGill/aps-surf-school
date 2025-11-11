@@ -209,34 +209,57 @@ export const CoachPaymentsCard = () => {
 
   // Calculate key statistics
   const stats = useMemo(() => {
-    if (!payments) return { sinceSeptember: 0, currentMonth: 0, average: 0 };
+    if (!payments?.length) {
+      console.debug('No payments data available');
+      return { sinceSeptember: 0, currentMonth: 0, average: 0 };
+    }
     
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = MONTHS[now.getMonth()];
     const septemberIndex = 8; // September is index 8
     
-    // Total from September onwards (Sept current year or later)
+    console.debug('Current date:', now);
+    console.debug('Current month:', currentMonth);
+    console.debug('Total payments:', payments.length);
+    
+    // Total from September onwards (Sept current year or Sept previous year for academic year)
     const sinceSeptember = payments
       .filter(p => {
-        if (p.payment_year > currentYear) return true;
-        if (p.payment_year === currentYear) {
-          const monthIndex = MONTHS.indexOf(p.payment_month);
+        const paymentYear = Number(p.payment_year);
+        const monthIndex = MONTHS.indexOf(p.payment_month);
+        
+        // Academic year: Sept previous year to Aug current year, or Sept current year onwards
+        if (paymentYear > currentYear) return true;
+        if (paymentYear === currentYear) {
+          return monthIndex >= septemberIndex;
+        }
+        // Include previous year Sept-Dec if we're in Jan-Aug
+        if (paymentYear === currentYear - 1 && now.getMonth() < septemberIndex) {
           return monthIndex >= septemberIndex;
         }
         return false;
       })
       .reduce((sum, p) => sum + Number(p.amount), 0);
     
+    console.debug('Since September total:', sinceSeptember);
+    
     // Current month total
     const currentMonthTotal = payments
-      .filter(p => p.payment_year === currentYear && p.payment_month === currentMonth)
+      .filter(p => {
+        const matches = Number(p.payment_year) === currentYear && p.payment_month === currentMonth;
+        return matches;
+      })
       .reduce((sum, p) => sum + Number(p.amount), 0);
+    
+    console.debug('Current month total:', currentMonthTotal);
     
     // Average per coach
     const totalPayments = payments.reduce((sum, p) => sum + Number(p.amount), 0);
     const uniqueCoaches = new Set(payments.map(p => p.coach_id)).size;
     const averagePerCoach = uniqueCoaches > 0 ? totalPayments / uniqueCoaches : 0;
+    
+    console.debug('Average per coach:', averagePerCoach, '(', uniqueCoaches, 'coaches)');
     
     return {
       sinceSeptember,
@@ -419,49 +442,85 @@ export const CoachPaymentsCard = () => {
 
       <CardContent className="p-6 space-y-6">
         {/* Key Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 bg-primary/10 rounded-lg">
-                  <Euro className="h-5 w-5 text-primary" />
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-10 w-10 rounded-md bg-muted animate-pulse" />
+                      <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                    </div>
+                    <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-md">
+                      <Euro className="h-4 w-4 text-primary" />
+                    </div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Since September
+                    </p>
+                  </div>
+                  <div className="pl-10">
+                    <p className="text-3xl font-bold tracking-tight">
+                      {stats.sinceSeptember.toFixed(0)}€
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-muted-foreground">Since September</p>
-                  <p className="text-2xl font-semibold truncate">{stats.sinceSeptember.toFixed(2)}€</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 bg-accent/10 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-accent-foreground" />
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-green-500/10 rounded-md">
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                    </div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Current Month
+                    </p>
+                  </div>
+                  <div className="pl-10">
+                    <p className="text-3xl font-bold tracking-tight">
+                      {stats.currentMonth.toFixed(0)}€
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-muted-foreground">Current Month</p>
-                  <p className="text-2xl font-semibold truncate">{stats.currentMonth.toFixed(2)}€</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 bg-secondary/10 rounded-lg">
-                  <CalendarIcon className="h-5 w-5 text-secondary-foreground" />
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-blue-500/10 rounded-md">
+                      <CalendarIcon className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Average per Coach
+                    </p>
+                  </div>
+                  <div className="pl-10">
+                    <p className="text-3xl font-bold tracking-tight">
+                      {stats.average.toFixed(0)}€
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-muted-foreground">Average</p>
-                  <p className="text-2xl font-semibold truncate">{stats.average.toFixed(2)}€</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
