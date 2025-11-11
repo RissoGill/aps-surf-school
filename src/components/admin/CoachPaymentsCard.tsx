@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -198,6 +198,13 @@ export const CoachPaymentsCard = () => {
     const years = new Set(payments?.map(p => p.payment_year) || []);
     return Array.from(years).sort((a, b) => b - a);
   }, [payments]);
+
+  // Ensure selectedYear is one of the available years (fallback to most recent)
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
   // Calculate monthly breakdown
   const monthlyBreakdown = useMemo(() => {
@@ -572,11 +579,11 @@ export const CoachPaymentsCard = () => {
                           {data.payments.map(payment => {
                             const coach = coaches?.find(c => c.coach_id === payment.coach_id);
                             return (
-                              <div key={payment.id} className="flex justify-between text-xs">
-                                <span className="text-muted-foreground truncate flex-1">
+                              <div key={payment.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                                <span className="text-muted-foreground truncate max-w-[65%]">
                                   {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
                                 </span>
-                                <span className="font-medium ml-2">{Number(payment.amount).toFixed(0)}€</span>
+                                <span className="font-medium ml-2 flex-shrink-0">{Number(payment.amount).toFixed(0)}€</span>
                               </div>
                             );
                           })}
@@ -653,7 +660,7 @@ export const CoachPaymentsCard = () => {
                       const coach = coaches?.find(c => c.coach_id === payment.coach_id);
                       return (
                         <TableRow key={payment.id}>
-                          <TableCell className="font-medium text-sm">
+                          <TableCell className="font-medium text-sm truncate max-w-[220px]">
                             {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
                           </TableCell>
                           <TableCell className="text-sm">{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
