@@ -502,7 +502,7 @@ export const CoachPaymentsCard = () => {
                         <User className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="truncate">{coach.first_name} {coach.last_name}</div>
+                        <div className="text-sm font-medium truncate">{coach.first_name} {coach.last_name}</div>
                         <div className="text-xs text-muted-foreground font-normal">{count} payments</div>
                       </div>
                     </CardTitle>
