@@ -501,24 +501,24 @@ export const CoachPaymentsCard = () => {
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <div>{coach.first_name} {coach.last_name}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate">{coach.first_name} {coach.last_name}</div>
                         <div className="text-xs text-muted-foreground font-normal">{count} payments</div>
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">This Month</span>
-                      <span className="text-lg font-medium text-green-600">{monthTotal.toFixed(2)}€</span>
+                  <CardContent className="space-y-1.5">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-xs text-muted-foreground flex-shrink-0">This Month</span>
+                      <span className="text-base font-semibold text-green-600 truncate">{monthTotal.toFixed(2)}€</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">This Year</span>
-                      <span className="text-sm font-semibold">{yearTotal.toFixed(2)}€</span>
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="text-xs text-muted-foreground flex-shrink-0">This Year</span>
+                      <span className="text-base font-semibold truncate">{yearTotal.toFixed(2)}€</span>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t">
-                      <span className="text-xs text-muted-foreground">All Time</span>
-                      <span className="text-sm">{total.toFixed(2)}€</span>
+                    <div className="flex justify-between items-center gap-2 pt-1.5 border-t">
+                      <span className="text-xs text-muted-foreground flex-shrink-0">All Time</span>
+                      <span className="text-sm truncate">{total.toFixed(2)}€</span>
                     </div>
                   </CardContent>
                 </Card>
