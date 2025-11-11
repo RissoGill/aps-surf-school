@@ -276,18 +276,23 @@ const AdministrationDashboard = () => {
         }, 0);
       
       // Fetch all coach payments
-      const { data: coachPaymentsRows } = await supabase
+      const { data: coachPaymentsRows, error: coachPaymentsError } = await supabase
         .from('coach_payments')
         .select('amount, payment_date, payment_year, payment_month');
+      if (coachPaymentsError) {
+        console.warn('coach_payments fetch error:', coachPaymentsError.message);
+      }
       
-      const septemberCutoff = new Date('2025-09-01');
+      // Determine season start: September of current year if >= Sep, otherwise previous year's September
+      const seasonStartYear = currentMonthNumber >= 9 ? currentYear : currentYear - 1;
+      const seasonStartDate = new Date(seasonStartYear, 8, 1); // month index 8 = September
       
-      // Calculate total paid to coaches from September 2025 onwards
+      // Calculate total paid to coaches from the season start onwards
       const totalPaidToCoaches = (coachPaymentsRows || [])
         .filter((p: any) => {
           if (!p.payment_date) return false;
           const paymentDate = new Date(p.payment_date);
-          return paymentDate >= septemberCutoff && paymentDate <= now;
+          return paymentDate >= seasonStartDate && paymentDate <= now;
         })
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
       
