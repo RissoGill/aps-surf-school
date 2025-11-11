@@ -106,6 +106,7 @@ export const CoachPaymentsCard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coach-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
       toast({
         title: "Success",
         description: `Payment ${editingPayment ? 'updated' : 'added'} successfully`,
@@ -132,6 +133,7 @@ export const CoachPaymentsCard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['coach-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
       toast({
         title: "Success",
         description: "Payment deleted successfully",

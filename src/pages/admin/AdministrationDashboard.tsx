@@ -22,9 +22,12 @@ const AdministrationDashboard = () => {
 
   useEffect(() => {
     const channel = supabase
-      .channel('admin-attendance-changes')
+      .channel('admin-dashboard-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => {
         queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'coach_payments' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
