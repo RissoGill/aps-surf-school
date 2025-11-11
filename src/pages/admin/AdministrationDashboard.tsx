@@ -194,19 +194,29 @@ const AdministrationDashboard = () => {
         .select('amount_paid, amount_due, month, year, athlete_id')
         .gte('year', 2025);
       
+      // Note: currentMonthSerial will be defined on line 209, so we calculate it here
+      const currentMonthSerial = currentYear * 12 + currentMonthNumber;
+      
       const annualFeesReceived = (sept2025OnwardsRows || [])
         .filter((p: any) => {
-          if (p.year > 2025) return true;
+          // Only include September 2025 onwards
+          if (p.year < 2025) return false;
           if (p.year === 2025) {
             const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
-            return monthNum >= 9; // September onwards
+            if (monthNum < 9) return false; // Before September
           }
-          return false;
+          
+          // Only include months up to the current month (exclude future months)
+          const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
+          const paymentSerial = (p.year || 0) * 12 + monthNum;
+          if (paymentSerial > currentMonthSerial) return false;
+          
+          return true;
         })
         .reduce((sum: number, p: any) => sum + (p.amount_paid || 0), 0);
       
       // Outstanding from September 2025 onwards for Learning/Pre-Competition (only past/current months)
-      const currentMonthSerial = currentYear * 12 + currentMonthNumber;
+      // Note: currentMonthSerial is now defined above
       
       const septemberOnwardsOutstandingLearning = (sept2025OnwardsRows || [])
         .filter((p: any) => {
