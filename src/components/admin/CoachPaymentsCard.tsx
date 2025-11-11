@@ -209,7 +209,7 @@ export const CoachPaymentsCard = () => {
 
   // Calculate key statistics
   const stats = useMemo(() => {
-    if (!payments) return { sinceSepty: 0, currentMonth: 0, average: 0 };
+    if (!payments) return { sinceSeptember: 0, currentMonth: 0, average: 0 };
     
     const now = new Date();
     const currentYear = now.getFullYear();
