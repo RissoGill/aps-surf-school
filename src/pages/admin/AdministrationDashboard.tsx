@@ -290,45 +290,68 @@ const AdministrationDashboard = () => {
         console.error('coach_payments fetch error:', coachPaymentsError);
       }
       
-      // Determine season start: September of current year if >= Sep, otherwise previous year's September
-      const seasonStartYear = currentMonthNumber >= 9 ? currentYear : currentYear - 1;
-      const seasonStartDate = new Date(seasonStartYear, 8, 1); // month index 8 = September
+      // Helper to derive a record date from payment_date or payment_year/payment_month
+      const toRecordDate = (p: any): Date | null => {
+        // Prefer payment_date if available
+        if (p.payment_date) {
+          try {
+            const d = new Date(p.payment_date);
+            if (!isNaN(d.getTime())) return d;
+          } catch {}
+        }
+        
+        // Fallback to payment_year + payment_month
+        const year = Number(p.payment_year);
+        const monthStr = normalizeMonth(p.payment_month || '');
+        const monthNum = monthNameToNumber[monthStr] || 0;
+        
+        if (!year || !monthNum) return null;
+        return new Date(year, monthNum - 1, 1);
+      };
       
-      console.info('Coach payments date range:', {
-        currentMonth: currentMonthNumber,
-        currentYear,
-        seasonStartYear,
-        seasonStartDate: seasonStartDate.toISOString(),
-        now: now.toISOString()
+      // Build rows with computed record date
+      const coachRows = (coachPaymentsRows || [])
+        .map((p: any) => ({ ...p, _recordDate: toRecordDate(p) }))
+        .filter((p: any) => p._recordDate);
+      
+      // Count how many used payment_date vs fallback
+      const usedPaymentDate = coachRows.filter((p: any) => p.payment_date).length;
+      const usedFallback = coachRows.length - usedPaymentDate;
+      
+      console.info('Coach payments record date derivation:', {
+        totalRows: coachPaymentsRows?.length || 0,
+        validRows: coachRows.length,
+        usedPaymentDate,
+        usedFallback,
+        sample: coachRows.slice(0, 3)
       });
       
-      // Calculate total paid to coaches from the season start onwards
-      const coachPaymentsFromSeason = (coachPaymentsRows || [])
-        .filter((p: any) => {
-          if (!p.payment_date) return false;
-          const paymentDate = new Date(p.payment_date);
-          return paymentDate >= seasonStartDate && paymentDate <= now;
-        });
+      // Fixed Sept+ cutoff: 2025-09-01
+      const septCutoff = new Date('2025-09-01');
       
-      const totalPaidToCoaches = coachPaymentsFromSeason
+      // Calculate total paid to coaches from Sept+ onwards
+      const coachPaymentsFromSept = coachRows.filter((p: any) => 
+        p._recordDate >= septCutoff && p._recordDate <= now
+      );
+      
+      const totalPaidToCoaches = coachPaymentsFromSept
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
       
-      console.info('Total paid to coaches calculation:', {
-        matchingRecords: coachPaymentsFromSeason.length,
+      console.info('Total paid to coaches (Sept+) calculation:', {
+        septCutoff: septCutoff.toISOString(),
+        now: now.toISOString(),
+        matchingRecords: coachPaymentsFromSept.length,
         totalAmount: totalPaidToCoaches,
-        records: coachPaymentsFromSeason
+        records: coachPaymentsFromSept
       });
       
-      // Calculate coach payments made this month (for the previous month's work)
+      // Calculate coach payments made this month
       const currentMonthStart = new Date(currentYear, currentMonthNumber - 1, 1);
       const currentMonthEnd = new Date(currentYear, currentMonthNumber, 0, 23, 59, 59);
       
-      const coachPaymentsThisMonthRecords = (coachPaymentsRows || [])
-        .filter((p: any) => {
-          if (!p.payment_date) return false;
-          const paymentDate = new Date(p.payment_date);
-          return paymentDate >= currentMonthStart && paymentDate <= currentMonthEnd;
-        });
+      const coachPaymentsThisMonthRecords = coachRows.filter((p: any) => 
+        p._recordDate >= currentMonthStart && p._recordDate <= currentMonthEnd
+      );
       
       const coachPaymentsThisMonth = coachPaymentsThisMonthRecords
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
