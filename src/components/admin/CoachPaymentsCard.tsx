@@ -321,6 +321,29 @@ export const CoachPaymentsCard = () => {
     });
   }, [payments, selectedCoachFilter, selectedMonthFilter]);
 
+  // StatCard subcomponent for KPI cards
+  const StatCard = ({ icon, label, value, iconBgClass }: {
+    icon: React.ReactNode;
+    label: string;
+    value: number;
+    iconBgClass: string;
+  }) => (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4">
+        <div className="grid grid-cols-[auto,1fr] gap-x-3 items-center min-w-0">
+          <div className={`p-2 rounded-md row-span-2 ${iconBgClass}`}>
+            {icon}
+          </div>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate min-w-0">
+            {label}
+          </p>
+          <p className="col-start-2 text-2xl sm:text-3xl font-bold tracking-tight leading-none whitespace-nowrap">
+            {value.toFixed(0)}€
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Card>
@@ -460,65 +483,24 @@ export const CoachPaymentsCard = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-primary/10 rounded-md">
-                      <Euro className="h-4 w-4 text-primary" />
-                    </div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Since September
-                    </p>
-                  </div>
-                  <div className="pl-10">
-                    <p className="text-3xl font-bold tracking-tight">
-                      {stats.sinceSeptember.toFixed(0)}€
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-green-500/10 rounded-md">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                    </div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Current Month
-                    </p>
-                  </div>
-                  <div className="pl-10">
-                    <p className="text-3xl font-bold tracking-tight">
-                      {stats.currentMonth.toFixed(0)}€
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-blue-500/10 rounded-md">
-                      <CalendarIcon className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Average per Coach
-                    </p>
-                  </div>
-                  <div className="pl-10">
-                    <p className="text-3xl font-bold tracking-tight">
-                      {stats.average.toFixed(0)}€
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              icon={<Euro className="h-4 w-4 text-primary" />}
+              label="Since September"
+              value={stats.sinceSeptember}
+              iconBgClass="bg-primary/10"
+            />
+            <StatCard
+              icon={<TrendingUp className="h-4 w-4 text-green-600" />}
+              label="Current Month"
+              value={stats.currentMonth}
+              iconBgClass="bg-green-500/10"
+            />
+            <StatCard
+              icon={<CalendarIcon className="h-4 w-4 text-blue-600" />}
+              label="Average per Coach"
+              value={stats.average}
+              iconBgClass="bg-blue-500/10"
+            />
           </div>
         )}
 
