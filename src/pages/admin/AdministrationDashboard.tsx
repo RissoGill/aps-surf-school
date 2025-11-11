@@ -600,8 +600,8 @@ const AdministrationDashboard = () => {
     { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
     { label: "Outstanding Learning/Pre-Comp (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
     { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
-    { label: "Total Paid to Coaches (Sept+)", value: `€${fmt(paymentsData?.totalPaidToCoaches)}` , color: "secondary" },
-    { label: "Coach Payments This Month", value: `€${fmt(paymentsData?.coachPaymentsThisMonth)}` , color: "secondary" },
+    { label: "Total Paid to Coaches (Sept+)", value: `€${fmt(paymentsData?.totalPaidToCoaches)}` , color: "primary" },
+    { label: "Coach Payments This Month", value: `€${fmt(paymentsData?.coachPaymentsThisMonth)}` , color: "primary" },
     { 
       label: "Total Learning Athletes", 
       value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
