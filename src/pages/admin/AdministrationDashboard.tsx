@@ -275,35 +275,31 @@ const AdministrationDashboard = () => {
           return sum + (remaining > 0 ? remaining : 0);
         }, 0);
       
-      // Fetch coach payments from September 2025 onwards
+      // Fetch all coach payments
       const { data: coachPaymentsRows } = await supabase
         .from('coach_payments')
-        .select('amount, payment_date, payment_year, payment_month')
-        .gte('payment_year', 2025);
+        .select('amount, payment_date, payment_year, payment_month');
       
-      // Calculate total paid to coaches from September 2025 onwards (up to current month)
+      const septemberCutoff = new Date('2025-09-01');
+      
+      // Calculate total paid to coaches from September 2025 onwards
       const totalPaidToCoaches = (coachPaymentsRows || [])
         .filter((p: any) => {
-          if (p.payment_year < 2025) return false;
-          if (p.payment_year === 2025) {
-            const monthNum = monthNameToNumber[normalizeMonth(p.payment_month)] || 0;
-            if (monthNum < 9) return false;
-          }
-          
-          // Only include up to current month
-          const paymentSerial = (p.payment_year || 0) * 12 + (monthNameToNumber[normalizeMonth(p.payment_month)] || 0);
-          if (paymentSerial > currentMonthSerial) return false;
-          
-          return true;
+          if (!p.payment_date) return false;
+          const paymentDate = new Date(p.payment_date);
+          return paymentDate >= septemberCutoff && paymentDate <= now;
         })
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
       
-      // Calculate coach payments made this month (for previous month)
+      // Calculate coach payments made this month (for the previous month's work)
+      const currentMonthStart = new Date(currentYear, currentMonthNumber - 1, 1);
+      const currentMonthEnd = new Date(currentYear, currentMonthNumber, 0, 23, 59, 59);
+      
       const coachPaymentsThisMonth = (coachPaymentsRows || [])
         .filter((p: any) => {
+          if (!p.payment_date) return false;
           const paymentDate = new Date(p.payment_date);
-          return paymentDate.getMonth() === currentMonthNumber - 1 && 
-                 paymentDate.getFullYear() === currentYear;
+          return paymentDate >= currentMonthStart && paymentDate <= currentMonthEnd;
         })
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
       
