@@ -219,6 +219,7 @@ export type Database = {
           first_name: string | null
           last_name: string | null
           phone: number | null
+          status: boolean | null
         }
         Insert: {
           auth_uid?: string | null
@@ -229,6 +230,7 @@ export type Database = {
           first_name?: string | null
           last_name?: string | null
           phone?: number | null
+          status?: boolean | null
         }
         Update: {
           auth_uid?: string | null
@@ -239,6 +241,7 @@ export type Database = {
           first_name?: string | null
           last_name?: string | null
           phone?: number | null
+          status?: boolean | null
         }
         Relationships: []
       }
