@@ -193,6 +193,18 @@ export const CoachPaymentsCard = () => {
     });
   };
 
+  // Create coach name map with fallbacks
+  const coachNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    (coaches || []).forEach(c => {
+      const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim();
+      if (c.coach_id) map.set(c.coach_id, name || `Coach ${c.coach_id}`);
+    });
+    return map;
+  }, [coaches]);
+
+  const getCoachLabel = (coachId: string) => coachNameMap.get(coachId) || coachId;
+
   // Get unique years from payments
   const availableYears = useMemo(() => {
     const years = new Set(payments?.map(p => p.payment_year) || []);
@@ -260,32 +272,33 @@ export const CoachPaymentsCard = () => {
     return coachMatch && monthMatch;
   });
 
-  // Calculate totals by coach
-  const paymentsByCoach = coaches?.map(coach => {
-    const coachPayments = payments?.filter(p => p.coach_id === coach.coach_id) || [];
-    const total = coachPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+  // Group payments by coach (independent of coaches query)
+  const paymentsByCoach = useMemo(() => {
+    if (!payments?.length) return [];
     const currentYear = new Date().getFullYear();
     const currentMonth = MONTHS[new Date().getMonth()];
-    
-    const yearTotal = coachPayments
-      .filter(p => p.payment_year === currentYear)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-    
-    const monthTotal = coachPayments
-      .filter(p => p.payment_year === currentYear && p.payment_month === currentMonth)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-    
-    return {
-      coach,
-      total,
-      yearTotal,
-      monthTotal,
-      count: coachPayments.length,
-    };
-  });
+    const groups = new Map<string, { coach_id: string; total: number; yearTotal: number; monthTotal: number; count: number }>();
+
+    for (const p of payments) {
+      const g = groups.get(p.coach_id) || { coach_id: p.coach_id, total: 0, yearTotal: 0, monthTotal: 0, count: 0 };
+      const amt = Number(p.amount) || 0;
+      g.total += amt;
+      if (p.payment_year === currentYear) g.yearTotal += amt;
+      if (p.payment_year === currentYear && p.payment_month === currentMonth) g.monthTotal += amt;
+      g.count += 1;
+      groups.set(p.coach_id, g);
+    }
+
+    return Array.from(groups.values()).sort((a, b) => b.total - a.total);
+  }, [payments]);
+
+  // Diagnostics
+  console.debug('CoachPaymentsCard - payments:', payments?.length, payments?.[0]);
+  console.debug('CoachPaymentsCard - coaches:', coaches?.length);
+  console.debug('CoachPaymentsCard - paymentsByCoach:', paymentsByCoach?.length);
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-soft">
       <CardHeader className="border-b border-border/40">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -501,21 +514,23 @@ export const CoachPaymentsCard = () => {
           {/* Overview Tab - All Coaches Summary */}
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {paymentsByCoach?.map(({ coach, total, yearTotal, monthTotal, count }) => (
-                <Card key={coach.coach_id} className="hover:shadow-md transition-shadow overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <User className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-foreground truncate" title={[coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach'}>
-                          {[coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach'}
+              {paymentsByCoach?.map(({ coach_id, total, yearTotal, monthTotal, count }) => {
+                const name = getCoachLabel(coach_id);
+                return (
+                  <Card key={coach_id} className="hover:shadow-md transition-shadow overflow-hidden">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <User className="h-4 w-4 text-primary" />
                         </div>
-                        <div className="text-xs text-muted-foreground">{count} {count === 1 ? 'payment' : 'payments'}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-foreground truncate" title={name}>
+                            {name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">{count} {count === 1 ? 'payment' : 'payments'}</div>
+                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
+                    </CardHeader>
                   <CardContent className="space-y-1.5">
                     <div className="flex justify-between items-center gap-2">
                       <span className="text-xs text-muted-foreground flex-shrink-0">This Month</span>
@@ -530,8 +545,9 @@ export const CoachPaymentsCard = () => {
                       <span className="text-sm truncate">{total.toFixed(2)}€</span>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
@@ -576,17 +592,14 @@ export const CoachPaymentsCard = () => {
                       </div>
                       {hasPayments ? (
                         <div className="space-y-1">
-                          {data.payments.map(payment => {
-                            const coach = coaches?.find(c => c.coach_id === payment.coach_id);
-                            return (
-                              <div key={payment.id} className="flex items-center justify-between text-xs gap-2 min-w-0">
-                                <span className="text-muted-foreground truncate max-w-[65%]">
-                                  {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
-                                </span>
-                                <span className="font-medium ml-2 flex-shrink-0">{Number(payment.amount).toFixed(0)}€</span>
-                              </div>
-                            );
-                          })}
+                          {data.payments.map(payment => (
+                            <div key={payment.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs">
+                              <span className="text-muted-foreground truncate">
+                                {getCoachLabel(payment.coach_id)}
+                              </span>
+                              <span className="font-medium">{Number(payment.amount).toFixed(0)}€</span>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <div className="text-xs text-muted-foreground">No payments</div>
@@ -610,11 +623,19 @@ export const CoachPaymentsCard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Coaches</SelectItem>
-                    {coaches?.map((coach) => (
-                      <SelectItem key={coach.coach_id} value={coach.coach_id}>
-                        {coach.first_name} {coach.last_name}
-                      </SelectItem>
-                    ))}
+                    {coaches?.length ? (
+                      coaches.map((coach) => (
+                        <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                          {coach.first_name} {coach.last_name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      Array.from(new Set((payments || []).map(p => p.coach_id))).map(id => (
+                        <SelectItem key={id} value={id}>
+                          {getCoachLabel(id)}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -636,7 +657,7 @@ export const CoachPaymentsCard = () => {
             </div>
 
             {/* Payments Table */}
-            <div className="rounded-md border">
+            <div className="overflow-x-auto rounded-md border">
               <Table>
                     <TableHeader>
                       <TableRow>
@@ -656,25 +677,27 @@ export const CoachPaymentsCard = () => {
                       </TableCell>
                     </TableRow>
                   ) : filteredPayments && filteredPayments.length > 0 ? (
-                    filteredPayments.map((payment) => {
-                      const coach = coaches?.find(c => c.coach_id === payment.coach_id);
-                      return (
-                        <TableRow key={payment.id}>
-                          <TableCell className="font-medium text-sm truncate max-w-[220px]">
-                            {coach ? `${coach.first_name} ${coach.last_name}` : payment.coach_id}
-                          </TableCell>
-                          <TableCell className="text-sm">{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {payment.payment_month} {payment.payment_year}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-semibold text-primary text-sm">
-                            {Number(payment.amount).toFixed(2)}€
-                          </TableCell>
-                          <TableCell className="max-w-xs truncate text-sm">
+                    filteredPayments.map((payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell className="font-medium text-sm">
+                          <span className="block truncate max-w-[220px]">
+                            {getCoachLabel(payment.coach_id)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-sm">{format(new Date(payment.payment_date), 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {payment.payment_month} {payment.payment_year}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-semibold text-primary text-sm">
+                          {Number(payment.amount).toFixed(2)}€
+                        </TableCell>
+                        <TableCell>
+                          <span className="block truncate max-w-xs text-sm">
                             {payment.notes || '-'}
-                          </TableCell>
+                          </span>
+                        </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -697,9 +720,8 @@ export const CoachPaymentsCard = () => {
                               </Button>
                             </div>
                           </TableCell>
-                        </TableRow>
-                      );
-                    })
+                      </TableRow>
+                    ))
                   ) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
