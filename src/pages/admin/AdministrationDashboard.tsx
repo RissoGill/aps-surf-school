@@ -279,34 +279,67 @@ const AdministrationDashboard = () => {
       const { data: coachPaymentsRows, error: coachPaymentsError } = await supabase
         .from('coach_payments')
         .select('amount, payment_date, payment_year, payment_month');
+      
+      console.info('Coach payments fetch result:', {
+        rowCount: coachPaymentsRows?.length || 0,
+        error: coachPaymentsError,
+        sample: coachPaymentsRows?.slice(0, 3)
+      });
+      
       if (coachPaymentsError) {
-        console.warn('coach_payments fetch error:', coachPaymentsError.message);
+        console.error('coach_payments fetch error:', coachPaymentsError);
       }
       
       // Determine season start: September of current year if >= Sep, otherwise previous year's September
       const seasonStartYear = currentMonthNumber >= 9 ? currentYear : currentYear - 1;
       const seasonStartDate = new Date(seasonStartYear, 8, 1); // month index 8 = September
       
+      console.info('Coach payments date range:', {
+        currentMonth: currentMonthNumber,
+        currentYear,
+        seasonStartYear,
+        seasonStartDate: seasonStartDate.toISOString(),
+        now: now.toISOString()
+      });
+      
       // Calculate total paid to coaches from the season start onwards
-      const totalPaidToCoaches = (coachPaymentsRows || [])
+      const coachPaymentsFromSeason = (coachPaymentsRows || [])
         .filter((p: any) => {
           if (!p.payment_date) return false;
           const paymentDate = new Date(p.payment_date);
           return paymentDate >= seasonStartDate && paymentDate <= now;
-        })
+        });
+      
+      const totalPaidToCoaches = coachPaymentsFromSeason
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+      
+      console.info('Total paid to coaches calculation:', {
+        matchingRecords: coachPaymentsFromSeason.length,
+        totalAmount: totalPaidToCoaches,
+        records: coachPaymentsFromSeason
+      });
       
       // Calculate coach payments made this month (for the previous month's work)
       const currentMonthStart = new Date(currentYear, currentMonthNumber - 1, 1);
       const currentMonthEnd = new Date(currentYear, currentMonthNumber, 0, 23, 59, 59);
       
-      const coachPaymentsThisMonth = (coachPaymentsRows || [])
+      const coachPaymentsThisMonthRecords = (coachPaymentsRows || [])
         .filter((p: any) => {
           if (!p.payment_date) return false;
           const paymentDate = new Date(p.payment_date);
           return paymentDate >= currentMonthStart && paymentDate <= currentMonthEnd;
-        })
+        });
+      
+      const coachPaymentsThisMonth = coachPaymentsThisMonthRecords
         .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+      
+      console.info('Coach payments this month calculation:', {
+        currentMonthStart: currentMonthStart.toISOString(),
+        currentMonthEnd: currentMonthEnd.toISOString(),
+        matchingRecords: coachPaymentsThisMonthRecords.length,
+        totalAmount: coachPaymentsThisMonth,
+        records: coachPaymentsThisMonthRecords
+      });
       
       console.info('Financial summary (DB-filtered)', {
         totalReceivedThisMonth,
