@@ -116,12 +116,12 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => (
             <Card key={i}>
-              <CardContent className="p-5">
-                <Skeleton className="h-4 w-24 mb-3" />
-                <Skeleton className="h-8 w-32" />
+              <CardContent className="p-4">
+                <Skeleton className="h-4 w-20 mb-2" />
+                <Skeleton className="h-6 w-24" />
               </CardContent>
             </Card>
           ))}
@@ -134,45 +134,32 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-primary/20 rounded-lg">
-                <Euro className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">All Time</span>
-            </div>
-            <div className="text-2xl font-medium text-primary">{totalAllTime.toFixed(2)}€</div>
-            <p className="text-xs text-muted-foreground mt-1">Total paid</p>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-success/20 rounded-lg">
-                <Calendar className="h-5 w-5 text-success" />
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-success/20 rounded-lg">
+                <Calendar className="h-4 w-4 text-success" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">This Year</span>
+              <span className="text-xs font-medium text-muted-foreground">This Year</span>
             </div>
-            <div className="text-2xl font-medium text-success">{totalThisYear.toFixed(2)}€</div>
-            <p className="text-xs text-muted-foreground mt-1">{currentYear}</p>
+            <div className="text-xl font-medium text-success truncate">{totalThisYear.toFixed(2)}€</div>
+            <p className="text-xs text-muted-foreground mt-0.5">{currentYear}</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 bg-secondary/20 rounded-lg">
-                <Receipt className="h-5 w-5 text-foreground" />
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="p-1.5 bg-secondary/20 rounded-lg">
+                <Receipt className="h-4 w-4 text-foreground" />
               </div>
-              <span className="text-sm font-medium text-muted-foreground">Last Payment</span>
+              <span className="text-xs font-medium text-muted-foreground">Last Payment</span>
             </div>
             {lastPayment ? (
               <>
-                <div className="text-2xl font-medium text-foreground">{Number(lastPayment.amount).toFixed(2)}€</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-xl font-medium text-foreground truncate">{Number(lastPayment.amount).toFixed(2)}€</div>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {format(new Date(lastPayment.payment_date), 'dd/MM/yyyy')}
                 </p>
               </>
