@@ -881,7 +881,7 @@ const CoachDashboard = () => {
       <main className="mobile-container py-6">
         {/* Welcome Section */}
         <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-start justify-between mb-2">
             <h2 className="text-2xl font-bold text-foreground">
               {`Welcome Back, ${
                 coachDisplayName ||
