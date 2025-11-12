@@ -295,29 +295,6 @@ export const CoachPaymentsCard = () => {
     return breakdown;
   }, [payments, selectedYear]);
 
-  // Group payments by coach for overview
-  const coachPayments = useMemo(() => {
-    if (!payments?.length) return [];
-    
-    const groups = new Map<string, { total: number; count: number; payments: CoachPayment[] }>();
-    
-    payments.forEach(p => {
-      const existing = groups.get(p.coach_id) || { total: 0, count: 0, payments: [] };
-      existing.total += Number(p.amount);
-      existing.count += 1;
-      existing.payments.push(p);
-      groups.set(p.coach_id, existing);
-    });
-    
-    return Array.from(groups.entries())
-      .map(([coach_id, data]) => ({
-        coach_id,
-        coach_name: getCoachName(coach_id),
-        ...data
-      }))
-      .sort((a, b) => b.total - a.total);
-  }, [payments, coaches]);
-
   // Filter payments for history tab
   const filteredPayments = useMemo(() => {
     return payments?.filter(p => {
@@ -447,37 +424,11 @@ export const CoachPaymentsCard = () => {
 
       <CardContent className="p-6 space-y-6">
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+        <Tabs defaultValue="monthly" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="monthly">By Month</TabsTrigger>
             <TabsTrigger value="history">Payment History</TabsTrigger>
           </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-4 mt-4">
-            {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading...</div>
-            ) : coachPayments.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No payments recorded yet</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {coachPayments.map(({ coach_id, coach_name, total, count }) => (
-                  <Card key={coach_id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate" title={coach_name}>{coach_name}</p>
-                          <p className="text-xs text-muted-foreground">{count} payment{count !== 1 ? 's' : ''}</p>
-                        </div>
-                        <Badge variant="secondary" className="flex-shrink-0">{total.toFixed(0)}€</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
 
           {/* By Month Tab */}
           <TabsContent value="monthly" className="space-y-4 mt-4">
