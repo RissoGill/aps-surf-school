@@ -27,7 +27,7 @@ const AppHeader = ({ title, showBack = false, backTo = "/" }: AppHeaderProps) =>
             </Button>
           )}
           <ProcessedLogo
-            containerClassName="h-8 w-8"
+            containerClassName="h-10 w-10"
             className="h-full w-full object-contain"
             alt="APS Surf School"
             process={false}
