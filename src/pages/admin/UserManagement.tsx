@@ -181,7 +181,7 @@ const UserManagement = () => {
       <main className="mobile-container py-6">
         {/* Search Dropdown */}
         <div className="mb-6">
-          <Label className="mb-2 block">Search User</Label>
+          <Label className="text-title mb-2 block">Search User</Label>
           <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -233,7 +233,7 @@ const UserManagement = () => {
           <Card className="shadow-medium">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>User Details</CardTitle>
+                <CardTitle className="text-title">User Details</CardTitle>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -265,7 +265,7 @@ const UserManagement = () => {
                 
                 <TabsContent value="personal" className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="first_name">First Name</Label>
+                    <Label htmlFor="first_name" className="text-title">First Name</Label>
                     <Input
                       id="first_name"
                       value={editForm.first_name || ''}
@@ -274,7 +274,7 @@ const UserManagement = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="last_name">Last Name</Label>
+                    <Label htmlFor="last_name" className="text-title">Last Name</Label>
                     <Input
                       id="last_name"
                       value={editForm.last_name || ''}
@@ -283,7 +283,7 @@ const UserManagement = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-title">Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -293,7 +293,7 @@ const UserManagement = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone" className="text-title">Phone</Label>
                     <Input
                       id="phone"
                       value={editForm.phone?.toString() || ''}
@@ -304,7 +304,7 @@ const UserManagement = () => {
                 
                 <TabsContent value="account" className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role" className="text-title">Role</Label>
                     <Select 
                       value={editForm.role || ''} 
                       onValueChange={(value) => setEditForm({ ...editForm, role: value as 'admin' | 'moderator' | 'user' })}
@@ -321,12 +321,12 @@ const UserManagement = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>User ID</Label>
+                    <Label className="text-title">User ID</Label>
                     <Input value={selectedUser.coach_id} disabled />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Auth UID</Label>
+                    <Label className="text-title">Auth UID</Label>
                     <Input value={selectedUser.auth_uid || 'Not linked'} disabled />
                   </div>
                 </TabsContent>

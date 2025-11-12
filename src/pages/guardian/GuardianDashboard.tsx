@@ -131,7 +131,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
       {isPack && (
         <Card className="shadow-soft mb-4">
           <CardHeader>
-            <h4 className="font-medium text-foreground">Your pack summary</h4>
+            <h4 className="font-medium text-title">Your pack summary</h4>
           </CardHeader>
           <CardContent>
             {packBalance ? (
@@ -159,7 +159,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                 {/* Purchase History */}
                 {packHistory.length > 0 && (
                   <div className="pt-4 border-t space-y-3">
-                    <h4 className="text-sm font-semibold text-foreground">Purchase History</h4>
+                    <h4 className="text-sm font-semibold text-title">Purchase History</h4>
                     <div className="space-y-2">
                       {packHistory.map((pack) => (
                         <div 
@@ -305,7 +305,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <h4 className="font-medium text-foreground flex items-center gap-2">
+        <h4 className="font-medium text-title flex items-center gap-2">
           <ImageIcon className="h-6 w-6" />
           Photos & Videos
         </h4>

@@ -259,7 +259,7 @@ const AttendanceManagement = () => {
       <main className="mobile-container py-6">
         <Card className="shadow-soft mb-6">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+            <CardTitle className="text-title text-2xl font-bold flex items-center gap-2">
               <Calendar className="h-6 w-6 text-primary" />
               Athlete Attendance Management
             </CardTitle>
@@ -323,7 +323,7 @@ const AttendanceManagement = () => {
         {selectedAthlete && (
           <Card className="shadow-soft">
             <CardHeader>
-              <CardTitle>Attendance Records</CardTitle>
+              <CardTitle className="text-title">Attendance Records</CardTitle>
               <CardDescription>
                 Double-click on any record to view details and manage
               </CardDescription>
@@ -415,7 +415,7 @@ const AttendanceManagement = () => {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Attendance Record Details</DialogTitle>
+            <DialogTitle className="text-title">Attendance Record Details</DialogTitle>
             <DialogDescription>
               View and manage attendance record
             </DialogDescription>
@@ -423,29 +423,29 @@ const AttendanceManagement = () => {
           {selectedRecord && (
             <div className="space-y-4">
               <div>
-                <Label className="text-muted-foreground">Date</Label>
+                <Label className="text-title">Date</Label>
                 <p className="font-medium">
                   {selectedRecord.date ? new Date(selectedRecord.date).toLocaleDateString() : '-'}
                 </p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Coach</Label>
+                <Label className="text-title">Coach</Label>
                 <p className="font-medium">{selectedRecord.coach_name}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Status</Label>
+                <Label className="text-title">Status</Label>
                 <p className="font-medium">{selectedRecord.status || '-'}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Shift</Label>
+                <Label className="text-title">Shift</Label>
                 <p className="font-medium">{selectedRecord.shift || '-'}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Beach Location</Label>
+                <Label className="text-title">Beach Location</Label>
                 <p className="font-medium">{selectedRecord.beach_location || '-'}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Notes</Label>
+                <Label className="text-title">Notes</Label>
                 <p className="font-medium">{selectedRecord.notes || '-'}</p>
               </div>
             </div>
@@ -479,14 +479,14 @@ const AttendanceManagement = () => {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Attendance Record</DialogTitle>
+            <DialogTitle className="text-title">Edit Attendance Record</DialogTitle>
             <DialogDescription>
               Update the attendance details
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date" className="text-title">Date</Label>
               <Input
                 id="date"
                 type="date"
@@ -495,7 +495,7 @@ const AttendanceManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status" className="text-title">Status</Label>
               <Select value={editForm.status} onValueChange={(value) => setEditForm({ ...editForm, status: value })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -508,7 +508,7 @@ const AttendanceManagement = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="shift">Shift</Label>
+              <Label htmlFor="shift" className="text-title">Shift</Label>
               <Select value={editForm.shift} onValueChange={(value) => setEditForm({ ...editForm, shift: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select shift" />
@@ -520,7 +520,7 @@ const AttendanceManagement = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="coach">Coach</Label>
+              <Label htmlFor="coach" className="text-title">Coach</Label>
               <Select value={editForm.coach_id} onValueChange={(value) => setEditForm({ ...editForm, coach_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select coach" />
@@ -535,7 +535,7 @@ const AttendanceManagement = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="beach">Beach Location</Label>
+              <Label htmlFor="beach" className="text-title">Beach Location</Label>
               <Input
                 id="beach"
                 value={editForm.beach_location}
@@ -544,7 +544,7 @@ const AttendanceManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="text-title">Notes</Label>
               <Textarea
                 id="notes"
                 value={editForm.notes}

@@ -235,14 +235,14 @@ const AthleteManagement = () => {
       <main className="mobile-container py-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Athlete Management</h2>
+          <h2 className="text-2xl font-bold text-title">Athlete Management</h2>
           <p className="text-muted-foreground">Search for an athlete to view and edit their information</p>
         </div>
 
         {/* Search Bar */}
         <Card className="shadow-soft mb-6">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+            <CardTitle className="text-title text-2xl font-bold flex items-center gap-2">
               <User className="h-6 w-6 text-primary" />
               Athlete Search
             </CardTitle>
@@ -356,7 +356,7 @@ const AthleteManagement = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Athlete Profile</CardTitle>
+                  <CardTitle className="text-title">Athlete Profile</CardTitle>
                   <CardDescription>
                     {isEditing ? "Edit athlete information" : "View athlete information"}
                   </CardDescription>
@@ -388,7 +388,7 @@ const AthleteManagement = () => {
                 <TabsContent value="personal" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="first_name">First Name *</Label>
+                      <Label htmlFor="first_name" className="text-title">First Name *</Label>
                       {isEditing ? (
                         <Input
                           id="first_name"
@@ -401,7 +401,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="last_name">Last Name *</Label>
+                      <Label htmlFor="last_name" className="text-title">Last Name *</Label>
                       {isEditing ? (
                         <Input
                           id="last_name"
@@ -414,7 +414,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="date_of_birth">Date of Birth</Label>
+                      <Label htmlFor="date_of_birth" className="text-title">Date of Birth</Label>
                       {isEditing ? (
                         <Input
                           id="date_of_birth"
@@ -428,7 +428,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone" className="text-title">Phone</Label>
                       {isEditing ? (
                         <Input
                           id="phone"
@@ -441,7 +441,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-title">Email</Label>
                       {isEditing ? (
                         <Input
                           id="email"
@@ -455,7 +455,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address" className="text-title">Address</Label>
                       {isEditing ? (
                         <Input
                           id="address"
@@ -472,10 +472,10 @@ const AthleteManagement = () => {
                 {/* Parents Information Tab */}
                 <TabsContent value="parents" className="space-y-6 mt-4">
                   <div className="space-y-4">
-                    <h4 className="font-medium text-foreground">Mother Information</h4>
+                    <h4 className="font-medium text-title">Mother Information</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
-                        <Label htmlFor="mother_name">Mother's Name</Label>
+                        <Label htmlFor="mother_name" className="text-title">Mother's Name</Label>
                         {isEditing ? (
                           <Input
                             id="mother_name"
@@ -489,7 +489,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="mother_phone">Mother's Phone</Label>
+                        <Label htmlFor="mother_phone" className="text-title">Mother's Phone</Label>
                         {isEditing ? (
                           <Input
                             id="mother_phone"
@@ -504,7 +504,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="mother_email">Mother's Email</Label>
+                        <Label htmlFor="mother_email" className="text-title">Mother's Email</Label>
                         {isEditing ? (
                           <Input
                             id="mother_email"
@@ -521,10 +521,10 @@ const AthleteManagement = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-medium text-foreground">Father Information</h4>
+                    <h4 className="font-medium text-title">Father Information</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
-                        <Label htmlFor="father_name">Father's Name</Label>
+                        <Label htmlFor="father_name" className="text-title">Father's Name</Label>
                         {isEditing ? (
                           <Input
                             id="father_name"
@@ -538,7 +538,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="father_phone">Father's Phone</Label>
+                        <Label htmlFor="father_phone" className="text-title">Father's Phone</Label>
                         {isEditing ? (
                           <Input
                             id="father_phone"
@@ -552,7 +552,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="father_email">Father's Email</Label>
+                        <Label htmlFor="father_email" className="text-title">Father's Email</Label>
                         {isEditing ? (
                           <Input
                             id="father_email"
@@ -573,12 +573,12 @@ const AthleteManagement = () => {
                 <TabsContent value="training" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="plan_type">Plan Type</Label>
+                      <Label htmlFor="plan_type" className="text-title">Plan Type</Label>
                       <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.plan_type || "-"}</p>
                     </div>
 
                     <div>
-                      <Label htmlFor="surf_level">Surf Level</Label>
+                      <Label htmlFor="surf_level" className="text-title">Surf Level</Label>
                       {isEditing ? (
                         <Select
                           value={editForm.surf_level || ""}
