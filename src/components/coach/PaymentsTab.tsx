@@ -4,9 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Euro, Calendar, TrendingUp, Receipt, Search, ArrowUpDown, ArrowUp, ArrowDown, FileText } from "lucide-react";
+import { Euro, Calendar, TrendingUp, Receipt, ArrowUpDown, ArrowUp, ArrowDown, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useMemo } from "react";
 
@@ -25,7 +24,6 @@ interface PaymentsTabProps {
 }
 
 export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [filterYear, setFilterYear] = useState<string>("all");
   const [filterMonth, setFilterMonth] = useState<string>("all");
   const [sortField, setSortField] = useState<"payment_date" | "amount">("payment_date");
@@ -73,14 +71,10 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
     if (!payments) return [];
     
     let filtered = payments.filter(payment => {
-      const matchesSearch = !searchTerm || 
-        payment.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        payment.payment_month.toLowerCase().includes(searchTerm.toLowerCase());
-      
       const matchesYear = filterYear === "all" || payment.payment_year === parseInt(filterYear);
       const matchesMonth = filterMonth === "all" || payment.payment_month === filterMonth;
       
-      return matchesSearch && matchesYear && matchesMonth;
+      return matchesYear && matchesMonth;
     });
 
     // Sort
@@ -95,7 +89,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
     });
 
     return filtered;
-  }, [payments, searchTerm, filterYear, filterMonth, sortField, sortDirection]);
+  }, [payments, filterYear, filterMonth, sortField, sortDirection]);
 
   const handleSort = (field: "payment_date" | "amount") => {
     if (sortField === field) {
@@ -179,17 +173,8 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Search and Filters */}
+          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by notes or month..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="Year" />
@@ -248,7 +233,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                       <TableRow 
                         key={payment.id}
                         className={`hover:bg-muted/50 transition-colors ${
-                          index === 0 && filterYear === "all" && filterMonth === "all" && !searchTerm
+                          index === 0 && filterYear === "all" && filterMonth === "all"
                             ? "bg-primary/5"
                             : ""
                         }`}
@@ -278,8 +263,8 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                           <FileText className="h-12 w-12 text-muted-foreground/50 mb-3" />
                           <p className="text-sm font-medium text-foreground mb-1">No payments found</p>
                           <p className="text-xs text-muted-foreground">
-                            {searchTerm || filterYear !== "all" || filterMonth !== "all"
-                              ? "Try adjusting your filters or search term"
+                            {filterYear !== "all" || filterMonth !== "all"
+                              ? "Try adjusting your filters"
                               : "Payment records will appear here once added"}
                           </p>
                         </div>
