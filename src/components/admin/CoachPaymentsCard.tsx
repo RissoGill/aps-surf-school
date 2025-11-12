@@ -453,26 +453,9 @@ export const CoachPaymentsCard = () => {
                 
                 return (
                   <Card key={month} className={cn(!hasPayments && "opacity-50")}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-sm font-medium">{month.slice(0, 3)}</p>
-                        {hasPayments && (
-                          <Badge variant="secondary" className="text-xs">{data.payments.length}</Badge>
-                        )}
-                      </div>
-                      <p className="text-lg font-semibold">{data.total.toFixed(0)}€</p>
-                      {hasPayments && (
-                        <div className="mt-2 space-y-1">
-                          {data.payments.slice(0, 2).map(payment => (
-                            <p key={payment.id} className="text-xs text-muted-foreground truncate">
-                              {getCoachName(payment.coach_id)}
-                            </p>
-                          ))}
-                          {data.payments.length > 2 && (
-                            <p className="text-xs text-muted-foreground">+{data.payments.length - 2} more</p>
-                          )}
-                        </div>
-                      )}
+                    <CardContent className="p-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">{month.slice(0, 3)}</p>
+                      <p className="text-sm font-semibold">{data.total.toFixed(0)}€</p>
                     </CardContent>
                   </Card>
                 );
