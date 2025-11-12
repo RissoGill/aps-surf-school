@@ -468,28 +468,28 @@ useEffect(() => {
           <TabsList className="w-full h-auto flex flex-wrap justify-start gap-1 bg-muted/50 p-2 mb-6">
             <TabsTrigger 
               value="personal" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <User className="h-3 w-3 mr-1 inline sm:hidden" />
               Personal
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Clock className="h-3 w-3 mr-1 inline sm:hidden" />
               Training
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Calendar className="h-3 w-3 mr-1 inline sm:hidden" />
               Attendance
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
               <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
               <span className="hidden sm:inline">Championships</span>
@@ -497,14 +497,14 @@ useEffect(() => {
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <ImageIcon className="h-3 w-3 mr-1 inline sm:hidden" />
               Media
             </TabsTrigger>
             <TabsTrigger 
               value="estagios" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
               Estágios
