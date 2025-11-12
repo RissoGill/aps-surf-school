@@ -455,7 +455,7 @@ export const CoachPaymentsCard = () => {
                   <Card key={month} className={cn(!hasPayments && "opacity-50")}>
                     <CardContent className="p-3">
                       <p className="text-xs font-medium text-muted-foreground mb-1">{month.slice(0, 3)}</p>
-                      <p className="text-sm font-semibold">{data.total.toFixed(0)}€</p>
+                      <p className="text-sm font-normal truncate">{data.total.toFixed(0)}€</p>
                     </CardContent>
                   </Card>
                 );
