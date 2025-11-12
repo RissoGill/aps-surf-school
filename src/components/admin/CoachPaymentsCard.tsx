@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Edit, Calendar as CalendarIcon, Euro } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -308,7 +308,15 @@ export const CoachPaymentsCard = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold">Coach Payments</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Euro className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground mb-1">Coach Payments</h4>
+              <p className="text-sm text-muted-foreground">Manage and track coach payment records</p>
+            </div>
+          </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm" className="gap-2">
