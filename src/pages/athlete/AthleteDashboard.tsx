@@ -564,7 +564,7 @@ useEffect(() => {
                   <>
                     <div>
                       <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                        <Phone className="h-5 w-5 text-success" />
+                        <User className="h-5 w-5 text-success" />
                         Mother
                       </h4>
                       <div className="text-sm space-y-1">
@@ -575,7 +575,7 @@ useEffect(() => {
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                        <Phone className="h-5 w-5 text-success" />
+                        <User className="h-5 w-5 text-success" />
                         Father
                       </h4>
                       <div className="text-sm space-y-1">
