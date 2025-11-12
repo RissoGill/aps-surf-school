@@ -527,23 +527,23 @@ useEffect(() => {
                 ) : athlete ? (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-muted-foreground mb-1">Date of Birth</p>
-                      <p className="font-medium">{athlete.date_of_birth || 'N/A'}</p>
+                      <p className="text-foreground mb-1">Date of Birth</p>
+                      <p className={athlete.date_of_birth ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.date_of_birth || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground mb-1">Phone</p>
-                      <p className="font-medium">{athlete.phone || 'N/A'}</p>
+                      <p className="text-foreground mb-1">Phone</p>
+                      <p className={athlete.phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.phone || 'N/A'}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-muted-foreground mb-1">Address</p>
-                      <p className="font-medium">{athlete.address || 'N/A'}</p>
+                      <p className="text-foreground mb-1">Address</p>
+                      <p className={athlete.address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.address || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground mb-1">Level</p>
+                      <p className="text-foreground mb-1">Level</p>
                       {athlete.surf_level ? (
                         <Badge className="gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
-                        <p className="font-medium">N/A</p>
+                        <p className="font-medium text-muted-foreground">N/A</p>
                       )}
                     </div>
                   </div>
@@ -568,9 +568,9 @@ useEffect(() => {
                         Mother
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-muted-foreground">Name:</span> <span className="font-medium">{athlete.mother_name || 'N/A'}</span></p>
-                        <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
-                        <p><span className="text-muted-foreground">Email:</span> <span className="font-medium">{athlete.mother_email || 'N/A'}</span></p>
+                        <p><span className="text-foreground">Name:</span> <span className={athlete.mother_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
+                        <p><span className="text-foreground">Phone:</span> <span className={athlete.mother_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
+                        <p><span className="text-foreground">Email:</span> <span className={athlete.mother_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
                       </div>
                     </div>
                     <div>
@@ -579,9 +579,9 @@ useEffect(() => {
                         Father
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-muted-foreground">Name:</span> <span className="font-medium">{athlete.father_name || 'N/A'}</span></p>
-                        <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{athlete.father_phone || 'N/A'}</span></p>
-                        <p><span className="text-muted-foreground">Email:</span> <span className="font-medium">{athlete.father_email || 'N/A'}</span></p>
+                        <p><span className="text-foreground">Name:</span> <span className={athlete.father_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
+                        <p><span className="text-foreground">Phone:</span> <span className={athlete.father_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
+                        <p><span className="text-foreground">Email:</span> <span className={athlete.father_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
                       </div>
                     </div>
                   </>
@@ -607,7 +607,7 @@ useEffect(() => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Weekly Sessions</p>
+                      <p className="text-foreground mb-2">Weekly Sessions</p>
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
@@ -617,14 +617,14 @@ useEffect(() => {
                     </div>
                     
                     <div>
-                      <p className="text-sm text-muted-foreground mb-3">Training Days</p>
+                      <p className="text-foreground mb-3">Training Days</p>
                       {athlete.training_days ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
                           <span className="font-medium text-foreground">{athlete.training_days}</span>
                         </div>
                       ) : (
-                        <p className="font-medium">Not specified</p>
+                        <p className="font-medium text-muted-foreground">Not specified</p>
                       )}
                     </div>
                   </>
@@ -656,12 +656,12 @@ useEffect(() => {
                     {athlete.transport && (
                       <div className="text-sm space-y-2">
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-muted-foreground text-xs">Pickup Address</p>
-                          <p className="font-medium">{athlete.pickup_address || 'N/A'}</p>
+                          <p className="text-foreground text-xs">Pickup Address</p>
+                          <p className={athlete.pickup_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.pickup_address || 'N/A'}</p>
                         </div>
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-muted-foreground text-xs">Drop-off Address</p>
-                          <p className="font-medium">{athlete.dropoff_address || 'N/A'}</p>
+                          <p className="text-foreground text-xs">Drop-off Address</p>
+                          <p className={athlete.dropoff_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.dropoff_address || 'N/A'}</p>
                         </div>
                       </div>
                     )}
