@@ -607,7 +607,7 @@ useEffect(() => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <p className="text-title mb-2">Weekly Sessions</p>
+                      <p className="text-sm text-title mb-2">Weekly Sessions</p>
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
@@ -617,7 +617,7 @@ useEffect(() => {
                     </div>
                     
                     <div>
-                      <p className="text-title mb-3">Training Days</p>
+                      <p className="text-sm text-title mb-3">Training Days</p>
                       {athlete.training_days ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
