@@ -880,9 +880,9 @@ const CoachDashboard = () => {
       
       <main className="mobile-container py-6">
         {/* Welcome Section */}
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-foreground">
               {`Welcome Back, ${
                 coachDisplayName ||
                 (() => {
@@ -906,20 +906,18 @@ const CoachDashboard = () => {
                 })()
               }`}
             </h2>
-            <p className="text-muted-foreground">
-              Manage your athletes and track their progress
-            </p>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="flex-shrink-0">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Manage your athletes and track their progress
+          </p>
         </div>
 
         {/* Quick Stats */}
