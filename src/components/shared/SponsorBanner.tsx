@@ -15,7 +15,7 @@ const SponsorBanner = () => {
       <div className="mobile-container space-y-8">
         {/* Main Sponsors */}
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-4 text-center">
+          <h3 className="text-sm font-medium text-title mb-4 text-center">
             Main Sponsors
           </h3>
           <div className="flex justify-center items-center gap-6">
@@ -34,7 +34,7 @@ const SponsorBanner = () => {
 
         {/* Our Partners */}
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-4 text-center">
+          <h3 className="text-sm font-medium text-title mb-4 text-center">
             Our Partners
           </h3>
           <div className="flex flex-wrap justify-center items-center gap-6">
@@ -68,7 +68,7 @@ const SponsorBanner = () => {
 
         {/* School Verified By */}
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-4 text-center">
+          <h3 className="text-sm font-medium text-title mb-4 text-center">
             School Verified By
           </h3>
           <div className="flex justify-center items-center gap-6">
