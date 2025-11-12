@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, Euro, TrendingUp, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Edit, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -327,37 +327,6 @@ export const CoachPaymentsCard = () => {
     });
   }, [payments, selectedCoachFilter, selectedMonthFilter]);
 
-  // StatCard subcomponent for KPI cards
-  const StatCard = ({
-    icon,
-    label,
-    value,
-    iconBgClass,
-    iconTextClass,
-  }: {
-    icon: React.ReactNode;
-    label: string;
-    value: number;
-    iconBgClass: string;
-    iconTextClass: string;
-  }) => (
-    <Card className="overflow-hidden">
-      <CardContent className="p-2">
-        <div className="grid grid-cols-[auto,1fr] grid-rows-2 gap-x-2 gap-y-1 items-center min-w-0">
-          <div className={`row-span-2 p-1.5 rounded-md ${iconBgClass}`}>
-            {icon}
-          </div>
-          <p className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide truncate min-w-0">
-            {label}
-          </p>
-          <p className="col-start-2 text-base sm:text-lg font-semibold leading-tight truncate min-w-0">
-            {value.toFixed(0)}€
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <Card>
       <CardHeader>
@@ -477,49 +446,6 @@ export const CoachPaymentsCard = () => {
       </CardHeader>
 
       <CardContent className="p-6 space-y-6">
-        {/* Key Statistics */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-md bg-muted animate-pulse" />
-                      <div className="h-4 w-24 bg-muted animate-pulse rounded" />
-                    </div>
-                    <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <StatCard
-              icon={<Euro className="h-3 w-3 text-primary" />}
-              label="Since September"
-              value={stats.sinceSeptember}
-              iconBgClass="bg-primary/10"
-              iconTextClass="text-primary"
-            />
-            <StatCard
-              icon={<TrendingUp className="h-3 w-3 text-green-600" />}
-              label="Current Month"
-              value={stats.currentMonth}
-              iconBgClass="bg-green-500/10"
-              iconTextClass="text-green-600"
-            />
-            <StatCard
-              icon={<CalendarIcon className="h-3 w-3 text-blue-600" />}
-              label="Average per Coach"
-              value={stats.average}
-              iconBgClass="bg-blue-500/10"
-              iconTextClass="text-blue-600"
-            />
-          </div>
-        )}
-
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
