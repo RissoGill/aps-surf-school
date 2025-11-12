@@ -21,6 +21,10 @@
     --primary-hover: 174 54% 38%;
     --primary-light: 174 54% 85%;
 
+    /* Title Color */
+    --title: 140 31% 10%;
+    --title-foreground: 140 31% 10%;
+
     /* Neutral Grays */
     --secondary: 210 10% 95%;
     --secondary-foreground: 210 15% 25%;

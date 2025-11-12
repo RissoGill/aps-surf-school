@@ -515,7 +515,7 @@ useEffect(() => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground">Personal Information</h4>
+                <h4 className="font-medium text-title">Personal Information</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -527,19 +527,19 @@ useEffect(() => {
                 ) : athlete ? (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-foreground mb-1">Date of Birth</p>
+                      <p className="text-title mb-1">Date of Birth</p>
                       <p className={athlete.date_of_birth ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.date_of_birth || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-foreground mb-1">Phone</p>
+                      <p className="text-title mb-1">Phone</p>
                       <p className={athlete.phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.phone || 'N/A'}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-foreground mb-1">Address</p>
+                      <p className="text-title mb-1">Address</p>
                       <p className={athlete.address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.address || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-foreground mb-1">Level</p>
+                      <p className="text-title mb-1">Level</p>
                       {athlete.surf_level ? (
                         <Badge className="gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
@@ -555,7 +555,7 @@ useEffect(() => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground">Emergency Contacts</h4>
+                <h4 className="font-medium text-title">Emergency Contacts</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -568,9 +568,9 @@ useEffect(() => {
                         Mother
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-foreground">Name:</span> <span className={athlete.mother_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
-                        <p><span className="text-foreground">Phone:</span> <span className={athlete.mother_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
-                        <p><span className="text-foreground">Email:</span> <span className={athlete.mother_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
+                        <p><span className="text-title">Name:</span> <span className={athlete.mother_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
+                        <p><span className="text-title">Phone:</span> <span className={athlete.mother_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
+                        <p><span className="text-title">Email:</span> <span className={athlete.mother_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
                       </div>
                     </div>
                     <div>
@@ -579,9 +579,9 @@ useEffect(() => {
                         Father
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-foreground">Name:</span> <span className={athlete.father_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
-                        <p><span className="text-foreground">Phone:</span> <span className={athlete.father_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
-                        <p><span className="text-foreground">Email:</span> <span className={athlete.father_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
+                        <p><span className="text-title">Name:</span> <span className={athlete.father_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
+                        <p><span className="text-title">Phone:</span> <span className={athlete.father_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
+                        <p><span className="text-title">Email:</span> <span className={athlete.father_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
                       </div>
                     </div>
                   </>
@@ -596,7 +596,7 @@ useEffect(() => {
           <TabsContent value="training" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+                <h4 className="font-medium text-title flex items-center gap-2">
                   <Calendar className="h-6 w-6 text-primary" />
                   Training Schedule
                 </h4>
@@ -607,7 +607,7 @@ useEffect(() => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <p className="text-foreground mb-2">Weekly Sessions</p>
+                      <p className="text-title mb-2">Weekly Sessions</p>
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
@@ -617,7 +617,7 @@ useEffect(() => {
                     </div>
                     
                     <div>
-                      <p className="text-foreground mb-3">Training Days</p>
+                      <p className="text-title mb-3">Training Days</p>
                       {athlete.training_days ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
@@ -636,7 +636,7 @@ useEffect(() => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+                <h4 className="font-medium text-title flex items-center gap-2">
                   <MapPin className="h-6 w-6 text-warning" />
                   Transportation
                 </h4>
@@ -656,11 +656,11 @@ useEffect(() => {
                     {athlete.transport && (
                       <div className="text-sm space-y-2">
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-foreground text-xs">Pickup Address</p>
+                          <p className="text-title text-xs">Pickup Address</p>
                           <p className={athlete.pickup_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.pickup_address || 'N/A'}</p>
                         </div>
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-foreground text-xs">Drop-off Address</p>
+                          <p className="text-title text-xs">Drop-off Address</p>
                           <p className={athlete.dropoff_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.dropoff_address || 'N/A'}</p>
                         </div>
                       </div>
@@ -678,7 +678,7 @@ useEffect(() => {
             <Card className="shadow-soft">
               <CardHeader>
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-foreground flex items-center gap-2">
+                  <h4 className="font-medium text-title flex items-center gap-2">
                     <Calendar className="h-6 w-6 text-primary" />
                     {getMonthName(selectedMonth.month, selectedMonth.year)}
                   </h4>
@@ -752,7 +752,7 @@ useEffect(() => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground">
+                <h4 className="font-medium text-title">
                   {athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' 
                     ? 'Your pack summary' 
                     : 'Monthly Summary'}
@@ -788,7 +788,7 @@ useEffect(() => {
                       {/* Purchase History */}
                       {packHistory.length > 0 && (
                         <div className="pt-4 border-t space-y-3">
-                          <h4 className="text-sm font-semibold text-foreground">Purchase History</h4>
+                          <h4 className="text-sm font-semibold text-title">Purchase History</h4>
                           <div className="space-y-2">
                             {packHistory.map((pack) => (
                               <div 
@@ -858,7 +858,7 @@ useEffect(() => {
           <TabsContent value="championships" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+                <h4 className="font-medium text-title flex items-center gap-2">
                   <Trophy className="h-6 w-6" />
                   My Championships
                 </h4>
@@ -882,7 +882,7 @@ useEffect(() => {
           <TabsContent value="media" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+                <h4 className="font-medium text-title flex items-center gap-2">
                   <ImageIcon className="h-6 w-6" />
                   Photos & Videos
                 </h4>
@@ -1053,7 +1053,7 @@ useEffect(() => {
           <TabsContent value="estagios">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground flex items-center gap-2">
+                <h4 className="font-medium text-title flex items-center gap-2">
                   <Plane className="h-6 w-6 text-primary" />
                   Estágios
                 </h4>

@@ -28,6 +28,10 @@ export default {
           hover: "hsl(var(--primary-hover))",
           light: "hsl(var(--primary-light))",
         },
+        title: {
+          DEFAULT: "hsl(var(--title))",
+          foreground: "hsl(var(--title-foreground))",
+        },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
