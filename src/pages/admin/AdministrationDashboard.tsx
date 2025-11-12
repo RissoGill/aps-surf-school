@@ -19,8 +19,70 @@ const AdministrationDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedCoach, setSelectedCoach] = useState<string>("");
+  const [sessionValid, setSessionValid] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Session validation on mount
+  useEffect(() => {
+    const validateSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Session expired",
+          description: "Please log in again",
+          variant: "destructive",
+        });
+        navigate("/auth/administration");
+        return;
+      }
+
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .in('role', ['admin', 'super_admin'])
+        .maybeSingle();
+
+      if (!roleData) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Access denied",
+          description: "Admin privileges required",
+          variant: "destructive",
+        });
+        navigate("/auth/administration");
+        return;
+      }
+
+      setSessionValid(true);
+      setCurrentUser(session.user.email || 'Unknown');
+      setUserRole(roleData.role);
+      console.log('Admin session validated:', session.user.email, roleData.role);
+    };
+
+    validateSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        toast({
+          title: "Signed out",
+          description: "Redirecting to login...",
+        });
+        navigate("/auth/administration");
+      } else if (event === 'TOKEN_REFRESHED') {
+        validateSession();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
+    if (!sessionValid) return;
+
     const channel = supabase
       .channel('admin-dashboard-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, () => {
@@ -31,11 +93,12 @@ const AdministrationDashboard = () => {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [queryClient]);
+  }, [queryClient, sessionValid]);
 
   // Fetch payment data
   const { data: paymentsData } = useQuery({
     queryKey: ['all-payments-summary'],
+    enabled: sessionValid,
     queryFn: async () => {
       const { data: paymentsRaw, error: paymentsError } = await supabase
         .from('payments')
@@ -394,6 +457,7 @@ const AdministrationDashboard = () => {
   // Fetch athletes with attendance data
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['admin-athletes-attendance'],
+    enabled: sessionValid,
     queryFn: async () => {
       const [athletesRes, coachesRes] = await Promise.all([
         supabase.from('atletas').select('*'),
@@ -629,11 +693,41 @@ const AdministrationDashboard = () => {
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="Administration" showBack backTo="/" />
       
-      <main className="mobile-container py-6">
-        <div className="mb-6 flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Administration Dashboard</h2>
-            <p className="text-muted-foreground">Manage system data and view reports</p>
+      {!sessionValid ? (
+        <main className="mobile-container py-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center space-y-4">
+              <Skeleton className="h-8 w-48 mx-auto" />
+              <Skeleton className="h-4 w-64 mx-auto" />
+            </div>
+          </div>
+        </main>
+      ) : (
+        <>
+          <div className="bg-muted/50 border-b px-4 py-2 text-sm">
+            <div className="mobile-container flex items-center justify-between">
+              <span>
+                Logged in as: <strong className="text-foreground">{currentUser}</strong> 
+                <Badge variant="secondary" className="ml-2 text-xs">{userRole}</Badge>
+              </span>
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate("/auth/administration");
+                }}
+              >
+                Sign Out
+              </Button>
+            </div>
+          </div>
+          
+          <main className="mobile-container py-6">
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Administration Dashboard</h2>
+                <p className="text-muted-foreground">Manage system data and view reports</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -868,6 +962,8 @@ const AdministrationDashboard = () => {
 
       <SponsorBanner />
       <AppFooter />
+      </>
+      )}
     </div>
   );
 };

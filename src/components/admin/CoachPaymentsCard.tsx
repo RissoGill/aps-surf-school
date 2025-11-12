@@ -114,9 +114,13 @@ export const CoachPaymentsCard = () => {
       handleCloseDialog();
     },
     onError: (error: any) => {
+      const isRLSError = error.message?.toLowerCase().includes('row-level security') || 
+                         error.message?.toLowerCase().includes('policy');
       toast({
         title: "Error",
-        description: error.message,
+        description: isRLSError 
+          ? "Permission denied. Your session may have expired. Please refresh the page or log in again."
+          : error.message,
         variant: "destructive",
       });
     },
