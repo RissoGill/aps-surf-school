@@ -528,22 +528,22 @@ useEffect(() => {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-title mb-1">Date of Birth</p>
-                      <p className={athlete.date_of_birth ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.date_of_birth || 'N/A'}</p>
+                      <p className={athlete.date_of_birth ? "" : "text-muted-foreground"}>{athlete.date_of_birth || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-title mb-1">Phone</p>
-                      <p className={athlete.phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.phone || 'N/A'}</p>
+                      <p className={athlete.phone ? "" : "text-muted-foreground"}>{athlete.phone || 'N/A'}</p>
                     </div>
                     <div className="col-span-2">
                       <p className="text-title mb-1">Address</p>
-                      <p className={athlete.address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.address || 'N/A'}</p>
+                      <p className={athlete.address ? "" : "text-muted-foreground"}>{athlete.address || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-title mb-1">Level</p>
                       {athlete.surf_level ? (
                         <Badge className="gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
-                        <p className="font-medium text-muted-foreground">N/A</p>
+                        <p className="text-muted-foreground">N/A</p>
                       )}
                     </div>
                   </div>
@@ -568,9 +568,9 @@ useEffect(() => {
                         Mother
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-title">Name:</span> <span className={athlete.mother_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
-                        <p><span className="text-title">Phone:</span> <span className={athlete.mother_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
-                        <p><span className="text-title">Email:</span> <span className={athlete.mother_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
+                        <p><span className="text-title">Name:</span> <span className={athlete.mother_name ? "" : "text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
+                        <p><span className="text-title">Phone:</span> <span className={athlete.mother_phone ? "" : "text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
+                        <p><span className="text-title">Email:</span> <span className={athlete.mother_email ? "" : "text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
                       </div>
                     </div>
                     <div>
@@ -579,9 +579,9 @@ useEffect(() => {
                         Father
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-title">Name:</span> <span className={athlete.father_name ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
-                        <p><span className="text-title">Phone:</span> <span className={athlete.father_phone ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
-                        <p><span className="text-title">Email:</span> <span className={athlete.father_email ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
+                        <p><span className="text-title">Name:</span> <span className={athlete.father_name ? "" : "text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
+                        <p><span className="text-title">Phone:</span> <span className={athlete.father_phone ? "" : "text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
+                        <p><span className="text-title">Email:</span> <span className={athlete.father_email ? "" : "text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
                       </div>
                     </div>
                   </>
@@ -612,7 +612,7 @@ useEffect(() => {
                         <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
                         </div>
-                        <p className="font-medium">sessions per week</p>
+                        <p>sessions per week</p>
                       </div>
                     </div>
                     
@@ -621,10 +621,10 @@ useEffect(() => {
                       {athlete.training_days ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
-                          <span className="font-medium text-foreground">{athlete.training_days}</span>
+                          <span className="text-foreground">{athlete.training_days}</span>
                         </div>
                       ) : (
-                        <p className="font-medium text-muted-foreground">Not specified</p>
+                        <p className="text-muted-foreground">Not specified</p>
                       )}
                     </div>
                   </>
@@ -657,11 +657,11 @@ useEffect(() => {
                       <div className="text-sm space-y-2">
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
                           <p className="text-title text-xs">Pickup Address</p>
-                          <p className={athlete.pickup_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.pickup_address || 'N/A'}</p>
+                          <p className={athlete.pickup_address ? "" : "text-muted-foreground"}>{athlete.pickup_address || 'N/A'}</p>
                         </div>
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
                           <p className="text-title text-xs">Drop-off Address</p>
-                          <p className={athlete.dropoff_address ? "font-medium" : "font-medium text-muted-foreground"}>{athlete.dropoff_address || 'N/A'}</p>
+                          <p className={athlete.dropoff_address ? "" : "text-muted-foreground"}>{athlete.dropoff_address || 'N/A'}</p>
                         </div>
                       </div>
                     )}
@@ -720,7 +720,7 @@ useEffect(() => {
                       getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((record) => (
                         <div key={record.id} className="border border-border rounded-lg p-3 space-y-2 hover:bg-accent/5 transition-colors">
                           <div className="flex items-center justify-between">
-                            <p className="font-medium text-foreground">{record.date || 'N/A'}</p>
+                            <p className="text-foreground">{record.date || 'N/A'}</p>
                             <Badge className={getStatusColor(record.status)}>
                               {record.status || 'Unknown'}
                             </Badge>
@@ -729,12 +729,12 @@ useEffect(() => {
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3 text-muted-foreground" />
                               <span className="text-muted-foreground">Coach:</span> 
-                              <span className="font-medium">{record.coach || 'N/A'}</span>
+                              <span>{record.coach || 'N/A'}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3 text-muted-foreground" />
                               <span className="text-muted-foreground">Beach:</span> 
-                              <span className="font-medium">{record.beach_location || 'N/A'}</span>
+                              <span>{record.beach_location || 'N/A'}</span>
                             </div>
                             {record.notes && (
                               <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded text-xs">
