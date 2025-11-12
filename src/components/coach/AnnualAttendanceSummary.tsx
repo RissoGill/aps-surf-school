@@ -116,7 +116,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
           <div key={index} className="space-y-2">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">{summary.year}</p>
-              <Badge variant="default" className="text-xs font-bold bg-primary">
+              <Badge variant="default" className="text-xs font-normal bg-primary">
                 {summary.total} total
               </Badge>
             </div>
