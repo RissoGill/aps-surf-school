@@ -212,7 +212,7 @@ const UserManagement = () => {
                         onSelect={() => handleUserSelect(user)}
                       >
                         <div className="flex flex-col">
-                          <span className="font-medium">
+                          <span>
                             {user.first_name} {user.last_name}
                           </span>
                           <span className="text-sm text-muted-foreground">

@@ -172,7 +172,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm font-medium">
+                              <p className="text-sm">
                                 {new Date(pack.purchase_date).toLocaleDateString()}
                               </p>
                               {pack.active && (
@@ -184,7 +184,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-bold text-foreground">
+                            <p className="text-sm text-foreground">
                               {pack.total_tokens} sessions
                             </p>
                             <p className="text-xs text-muted-foreground">
@@ -353,7 +353,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
                             {photo.date && (
-                              <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                              <p className="text-xs text-foreground flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 {new Date(photo.date).toLocaleDateString('pt-PT', {
                                   day: '2-digit',
@@ -414,7 +414,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
                             {video.date && (
-                              <p className="text-xs font-medium text-foreground flex items-center gap-1">
+                              <p className="text-xs text-foreground flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 {new Date(video.date).toLocaleDateString('pt-PT', {
                                   day: '2-digit',

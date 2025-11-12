@@ -340,27 +340,27 @@ const AthleteDetails = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-title">Date of Birth</p>
-                    <p className="font-medium">{athlete.date_of_birth || 'N/A'}</p>
+                    <p>{athlete.date_of_birth || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-title">Level</p>
                     {athlete.surf_level ? (
                       <Badge className={getLevelColor(athlete.surf_level)}>{athlete.surf_level}</Badge>
                     ) : (
-                      <p className="font-medium">N/A</p>
+                      <p>N/A</p>
                     )}
                   </div>
                   <div className="col-span-2">
                     <p className="text-title">Address</p>
-                    <p className="font-medium">{athlete.address || 'N/A'}</p>
+                    <p>{athlete.address || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-title">Phone</p>
-                    <p className="font-medium">{athlete.phone || 'N/A'}</p>
+                    <p>{athlete.phone || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-title">Email</p>
-                    <p className="font-medium">{athlete.email || 'N/A'}</p>
+                    <p>{athlete.email || 'N/A'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -376,9 +376,9 @@ const AthleteDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
-                  <p><span className="text-title">Name:</span> {athlete.mother_name || 'N/A'}</p>
-                  <p><span className="text-title">Phone:</span> {athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</p>
-                  <p><span className="text-title">Email:</span> {athlete.mother_email || 'N/A'}</p>
+                  <p><span className="text-title">Name:</span> <span className="text-muted-foreground">{athlete.mother_name || 'N/A'}</span></p>
+                  <p><span className="text-title">Phone:</span> <span className="text-muted-foreground">{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
+                  <p><span className="text-title">Email:</span> <span className="text-muted-foreground">{athlete.mother_email || 'N/A'}</span></p>
                 </CardContent>
               </Card>
 
@@ -391,9 +391,9 @@ const AthleteDetails = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
-                  <p><span className="text-title">Name:</span> {athlete.father_name || 'N/A'}</p>
-                  <p><span className="text-title">Phone:</span> {athlete.father_phone || 'N/A'}</p>
-                  <p><span className="text-title">Email:</span> {athlete.father_email || 'N/A'}</p>
+                  <p><span className="text-title">Name:</span> <span className="text-muted-foreground">{athlete.father_name || 'N/A'}</span></p>
+                  <p><span className="text-title">Phone:</span> <span className="text-muted-foreground">{athlete.father_phone || 'N/A'}</span></p>
+                  <p><span className="text-title">Email:</span> <span className="text-muted-foreground">{athlete.father_email || 'N/A'}</span></p>
                 </CardContent>
               </Card>
             </div>
@@ -412,7 +412,7 @@ const AthleteDetails = () => {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-title mb-2">Weekly Sessions</p>
-                  <p className="font-medium">{athlete.trainings_per_week || 0} sessions per week</p>
+                  <p>{athlete.trainings_per_week || 0} sessions per week</p>
                 </div>
                 
                 <div>
@@ -421,11 +421,11 @@ const AthleteDetails = () => {
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 p-2 bg-accent/50 rounded-md">
                         <Clock className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{athlete.training_days}</span>
+                        <span>{athlete.training_days}</span>
                       </div>
                     </div>
                   ) : (
-                    <p className="font-medium">Not specified</p>
+                    <p>Not specified</p>
                   )}
                 </div>
               </CardContent>
@@ -451,11 +451,11 @@ const AthleteDetails = () => {
                     <div className="text-sm space-y-2">
                       <div>
                         <p className="text-title">Pickup</p>
-                        <p className="font-medium">{athlete.pickup_address || 'N/A'}</p>
+                        <p>{athlete.pickup_address || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-title">Drop-off</p>
-                        <p className="font-medium">{athlete.dropoff_address || 'N/A'}</p>
+                        <p>{athlete.dropoff_address || 'N/A'}</p>
                       </div>
                     </div>
                   )}

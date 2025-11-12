@@ -75,17 +75,17 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm pl-6">
             {athlete.plan_type && (
               <div className="text-muted-foreground">
-                <span className="font-medium">Plan:</span> {athlete.plan_type}
+                <span className="text-title">Plan:</span> {athlete.plan_type}
               </div>
             )}
             {athlete.training_days && (
               <div className="text-muted-foreground">
-                <span className="font-medium">Days:</span> {athlete.training_days}
+                <span className="text-title">Days:</span> {athlete.training_days}
               </div>
             )}
             {athlete.trainings_per_week && (
               <div className="text-muted-foreground">
-                <span className="font-medium">Per Week:</span> {athlete.trainings_per_week}
+                <span className="text-title">Per Week:</span> {athlete.trainings_per_week}
               </div>
             )}
           </div>
@@ -132,7 +132,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-6">
             {athlete.mother_name && (
               <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Mother</p>
+                <p className="text-sm text-title">Mother</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>{athlete.mother_name}</p>
                   {athlete.mother_phone && (
@@ -152,7 +152,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
             )}
             {athlete.father_name && (
               <div className="space-y-1">
-                <p className="text-sm font-medium text-foreground">Father</p>
+                <p className="text-sm text-title">Father</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>{athlete.father_name}</p>
                   {athlete.father_phone && (
@@ -184,12 +184,12 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
           <div className="grid grid-cols-1 gap-2 text-sm pl-6">
             {athlete.pickup_address && (
               <div className="text-muted-foreground">
-                <span className="font-medium">Pickup:</span> {athlete.pickup_address}
+                <span className="text-title">Pickup:</span> {athlete.pickup_address}
               </div>
             )}
             {athlete.dropoff_address && (
               <div className="text-muted-foreground">
-                <span className="font-medium">Drop-off:</span> {athlete.dropoff_address}
+                <span className="text-title">Drop-off:</span> {athlete.dropoff_address}
               </div>
             )}
           </div>
