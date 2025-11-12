@@ -148,17 +148,17 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+        <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="p-1.5 bg-secondary/20 rounded-lg">
-                <Receipt className="h-4 w-4 text-foreground" />
+              <div className="p-1.5 bg-success/20 rounded-lg">
+                <Receipt className="h-4 w-4 text-success" />
               </div>
               <span className="text-xs font-medium text-muted-foreground">Last Payment</span>
             </div>
             {lastPayment ? (
               <>
-                <div className="text-xl font-medium text-foreground truncate">{Number(lastPayment.amount).toFixed(2)}€</div>
+                <div className="text-xl font-medium text-success truncate">{Number(lastPayment.amount).toFixed(2)}€</div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {format(new Date(lastPayment.payment_date), 'dd/MM/yyyy')}
                 </p>
