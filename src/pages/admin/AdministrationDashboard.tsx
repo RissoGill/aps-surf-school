@@ -795,7 +795,15 @@ const AdministrationDashboard = () => {
         <div className="space-y-4">
           <h3 className="text-2xl font-bold text-foreground mb-4 text-center">Management Tools</h3>
           
-          {adminActions.map((action, index) => {
+          {adminActions
+            .filter(action => {
+              // Only super_admin can see "Manage Users"
+              if (action.title === "Manage Users") {
+                return userRole === 'super_admin';
+              }
+              return true;
+            })
+            .map((action, index) => {
             const bgColorClass = 
               action.color === "primary" ? "bg-primary/10" :
               action.color === "success" ? "bg-success/10" :

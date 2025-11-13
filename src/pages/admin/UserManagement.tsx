@@ -1,351 +1,552 @@
 import { useState, useEffect } from "react";
-import { Search, Save, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const userEditSchema = z.object({
+const coachSchema = z.object({
+  coach_id: z.string().min(1, "Coach ID is required"),
   first_name: z.string().min(1, "First name is required").max(100),
   last_name: z.string().min(1, "Last name is required").max(100),
   email: z.string().email("Invalid email").max(255),
   phone: z.string().max(20).nullable().optional(),
-  role: z.enum(['admin', 'moderator', 'user']).optional(),
+  coach_user_id: z.string().max(100).nullable().optional(),
+  coach_password: z.string().max(100).nullable().optional(),
+  status: z.boolean().optional(),
 });
 
-type UserData = {
-  coach_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: number | null;
-  auth_uid: string;
-  role?: 'admin' | 'moderator' | 'user';
-};
+const athleteSchema = z.object({
+  athlete_id: z.string().min(1, "Athlete ID is required"),
+  first_name: z.string().min(1, "First name is required").max(100),
+  last_name: z.string().min(1, "Last name is required").max(100),
+  email: z.string().email("Invalid email").max(255).nullable().optional(),
+  phone: z.string().max(20).nullable().optional(),
+  date_of_birth: z.string().nullable().optional(),
+  address: z.string().max(500).nullable().optional(),
+  mother_name: z.string().max(100).nullable().optional(),
+  mother_email: z.string().email("Invalid email").max(255).nullable().optional().or(z.literal("")),
+  mother_phone: z.string().max(20).nullable().optional(),
+  father_name: z.string().max(100).nullable().optional(),
+  father_email: z.string().email("Invalid email").max(255).nullable().optional().or(z.literal("")),
+  father_phone: z.string().max(20).nullable().optional(),
+  plan_type: z.string().max(50).nullable().optional(),
+  surf_level: z.string().max(50).nullable().optional(),
+  training_days: z.string().max(200).nullable().optional(),
+  trainings_per_week: z.number().int().min(0).max(7).nullable().optional(),
+  transport: z.boolean().nullable().optional(),
+  pickup_address: z.string().max(500).nullable().optional(),
+  dropoff_address: z.string().max(500).nullable().optional(),
+  is_active: z.boolean().nullable().optional(),
+  guardian_id: z.string().max(100).nullable().optional(),
+  sql_line: z.string().max(1000).nullable().optional(),
+});
+
+const guardianSchema = z.object({
+  email: z.string().email("Invalid email").max(255),
+  first_name: z.string().min(1, "First name is required").max(100),
+  last_name: z.string().min(1, "Last name is required").max(100),
+  phone: z.string().max(20).nullable().optional(),
+});
+
+type Coach = z.infer<typeof coachSchema> & { auth_uid?: string };
+type Athlete = z.infer<typeof athleteSchema>;
+type Guardian = z.infer<typeof guardianSchema> & { id?: string; auth_uid?: string; created_at?: string };
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<UserData[]>([]);
+  const navigate = useNavigate();
+  const [sessionValid, setSessionValid] = useState(false);
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [athletes, setAthletes] = useState<Athlete[]>([]);
+  const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-  const [editForm, setEditForm] = useState<Partial<UserData>>({});
+  const [activeTab, setActiveTab] = useState("coaches");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
+    const validateSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Fetch coaches
-      const { data: coachesData, error: coachError } = await supabase
-        .from('coach')
-        .select('*');
+      if (!session) {
+        toast.error("Session expired. Please log in again.");
+        navigate("/auth/administration");
+        return;
+      }
 
-      if (coachError) throw coachError;
-
-      // Fetch user roles
-      const { data: rolesData, error: rolesError } = await supabase
+      const { data: roleData } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'super_admin')
+        .maybeSingle();
 
-      if (rolesError) throw rolesError;
+      if (!roleData) {
+        await supabase.auth.signOut();
+        toast.error("Access denied. Super admin privileges required.");
+        navigate("/auth/administration");
+        return;
+      }
 
-      // Combine coach data with roles
-      const usersWithRoles = coachesData?.map(coach => {
-        const userRole = rolesData?.find(r => r.user_id === coach.auth_uid);
-        return {
-          ...coach,
-          role: userRole?.role as 'admin' | 'moderator' | 'user' | undefined
-        };
-      }) || [];
+      setSessionValid(true);
+    };
 
-      setUsers(usersWithRoles);
-    } catch (error) {
+    validateSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        navigate("/auth/administration");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (sessionValid) {
+      fetchAllUsers();
+    }
+  }, [sessionValid]);
+
+  const fetchAllUsers = async () => {
+    setLoading(true);
+    try {
+      const { data: coachesData, error: coachError } = await supabase.from('coach').select('*').order('first_name');
+      if (coachError) throw coachError;
+      setCoaches(coachesData || []);
+
+      const { data: athletesData, error: athleteError } = await supabase.from('atletas').select('*').order('first_name');
+      if (athleteError) throw athleteError;
+      setAthletes(athletesData || []);
+
+      const { data: guardiansData, error: guardianError } = await supabase.from('guardians').select('*').order('first_name');
+      if (guardianError) throw guardianError;
+      setGuardians(guardiansData || []);
+    } catch (error: any) {
       console.error('Error fetching users:', error);
-      toast.error("Failed to load users");
+      toast.error("Failed to load users: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-    const email = user.email?.toLowerCase() || '';
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || email.includes(search);
-  });
+  const generateId = (prefix: string) => {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}${timestamp}${random}`;
+  };
 
-  const handleUserSelect = (user: UserData) => {
+  const handleAdd = () => {
+    setSelectedUser(null);
+    if (activeTab === "coaches") {
+      setFormData({ coach_id: generateId("C"), status: true });
+    } else if (activeTab === "athletes") {
+      setFormData({ athlete_id: generateId("A"), is_active: true, transport: false });
+    } else {
+      setFormData({});
+    }
+    setIsAddDialogOpen(true);
+  };
+
+  const handleEdit = (user: any) => {
     setSelectedUser(user);
-    setEditForm(user);
-    setDropdownOpen(false);
+    setFormData(user);
+    setIsEditDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!selectedUser) return;
-
+    setIsSaving(true);
     try {
-      // Validate the form data
-      const validatedData = userEditSchema.parse(editForm);
-      setIsSaving(true);
-
-      // Update coach table
-      const { error: coachError } = await supabase
-        .from('coach')
-        .update({
-          first_name: validatedData.first_name,
-          last_name: validatedData.last_name,
-          email: validatedData.email,
-          phone: validatedData.phone ? parseInt(validatedData.phone) : null,
-        })
-        .eq('coach_id', selectedUser.coach_id);
-
-      if (coachError) throw coachError;
-
-      // Update user role if changed
-      if (validatedData.role && validatedData.role !== selectedUser.role) {
-        // First delete existing role
-        await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', selectedUser.auth_uid);
-
-        // Then insert new role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: selectedUser.auth_uid,
-            role: validatedData.role
-          });
-
-        if (roleError) throw roleError;
+      if (activeTab === "coaches") {
+        const validatedData = coachSchema.parse(formData);
+        if (selectedUser) {
+          const { error } = await supabase.from('coach').update(validatedData).eq('coach_id', selectedUser.coach_id);
+          if (error) throw error;
+          toast.success("Coach updated successfully");
+        } else {
+          const { error } = await supabase.from('coach').insert([validatedData]);
+          if (error) throw error;
+          toast.success("Coach added successfully");
+        }
+      } else if (activeTab === "athletes") {
+        const dataToValidate = { ...formData };
+        if (dataToValidate.mother_phone) dataToValidate.mother_phone = dataToValidate.mother_phone.toString();
+        if (dataToValidate.trainings_per_week) dataToValidate.trainings_per_week = parseInt(dataToValidate.trainings_per_week);
+        
+        const validatedData = athleteSchema.parse(dataToValidate);
+        const supabaseData: any = { ...validatedData };
+        if (supabaseData.mother_phone) supabaseData.mother_phone = parseInt(supabaseData.mother_phone);
+        
+        if (selectedUser) {
+          const { error } = await supabase.from('atletas').update(supabaseData).eq('athlete_id', selectedUser.athlete_id);
+          if (error) throw error;
+          toast.success("Athlete updated successfully");
+        } else {
+          const { error } = await supabase.from('atletas').insert([supabaseData]);
+          if (error) throw error;
+          toast.success("Athlete added successfully");
+        }
+      } else if (activeTab === "guardians") {
+        const validatedData = guardianSchema.parse(formData);
+        if (selectedUser) {
+          const { error } = await supabase.from('guardians').update(validatedData).eq('id', selectedUser.id);
+          if (error) throw error;
+          toast.success("Guardian updated successfully");
+        } else {
+          const { error } = await supabase.from('guardians').insert([validatedData]);
+          if (error) throw error;
+          toast.success("Guardian added successfully");
+        }
       }
-
-      toast.success("User updated successfully");
       
-      // Refresh the user list
-      await fetchUsers();
-      
-      // Update selected user
-      const updatedUser = { ...selectedUser, ...editForm };
-      setSelectedUser(updatedUser);
-    } catch (error) {
+      setIsAddDialogOpen(false);
+      setIsEditDialogOpen(false);
+      fetchAllUsers();
+    } catch (error: any) {
+      console.error('Error saving user:', error);
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
+        toast.error("Validation error: " + error.errors[0].message);
       } else {
-        console.error('Error updating user:', error);
-        toast.error("Failed to update user");
+        toast.error("Failed to save user: " + error.message);
       }
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleCancel = () => {
-    setEditForm(selectedUser || {});
-  };
+  const filteredCoaches = coaches.filter(coach => {
+    const fullName = `${coach.first_name || ''} ${coach.last_name || ''}`.toLowerCase();
+    const email = coach.email?.toLowerCase() || '';
+    const search = searchQuery.toLowerCase();
+    return fullName.includes(search) || email.includes(search);
+  });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-surface">
-        <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
-        <main className="mobile-container py-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Loading users...</p>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
-    );
-  }
+  const filteredAthletes = athletes.filter(athlete => {
+    const fullName = `${athlete.first_name || ''} ${athlete.last_name || ''}`.toLowerCase();
+    const email = athlete.email?.toLowerCase() || '';
+    const search = searchQuery.toLowerCase();
+    return fullName.includes(search) || email.includes(search);
+  });
+
+  const filteredGuardians = guardians.filter(guardian => {
+    const fullName = `${guardian.first_name || ''} ${guardian.last_name || ''}`.toLowerCase();
+    const email = guardian.email?.toLowerCase() || '';
+    const search = searchQuery.toLowerCase();
+    return fullName.includes(search) || email.includes(search);
+  });
+
+  const renderFormFields = () => {
+    if (activeTab === "coaches") {
+      return (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="coach_id">Coach ID</Label>
+              <Input id="coach_id" value={formData.coach_id || ""} onChange={(e) => setFormData({ ...formData, coach_id: e.target.value })} disabled={!!selectedUser} />
+            </div>
+            <div>
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="status">Status</Label>
+              <Switch id="status" checked={formData.status || false} onCheckedChange={(checked) => setFormData({ ...formData, status: checked })} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Label htmlFor="coach_user_id">Coach User ID</Label>
+            <Input id="coach_user_id" value={formData.coach_user_id || ""} onChange={(e) => setFormData({ ...formData, coach_user_id: e.target.value })} />
+          </div>
+          <div className="mt-4">
+            <Label htmlFor="coach_password">Coach Password</Label>
+            <Input id="coach_password" type="password" value={formData.coach_password || ""} onChange={(e) => setFormData({ ...formData, coach_password: e.target.value })} />
+          </div>
+        </>
+      );
+    } else if (activeTab === "athletes") {
+      return (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="athlete_id">Athlete ID</Label>
+              <Input id="athlete_id" value={formData.athlete_id || ""} onChange={(e) => setFormData({ ...formData, athlete_id: e.target.value })} disabled={!!selectedUser} />
+            </div>
+            <div>
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="date_of_birth">Date of Birth</Label>
+              <Input id="date_of_birth" type="date" value={formData.date_of_birth || ""} onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" value={formData.address || ""} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="mother_name">Mother's Name</Label>
+              <Input id="mother_name" value={formData.mother_name || ""} onChange={(e) => setFormData({ ...formData, mother_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="mother_email">Mother's Email</Label>
+              <Input id="mother_email" type="email" value={formData.mother_email || ""} onChange={(e) => setFormData({ ...formData, mother_email: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="mother_phone">Mother's Phone</Label>
+              <Input id="mother_phone" value={formData.mother_phone || ""} onChange={(e) => setFormData({ ...formData, mother_phone: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="father_name">Father's Name</Label>
+              <Input id="father_name" value={formData.father_name || ""} onChange={(e) => setFormData({ ...formData, father_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="father_email">Father's Email</Label>
+              <Input id="father_email" type="email" value={formData.father_email || ""} onChange={(e) => setFormData({ ...formData, father_email: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="father_phone">Father's Phone</Label>
+              <Input id="father_phone" value={formData.father_phone || ""} onChange={(e) => setFormData({ ...formData, father_phone: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="plan_type">Plan Type</Label>
+              <Input id="plan_type" value={formData.plan_type || ""} onChange={(e) => setFormData({ ...formData, plan_type: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="surf_level">Surf Level</Label>
+              <Input id="surf_level" value={formData.surf_level || ""} onChange={(e) => setFormData({ ...formData, surf_level: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="training_days">Training Days</Label>
+              <Input id="training_days" value={formData.training_days || ""} onChange={(e) => setFormData({ ...formData, training_days: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="trainings_per_week">Trainings per Week</Label>
+              <Input id="trainings_per_week" type="number" value={formData.trainings_per_week || ""} onChange={(e) => setFormData({ ...formData, trainings_per_week: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="transport">Transport</Label>
+              <Switch id="transport" checked={formData.transport || false} onCheckedChange={(checked) => setFormData({ ...formData, transport: checked })} />
+            </div>
+            <div>
+              <Label htmlFor="pickup_address">Pickup Address</Label>
+              <Input id="pickup_address" value={formData.pickup_address || ""} onChange={(e) => setFormData({ ...formData, pickup_address: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="dropoff_address">Dropoff Address</Label>
+              <Input id="dropoff_address" value={formData.dropoff_address || ""} onChange={(e) => setFormData({ ...formData, dropoff_address: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="is_active">Is Active</Label>
+              <Switch id="is_active" checked={formData.is_active || false} onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })} />
+            </div>
+            <div>
+              <Label htmlFor="guardian_id">Guardian ID</Label>
+              <Input id="guardian_id" value={formData.guardian_id || ""} onChange={(e) => setFormData({ ...formData, guardian_id: e.target.value })} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Label htmlFor="sql_line">SQL Line</Label>
+            <Textarea id="sql_line" value={formData.sql_line || ""} onChange={(e) => setFormData({ ...formData, sql_line: e.target.value })} />
+          </div>
+        </>
+      );
+    } else if (activeTab === "guardians") {
+      return (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="first_name">First Name</Label>
+              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+            </div>
+          </div>
+        </>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
-      
-      <main className="mobile-container py-6">
-        {/* Search Dropdown */}
-        <div className="mb-6">
-          <Label className="text-title mb-2 block">Search User</Label>
-          <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                className="w-full justify-between"
-              >
-                {selectedUser 
-                  ? `${selectedUser.first_name} ${selectedUser.last_name}` 
-                  : "Select a user..."}
-                <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput 
-                  placeholder="Search users..." 
-                  value={searchQuery}
-                  onValueChange={setSearchQuery}
-                />
-                <CommandList>
-                  <CommandEmpty>No users found.</CommandEmpty>
-                  <CommandGroup>
-                    {filteredUsers.map((user) => (
-                      <CommandItem
-                        key={user.coach_id}
-                        value={`${user.first_name} ${user.last_name}`}
-                        onSelect={() => handleUserSelect(user)}
-                      >
-                        <div className="flex flex-col">
-                          <span>
-                            {user.first_name} {user.last_name}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {user.email}
-                          </span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* User Details */}
-        {selectedUser && (
-          <Card className="shadow-medium">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-title">User Details</CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancel}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    <Save className="h-4 w-4 mr-1" />
-                    {isSaving ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <Tabs defaultValue="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                  <TabsTrigger value="account">Account</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="personal" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name" className="text-title">First Name</Label>
-                    <Input
-                      id="first_name"
-                      value={editForm.first_name || ''}
-                      onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name" className="text-title">Last Name</Label>
-                    <Input
-                      id="last_name"
-                      value={editForm.last_name || ''}
-                      onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-title">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={editForm.email || ''}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-title">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={editForm.phone?.toString() || ''}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value ? parseInt(e.target.value) : null })}
-                    />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="account" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="role" className="text-title">Role</Label>
-                    <Select 
-                      value={editForm.role || ''} 
-                      onValueChange={(value) => setEditForm({ ...editForm, role: value as 'admin' | 'moderator' | 'user' })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="user">User</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-title">User ID</Label>
-                    <Input value={selectedUser.coach_id} disabled />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-title">Auth UID</Label>
-                    <Input value={selectedUser.auth_uid || 'Not linked'} disabled />
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
-
-        {!selectedUser && (
-          <Card>
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">Select a user to view and edit details</p>
-            </CardContent>
-          </Card>
-        )}
-      </main>
-
+      <AppHeader title="User Management" showBack backTo="/admin" />
       <SponsorBanner />
+      <main className="mobile-container py-6">
+        <Card className="shadow-soft">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div><CardTitle>Manage Users</CardTitle><CardDescription>Add, edit coaches, athletes, and guardians</CardDescription></div>
+              <Button onClick={handleAdd} className="touch-friendly"><UserPlus className="h-4 w-4 mr-2" />Add New</Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mb-6" />
+            <Tabs defaultValue="coaches" className="space-y-4" onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="coaches">Coaches</TabsTrigger>
+                <TabsTrigger value="athletes">Athletes</TabsTrigger>
+                <TabsTrigger value="guardians">Guardians</TabsTrigger>
+              </TabsList>
+              <TabsContent value="coaches">
+                {loading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-4 w-[200px]" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {filteredCoaches.map(coach => (
+                      <div key={coach.coach_id} className="py-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{coach.first_name} {coach.last_name}</p>
+                          <p className="text-sm text-muted-foreground">{coach.email}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(coach)}>Edit</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="athletes">
+                {loading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-4 w-[200px]" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {filteredAthletes.map(athlete => (
+                      <div key={athlete.athlete_id} className="py-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{athlete.first_name} {athlete.last_name}</p>
+                          <p className="text-sm text-muted-foreground">{athlete.email}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(athlete)}>Edit</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="guardians">
+                {loading ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-4">
+                        <Skeleton className="h-12 w-12 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-4 w-[200px]" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {filteredGuardians.map(guardian => (
+                      <div key={guardian.id} className="py-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{guardian.first_name} {guardian.last_name}</p>
+                          <p className="text-sm text-muted-foreground">{guardian.email}</p>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(guardian)}>Edit</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </main>
       <AppFooter />
+
+      {/* Add / Edit Dialog */}
+      <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={() => { setIsAddDialogOpen(false); setIsEditDialogOpen(false); }}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>{selectedUser ? `Edit ${activeTab.slice(0, -1)}` : `Add New ${activeTab.slice(0, -1)}`}</DialogTitle>
+            <DialogDescription>
+              {`Make changes to your ${activeTab} here. Click save when you're done.`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {renderFormFields()}
+
+          <DialogFooter>
+            <Button type="button" variant="secondary" onClick={() => { setIsAddDialogOpen(false); setIsEditDialogOpen(false); }}>
+              Cancel
+            </Button>
+            <Button type="submit" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
