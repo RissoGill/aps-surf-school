@@ -33,7 +33,7 @@ const athleteSchema = z.object({
   athlete_id: z.string().min(1, "Athlete ID is required"),
   first_name: z.string().min(1, "First name is required").max(100),
   last_name: z.string().min(1, "Last name is required").max(100),
-  email: z.string().email("Invalid email").max(255).nullable().optional(),
+  email: z.string().email("Invalid email").max(255).nullable().optional().or(z.literal("")),
   phone: z.string().max(20).nullable().optional(),
   date_of_birth: z.string().nullable().optional(),
   address: z.string().max(500).nullable().optional(),
@@ -233,322 +233,257 @@ const UserManagement = () => {
 
   const filteredCoaches = coaches.filter(coach => {
     const fullName = `${coach.first_name || ''} ${coach.last_name || ''}`.toLowerCase();
-    const email = coach.email?.toLowerCase() || '';
     const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || email.includes(search);
+    return fullName.includes(search) || coach.email?.toLowerCase().includes(search) || coach.coach_id?.toLowerCase().includes(search);
   });
 
   const filteredAthletes = athletes.filter(athlete => {
     const fullName = `${athlete.first_name || ''} ${athlete.last_name || ''}`.toLowerCase();
-    const email = athlete.email?.toLowerCase() || '';
     const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || email.includes(search);
+    return fullName.includes(search) || athlete.email?.toLowerCase().includes(search) || athlete.athlete_id?.toLowerCase().includes(search);
   });
 
   const filteredGuardians = guardians.filter(guardian => {
     const fullName = `${guardian.first_name || ''} ${guardian.last_name || ''}`.toLowerCase();
-    const email = guardian.email?.toLowerCase() || '';
     const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || email.includes(search);
+    return fullName.includes(search) || guardian.email?.toLowerCase().includes(search);
   });
 
-  const renderFormFields = () => {
-    if (activeTab === "coaches") {
-      return (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="coach_id">Coach ID</Label>
-              <Input id="coach_id" value={formData.coach_id || ""} onChange={(e) => setFormData({ ...formData, coach_id: e.target.value })} disabled={!!selectedUser} />
-            </div>
-            <div>
-              <Label htmlFor="first_name">First Name</Label>
-              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Switch id="status" checked={formData.status || false} onCheckedChange={(checked) => setFormData({ ...formData, status: checked })} />
-            </div>
+  if (!sessionValid) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <AppHeader title="User Management" showBack backTo="/admin" />
+        <main className="mobile-container py-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Skeleton className="h-8 w-48 mx-auto" />
           </div>
-          <div className="mt-4">
-            <Label htmlFor="coach_user_id">Coach User ID</Label>
-            <Input id="coach_user_id" value={formData.coach_user_id || ""} onChange={(e) => setFormData({ ...formData, coach_user_id: e.target.value })} />
-          </div>
-          <div className="mt-4">
-            <Label htmlFor="coach_password">Coach Password</Label>
-            <Input id="coach_password" type="password" value={formData.coach_password || ""} onChange={(e) => setFormData({ ...formData, coach_password: e.target.value })} />
-          </div>
-        </>
-      );
-    } else if (activeTab === "athletes") {
-      return (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="athlete_id">Athlete ID</Label>
-              <Input id="athlete_id" value={formData.athlete_id || ""} onChange={(e) => setFormData({ ...formData, athlete_id: e.target.value })} disabled={!!selectedUser} />
-            </div>
-            <div>
-              <Label htmlFor="first_name">First Name</Label>
-              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="date_of_birth">Date of Birth</Label>
-              <Input id="date_of_birth" type="date" value={formData.date_of_birth || ""} onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" value={formData.address || ""} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="mother_name">Mother's Name</Label>
-              <Input id="mother_name" value={formData.mother_name || ""} onChange={(e) => setFormData({ ...formData, mother_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="mother_email">Mother's Email</Label>
-              <Input id="mother_email" type="email" value={formData.mother_email || ""} onChange={(e) => setFormData({ ...formData, mother_email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="mother_phone">Mother's Phone</Label>
-              <Input id="mother_phone" value={formData.mother_phone || ""} onChange={(e) => setFormData({ ...formData, mother_phone: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="father_name">Father's Name</Label>
-              <Input id="father_name" value={formData.father_name || ""} onChange={(e) => setFormData({ ...formData, father_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="father_email">Father's Email</Label>
-              <Input id="father_email" type="email" value={formData.father_email || ""} onChange={(e) => setFormData({ ...formData, father_email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="father_phone">Father's Phone</Label>
-              <Input id="father_phone" value={formData.father_phone || ""} onChange={(e) => setFormData({ ...formData, father_phone: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="plan_type">Plan Type</Label>
-              <Input id="plan_type" value={formData.plan_type || ""} onChange={(e) => setFormData({ ...formData, plan_type: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="surf_level">Surf Level</Label>
-              <Input id="surf_level" value={formData.surf_level || ""} onChange={(e) => setFormData({ ...formData, surf_level: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="training_days">Training Days</Label>
-              <Input id="training_days" value={formData.training_days || ""} onChange={(e) => setFormData({ ...formData, training_days: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="trainings_per_week">Trainings per Week</Label>
-              <Input id="trainings_per_week" type="number" value={formData.trainings_per_week || ""} onChange={(e) => setFormData({ ...formData, trainings_per_week: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="transport">Transport</Label>
-              <Switch id="transport" checked={formData.transport || false} onCheckedChange={(checked) => setFormData({ ...formData, transport: checked })} />
-            </div>
-            <div>
-              <Label htmlFor="pickup_address">Pickup Address</Label>
-              <Input id="pickup_address" value={formData.pickup_address || ""} onChange={(e) => setFormData({ ...formData, pickup_address: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="dropoff_address">Dropoff Address</Label>
-              <Input id="dropoff_address" value={formData.dropoff_address || ""} onChange={(e) => setFormData({ ...formData, dropoff_address: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="is_active">Is Active</Label>
-              <Switch id="is_active" checked={formData.is_active || false} onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })} />
-            </div>
-            <div>
-              <Label htmlFor="guardian_id">Guardian ID</Label>
-              <Input id="guardian_id" value={formData.guardian_id || ""} onChange={(e) => setFormData({ ...formData, guardian_id: e.target.value })} />
-            </div>
-          </div>
-          <div className="mt-4">
-            <Label htmlFor="sql_line">SQL Line</Label>
-            <Textarea id="sql_line" value={formData.sql_line || ""} onChange={(e) => setFormData({ ...formData, sql_line: e.target.value })} />
-          </div>
-        </>
-      );
-    } else if (activeTab === "guardians") {
-      return (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="first_name">First Name</Label>
-              <Input id="first_name" value={formData.first_name || ""} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input id="last_name" value={formData.last_name || ""} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-            </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-            </div>
-          </div>
-        </>
-      );
-    }
-    return null;
-  };
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="User Management" showBack backTo="/admin" />
       <SponsorBanner />
+      
       <main className="mobile-container py-6">
         <Card className="shadow-soft">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div><CardTitle>Manage Users</CardTitle><CardDescription>Add, edit coaches, athletes, and guardians</CardDescription></div>
-              <Button onClick={handleAdd} className="touch-friendly"><UserPlus className="h-4 w-4 mr-2" />Add New</Button>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <CardTitle>Manage Users</CardTitle>
+                <CardDescription>Add, edit coaches, athletes, and guardians</CardDescription>
+              </div>
+              <Button onClick={handleAdd} className="touch-friendly">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add New
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="mb-6" />
-            <Tabs defaultValue="coaches" className="space-y-4" onValueChange={setActiveTab}>
-              <TabsList>
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="coaches">Coaches</TabsTrigger>
                 <TabsTrigger value="athletes">Athletes</TabsTrigger>
                 <TabsTrigger value="guardians">Guardians</TabsTrigger>
               </TabsList>
+
               <TabsContent value="coaches">
                 {loading ? (
-                  <div className="space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="flex items-center space-x-4">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-[250px]" />
-                          <Skeleton className="h-4 w-[200px]" />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
                   </div>
                 ) : (
-                  <div className="divide-y divide-border">
-                    {filteredCoaches.map(coach => (
-                      <div key={coach.coach_id} className="py-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{coach.first_name} {coach.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{coach.email}</p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(coach)}>Edit</Button>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {filteredCoaches.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">No coaches found</p>
+                    ) : (
+                      filteredCoaches.map((coach) => (
+                        <Card key={coach.coach_id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(coach)}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-foreground">{coach.first_name} {coach.last_name}</h4>
+                                <p className="text-sm text-muted-foreground">{coach.email}</p>
+                                <p className="text-xs text-muted-foreground">ID: {coach.coach_id}</p>
+                              </div>
+                              {coach.status !== undefined && (
+                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${coach.status ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                                  {coach.status ? 'Active' : 'Inactive'}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
                   </div>
                 )}
               </TabsContent>
+
               <TabsContent value="athletes">
                 {loading ? (
-                  <div className="space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="flex items-center space-x-4">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-[250px]" />
-                          <Skeleton className="h-4 w-[200px]" />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
                   </div>
                 ) : (
-                  <div className="divide-y divide-border">
-                    {filteredAthletes.map(athlete => (
-                      <div key={athlete.athlete_id} className="py-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{athlete.first_name} {athlete.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{athlete.email}</p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(athlete)}>Edit</Button>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {filteredAthletes.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">No athletes found</p>
+                    ) : (
+                      filteredAthletes.map((athlete) => (
+                        <Card key={athlete.athlete_id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(athlete)}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-foreground">{athlete.first_name} {athlete.last_name}</h4>
+                                <p className="text-sm text-muted-foreground">{athlete.email || 'No email'}</p>
+                                <div className="flex gap-2 mt-1 flex-wrap">
+                                  <p className="text-xs text-muted-foreground">ID: {athlete.athlete_id}</p>
+                                  {athlete.surf_level && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{athlete.surf_level}</span>
+                                  )}
+                                </div>
+                              </div>
+                              {athlete.is_active !== undefined && (
+                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${athlete.is_active ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                                  {athlete.is_active ? 'Active' : 'Inactive'}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
                   </div>
                 )}
               </TabsContent>
+
               <TabsContent value="guardians">
                 {loading ? (
-                  <div className="space-y-2">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="flex items-center space-x-4">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-[250px]" />
-                          <Skeleton className="h-4 w-[200px]" />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
                   </div>
                 ) : (
-                  <div className="divide-y divide-border">
-                    {filteredGuardians.map(guardian => (
-                      <div key={guardian.id} className="py-4 flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{guardian.first_name} {guardian.last_name}</p>
-                          <p className="text-sm text-muted-foreground">{guardian.email}</p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(guardian)}>Edit</Button>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {filteredGuardians.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">No guardians found</p>
+                    ) : (
+                      filteredGuardians.map((guardian) => (
+                        <Card key={guardian.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(guardian)}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-foreground">{guardian.first_name} {guardian.last_name}</h4>
+                                <p className="text-sm text-muted-foreground">{guardian.email}</p>
+                                {guardian.phone && <p className="text-xs text-muted-foreground">Phone: {guardian.phone}</p>}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
                   </div>
                 )}
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
+
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New {activeTab === "coaches" ? "Coach" : activeTab === "athletes" ? "Athlete" : "Guardian"}</DialogTitle>
+              <DialogDescription>Fill in all required fields</DialogDescription>
+            </DialogHeader>
+            
+            {activeTab === "coaches" && <CoachForm formData={formData} setFormData={setFormData} isEdit={false} />}
+            {activeTab === "athletes" && <AthleteForm formData={formData} setFormData={setFormData} isEdit={false} />}
+            {activeTab === "guardians" && <GuardianForm formData={formData} setFormData={setFormData} isEdit={false} />}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} disabled={isSaving}>Cancel</Button>
+              <Button onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit {activeTab === "coaches" ? "Coach" : activeTab === "athletes" ? "Athlete" : "Guardian"}</DialogTitle>
+              <DialogDescription>Update user information</DialogDescription>
+            </DialogHeader>
+            
+            {activeTab === "coaches" && <CoachForm formData={formData} setFormData={setFormData} isEdit={true} />}
+            {activeTab === "athletes" && <AthleteForm formData={formData} setFormData={setFormData} isEdit={true} />}
+            {activeTab === "guardians" && <GuardianForm formData={formData} setFormData={setFormData} isEdit={true} />}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isSaving}>Cancel</Button>
+              <Button onClick={handleSave} disabled={isSaving}>{isSaving ? "Saving..." : "Save Changes"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
+      
       <AppFooter />
-
-      {/* Add / Edit Dialog */}
-      <Dialog open={isAddDialogOpen || isEditDialogOpen} onOpenChange={() => { setIsAddDialogOpen(false); setIsEditDialogOpen(false); }}>
-        <DialogContent className="sm:max-w-[625px]">
-          <DialogHeader>
-            <DialogTitle>{selectedUser ? `Edit ${activeTab.slice(0, -1)}` : `Add New ${activeTab.slice(0, -1)}`}</DialogTitle>
-            <DialogDescription>
-              {`Make changes to your ${activeTab} here. Click save when you're done.`}
-            </DialogDescription>
-          </DialogHeader>
-
-          {renderFormFields()}
-
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => { setIsAddDialogOpen(false); setIsEditDialogOpen(false); }}>
-              Cancel
-            </Button>
-            <Button type="submit" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
+
+const CoachForm = ({ formData, setFormData, isEdit }: any) => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><Label htmlFor="coach_id">Coach ID *</Label><Input id="coach_id" value={formData.coach_id || ''} onChange={(e) => setFormData({ ...formData, coach_id: e.target.value })} disabled={isEdit} /></div>
+      <div><Label htmlFor="status">Status</Label><div className="flex items-center space-x-2 mt-2"><Switch id="status" checked={formData.status || false} onCheckedChange={(checked) => setFormData({ ...formData, status: checked })} /><span className="text-sm text-foreground">{formData.status ? 'Active' : 'Inactive'}</span></div></div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><Label htmlFor="first_name">First Name *</Label><Input id="first_name" value={formData.first_name || ''} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} /></div>
+      <div><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" value={formData.last_name || ''} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} /></div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><Label htmlFor="email">Email *</Label><Input id="email" type="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} /></div>
+      <div><Label htmlFor="phone">Phone</Label><Input id="phone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} /></div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><Label htmlFor="coach_user_id">User ID</Label><Input id="coach_user_id" value={formData.coach_user_id || ''} onChange={(e) => setFormData({ ...formData, coach_user_id: e.target.value })} /></div>
+      <div><Label htmlFor="coach_password">Password</Label><Input id="coach_password" type="password" value={formData.coach_password || ''} onChange={(e) => setFormData({ ...formData, coach_password: e.target.value })} /></div>
+    </div>
+    {isEdit && formData.auth_uid && <div><Label htmlFor="auth_uid">Auth UID (read-only)</Label><Input id="auth_uid" value={formData.auth_uid} disabled className="bg-muted" /></div>}
+  </div>
+);
+
+const AthleteForm = ({ formData, setFormData, isEdit }: any) => (
+  <div className="space-y-6">
+    <div><h4 className="text-sm font-semibold mb-3 text-foreground">Personal Information</h4><div className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="athlete_id">Athlete ID *</Label><Input id="athlete_id" value={formData.athlete_id || ''} onChange={(e) => setFormData({ ...formData, athlete_id: e.target.value })} disabled={isEdit} /></div><div><Label htmlFor="is_active">Status</Label><div className="flex items-center space-x-2 mt-2"><Switch id="is_active" checked={formData.is_active !== false} onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })} /><span className="text-sm text-foreground">{formData.is_active !== false ? 'Active' : 'Inactive'}</span></div></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="first_name">First Name *</Label><Input id="first_name" value={formData.first_name || ''} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} /></div><div><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" value={formData.last_name || ''} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} /></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="email">Email</Label><Input id="email" type="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} /></div><div><Label htmlFor="phone">Phone</Label><Input id="phone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} /></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="date_of_birth">Date of Birth</Label><Input id="date_of_birth" type="date" value={formData.date_of_birth || ''} onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })} /></div><div><Label htmlFor="guardian_id">Guardian ID</Label><Input id="guardian_id" value={formData.guardian_id || ''} onChange={(e) => setFormData({ ...formData, guardian_id: e.target.value })} /></div></div><div><Label htmlFor="address">Address</Label><Textarea id="address" value={formData.address || ''} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={2} /></div></div></div>
+    <div><h4 className="text-sm font-semibold mb-3 text-foreground">Training Information</h4><div className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="surf_level">Surf Level</Label><Select value={formData.surf_level || ''} onValueChange={(value) => setFormData({ ...formData, surf_level: value })}><SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger><SelectContent><SelectItem value="Learning">Learning</SelectItem><SelectItem value="Pre-Competition">Pre-Competition</SelectItem><SelectItem value="Competition">Competition</SelectItem></SelectContent></Select></div><div><Label htmlFor="plan_type">Plan Type</Label><Input id="plan_type" value={formData.plan_type || ''} onChange={(e) => setFormData({ ...formData, plan_type: e.target.value })} /></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="trainings_per_week">Trainings Per Week</Label><Input id="trainings_per_week" type="number" min="0" max="7" value={formData.trainings_per_week || ''} onChange={(e) => setFormData({ ...formData, trainings_per_week: parseInt(e.target.value) || null })} /></div><div><Label htmlFor="training_days">Training Days</Label><Input id="training_days" value={formData.training_days || ''} onChange={(e) => setFormData({ ...formData, training_days: e.target.value })} placeholder="e.g., Mon, Wed, Fri" /></div></div></div></div>
+    <div><h4 className="text-sm font-semibold mb-3 text-foreground">Guardian Information</h4><div className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-3 gap-4"><div><Label htmlFor="mother_name">Mother's Name</Label><Input id="mother_name" value={formData.mother_name || ''} onChange={(e) => setFormData({ ...formData, mother_name: e.target.value })} /></div><div><Label htmlFor="mother_email">Mother's Email</Label><Input id="mother_email" type="email" value={formData.mother_email || ''} onChange={(e) => setFormData({ ...formData, mother_email: e.target.value })} /></div><div><Label htmlFor="mother_phone">Mother's Phone</Label><Input id="mother_phone" value={formData.mother_phone || ''} onChange={(e) => setFormData({ ...formData, mother_phone: e.target.value })} /></div></div><div className="grid grid-cols-1 md:grid-cols-3 gap-4"><div><Label htmlFor="father_name">Father's Name</Label><Input id="father_name" value={formData.father_name || ''} onChange={(e) => setFormData({ ...formData, father_name: e.target.value })} /></div><div><Label htmlFor="father_email">Father's Email</Label><Input id="father_email" type="email" value={formData.father_email || ''} onChange={(e) => setFormData({ ...formData, father_email: e.target.value })} /></div><div><Label htmlFor="father_phone">Father's Phone</Label><Input id="father_phone" value={formData.father_phone || ''} onChange={(e) => setFormData({ ...formData, father_phone: e.target.value })} /></div></div></div></div>
+    <div><h4 className="text-sm font-semibold mb-3 text-foreground">Transport Information</h4><div className="space-y-4"><div><Label htmlFor="transport">Requires Transport</Label><div className="flex items-center space-x-2 mt-2"><Switch id="transport" checked={formData.transport || false} onCheckedChange={(checked) => setFormData({ ...formData, transport: checked })} /><span className="text-sm text-foreground">{formData.transport ? 'Yes' : 'No'}</span></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="pickup_address">Pickup Address</Label><Textarea id="pickup_address" value={formData.pickup_address || ''} onChange={(e) => setFormData({ ...formData, pickup_address: e.target.value })} rows={2} /></div><div><Label htmlFor="dropoff_address">Dropoff Address</Label><Textarea id="dropoff_address" value={formData.dropoff_address || ''} onChange={(e) => setFormData({ ...formData, dropoff_address: e.target.value })} rows={2} /></div></div></div></div>
+    <div><h4 className="text-sm font-semibold mb-3 text-foreground">Additional Information</h4><div><Label htmlFor="sql_line">SQL Line (Optional)</Label><Textarea id="sql_line" value={formData.sql_line || ''} onChange={(e) => setFormData({ ...formData, sql_line: e.target.value })} rows={2} /></div></div>
+  </div>
+);
+
+const GuardianForm = ({ formData, setFormData, isEdit }: any) => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="first_name">First Name *</Label><Input id="first_name" value={formData.first_name || ''} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} /></div><div><Label htmlFor="last_name">Last Name *</Label><Input id="last_name" value={formData.last_name || ''} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} /></div></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label htmlFor="email">Email *</Label><Input id="email" type="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} /></div><div><Label htmlFor="phone">Phone</Label><Input id="phone" value={formData.phone || ''} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} /></div></div>
+    {isEdit && <div className="space-y-4 pt-4 border-t border-border"><div><Label htmlFor="id">Guardian ID (read-only)</Label><Input id="id" value={formData.id || ''} disabled className="bg-muted" /></div>{formData.auth_uid && <div><Label htmlFor="auth_uid">Auth UID (read-only)</Label><Input id="auth_uid" value={formData.auth_uid} disabled className="bg-muted" /></div>}{formData.created_at && <div><Label htmlFor="created_at">Created At (read-only)</Label><Input id="created_at" value={new Date(formData.created_at).toLocaleString()} disabled className="bg-muted" /></div>}</div>}
+  </div>
+);
 
 export default UserManagement;
