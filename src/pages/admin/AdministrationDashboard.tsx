@@ -791,6 +791,8 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
+        <SponsorBanner />
+
         {/* Admin Actions */}
         <div className="space-y-4">
           <h3 className="text-2xl font-bold text-foreground mb-4 text-center">Management Tools</h3>
@@ -968,7 +970,6 @@ const AdministrationDashboard = () => {
         </div>
       </main>
 
-      <SponsorBanner />
       <AppFooter />
       </>
       )}
