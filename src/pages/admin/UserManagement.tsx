@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Search, Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
@@ -80,6 +83,7 @@ const UserManagement = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const validateSession = async () => {
@@ -173,6 +177,7 @@ const UserManagement = () => {
 
   const handleUserSelect = (userId: string) => {
     setSelectedUserId(userId);
+    setOpen(false);
     let user = null;
     if (activeTab === "coaches") {
       user = coaches.find(c => c.coach_id === userId);
@@ -184,6 +189,22 @@ const UserManagement = () => {
     if (user) {
       handleEdit(user);
     }
+  };
+
+  const getSelectedUserLabel = () => {
+    if (!selectedUserId) return "Select user...";
+    let user = null;
+    if (activeTab === "coaches") {
+      user = coaches.find(c => c.coach_id === selectedUserId);
+      if (user) return `${user.first_name} ${user.last_name} - ${user.email}`;
+    } else if (activeTab === "athletes") {
+      user = athletes.find(a => a.athlete_id === selectedUserId);
+      if (user) return `${user.first_name} ${user.last_name} - ${user.email || user.athlete_id}`;
+    } else if (activeTab === "guardians") {
+      user = guardians.find(g => g.id === selectedUserId);
+      if (user) return `${user.first_name} ${user.last_name} - ${user.email}`;
+    }
+    return "Select user...";
   };
 
   const handleSave = async () => {
@@ -282,7 +303,7 @@ const UserManagement = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSelectedUserId(""); }}>
+            <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSelectedUserId(""); setOpen(false); }}>
               <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="coaches">Coaches</TabsTrigger>
                 <TabsTrigger value="athletes">Athletes</TabsTrigger>
@@ -296,22 +317,44 @@ const UserManagement = () => {
                   <div className="space-y-4">
                     <div>
                       <Label>Select Coach</Label>
-                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a coach to edit..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {coaches.length === 0 ? (
-                            <div className="p-2 text-sm text-muted-foreground">No coaches available</div>
-                          ) : (
-                            coaches.map((coach) => (
-                              <SelectItem key={coach.coach_id} value={coach.coach_id}>
-                                {coach.first_name} {coach.last_name} - {coach.email}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between"
+                          >
+                            {getSelectedUserLabel()}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search coaches..." />
+                            <CommandList>
+                              <CommandEmpty>No coach found.</CommandEmpty>
+                              <CommandGroup>
+                                {coaches.map((coach) => (
+                                  <CommandItem
+                                    key={coach.coach_id}
+                                    value={`${coach.first_name} ${coach.last_name} ${coach.email} ${coach.coach_id}`}
+                                    onSelect={() => handleUserSelect(coach.coach_id)}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedUserId === coach.coach_id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {coach.first_name} {coach.last_name} - {coach.email}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 )}
@@ -324,22 +367,44 @@ const UserManagement = () => {
                   <div className="space-y-4">
                     <div>
                       <Label>Select Athlete</Label>
-                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select an athlete to edit..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {athletes.length === 0 ? (
-                            <div className="p-2 text-sm text-muted-foreground">No athletes available</div>
-                          ) : (
-                            athletes.map((athlete) => (
-                              <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
-                                {athlete.first_name} {athlete.last_name} - {athlete.email || athlete.athlete_id}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between"
+                          >
+                            {getSelectedUserLabel()}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search athletes..." />
+                            <CommandList>
+                              <CommandEmpty>No athlete found.</CommandEmpty>
+                              <CommandGroup>
+                                {athletes.map((athlete) => (
+                                  <CommandItem
+                                    key={athlete.athlete_id}
+                                    value={`${athlete.first_name} ${athlete.last_name} ${athlete.email} ${athlete.athlete_id}`}
+                                    onSelect={() => handleUserSelect(athlete.athlete_id)}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedUserId === athlete.athlete_id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {athlete.first_name} {athlete.last_name} - {athlete.email || athlete.athlete_id}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 )}
@@ -352,22 +417,44 @@ const UserManagement = () => {
                   <div className="space-y-4">
                     <div>
                       <Label>Select Guardian</Label>
-                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a guardian to edit..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {guardians.length === 0 ? (
-                            <div className="p-2 text-sm text-muted-foreground">No guardians available</div>
-                          ) : (
-                            guardians.map((guardian) => (
-                              <SelectItem key={guardian.id} value={guardian.id || ""}>
-                                {guardian.first_name} {guardian.last_name} - {guardian.email}
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between"
+                          >
+                            {getSelectedUserLabel()}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search guardians..." />
+                            <CommandList>
+                              <CommandEmpty>No guardian found.</CommandEmpty>
+                              <CommandGroup>
+                                {guardians.map((guardian) => (
+                                  <CommandItem
+                                    key={guardian.id}
+                                    value={`${guardian.first_name} ${guardian.last_name} ${guardian.email} ${guardian.id}`}
+                                    onSelect={() => handleUserSelect(guardian.id || "")}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedUserId === guardian.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {guardian.first_name} {guardian.last_name} - {guardian.email}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 )}
