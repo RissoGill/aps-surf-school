@@ -272,7 +272,7 @@ const UserManagement = () => {
   if (!sessionValid) {
     return (
       <div className="min-h-screen bg-gradient-surface">
-        <AppHeader title="User Management" showBack backTo="/admin" />
+        <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
         <main className="mobile-container py-6">
           <div className="flex items-center justify-center min-h-[60vh]">
             <Skeleton className="h-8 w-48 mx-auto" />
@@ -285,7 +285,7 @@ const UserManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="User Management" showBack backTo="/admin" />
+      <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
         <Card className="shadow-soft">
