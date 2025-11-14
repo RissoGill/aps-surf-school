@@ -286,7 +286,6 @@ const UserManagement = () => {
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title="User Management" showBack backTo="/admin" />
-      <SponsorBanner />
       
       <main className="mobile-container py-6">
         <Card className="shadow-soft">
@@ -500,6 +499,7 @@ const UserManagement = () => {
         </Dialog>
       </main>
       
+      <SponsorBanner />
       <AppFooter />
     </div>
   );

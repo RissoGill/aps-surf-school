@@ -100,7 +100,6 @@ const AttendanceRecords = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <AppHeader title="Attendance Records" showBack backTo="/dashboard/coach" />
-      <SponsorBanner />
       
       <main className="flex-1 mobile-container py-6">
         <Card>
@@ -167,6 +166,7 @@ const AttendanceRecords = () => {
         </Card>
       </main>
 
+      <SponsorBanner />
       <AppFooter />
     </div>
   );
