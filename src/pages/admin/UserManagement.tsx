@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,11 +73,11 @@ const UserManagement = () => {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("coaches");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -171,6 +171,21 @@ const UserManagement = () => {
     setIsEditDialogOpen(true);
   };
 
+  const handleUserSelect = (userId: string) => {
+    setSelectedUserId(userId);
+    let user = null;
+    if (activeTab === "coaches") {
+      user = coaches.find(c => c.coach_id === userId);
+    } else if (activeTab === "athletes") {
+      user = athletes.find(a => a.athlete_id === userId);
+    } else if (activeTab === "guardians") {
+      user = guardians.find(g => g.id === userId);
+    }
+    if (user) {
+      handleEdit(user);
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -218,6 +233,7 @@ const UserManagement = () => {
       
       setIsAddDialogOpen(false);
       setIsEditDialogOpen(false);
+      setSelectedUserId("");
       fetchAllUsers();
     } catch (error: any) {
       console.error('Error saving user:', error);
@@ -231,23 +247,6 @@ const UserManagement = () => {
     }
   };
 
-  const filteredCoaches = coaches.filter(coach => {
-    const fullName = `${coach.first_name || ''} ${coach.last_name || ''}`.toLowerCase();
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || coach.email?.toLowerCase().includes(search) || coach.coach_id?.toLowerCase().includes(search);
-  });
-
-  const filteredAthletes = athletes.filter(athlete => {
-    const fullName = `${athlete.first_name || ''} ${athlete.last_name || ''}`.toLowerCase();
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || athlete.email?.toLowerCase().includes(search) || athlete.athlete_id?.toLowerCase().includes(search);
-  });
-
-  const filteredGuardians = guardians.filter(guardian => {
-    const fullName = `${guardian.first_name || ''} ${guardian.last_name || ''}`.toLowerCase();
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || guardian.email?.toLowerCase().includes(search);
-  });
 
   if (!sessionValid) {
     return (
@@ -283,19 +282,7 @@ const UserManagement = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, email, or ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSelectedUserId(""); }}>
               <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="coaches">Coaches</TabsTrigger>
                 <TabsTrigger value="athletes">Athletes</TabsTrigger>
@@ -304,99 +291,84 @@ const UserManagement = () => {
 
               <TabsContent value="coaches">
                 {loading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
-                  </div>
+                  <Skeleton className="h-10 w-full" />
                 ) : (
-                  <div className="space-y-3">
-                    {filteredCoaches.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">No coaches found</p>
-                    ) : (
-                      filteredCoaches.map((coach) => (
-                        <Card key={coach.coach_id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(coach)}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-foreground">{coach.first_name} {coach.last_name}</h4>
-                                <p className="text-sm text-muted-foreground">{coach.email}</p>
-                                <p className="text-xs text-muted-foreground">ID: {coach.coach_id}</p>
-                              </div>
-                              {coach.status !== undefined && (
-                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${coach.status ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                                  {coach.status ? 'Active' : 'Inactive'}
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    )}
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Select Coach</Label>
+                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a coach to edit..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {coaches.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground">No coaches available</div>
+                          ) : (
+                            coaches.map((coach) => (
+                              <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                                {coach.first_name} {coach.last_name} - {coach.email}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="athletes">
                 {loading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
-                  </div>
+                  <Skeleton className="h-10 w-full" />
                 ) : (
-                  <div className="space-y-3">
-                    {filteredAthletes.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">No athletes found</p>
-                    ) : (
-                      filteredAthletes.map((athlete) => (
-                        <Card key={athlete.athlete_id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(athlete)}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-foreground">{athlete.first_name} {athlete.last_name}</h4>
-                                <p className="text-sm text-muted-foreground">{athlete.email || 'No email'}</p>
-                                <div className="flex gap-2 mt-1 flex-wrap">
-                                  <p className="text-xs text-muted-foreground">ID: {athlete.athlete_id}</p>
-                                  {athlete.surf_level && (
-                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{athlete.surf_level}</span>
-                                  )}
-                                </div>
-                              </div>
-                              {athlete.is_active !== undefined && (
-                                <div className={`px-3 py-1 rounded-full text-xs font-medium ${athlete.is_active ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                                  {athlete.is_active ? 'Active' : 'Inactive'}
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    )}
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Select Athlete</Label>
+                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an athlete to edit..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {athletes.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground">No athletes available</div>
+                          ) : (
+                            athletes.map((athlete) => (
+                              <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
+                                {athlete.first_name} {athlete.last_name} - {athlete.email || athlete.athlete_id}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
               </TabsContent>
 
               <TabsContent value="guardians">
                 {loading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
-                  </div>
+                  <Skeleton className="h-10 w-full" />
                 ) : (
-                  <div className="space-y-3">
-                    {filteredGuardians.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">No guardians found</p>
-                    ) : (
-                      filteredGuardians.map((guardian) => (
-                        <Card key={guardian.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleEdit(guardian)}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-foreground">{guardian.first_name} {guardian.last_name}</h4>
-                                <p className="text-sm text-muted-foreground">{guardian.email}</p>
-                                {guardian.phone && <p className="text-xs text-muted-foreground">Phone: {guardian.phone}</p>}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
-                    )}
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Select Guardian</Label>
+                      <Select value={selectedUserId} onValueChange={handleUserSelect}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a guardian to edit..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {guardians.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground">No guardians available</div>
+                          ) : (
+                            guardians.map((guardian) => (
+                              <SelectItem key={guardian.id} value={guardian.id || ""}>
+                                {guardian.first_name} {guardian.last_name} - {guardian.email}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
               </TabsContent>
