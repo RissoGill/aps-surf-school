@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, Download, Eye, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,9 @@ export const ReportsCard = () => {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [coaches, setCoaches] = useState<any[]>([]);
   const [selectedCoach, setSelectedCoach] = useState<string>("");
+  const [showOnlyOutstanding, setShowOnlyOutstanding] = useState(false);
+  const [filterByCurrentMonth, setFilterByCurrentMonth] = useState(false);
+  const [selectedSurfLevels, setSelectedSurfLevels] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchAthletes = async () => {
@@ -78,11 +82,20 @@ export const ReportsCard = () => {
           // Generate month/year combinations from date range
           const months = [];
           let currentDate = new Date(startDate);
-          while (currentDate <= endDate) {
-            const monthName = format(currentDate, "MMMM");
-            const year = currentDate.getFullYear();
+          
+          // If filtering by current month, only use current month
+          if (filterByCurrentMonth) {
+            const now = new Date();
+            const monthName = format(now, "MMMM");
+            const year = now.getFullYear();
             months.push({ month: monthName, year });
-            currentDate.setMonth(currentDate.getMonth() + 1);
+          } else {
+            while (currentDate <= endDate) {
+              const monthName = format(currentDate, "MMMM");
+              const year = currentDate.getFullYear();
+              months.push({ month: monthName, year });
+              currentDate.setMonth(currentDate.getMonth() + 1);
+            }
           }
           
           let paymentsQuery = supabase
@@ -93,12 +106,20 @@ export const ReportsCard = () => {
             `);
           
           // Build OR condition: match by payment_date range OR by month/year when payment_date is null
-          const dateConditions = [
-            `and(payment_date.gte.${startStr},payment_date.lte.${endStr})`,
-            ...months.map(m => `and(payment_date.is.null,month.eq.${m.month},year.eq.${m.year})`)
-          ].join(',');
-          
-          paymentsQuery = paymentsQuery.or(dateConditions);
+          if (filterByCurrentMonth) {
+            const now = new Date();
+            const currentMonth = format(now, "MMMM");
+            const currentYear = now.getFullYear();
+            paymentsQuery = paymentsQuery.or(
+              `and(payment_date.gte.${format(now, "yyyy-MM")}-01,payment_date.lte.${format(now, "yyyy-MM")}-31),and(payment_date.is.null,month.eq.${currentMonth},year.eq.${currentYear})`
+            );
+          } else {
+            const dateConditions = [
+              `and(payment_date.gte.${startStr},payment_date.lte.${endStr})`,
+              ...months.map(m => `and(payment_date.is.null,month.eq.${m.month},year.eq.${m.year})`)
+            ].join(',');
+            paymentsQuery = paymentsQuery.or(dateConditions);
+          }
           
           if (selectedAthlete && selectedAthlete !== "all") {
             paymentsQuery = paymentsQuery.eq("athlete_id", selectedAthlete);
@@ -107,7 +128,27 @@ export const ReportsCard = () => {
           const { data: payments, error: paymentsError } = await paymentsQuery;
           
           if (paymentsError) throw paymentsError;
-          data = payments || [];
+          
+          // Filter in-memory for outstanding and surf levels
+          let filteredPayments = payments || [];
+          
+          if (showOnlyOutstanding) {
+            filteredPayments = filteredPayments.filter((p: any) => {
+              const outstanding = (parseFloat(p.amount_due || 0) - parseFloat(p.amount_paid || 0));
+              return outstanding > 0;
+            });
+          }
+          
+          if (selectedSurfLevels.length > 0) {
+            filteredPayments = filteredPayments.filter((p: any) => {
+              const surfLevel = p.atletas?.surf_level?.toLowerCase().trim();
+              return selectedSurfLevels.some(level => 
+                surfLevel === level.toLowerCase().trim()
+              );
+            });
+          }
+          
+          data = filteredPayments;
           break;
 
         case "attendance":
@@ -232,8 +273,42 @@ export const ReportsCard = () => {
     const { title, startDate, endDate, generatedAt, data, type } = report;
 
     let tableRows = "";
+    let summarySection = "";
     
     if (type === "financial") {
+      // Calculate summary statistics
+      const totalOutstanding = (data as any[]).reduce((sum, p) => 
+        sum + (parseFloat(p.amount_due || 0) - parseFloat(p.amount_paid || 0)), 0
+      );
+      const totalAthletes = data.length;
+      
+      // Group by surf level
+      const surfLevelBreakdown = (data as any[]).reduce((acc: any, p) => {
+        const level = p.atletas?.surf_level || "Unknown";
+        if (!acc[level]) {
+          acc[level] = { count: 0, outstanding: 0 };
+        }
+        acc[level].count++;
+        acc[level].outstanding += (parseFloat(p.amount_due || 0) - parseFloat(p.amount_paid || 0));
+        return acc;
+      }, {});
+      
+      summarySection = `
+        <div style="background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+          <h2 style="color: #31A896; margin-top: 0;">Summary Statistics</h2>
+          <p><strong>Total Athletes:</strong> ${totalAthletes}</p>
+          <p><strong>Total Outstanding:</strong> €${totalOutstanding.toFixed(2)}</p>
+          <div style="margin-top: 10px;">
+            <strong>Breakdown by Surf Level:</strong>
+            <ul style="margin: 5px 0;">
+              ${Object.entries(surfLevelBreakdown).map(([level, stats]: [string, any]) => `
+                <li>${level}: ${stats.count} athletes, €${stats.outstanding.toFixed(2)} outstanding</li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+      
       tableRows = (data as any[]).map(payment => {
         const displayDate = payment.payment_date || `${payment.month} ${payment.year}`;
         const outstanding = (parseFloat(payment.amount_due || 0) - parseFloat(payment.amount_paid || 0)).toFixed(2);
@@ -241,6 +316,7 @@ export const ReportsCard = () => {
         <tr>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.athlete_id}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.atletas?.first_name || ""} ${payment.atletas?.last_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${payment.atletas?.surf_level || "N/A"}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${displayDate}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_paid || 0}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_due || 0}</td>
@@ -313,7 +389,7 @@ export const ReportsCard = () => {
     }
 
     const tableHeaders = 
-      type === "financial" ? "<tr><th>Athlete ID</th><th>Name</th><th>Date</th><th>Paid</th><th>Due</th><th>Outstanding</th><th>Status</th></tr>" :
+      type === "financial" ? "<tr><th>Athlete ID</th><th>Name</th><th>Surf Level</th><th>Date</th><th>Paid</th><th>Due</th><th>Outstanding</th><th>Status</th></tr>" :
       type === "attendance" ? "<tr><th>Date</th><th>Athlete</th><th>Coach</th><th>Status</th><th>Location</th></tr>" :
       type === "personal" ? "<tr><th>Athlete ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Level</th></tr>" :
       type === "coach_payments" ? "<tr><th>Coach Name</th><th>Payment Date</th><th>Month</th><th>Year</th><th>Amount</th><th>Notes</th></tr>" :
@@ -389,6 +465,8 @@ export const ReportsCard = () => {
           </div>
         </div>
         
+        ${summarySection}
+        
         <table>
           ${tableHeaders}
           ${tableRows}
@@ -454,6 +532,58 @@ export const ReportsCard = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {reportType === "financial" && (
+            <div className="space-y-4 p-4 border rounded-md bg-muted/30">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="outstanding" 
+                    checked={showOnlyOutstanding}
+                    onCheckedChange={(checked) => setShowOnlyOutstanding(checked as boolean)}
+                  />
+                  <label htmlFor="outstanding" className="text-sm font-medium cursor-pointer">
+                    Show only outstanding payments
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="currentMonth" 
+                    checked={filterByCurrentMonth}
+                    onCheckedChange={(checked) => setFilterByCurrentMonth(checked as boolean)}
+                  />
+                  <label htmlFor="currentMonth" className="text-sm font-medium cursor-pointer">
+                    Filter by current month only
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Filter by Surf Level (Optional)</label>
+                <div className="space-y-2">
+                  {['Learning', 'Pre-Competition', 'Competition'].map((level) => (
+                    <div key={level} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={level} 
+                        checked={selectedSurfLevels.includes(level)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedSurfLevels([...selectedSurfLevels, level]);
+                          } else {
+                            setSelectedSurfLevels(selectedSurfLevels.filter(l => l !== level));
+                          }
+                        }}
+                      />
+                      <label htmlFor={level} className="text-sm cursor-pointer">
+                        {level}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
