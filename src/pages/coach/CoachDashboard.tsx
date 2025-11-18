@@ -1019,24 +1019,6 @@ const CoachDashboard = () => {
           <BulkAttendanceRegistration coachId={coachData.coach_id} />
         )}
 
-        {/* Coach Payments Section */}
-        {coachData?.coach_id && (
-          <Card className="shadow-soft mb-6">
-            <CardHeader>
-              <h4 className="font-medium text-foreground flex items-center gap-2">
-                <Euro className="h-5 w-5" />
-                My Payments
-              </h4>
-              <CardDescription>
-                View your payment history and summaries
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PaymentsTab coachId={coachData.coach_id} />
-            </CardContent>
-          </Card>
-        )}
-
         {/* Athletes List appears here when searching */}
 
         {/* Athletes List - Only shown when searching */}
@@ -1170,32 +1152,17 @@ const CoachDashboard = () => {
                                   multiple
                                   onChange={(e) => {
                                     const files = Array.from(e.target.files || []);
-                                    setUploadedPhotos(prev => [...prev, ...files]);
+                                    setUploadedPhotos(files);
                                   }}
-                                  className="cursor-pointer"
                                 />
-                                {uploadedPhotos.length > 0 && (
-                                  <div className="flex flex-wrap gap-2">
-                                    {uploadedPhotos.map((file, idx) => (
-                                      <div key={idx} className="relative group">
-                                        <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
-                                          <ImageIcon className="h-4 w-4" />
-                                          <span className="text-sm truncate max-w-[150px]">{file.name}</span>
-                                          <button
-                                            type="button"
-                                            onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== idx))}
-                                            className="text-muted-foreground hover:text-destructive"
-                                          >
-                                            <X className="h-4 w-4" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                {uploadedPhotos && uploadedPhotos.length > 0 && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {uploadedPhotos.length} photo(s) selected
+                                  </p>
                                 )}
                               </div>
                             </div>
-
+                            
                             {/* Video Upload */}
                             <div className="space-y-2">
                               <Label className="flex items-center gap-2">
@@ -1209,30 +1176,25 @@ const CoachDashboard = () => {
                                   multiple
                                   onChange={(e) => {
                                     const files = Array.from(e.target.files || []);
-                                    setUploadedVideos(prev => [...prev, ...files]);
+                                    setUploadedVideos(files);
                                   }}
-                                  className="cursor-pointer"
                                 />
-                                {uploadedVideos.length > 0 && (
-                                  <div className="flex flex-wrap gap-2">
-                                    {uploadedVideos.map((file, idx) => (
-                                      <div key={idx} className="relative group">
-                                        <div className="flex items-center gap-2 bg-secondary px-3 py-2 rounded-md">
-                                          <Video className="h-4 w-4" />
-                                          <span className="text-sm truncate max-w-[150px]">{file.name}</span>
-                                          <button
-                                            type="button"
-                                            onClick={() => setUploadedVideos(prev => prev.filter((_, i) => i !== idx))}
-                                            className="text-muted-foreground hover:text-destructive"
-                                          >
-                                            <X className="h-4 w-4" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                {uploadedVideos && uploadedVideos.length > 0 && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {uploadedVideos.length} video(s) selected
+                                  </p>
                                 )}
                               </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Notes (optional)</Label>
+                              <Textarea
+                                value={newAttendance.notas}
+                                onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
+                                placeholder="Add any additional notes..."
+                                rows={3}
+                              />
                             </div>
                             
                             <Button 
@@ -1291,6 +1253,24 @@ const CoachDashboard = () => {
             )}
           </CardContent>
         </Card>
+        )}
+
+        {/* Coach Payments Section */}
+        {coachData?.coach_id && (
+          <Card className="shadow-soft mb-6">
+            <CardHeader>
+              <h4 className="font-medium text-foreground flex items-center gap-2">
+                <Euro className="h-5 w-5" />
+                My Payments
+              </h4>
+              <CardDescription>
+                View your payment history and summaries
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PaymentsTab coachId={coachData.coach_id} />
+            </CardContent>
+          </Card>
         )}
 
         {/* Training Days Breakdown */}
