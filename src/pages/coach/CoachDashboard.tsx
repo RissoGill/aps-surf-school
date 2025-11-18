@@ -970,10 +970,10 @@ const CoachDashboard = () => {
         {searchQuery && (
         <Card className="shadow-medium mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <h4 className="font-medium text-foreground flex items-center gap-2">
               <User className="h-5 w-5" />
               Athletes & Attendance
-            </CardTitle>
+            </h4>
             <CardDescription>
               View athletes and their attendance records
             </CardDescription>

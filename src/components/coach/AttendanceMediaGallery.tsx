@@ -29,10 +29,10 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
     return (
       <Card className="shadow-soft">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <h4 className="text-lg font-medium text-foreground flex items-center gap-2">
             <ImageIcon className="h-5 w-5 text-primary" />
             Media Gallery
-          </CardTitle>
+          </h4>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-4">
@@ -46,10 +46,10 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
+        <h4 className="text-lg font-medium text-foreground flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-primary" />
           Media Gallery
-        </CardTitle>
+        </h4>
       </CardHeader>
       <CardContent className="space-y-4">
         {recordsWithMedia.map((record) => (
