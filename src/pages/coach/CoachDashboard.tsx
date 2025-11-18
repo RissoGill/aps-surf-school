@@ -70,7 +70,6 @@ interface Athlete {
 const CoachDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(null);
   const [newAttendance, setNewAttendance] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -88,7 +87,6 @@ const CoachDashboard = () => {
   const [coachData, setCoachData] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const searchRef = useRef<HTMLDivElement>(null);
 
   // Check authentication and fetch coach data using Supabase Auth, with legacy fallback
   useEffect(() => {
@@ -150,17 +148,8 @@ const CoachDashboard = () => {
     };
   }, [navigate, supabase]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Close dropdown when clicking outside - No longer needed since results are below card
+  // Removed: useEffect for click outside handler
 
   // Real-time subscription for attendance updates
   useEffect(() => {
@@ -555,7 +544,6 @@ const CoachDashboard = () => {
 
   const handleSelectAthlete = (athlete: Athlete) => {
     setSearchQuery(`${athlete.first_name} ${athlete.last_name}`);
-    setShowDropdown(false);
   };
 
   const getLevelColor = (level: string) => {
@@ -959,44 +947,72 @@ const CoachDashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div ref={searchRef} className="relative">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Search athletes by name..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowDropdown(true);
-                }}
-                onFocus={() => setShowDropdown(true)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 touch-friendly"
               />
-              
-              {/* Autocomplete Dropdown */}
-              {showDropdown && searchQuery && filteredAthletes.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                  {filteredAthletes.slice(0, 5).map((athlete) => (
-                    <button
-                      key={athlete.athlete_id}
-                      onClick={() => handleSelectAthlete(athlete)}
-                      className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center gap-3 border-b border-border last:border-b-0"
-                    >
-                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-foreground truncate">
-                          {athlete.first_name} {athlete.last_name}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
+
+        {/* Search Results Section - Below Search Card */}
+        {searchQuery && (
+          <Card className="shadow-soft mb-6">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-foreground flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Search Results {filteredAthletes.length > 0 && `(${filteredAthletes.length})`}
+                </h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                  Clear
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {filteredAthletes.length > 0 ? (
+                <div className="grid gap-3">
+                  {filteredAthletes.map((athlete) => (
+                    <button
+                      key={athlete.athlete_id}
+                      onClick={() => handleSelectAthlete(athlete)}
+                      className="w-full p-4 text-left hover:bg-accent transition-colors flex items-center gap-3 border border-border rounded-lg"
+                    >
+                      <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">
+                          {athlete.first_name} {athlete.last_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
+                        </p>
+                      </div>
+                      {athlete.surf_level && (
+                        <Badge variant="secondary" className={getLevelColor(athlete.surf_level)}>
+                          {athlete.surf_level}
+                        </Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <User className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>No athletes found matching "{searchQuery}"</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Bulk Attendance Registration */}
         {coachData?.coach_id && (
