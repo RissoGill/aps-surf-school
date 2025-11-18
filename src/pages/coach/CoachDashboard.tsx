@@ -40,6 +40,7 @@ interface AttendanceRecord {
   athlete_id: string | null;
   photos?: string[];
   videos?: string[];
+  shift?: string | null;
 }
 
 interface Athlete {
@@ -849,6 +850,77 @@ const CoachDashboard = () => {
     return byMonth;
   }, [athletes, coachData]);
 
+  // Training sessions with athlete details by month
+  const trainingSessionsByMonth = useMemo(() => {
+    if (!athletes || !coachData) return {};
+
+    const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
+    const firstName = coachData?.first_name?.toString().trim().toLowerCase();
+    const lastName = coachData?.last_name?.toString().trim().toLowerCase();
+    const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
+      if (coachId && recordCoachId) {
+        const rec = String(recordCoachId).trim().toUpperCase();
+        if (rec === coachId) return true;
+      }
+      const coach = (coachName || '').trim();
+      if (!coach) return false;
+      const tLower = coach.toLowerCase();
+      const tokens = tLower.split(/[^a-z0-9]+/).filter(Boolean);
+      return (
+        (firstName && tokens.includes(firstName)) ||
+        (lastName && tokens.includes(lastName)) ||
+        (fullName && tLower === fullName)
+      );
+    };
+
+    // Group by month -> date -> athletes
+    const byMonth: Record<string, Record<string, Array<{
+      athleteId: string;
+      athleteName: string;
+      shift?: string;
+      beachLocation?: string;
+    }>>> = {};
+
+    for (const athlete of athletes) {
+      const athleteName = `${athlete.first_name || ''} ${athlete.last_name || ''}`.trim();
+      
+      for (const record of athlete.attendance) {
+        if (!record.date) continue;
+        if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
+        if (isExcludedDateForCoach(record)) continue;
+        
+        const yearMonth = record.date.slice(0, 7);
+        if (!byMonth[yearMonth]) {
+          byMonth[yearMonth] = {};
+        }
+        if (!byMonth[yearMonth][record.date]) {
+          byMonth[yearMonth][record.date] = [];
+        }
+        
+        byMonth[yearMonth][record.date].push({
+          athleteId: athlete.athlete_id,
+          athleteName: athleteName,
+          shift: record.shift || undefined,
+          beachLocation: record.beach_location || undefined,
+        });
+      }
+    }
+
+    // Sort dates within each month (reverse chronological)
+    Object.keys(byMonth).forEach(ym => {
+      const sortedDates = Object.keys(byMonth[ym]).sort().reverse();
+      const sortedMonth: Record<string, any> = {};
+      sortedDates.forEach(date => {
+        sortedMonth[date] = byMonth[ym][date];
+      });
+      byMonth[ym] = sortedMonth;
+    });
+
+    return byMonth;
+  }, [athletes, coachData]);
+
   // State for expanded months
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
 
@@ -1238,7 +1310,7 @@ const CoachDashboard = () => {
                         const [year, monthNum] = month.split('-');
                         const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
                         const isExpanded = expandedMonths.has(month);
-                        const dates = trainingDatesByMonth[month] || [];
+                        const sessionsByDate = trainingSessionsByMonth[month] || {};
                         
                         return (
                           <div key={month} className="border border-border rounded-lg overflow-hidden">
@@ -1259,19 +1331,64 @@ const CoachDashboard = () => {
                             
                             {isExpanded && (
                               <div className="bg-muted/30 px-3 py-2 border-t border-border">
-                                <div className="space-y-1 max-h-40 overflow-y-auto">
-                                  {dates.map((date) => {
+                                <div className="space-y-3 max-h-96 overflow-y-auto">
+                                  {Object.entries(sessionsByDate).map(([date, athletesList]) => {
                                     const dateObj = new Date(date);
                                     const dayName = dateObj.toLocaleDateString('default', { weekday: 'short' });
                                     const dayNum = dateObj.getDate();
+                                    const athleteCount = athletesList.length;
+                                    
+                                    // Group athletes by shift
+                                    const byShift: Record<string, typeof athletesList> = {};
+                                    athletesList.forEach(athlete => {
+                                      const shift = athlete.shift || 'No shift';
+                                      if (!byShift[shift]) byShift[shift] = [];
+                                      byShift[shift].push(athlete);
+                                    });
+                                    
                                     return (
-                                      <div
-                                        key={date}
-                                        className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
-                                      >
-                                        <Calendar className="h-3 w-3" />
-                                        <span>{dayName}, {dayNum}</span>
-                                        <span className="ml-auto text-xs opacity-70">{date}</span>
+                                      <div key={date} className="border border-border/50 rounded-md overflow-hidden bg-card/50">
+                                        {/* Date Header */}
+                                        <div className="flex items-center justify-between px-3 py-2 bg-accent/30 border-b border-border/50">
+                                          <div className="flex items-center gap-2">
+                                            <Calendar className="h-3 w-3 text-primary" />
+                                            <span className="text-sm font-medium">{dayName}, {dayNum}</span>
+                                            <span className="text-xs text-muted-foreground">({date})</span>
+                                          </div>
+                                          <Badge variant="outline" className="text-xs">
+                                            {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
+                                          </Badge>
+                                        </div>
+                                        
+                                        {/* Athletes List */}
+                                        <div className="p-2 space-y-2">
+                                          {Object.entries(byShift).map(([shift, shiftAthletes]) => (
+                                            <div key={shift}>
+                                              {Object.keys(byShift).length > 1 && (
+                                                <div className="text-xs font-medium text-muted-foreground mb-1 px-1">
+                                                  {shift}
+                                                </div>
+                                              )}
+                                              <div className="space-y-1">
+                                                {shiftAthletes.map((athlete, idx) => (
+                                                  <div 
+                                                    key={`${athlete.athleteId}-${idx}`}
+                                                    className="flex items-center gap-2 px-2 py-1 rounded hover:bg-accent/50 text-xs"
+                                                  >
+                                                    <User className="h-3 w-3 text-primary/70" />
+                                                    <span className="font-medium">{athlete.athleteName}</span>
+                                                    {athlete.beachLocation && (
+                                                      <span className="ml-auto flex items-center gap-1 text-muted-foreground">
+                                                        <MapPin className="h-3 w-3" />
+                                                        {athlete.beachLocation}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
                                       </div>
                                     );
                                   })}
