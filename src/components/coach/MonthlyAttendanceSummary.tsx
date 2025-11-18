@@ -111,10 +111,10 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
     <Card className="shadow-soft">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
+          <h4 className="text-base font-medium text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Monthly Summary
-          </CardTitle>
+          </h4>
           <Select value={selectedMonthKey} onValueChange={handleMonthChange}>
             <SelectTrigger className="w-[180px] h-8 text-sm">
               <SelectValue placeholder="Select month" />
