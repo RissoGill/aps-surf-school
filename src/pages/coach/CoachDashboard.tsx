@@ -94,8 +94,8 @@ const CoachDashboard = () => {
     start: '', 
     end: new Date().toISOString().split('T')[0]
   });
-  const [historyAthleteFilter, setHistoryAthleteFilter] = useState<string>('');
-  const [historyBeachFilter, setHistoryBeachFilter] = useState<string>('');
+  const [historyAthleteFilter, setHistoryAthleteFilter] = useState<string>('all');
+  const [historyBeachFilter, setHistoryBeachFilter] = useState<string>('all');
   const [historySearchQuery, setHistorySearchQuery] = useState<string>('');
 
   // Check authentication and fetch coach data using Supabase Auth, with legacy fallback
@@ -947,10 +947,10 @@ const CoachDashboard = () => {
         // Filter athletes
         const filteredAthletes = athletesList.filter(athlete => {
           // Athlete filter
-          if (historyAthleteFilter && athlete.athleteId !== historyAthleteFilter) return false;
+          if (historyAthleteFilter && historyAthleteFilter !== 'all' && athlete.athleteId !== historyAthleteFilter) return false;
           
           // Beach filter
-          if (historyBeachFilter && athlete.beachLocation !== historyBeachFilter) return false;
+          if (historyBeachFilter && historyBeachFilter !== 'all' && athlete.beachLocation !== historyBeachFilter) return false;
           
           // Search query
           if (historySearchQuery) {
@@ -1043,8 +1043,8 @@ const CoachDashboard = () => {
   // Clear all filters
   const clearAllFilters = () => {
     setHistoryDateRange({ start: '', end: new Date().toISOString().split('T')[0] });
-    setHistoryAthleteFilter('');
-    setHistoryBeachFilter('');
+    setHistoryAthleteFilter('all');
+    setHistoryBeachFilter('all');
     setHistorySearchQuery('');
   };
 
@@ -1538,7 +1538,7 @@ const CoachDashboard = () => {
                         <SelectValue placeholder="All Athletes" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Athletes</SelectItem>
+                        <SelectItem value="all">All Athletes</SelectItem>
                         {uniqueAthletesList.map(athlete => (
                           <SelectItem key={athlete.id} value={athlete.id}>
                             {athlete.name}
@@ -1556,7 +1556,7 @@ const CoachDashboard = () => {
                         <SelectValue placeholder="All Beaches" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Beaches</SelectItem>
+                        <SelectItem value="all">All Beaches</SelectItem>
                         {uniqueBeachLocations.map(beach => (
                           <SelectItem key={beach} value={beach}>
                             {beach}
@@ -1580,7 +1580,7 @@ const CoachDashboard = () => {
               </div>
 
               {/* Empty State for Filtered Results */}
-              {Object.keys(filteredTrainingSessionsByMonth).length === 0 && (historySearchQuery || historyAthleteFilter || historyBeachFilter || historyDateRange.start) && (
+              {Object.keys(filteredTrainingSessionsByMonth).length === 0 && (historySearchQuery || historyAthleteFilter !== 'all' || historyBeachFilter !== 'all' || historyDateRange.start) && (
                 <div className="text-center py-12 px-4">
                   <div className="bg-muted/30 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                     <Search className="h-8 w-8 text-muted-foreground" />
