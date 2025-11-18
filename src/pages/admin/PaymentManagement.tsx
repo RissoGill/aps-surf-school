@@ -800,13 +800,13 @@ const PaymentManagement = () => {
                               </TableCell>
                               
                               {/* Notes */}
-                              <TableCell className="max-w-md">
+                              <TableCell className="min-w-[260px] max-w-xl align-top">
                                 {isEditing ? (
                                   <Textarea
                                     value={editForm.notes}
                                     onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                                     placeholder="Add notes..."
-                                    className="min-h-[100px] text-base"
+                                    className="min-h-[120px] text-base w-full resize-y"
                                     rows={3}
                                   />
                                 ) : (
