@@ -91,7 +91,7 @@ const UserManagement = () => {
       
       if (!session) {
         toast.error("Session expired. Please log in again.");
-        navigate("/auth/administration");
+        navigate("/login/administration");
         return;
       }
 
@@ -105,7 +105,7 @@ const UserManagement = () => {
       if (!roleData) {
         await supabase.auth.signOut();
         toast.error("Access denied. Super admin privileges required.");
-        navigate("/auth/administration");
+        navigate("/login/administration");
         return;
       }
 
@@ -116,7 +116,7 @@ const UserManagement = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        navigate("/auth/administration");
+        navigate("/login/administration");
       }
     });
 

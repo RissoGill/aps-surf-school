@@ -34,7 +34,7 @@ const AdministrationDashboard = () => {
           description: "Please log in again",
           variant: "destructive",
         });
-        navigate("/auth/administration");
+        navigate("/login/administration");
         return;
       }
 
@@ -52,7 +52,7 @@ const AdministrationDashboard = () => {
           description: "Admin privileges required",
           variant: "destructive",
         });
-        navigate("/auth/administration");
+        navigate("/login/administration");
         return;
       }
 
@@ -71,7 +71,7 @@ const AdministrationDashboard = () => {
           title: "Signed out",
           description: "Redirecting to login...",
         });
-        navigate("/auth/administration");
+        navigate("/login/administration");
       } else if (event === 'TOKEN_REFRESHED') {
         validateSession();
       }
@@ -715,7 +715,7 @@ const AdministrationDashboard = () => {
                 variant="ghost"
                 onClick={async () => {
                   await supabase.auth.signOut();
-                  navigate("/auth/administration");
+                  navigate("/login/administration");
                 }}
               >
                 Sign Out
