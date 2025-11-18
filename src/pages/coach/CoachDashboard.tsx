@@ -935,6 +935,11 @@ const CoachDashboard = () => {
           </Card>
         </div>
 
+        {/* Bulk Attendance Registration */}
+        {coachData?.coach_id && (
+          <BulkAttendanceRegistration coachId={coachData.coach_id} />
+        )}
+
         {/* Search Athletes Card */}
         <Card className="shadow-soft mb-6">
           <CardHeader>
@@ -958,66 +963,6 @@ const CoachDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Search Results Section - Below Search Card */}
-        {searchQuery && (
-          <Card className="shadow-soft mb-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-foreground flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Search Results {filteredAthletes.length > 0 && `(${filteredAthletes.length})`}
-                </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4" />
-                  Clear
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {filteredAthletes.length > 0 ? (
-                <div className="grid gap-3">
-                  {filteredAthletes.map((athlete) => (
-                    <button
-                      key={athlete.athlete_id}
-                      onClick={() => handleSelectAthlete(athlete)}
-                      className="w-full p-4 text-left hover:bg-accent transition-colors flex items-center gap-3 border border-border rounded-lg"
-                    >
-                      <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground">
-                          {athlete.first_name} {athlete.last_name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {athlete.athlete_id} {athlete.surf_level && `• ${athlete.surf_level}`}
-                        </p>
-                      </div>
-                      {athlete.surf_level && (
-                        <Badge variant="secondary" className={getLevelColor(athlete.surf_level)}>
-                          {athlete.surf_level}
-                        </Badge>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <User className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>No athletes found matching "{searchQuery}"</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Bulk Attendance Registration */}
-        {coachData?.coach_id && (
-          <BulkAttendanceRegistration coachId={coachData.coach_id} />
-        )}
 
         {/* Athletes List appears here when searching */}
 
