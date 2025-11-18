@@ -378,7 +378,10 @@ const PaymentManagement = () => {
       const amountPaid = validated.amount_paid;
       let calculatedStatus: "Paid" | "Unpaid" | "Partial";
       
-      if (amountPaid === 0) {
+      // If both are 0, consider it as Paid (no amount due, no amount owed)
+      if (amountDue === 0 && amountPaid === 0) {
+        calculatedStatus = "Paid";
+      } else if (amountPaid === 0) {
         calculatedStatus = "Unpaid";
       } else if (amountPaid >= amountDue) {
         calculatedStatus = "Paid";
@@ -445,7 +448,10 @@ const PaymentManagement = () => {
     const amountDue = payment.amount_due || 0;
     const amountPaid = payment.amount_paid || 0;
 
-    if (amountPaid === 0) {
+    // If both are 0, consider it as Paid (no amount due, no amount owed)
+    if (amountDue === 0 && amountPaid === 0) {
+      return { label: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
+    } else if (amountPaid === 0) {
       return { label: "Unpaid", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
     } else if (amountPaid >= amountDue) {
       return { label: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
