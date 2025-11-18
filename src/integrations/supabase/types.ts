@@ -427,6 +427,7 @@ export type Database = {
           amount_paid: number | null
           athlete_id: string | null
           month: string | null
+          notes: string | null
           payment_date: string | null
           payment_id: string
           plan_type: string | null
@@ -438,6 +439,7 @@ export type Database = {
           amount_paid?: number | null
           athlete_id?: string | null
           month?: string | null
+          notes?: string | null
           payment_date?: string | null
           payment_id: string
           plan_type?: string | null
@@ -449,6 +451,7 @@ export type Database = {
           amount_paid?: number | null
           athlete_id?: string | null
           month?: string | null
+          notes?: string | null
           payment_date?: string | null
           payment_id?: string
           plan_type?: string | null

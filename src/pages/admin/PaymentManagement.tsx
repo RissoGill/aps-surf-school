@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
@@ -25,6 +26,7 @@ interface Payment {
   status: string;
   payment_date: string | null;
   plan_type: string | null;
+  notes: string | null;
   athlete_name?: string;
 }
 
@@ -39,7 +41,8 @@ const paymentEditSchema = z.object({
   amount_due: z.number().min(0, "Amount due must be positive"),
   amount_paid: z.number().min(0, "Amount paid must be positive"),
   payment_date: z.string().nullable(),
-  plan_type: z.string().nullable()
+  plan_type: z.string().nullable(),
+  notes: z.string().nullable()
 });
 
 const PaymentManagement = () => {
@@ -54,12 +57,14 @@ const PaymentManagement = () => {
     status: string;
     payment_date: string;
     plan_type: string;
+    notes: string;
   }>({
     amount_due: "",
     amount_paid: "",
     status: "",
     payment_date: "",
-    plan_type: ""
+    plan_type: "",
+    notes: ""
   });
 
   // Fetch all athletes for search
@@ -198,7 +203,8 @@ const PaymentManagement = () => {
       amount_paid: payment.amount_paid.toString(),
       status: payment.status,
       payment_date: payment.payment_date || "",
-      plan_type: payment.plan_type || ""
+      plan_type: payment.plan_type || "",
+      notes: payment.notes || ""
     });
   };
 
@@ -209,7 +215,8 @@ const PaymentManagement = () => {
       amount_paid: "",
       status: "",
       payment_date: "",
-      plan_type: ""
+      plan_type: "",
+      notes: ""
     });
   };
 
@@ -370,7 +377,8 @@ const PaymentManagement = () => {
         amount_due: parseFloat(editForm.amount_due),
         amount_paid: parseFloat(editForm.amount_paid),
         payment_date: editForm.payment_date || null,
-        plan_type: editForm.plan_type || null
+        plan_type: editForm.plan_type || null,
+        notes: editForm.notes || null
       });
 
       // Auto-calculate status based on amounts
@@ -397,7 +405,8 @@ const PaymentManagement = () => {
           amount_paid: validated.amount_paid,
           status: calculatedStatus,
           payment_date: validated.payment_date,
-          plan_type: validated.plan_type
+          plan_type: validated.plan_type,
+          notes: validated.notes
         })
         .eq('payment_id', paymentId);
 
@@ -699,6 +708,7 @@ const PaymentManagement = () => {
                           <TableHead>Amount Paid</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
+                          <TableHead>Notes</TableHead>
                           <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -786,6 +796,23 @@ const PaymentManagement = () => {
                                   payment.payment_date 
                                     ? new Date(payment.payment_date).toLocaleDateString()
                                     : '-'
+                                )}
+                              </TableCell>
+                              
+                              {/* Notes */}
+                              <TableCell className="max-w-xs">
+                                {isEditing ? (
+                                  <Textarea
+                                    value={editForm.notes}
+                                    onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                                    placeholder="Add notes..."
+                                    className="min-h-[60px] text-sm"
+                                    rows={2}
+                                  />
+                                ) : (
+                                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                    {payment.notes || '-'}
+                                  </div>
                                 )}
                               </TableCell>
                               
