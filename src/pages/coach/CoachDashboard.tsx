@@ -1597,9 +1597,9 @@ const CoachDashboard = () => {
 
               {/* Training Sessions Display */}
               {Object.keys(filteredTrainingSessionsByMonth).length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Monthly breakdown */}
-                  <div>
+                  <div className="min-w-0">
                     <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
                       {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
@@ -1618,24 +1618,22 @@ const CoachDashboard = () => {
                               onClick={() => toggleMonth(month)}
                               className="w-full flex items-center justify-between py-3 px-4 hover:bg-accent/70 transition-all group"
                             >
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
                                 {isExpanded ? (
-                                  <ChevronDown className="h-5 w-5 text-primary transition-transform" />
+                                  <ChevronDown className="h-5 w-5 text-primary transition-transform flex-shrink-0" />
                                 ) : (
-                                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                                 )}
-                                <div className="text-left">
+                                <div className="text-left min-w-0">
                                   <span className="text-sm font-semibold block">{monthName} {year}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {count} sessions • {totalAthletesInMonth} athletes
+                                  <span className="text-xs text-muted-foreground truncate block">
+                                    {count} {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} {totalAthletesInMonth === 1 ? 'athlete' : 'athletes'}
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="font-medium">
-                                  {count} days
-                                </Badge>
-                              </div>
+                              <Badge variant="secondary" className="font-medium text-xs flex-shrink-0">
+                                {count}
+                              </Badge>
                             </button>
                             
                             {isExpanded && (
@@ -1667,20 +1665,18 @@ const CoachDashboard = () => {
                                       <div key={date} className="border-2 border-border/50 rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
                                         {/* Enhanced Date Header */}
                                         <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-accent/40 to-accent/20 border-b-2 border-border/50">
-                                          <div className="flex items-center gap-3">
-                                            <div className="bg-primary/10 p-2 rounded-lg">
+                                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                                            <div className="bg-primary/10 p-2 rounded-lg flex-shrink-0">
                                               <Calendar className="h-4 w-4 text-primary" />
                                             </div>
-                                            <div>
-                                              <span className="text-base font-semibold">{dayName}, {dayNum}</span>
-                                              <span className="text-xs text-muted-foreground ml-2">{date}</span>
+                                            <div className="min-w-0">
+                                              <div className="text-base font-semibold">{dayName}, {dayNum}</div>
+                                              <div className="text-xs text-muted-foreground">{monthName} {year}</div>
                                             </div>
                                           </div>
-                                          <div className="flex items-center gap-2">
-                                            <Badge variant="default" className="text-xs font-medium">
-                                              {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
-                                            </Badge>
-                                          </div>
+                                          <Badge variant="default" className="text-xs font-medium flex-shrink-0">
+                                            {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
+                                          </Badge>
                                         </div>
                                         
                                         {/* Enhanced Athletes List with color-coding */}
@@ -1701,14 +1697,21 @@ const CoachDashboard = () => {
                                                       key={`${athlete.athleteId}-${idx}`}
                                                       className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/60 hover:bg-card transition-colors text-sm border border-border/30"
                                                     >
-                                                      <div className="bg-primary/10 p-1.5 rounded-full">
+                                                      <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
                                                         <User className="h-3.5 w-3.5 text-primary" />
                                                       </div>
-                                                      <span className="font-medium flex-1">{athlete.athleteName}</span>
+                                                      <span 
+                                                        className="font-medium flex-1 truncate min-w-0" 
+                                                        title={athlete.athleteName}
+                                                      >
+                                                        {athlete.athleteName}
+                                                      </span>
                                                       {athlete.beachLocation && (
-                                                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
-                                                          <MapPin className="h-3 w-3" />
-                                                          {athlete.beachLocation}
+                                                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md flex-shrink-0 whitespace-nowrap">
+                                                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                                                          <span className="truncate max-w-[100px]" title={athlete.beachLocation}>
+                                                            {athlete.beachLocation}
+                                                          </span>
                                                         </span>
                                                       )}
                                                     </div>
