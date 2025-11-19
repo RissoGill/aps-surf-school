@@ -364,7 +364,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           {selectedAthletes.length > 0 && (
             <div className="space-y-3 mt-4">
               <div className="flex items-center justify-between">
-                <Label>Selected Athletes ({selectedAthletes.length})</Label>
+                <Label className="text-sm">Selected Athletes ({selectedAthletes.length})</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -378,7 +378,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               <div className="space-y-2">
                 {selectedAthletes.map((athleteId) => (
                   <div key={athleteId} className="flex items-center gap-3 p-3 border rounded-lg bg-card">
-                    <div className="flex-1 font-medium">
+                    <div className="flex-1 font-medium text-sm">
                       {getAthleteName(athleteId)}
                     </div>
                     <Select 
