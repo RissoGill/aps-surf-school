@@ -1651,14 +1651,15 @@ const CoachDashboard = () => {
         {/* Training Days Breakdown - Enhanced */}
         {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
           <Card className="shadow-soft mb-6">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <div>
-                <h4 className="font-medium text-foreground">Your Training Session History</h4>
-                <CardDescription>Detailed breakdown of your training days</CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
+            <CardHeader className="pb-4">
+              <h4 className="font-medium text-foreground">Your Training Session History</h4>
+              <CardDescription>Detailed breakdown of your training days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* PDF Action Buttons */}
+              <div className="flex items-center gap-2 mb-6">
                 <Button 
-                  variant="outline" 
+                  variant="default" 
                   size="sm"
                   onClick={downloadTrainingHistoryPDF}
                   className="flex items-center gap-2"
@@ -1676,8 +1677,7 @@ const CoachDashboard = () => {
                   View PDF
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent>
+              
               {/* Summary Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
