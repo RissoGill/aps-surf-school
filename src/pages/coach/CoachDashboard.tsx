@@ -1804,159 +1804,137 @@ const CoachDashboard = () => {
                 </div>
               )}
 
-              {/* Training Sessions Display */}
+              {/* Training Sessions Display - Monthly View */}
               {Object.keys(filteredTrainingSessionsByMonth).length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Monthly breakdown */}
-                  <div className="min-w-0">
-                    <h4 className="text-base font-semibold mb-3 text-muted-foreground">By Month</h4>
-                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                      {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
-                        const [year, monthNum] = month.split('-');
-                        const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                        const isExpanded = expandedMonths.has(month);
-                        const count = Object.keys(sessionsByDate).length;
-                        
-                        // Calculate total athletes in month
-                        const totalAthletesInMonth = Object.values(sessionsByDate).reduce((acc, athletesList) => 
-                          acc + athletesList.length, 0);
-                        
-                        return (
-                          <div key={month} className="border-2 border-border rounded-lg overflow-hidden">
-                            <button
-                              onClick={() => toggleMonth(month)}
-                              className="w-full flex items-center justify-between py-3 px-4 hover:bg-accent/70 transition-all group"
-                            >
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                {isExpanded ? (
-                                  <ChevronDown className="h-5 w-5 text-primary transition-transform flex-shrink-0" />
-                                ) : (
-                                  <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                                )}
-                                <div className="text-left min-w-0">
-                                  <span className="text-base font-semibold block">{monthName} {year}</span>
-                                  <span className="text-sm text-muted-foreground block">
-                                    {count} {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} {totalAthletesInMonth === 1 ? 'athlete' : 'athletes'}
-                                  </span>
-                                </div>
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-foreground">Monthly Breakdown</h4>
+                  <div className="space-y-3">
+                    {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
+                      const [year, monthNum] = month.split('-');
+                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'long' });
+                      const isExpanded = expandedMonths.has(month);
+                      const count = Object.keys(sessionsByDate).length;
+                      
+                      // Calculate total athletes in month
+                      const totalAthletesInMonth = Object.values(sessionsByDate).reduce((acc, athletesList) => 
+                        acc + athletesList.length, 0);
+                      
+                      return (
+                        <div key={month} className="border-2 border-border rounded-lg overflow-hidden bg-card shadow-sm">
+                          <button
+                            onClick={() => toggleMonth(month)}
+                            className="w-full flex items-center justify-between py-4 px-5 hover:bg-accent/50 transition-all group"
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              {isExpanded ? (
+                                <ChevronDown className="h-5 w-5 text-primary transition-transform flex-shrink-0" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                              )}
+                              <div className="text-left min-w-0">
+                                <span className="text-lg font-semibold block text-foreground">{monthName} {year}</span>
+                                <span className="text-sm text-muted-foreground block">
+                                  {count} training {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} total {totalAthletesInMonth === 1 ? 'session' : 'sessions'}
+                                </span>
                               </div>
-                              <Badge variant="secondary" className="font-medium text-sm flex-shrink-0">
-                                {count}
-                              </Badge>
-                            </button>
-                            
-                            {isExpanded && (
-                              <div className="bg-muted/30 px-3 py-3 border-t-2 border-border">
-                                <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                                  {Object.entries(sessionsByDate).map(([date, athletesList]) => {
-                                    const dateObj = new Date(date);
-                                    const dayName = dateObj.toLocaleDateString('default', { weekday: 'short' });
-                                    const dayNum = dateObj.getDate();
-                                    const athleteCount = athletesList.length;
-                                    
-                                    // Group athletes by shift
-                                    const byShift: Record<string, typeof athletesList> = {};
-                                    athletesList.forEach(athlete => {
-                                      const shift = athlete.shift || 'No shift';
-                                      if (!byShift[shift]) byShift[shift] = [];
-                                      byShift[shift].push(athlete);
-                                    });
+                            </div>
+                            <Badge variant="secondary" className="font-semibold text-base flex-shrink-0 px-3 py-1">
+                              {count}
+                            </Badge>
+                          </button>
+                          
+                          {isExpanded && (
+                            <div className="bg-muted/20 px-4 py-4 border-t-2 border-border">
+                              <div className="space-y-3">
+                                {Object.entries(sessionsByDate).map(([date, athletesList]) => {
+                                  const dateObj = new Date(date);
+                                  const dayName = dateObj.toLocaleDateString('default', { weekday: 'long' });
+                                  const dayNum = dateObj.getDate();
+                                  const athleteCount = athletesList.length;
+                                  
+                                  // Group athletes by shift
+                                  const byShift: Record<string, typeof athletesList> = {};
+                                  athletesList.forEach(athlete => {
+                                    const shift = athlete.shift || 'No shift';
+                                    if (!byShift[shift]) byShift[shift] = [];
+                                    byShift[shift].push(athlete);
+                                  });
 
-                                    // Shift color mapping
-                                    const shiftColors: Record<string, {bg: string, text: string, border: string}> = {
-                                      'Morning': {bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800'},
-                                      'Afternoon': {bg: 'bg-blue-50 dark:bg-blue-950/30', text: 'text-blue-700 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-800'},
-                                      'Evening': {bg: 'bg-purple-50 dark:bg-purple-950/30', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-800'},
-                                      'No shift': {bg: 'bg-muted/50', text: 'text-muted-foreground', border: 'border-border'}
-                                    };
-                                    
-                                    return (
-                                      <div key={date} className="border-2 border-border/50 rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
-                                        {/* Enhanced Date Header */}
-                                        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-accent/40 to-accent/20 border-b-2 border-border/50">
-                                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                                            <div className="bg-primary/10 p-2 rounded-lg flex-shrink-0">
-                                              <Calendar className="h-4 w-4 text-primary" />
-                                            </div>
-                                            <div className="min-w-0">
-                                              <div className="text-lg font-semibold">{dayName}, {dayNum}</div>
-                                              <div className="text-sm text-muted-foreground">{monthName} {year}</div>
-                                            </div>
+                                  // Shift color mapping
+                                  const shiftColors: Record<string, {bg: string, text: string, border: string}> = {
+                                    'Morning': {bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800'},
+                                    'Afternoon': {bg: 'bg-blue-50 dark:bg-blue-950/30', text: 'text-blue-700 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-800'},
+                                    'Evening': {bg: 'bg-purple-50 dark:bg-purple-950/30', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-800'},
+                                    'No shift': {bg: 'bg-muted/50', text: 'text-muted-foreground', border: 'border-border'}
+                                  };
+                                  
+                                  return (
+                                    <div key={date} className="border-2 border-border/50 rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
+                                      {/* Date Header */}
+                                      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/10 to-primary/5 border-b-2 border-border/50">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                                          <div className="bg-primary/15 p-2 rounded-lg flex-shrink-0">
+                                            <Calendar className="h-4 w-4 text-primary" />
                                           </div>
-                                          <Badge variant="default" className="text-sm font-medium flex-shrink-0">
-                                            {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
-                                          </Badge>
+                                          <div className="min-w-0">
+                                            <div className="text-base font-semibold text-foreground">{dayName}, {monthName} {dayNum}</div>
+                                            <div className="text-sm text-muted-foreground">{date}</div>
+                                          </div>
                                         </div>
-                                        
-                                        {/* Enhanced Athletes List with color-coding */}
-                                        <div className="p-3 space-y-3">
-                                          {Object.entries(byShift).map(([shift, shiftAthletes]) => {
-                                            const colors = shiftColors[shift] || shiftColors['No shift'];
-                                            return (
-                                              <div key={shift} className={`${colors.bg} ${colors.border} border rounded-lg p-3`}>
-                                                {Object.keys(byShift).length > 1 && (
-                                                  <div className={`text-sm font-semibold ${colors.text} mb-2 flex items-center gap-2`}>
-                                                    <Clock className="h-3 w-3" />
-                                                    {shift}
-                                                  </div>
-                                                )}
-                                                <div className="space-y-1.5">
-                                                  {shiftAthletes.map((athlete, idx) => (
-                                                    <div 
-                                                      key={`${athlete.athleteId}-${idx}`}
-                                                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/60 hover:bg-card transition-colors text-base border border-border/30"
-                                                    >
-                                                      <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
-                                                        <User className="h-3.5 w-3.5 text-primary" />
-                                                      </div>
-                                                      <span 
-                                                        className="font-medium flex-1 truncate min-w-0" 
-                                                        title={athlete.athleteName}
-                                                      >
-                                                        {athlete.athleteName}
-                                                      </span>
-                                                      {athlete.beachLocation && (
-                                                        <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded-md flex-shrink-0">
-                                                          <MapPin className="h-3 w-3 flex-shrink-0" />
-                                                          <span className="truncate max-w-[200px]" title={athlete.beachLocation}>
-                                                            {athlete.beachLocation}
-                                                          </span>
-                                                        </span>
-                                                      )}
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
+                                        <Badge variant="default" className="text-sm font-medium flex-shrink-0">
+                                          {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
+                                        </Badge>
                                       </div>
-                                    );
-                                  })}
-                                </div>
+                                      
+                                      {/* Athletes List grouped by shift */}
+                                      <div className="p-4 space-y-3">
+                                        {Object.entries(byShift).map(([shift, shiftAthletes]) => {
+                                          const colors = shiftColors[shift] || shiftColors['No shift'];
+                                          return (
+                                            <div key={shift} className={`${colors.bg} ${colors.border} border-2 rounded-lg p-3`}>
+                                              <div className={`text-sm font-semibold ${colors.text} mb-2 flex items-center gap-2`}>
+                                                <Clock className="h-4 w-4" />
+                                                {shift} ({shiftAthletes.length})
+                                              </div>
+                                              <div className="space-y-2">
+                                                {shiftAthletes.map((athlete, idx) => (
+                                                  <div 
+                                                    key={`${athlete.athleteId}-${idx}`}
+                                                    className="flex items-center gap-2 px-3 py-2.5 rounded-md bg-card/80 hover:bg-card transition-colors border border-border/40"
+                                                  >
+                                                    <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
+                                                      <User className="h-4 w-4 text-primary" />
+                                                    </div>
+                                                    <span 
+                                                      className="font-medium flex-1 truncate min-w-0 text-foreground" 
+                                                      title={athlete.athleteName}
+                                                    >
+                                                      {athlete.athleteName}
+                                                    </span>
+                                                    {athlete.beachLocation && (
+                                                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-md flex-shrink-0">
+                                                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                                                        <span className="truncate max-w-[150px]" title={athlete.beachLocation}>
+                                                          {athlete.beachLocation}
+                                                        </span>
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Yearly breakdown */}
-                  <div>
-                    <h4 className="text-base font-semibold mb-3 text-muted-foreground">By Year</h4>
-                    {Object.keys(trainingDaysByYear).length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {Object.entries(trainingDaysByYear).map(([year, count]) => (
-                          <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-accent/30 to-accent/20 hover:from-accent/40 hover:to-accent/30 transition-all border border-border">
-                            <span className="text-sm font-semibold">{year}</span>
-                            <Badge variant="secondary" className="font-medium">{count} days</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
