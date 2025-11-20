@@ -1481,7 +1481,7 @@ const CoachDashboard = () => {
                     <div className="text-xs text-muted-foreground">Athletes Trained</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-medium text-primary truncate px-2">{summaryStats.mostActiveBeach}</div>
+                    <div className="text-2xl font-medium text-primary px-2 break-words whitespace-normal">{summaryStats.mostActiveBeach}</div>
                     <div className="text-xs text-muted-foreground">Most Active Beach</div>
                   </div>
                   <div className="text-center">
