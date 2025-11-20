@@ -1900,14 +1900,14 @@ const CoachDashboard = () => {
                                                 {shiftAthletes.map((athlete, idx) => (
                                                   <div 
                                                     key={`${athlete.athleteId}-${idx}`}
-                                                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
                                                   >
                                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                                       <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
                                                         <User className="h-4 w-4 text-primary" />
                                                       </div>
                                                       <span 
-                                                        className="text-base font-semibold text-foreground" 
+                                                        className="text-base font-semibold text-foreground truncate" 
                                                         title={athlete.athleteName}
                                                       >
                                                         {athlete.athleteName}
@@ -1916,7 +1916,7 @@ const CoachDashboard = () => {
                                                     {athlete.beachLocation && (
                                                       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md flex-shrink-0">
                                                         <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                                                        <span className="font-medium">{athlete.beachLocation}</span>
+                                                        <span className="font-medium whitespace-nowrap">{athlete.beachLocation}</span>
                                                       </div>
                                                     )}
                                                   </div>
