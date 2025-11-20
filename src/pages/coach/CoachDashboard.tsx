@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind, Euro, RefreshCw, Filter, Download, FileText, Clock } from "lucide-react";
+import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as ImageIcon, Video, Waves, ChevronDown, ChevronRight, Wind, Euro, RefreshCw, Filter, Download, FileText, Clock, Eye } from "lucide-react";
+import html2pdf from "html2pdf.js";
+import { format } from "date-fns";
+import apsLogoImage from "@/assets/aps-logo.png";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -1048,35 +1051,232 @@ const CoachDashboard = () => {
     setHistorySearchQuery('');
   };
 
-  // Export to CSV
-  const exportToCSV = () => {
-    const csvData = [];
-    csvData.push(['Date', 'Day', 'Athlete', 'Shift', 'Beach Location']);
-    
-    Object.entries(filteredTrainingSessionsByMonth).forEach(([month, sessions]) => {
-      Object.entries(sessions).forEach(([date, athletesList]) => {
-        athletesList.forEach(athlete => {
-          const dateObj = new Date(date);
-          const dayName = dateObj.toLocaleDateString('default', { weekday: 'long' });
-          csvData.push([
-            date,
-            dayName,
-            athlete.athleteName,
-            athlete.shift || 'N/A',
-            athlete.beachLocation || 'N/A'
-          ]);
-        });
-      });
-    });
-    
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `training-history-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  // Generate HTML for PDF export
+  const generateTrainingHistoryHTML = (): string => {
+    const activeFilters = [];
+    if (historyDateRange.start) activeFilters.push(`From: ${historyDateRange.start}`);
+    if (historyDateRange.end) activeFilters.push(`To: ${historyDateRange.end}`);
+    if (historyAthleteFilter !== 'all') activeFilters.push(`Athlete: ${historyAthleteFilter}`);
+    if (historyBeachFilter !== 'all') activeFilters.push(`Beach: ${historyBeachFilter}`);
+    if (historySearchQuery) activeFilters.push(`Search: ${historySearchQuery}`);
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Training Session History Report</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+              border-bottom: 2px solid #0077be;
+              padding-bottom: 20px;
+            }
+            .header img {
+              width: 120px;
+              margin-bottom: 15px;
+            }
+            .header h1 {
+              margin: 10px 0;
+              color: #0077be;
+              font-size: 24px;
+            }
+            .header p {
+              margin: 5px 0;
+              color: #666;
+              font-size: 14px;
+            }
+            .summary-stats {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 15px;
+              margin-bottom: 30px;
+            }
+            .stat-box {
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              padding: 15px;
+              text-align: center;
+              background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+            }
+            .stat-value {
+              font-size: 24px;
+              font-weight: bold;
+              color: #0077be;
+              margin-bottom: 5px;
+            }
+            .stat-label {
+              font-size: 12px;
+              color: #666;
+            }
+            .filters-info {
+              background: #f8f9fa;
+              padding: 10px 15px;
+              border-radius: 5px;
+              margin-bottom: 20px;
+              font-size: 12px;
+              color: #666;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            th {
+              background: #0077be;
+              color: white;
+              padding: 12px;
+              text-align: left;
+              font-weight: 600;
+              font-size: 14px;
+            }
+            td {
+              padding: 10px 12px;
+              border-bottom: 1px solid #e0e0e0;
+              font-size: 13px;
+            }
+            tr:nth-child(even) {
+              background: #f8f9fa;
+            }
+            .month-header {
+              background: #e3f2fd;
+              font-weight: bold;
+              color: #0077be;
+              padding: 8px 12px;
+              font-size: 14px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 30px;
+              padding-top: 20px;
+              border-top: 1px solid #e0e0e0;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <img src="${apsLogoImage}" alt="APS Logo" />
+            <h1>Training Session History Report</h1>
+            <p><strong>Coach:</strong> ${coachDisplayName}</p>
+            <p><strong>Generated:</strong> ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+            ${activeFilters.length > 0 ? `<p><strong>Applied Filters:</strong> ${activeFilters.join(' | ')}</p>` : ''}
+          </div>
+
+          <div class="summary-stats">
+            <div class="stat-box">
+              <div class="stat-value">${summaryStats.totalDays}</div>
+              <div class="stat-label">Total Days</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${summaryStats.uniqueAthletesCount}</div>
+              <div class="stat-label">Athletes Trained</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${summaryStats.mostActiveBeach}</div>
+              <div class="stat-label">Most Active Beach</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">${summaryStats.avgAthletesPerSession}</div>
+              <div class="stat-label">Avg per Session</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Athlete</th>
+                <th>Shift</th>
+                <th>Beach Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Object.entries(filteredTrainingSessionsByMonth).map(([month, sessions]) => `
+                <tr>
+                  <td colspan="5" class="month-header">${month}</td>
+                </tr>
+                ${Object.entries(sessions).map(([date, athletesList]) => 
+                  athletesList.map(athlete => {
+                    const dateObj = new Date(date);
+                    const dayName = dateObj.toLocaleDateString('default', { weekday: 'long' });
+                    return `
+                      <tr>
+                        <td>${date}</td>
+                        <td>${dayName}</td>
+                        <td>${athlete.athleteName}</td>
+                        <td>${athlete.shift || 'N/A'}</td>
+                        <td>${athlete.beachLocation || 'N/A'}</td>
+                      </tr>
+                    `;
+                  }).join('')
+                ).join('')}
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <p>APS - Academia de Performance Surf | Training Session History Report</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  // View PDF in new tab
+  const viewTrainingHistoryPDF = async () => {
+    try {
+      const htmlContent = generateTrainingHistoryHTML();
+      const element = document.createElement('div');
+      element.innerHTML = htmlContent;
+
+      const opt = {
+        margin: 10,
+        filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      };
+
+      const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
+      const pdfUrl = URL.createObjectURL(pdf);
+      window.open(pdfUrl, '_blank');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
+    }
+  };
+
+  // Download PDF
+  const downloadTrainingHistoryPDF = async () => {
+    try {
+      const htmlContent = generateTrainingHistoryHTML();
+      const element = document.createElement('div');
+      element.innerHTML = htmlContent;
+
+      const opt = {
+        margin: 10,
+        filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      };
+
+      await html2pdf().from(element).set(opt).save();
+      toast({ title: "Success", description: "PDF downloaded successfully" });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({ title: "Error", description: "Failed to download PDF", variant: "destructive" });
+    }
   };
 
   // State for expanded months
@@ -1460,11 +1660,20 @@ const CoachDashboard = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={exportToCSV}
+                  onClick={downloadTrainingHistoryPDF}
                   className="flex items-center gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  Export CSV
+                  Download PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={viewTrainingHistoryPDF}
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  View PDF
                 </Button>
               </div>
             </CardHeader>
