@@ -1470,7 +1470,7 @@ const CoachDashboard = () => {
             </CardHeader>
             <CardContent>
               {/* Summary Statistics */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
                   <div className="text-2xl font-medium text-primary">{summaryStats.totalDays}</div>
                   <div className="text-xs text-muted-foreground mt-1">Total Days</div>
