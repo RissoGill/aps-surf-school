@@ -1480,7 +1480,7 @@ const CoachDashboard = () => {
                   <div className="text-xs text-muted-foreground mt-1">Athletes Trained</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
-                  <div className="text-xl font-medium text-primary px-2">
+                  <div className="text-xl font-medium text-primary">
                     {summaryStats.mostActiveBeach}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">Most Active Beach</div>
