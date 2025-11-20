@@ -1473,19 +1473,19 @@ const CoachDashboard = () => {
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg mb-6 border border-primary/20">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-primary">{summaryStats.totalDays}</div>
+                    <div className="text-2xl font-medium text-primary">{summaryStats.totalDays}</div>
                     <div className="text-xs text-muted-foreground">Total Days</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-primary">{summaryStats.uniqueAthletesCount}</div>
+                    <div className="text-2xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
                     <div className="text-xs text-muted-foreground">Athletes Trained</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-primary truncate px-2">{summaryStats.mostActiveBeach}</div>
+                    <div className="text-2xl font-medium text-primary truncate px-2">{summaryStats.mostActiveBeach}</div>
                     <div className="text-xs text-muted-foreground">Most Active Beach</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-semibold text-primary">{summaryStats.avgAthletesPerSession}</div>
+                    <div className="text-2xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
                     <div className="text-xs text-muted-foreground">Avg per Session</div>
                   </div>
                 </div>
