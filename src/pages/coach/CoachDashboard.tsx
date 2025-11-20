@@ -1891,33 +1891,33 @@ const CoachDashboard = () => {
                                         {Object.entries(byShift).map(([shift, shiftAthletes]) => {
                                           const colors = shiftColors[shift] || shiftColors['No shift'];
                                           return (
-                                            <div key={shift} className={`${colors.bg} ${colors.border} border-2 rounded-lg p-3`}>
-                                              <div className={`text-sm font-semibold ${colors.text} mb-2 flex items-center gap-2`}>
+                                            <div key={shift} className="space-y-2">
+                                              <div className={`text-sm font-bold ${colors.text} flex items-center gap-2 px-2`}>
                                                 <Clock className="h-4 w-4" />
-                                                {shift} ({shiftAthletes.length})
+                                                {shift} - {shiftAthletes.length} {shiftAthletes.length === 1 ? 'athlete' : 'athletes'}
                                               </div>
-                                              <div className="space-y-2">
+                                              <div className="space-y-2 pl-2">
                                                 {shiftAthletes.map((athlete, idx) => (
                                                   <div 
                                                     key={`${athlete.athleteId}-${idx}`}
-                                                    className="flex items-center gap-2 px-3 py-2.5 rounded-md bg-background hover:bg-accent/50 transition-colors border border-border"
+                                                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
                                                   >
-                                                    <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
-                                                      <User className="h-4 w-4 text-primary" />
-                                                    </div>
-                                                    <span 
-                                                      className="font-semibold flex-1 min-w-0 text-foreground" 
-                                                      title={athlete.athleteName}
-                                                    >
-                                                      {athlete.athleteName}
-                                                    </span>
-                                                    {athlete.beachLocation && (
-                                                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-md flex-shrink-0">
-                                                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                                                        <span className="truncate max-w-[150px]" title={athlete.beachLocation}>
-                                                          {athlete.beachLocation}
-                                                        </span>
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                      <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
+                                                        <User className="h-4 w-4 text-primary" />
+                                                      </div>
+                                                      <span 
+                                                        className="text-base font-semibold text-foreground" 
+                                                        title={athlete.athleteName}
+                                                      >
+                                                        {athlete.athleteName}
                                                       </span>
+                                                    </div>
+                                                    {athlete.beachLocation && (
+                                                      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md flex-shrink-0">
+                                                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                                                        <span className="font-medium">{athlete.beachLocation}</span>
+                                                      </div>
                                                     )}
                                                   </div>
                                                 ))}
