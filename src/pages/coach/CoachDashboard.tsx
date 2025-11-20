@@ -1600,7 +1600,7 @@ const CoachDashboard = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Monthly breakdown */}
                   <div className="min-w-0">
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h4>
+                    <h4 className="text-base font-semibold mb-3 text-muted-foreground">By Month</h4>
                     <div className="space-y-2 max-h-[500px] overflow-y-auto">
                       {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
                         const [year, monthNum] = month.split('-');
@@ -1625,13 +1625,13 @@ const CoachDashboard = () => {
                                   <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                                 )}
                                 <div className="text-left min-w-0">
-                                  <span className="text-sm font-semibold block">{monthName} {year}</span>
-                                  <span className="text-xs text-muted-foreground truncate block">
+                                  <span className="text-base font-semibold block">{monthName} {year}</span>
+                                  <span className="text-sm text-muted-foreground block">
                                     {count} {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} {totalAthletesInMonth === 1 ? 'athlete' : 'athletes'}
                                   </span>
                                 </div>
                               </div>
-                              <Badge variant="secondary" className="font-medium text-xs flex-shrink-0">
+                              <Badge variant="secondary" className="font-medium text-sm flex-shrink-0">
                                 {count}
                               </Badge>
                             </button>
@@ -1670,11 +1670,11 @@ const CoachDashboard = () => {
                                               <Calendar className="h-4 w-4 text-primary" />
                                             </div>
                                             <div className="min-w-0">
-                                              <div className="text-base font-semibold">{dayName}, {dayNum}</div>
-                                              <div className="text-xs text-muted-foreground">{monthName} {year}</div>
+                                              <div className="text-lg font-semibold">{dayName}, {dayNum}</div>
+                                              <div className="text-sm text-muted-foreground">{monthName} {year}</div>
                                             </div>
                                           </div>
-                                          <Badge variant="default" className="text-xs font-medium flex-shrink-0">
+                                          <Badge variant="default" className="text-sm font-medium flex-shrink-0">
                                             {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
                                           </Badge>
                                         </div>
@@ -1686,7 +1686,7 @@ const CoachDashboard = () => {
                                             return (
                                               <div key={shift} className={`${colors.bg} ${colors.border} border rounded-lg p-3`}>
                                                 {Object.keys(byShift).length > 1 && (
-                                                  <div className={`text-xs font-semibold ${colors.text} mb-2 flex items-center gap-2`}>
+                                                  <div className={`text-sm font-semibold ${colors.text} mb-2 flex items-center gap-2`}>
                                                     <Clock className="h-3 w-3" />
                                                     {shift}
                                                   </div>
@@ -1695,7 +1695,7 @@ const CoachDashboard = () => {
                                                   {shiftAthletes.map((athlete, idx) => (
                                                     <div 
                                                       key={`${athlete.athleteId}-${idx}`}
-                                                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/60 hover:bg-card transition-colors text-sm border border-border/30"
+                                                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-card/60 hover:bg-card transition-colors text-base border border-border/30"
                                                     >
                                                       <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
                                                         <User className="h-3.5 w-3.5 text-primary" />
@@ -1707,9 +1707,9 @@ const CoachDashboard = () => {
                                                         {athlete.athleteName}
                                                       </span>
                                                       {athlete.beachLocation && (
-                                                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md flex-shrink-0 whitespace-nowrap">
+                                                        <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded-md flex-shrink-0">
                                                           <MapPin className="h-3 w-3 flex-shrink-0" />
-                                                          <span className="truncate max-w-[100px]" title={athlete.beachLocation}>
+                                                          <span className="truncate max-w-[200px]" title={athlete.beachLocation}>
                                                             {athlete.beachLocation}
                                                           </span>
                                                         </span>
@@ -1735,7 +1735,7 @@ const CoachDashboard = () => {
                   
                   {/* Yearly breakdown */}
                   <div>
-                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h4>
+                    <h4 className="text-base font-semibold mb-3 text-muted-foreground">By Year</h4>
                     {Object.keys(trainingDaysByYear).length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
                     ) : (
