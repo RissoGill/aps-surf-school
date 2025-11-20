@@ -1900,13 +1900,13 @@ const CoachDashboard = () => {
                                                 {shiftAthletes.map((athlete, idx) => (
                                                   <div 
                                                     key={`${athlete.athleteId}-${idx}`}
-                                                    className="flex items-center gap-2 px-3 py-2.5 rounded-md bg-card/80 hover:bg-card transition-colors border border-border/40"
+                                                    className="flex items-center gap-2 px-3 py-2.5 rounded-md bg-background hover:bg-accent/50 transition-colors border border-border"
                                                   >
                                                     <div className="bg-primary/10 p-1.5 rounded-full flex-shrink-0">
                                                       <User className="h-4 w-4 text-primary" />
                                                     </div>
                                                     <span 
-                                                      className="font-medium flex-1 truncate min-w-0 text-foreground" 
+                                                      className="font-semibold flex-1 min-w-0 text-foreground" 
                                                       title={athlete.athleteName}
                                                     >
                                                       {athlete.athleteName}
