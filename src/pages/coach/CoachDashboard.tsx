@@ -1470,24 +1470,24 @@ const CoachDashboard = () => {
             </CardHeader>
             <CardContent>
               {/* Summary Statistics */}
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg mb-6 border border-primary/20">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-medium text-primary">{summaryStats.totalDays}</div>
-                    <div className="text-xs text-muted-foreground">Total Days</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
+                  <div className="text-2xl font-medium text-primary">{summaryStats.totalDays}</div>
+                  <div className="text-xs text-muted-foreground mt-1">Total Days</div>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
+                  <div className="text-2xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
+                  <div className="text-xs text-muted-foreground mt-1">Athletes Trained</div>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
+                  <div className="text-2xl font-medium text-primary px-2 break-words whitespace-normal">
+                    {summaryStats.mostActiveBeach}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
-                    <div className="text-xs text-muted-foreground">Athletes Trained</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-medium text-primary px-2 break-words whitespace-normal">{summaryStats.mostActiveBeach}</div>
-                    <div className="text-xs text-muted-foreground">Most Active Beach</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
-                    <div className="text-xs text-muted-foreground">Avg per Session</div>
-                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">Most Active Beach</div>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
+                  <div className="text-2xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
+                  <div className="text-xs text-muted-foreground mt-1">Avg per Session</div>
                 </div>
               </div>
 
