@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import apsLogoImage from "@/assets/aps-logo.png";
+import html2pdf from "html2pdf.js";
 
 type ReportType = "financial" | "personal" | "overall" | "attendance" | "coach_payments";
 
@@ -242,31 +243,53 @@ export const ReportsCard = () => {
     }
   };
 
-  const viewReport = () => {
+  const viewReport = async () => {
     if (!reportData) return;
 
-    const reportWindow = window.open("", "_blank");
-    if (!reportWindow) return;
-
     const htmlContent = generateReportHTML(reportData);
-    reportWindow.document.write(htmlContent);
-    reportWindow.document.close();
+    const element = document.createElement('div');
+    element.innerHTML = htmlContent;
+
+    const opt = {
+      margin: 10,
+      filename: `${reportData.type}_report_${format(reportData.generatedAt, "yyyy-MM-dd")}.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+    };
+
+    try {
+      const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
+      const pdfUrl = URL.createObjectURL(pdf);
+      window.open(pdfUrl, '_blank');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    }
   };
 
-  const downloadReport = () => {
+  const downloadReport = async () => {
     if (!reportData) return;
 
     const htmlContent = generateReportHTML(reportData);
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${reportData.type}_report_${format(reportData.generatedAt, "yyyy-MM-dd")}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Report downloaded");
+    const element = document.createElement('div');
+    element.innerHTML = htmlContent;
+
+    const opt = {
+      margin: 10,
+      filename: `${reportData.type}_report_${format(reportData.generatedAt, "yyyy-MM-dd")}.pdf`,
+      image: { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+    };
+
+    try {
+      await html2pdf().from(element).set(opt).save();
+      toast.success("PDF downloaded successfully");
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Failed to download PDF');
+    }
   };
 
   const generateReportHTML = (report: ReportData): string => {
@@ -672,11 +695,11 @@ export const ReportsCard = () => {
           <div className="flex flex-col gap-2 pt-4 border-t">
             <Button onClick={downloadReport} variant="default" className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Download Report
+              Download PDF
             </Button>
             <Button onClick={viewReport} variant="outline" className="w-full">
               <Eye className="mr-2 h-4 w-4" />
-              View Report
+              View PDF
             </Button>
           </div>
         )}
