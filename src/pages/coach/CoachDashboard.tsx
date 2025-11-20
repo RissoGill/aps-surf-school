@@ -1509,7 +1509,7 @@ const CoachDashboard = () => {
                   </Button>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* Date Range Filter */}
                   <div className="space-y-1">
                     <Label className="text-xs">Start Date</Label>
