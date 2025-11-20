@@ -1472,21 +1472,21 @@ const CoachDashboard = () => {
               {/* Summary Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
-                  <div className="text-2xl font-medium text-primary">{summaryStats.totalDays}</div>
+                  <div className="text-xl font-medium text-primary">{summaryStats.totalDays}</div>
                   <div className="text-xs text-muted-foreground mt-1">Total Days</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
-                  <div className="text-2xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
+                  <div className="text-xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
                   <div className="text-xs text-muted-foreground mt-1">Athletes Trained</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
-                  <div className="text-2xl font-medium text-primary px-2 break-words whitespace-normal">
+                  <div className="text-xl font-medium text-primary px-2">
                     {summaryStats.mostActiveBeach}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">Most Active Beach</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
-                  <div className="text-2xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
+                  <div className="text-xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
                   <div className="text-xs text-muted-foreground mt-1">Avg per Session</div>
                 </div>
               </div>
