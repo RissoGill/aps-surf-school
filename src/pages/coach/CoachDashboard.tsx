@@ -1900,21 +1900,21 @@ const CoachDashboard = () => {
                                                 {shiftAthletes.map((athlete, idx) => (
                                                   <div 
                                                     key={`${athlete.athleteId}-${idx}`}
-                                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                                                    className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
                                                   >
                                                     <div className="flex items-center gap-3 flex-1">
                                                       <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
                                                         <User className="h-4 w-4 text-primary" />
                                                       </div>
                                                       <span 
-                                                        className="text-xs font-medium text-foreground leading-snug" 
+                                                        className="text-[10px] font-normal text-foreground leading-tight" 
                                                         title={athlete.athleteName}
                                                       >
                                                         {athlete.athleteName}
                                                       </span>
                                                     </div>
                                                     {athlete.beachLocation && (
-                                                      <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md flex-shrink-0 max-w-[140px] overflow-hidden">
+                                                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-md max-w-[120px] overflow-hidden">
                                                         <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                                                         <span className="font-medium truncate" title={athlete.beachLocation}>{athlete.beachLocation}</span>
                                                       </div>
