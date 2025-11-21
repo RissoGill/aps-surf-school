@@ -837,8 +837,8 @@ const AdministrationDashboard = () => {
                 }}
               >
                 <CardContent className="p-0">
-                  <div className="flex items-center p-4">
-                    <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center mr-4 flex-shrink-0`}>
+                  <div className="flex flex-col md:flex-row md:items-center p-4 gap-4">
+                    <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
                       <action.icon className={`h-6 w-6 ${textColorClass}`} />
                     </div>
                   
@@ -850,7 +850,7 @@ const AdministrationDashboard = () => {
                     <Button 
                       variant="default" 
                       size="sm"
-                      className="ml-4 touch-friendly"
+                      className="w-full md:w-auto touch-friendly shrink-0"
                     >
                       {action.action}
                     </Button>
