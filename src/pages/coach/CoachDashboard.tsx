@@ -1254,7 +1254,7 @@ const CoachDashboard = () => {
 
       const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
       const pdfUrl = URL.createObjectURL(pdf);
-      window.open(pdfUrl, '_blank');
+      window.location.href = pdfUrl;
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
