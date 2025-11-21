@@ -10,10 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AdministrationLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -32,7 +34,7 @@ const AdministrationLogin = () => {
 
       if (error) {
         toast({
-          title: "Login Failed",
+          title: t('login.error'),
           description: error.message,
           variant: "destructive"
         });
@@ -51,8 +53,8 @@ const AdministrationLogin = () => {
       if (roleError || !roleData) {
         await supabase.auth.signOut();
         toast({
-          title: "Access Denied",
-          description: "You do not have administrator privileges.",
+          title: t('login.accessDenied'),
+          description: t('login.noAdminPrivileges'),
           variant: "destructive"
         });
         setIsLoading(false);
@@ -60,14 +62,14 @@ const AdministrationLogin = () => {
       }
 
       toast({
-        title: "Login Successful",
-        description: "Welcome back, Administrator!",
+        title: t('login.success'),
+        description: t('login.welcomeAdmin'),
       });
       navigate("/dashboard/administration");
     } catch (error) {
       toast({
-        title: "Login Failed",
-        description: "An unexpected error occurred.",
+        title: t('login.error'),
+        description: t('login.unexpectedError'),
         variant: "destructive"
       });
     } finally {
@@ -84,7 +86,7 @@ const AdministrationLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Administration Login" showBack backTo="/" />
+      <AppHeader title={t('login.admin')} showBack backTo="/" />
       
       <main className="mobile-container py-8">
         <Card className="shadow-medium animate-slide-up">
@@ -92,21 +94,21 @@ const AdministrationLogin = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary/50 mb-4 mx-auto">
               <Settings className="h-8 w-8 text-secondary-foreground" />
             </div>
-            <CardTitle className="text-2xl">Admin Portal</CardTitle>
+            <CardTitle className="text-2xl">{t('login.adminPortal')}</CardTitle>
             <CardDescription>
-              Full access to school management system
+              {t('login.adminDescription')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('login.email')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="admin@aps.com"
+                  placeholder={t('login.adminPlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -115,12 +117,12 @@ const AdministrationLogin = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleInputChange}
                   required
@@ -134,7 +136,7 @@ const AdministrationLogin = () => {
                 variant="secondary"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </form>
           </CardContent>

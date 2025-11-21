@@ -17,6 +17,7 @@ import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSumm
 import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { calculatePackBalance } from "@/utils/packBalance";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Athlete {
   athlete_id: string;
@@ -56,6 +57,7 @@ interface AttendanceRecord {
 const AthleteDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
   const [userAuthId, setUserAuthId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -97,8 +99,8 @@ const AthleteDashboard = () => {
       if (error) {
         console.error('Error fetching athlete:', error);
         toast({
-          title: "Error",
-          description: "Failed to load athlete profile",
+          title: t('common.error'),
+          description: t('athlete.dashboard.errorLoadingProfile'),
           variant: "destructive",
         });
         throw error;
@@ -299,8 +301,8 @@ useEffect(() => {
   const handleLogout = () => {
     localStorage.removeItem('athleteSession');
     toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out",
+      title: t('athlete.dashboard.loggedOut'),
+      description: t('athlete.dashboard.loggedOutDescription'),
     });
     navigate("/login/athlete");
   };
@@ -308,8 +310,8 @@ useEffect(() => {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['athlete', userAuthId, userEmail] });
     toast({
-      title: "Refreshed",
-      description: "Athlete data has been updated",
+      title: t('athlete.dashboard.refreshed'),
+      description: t('athlete.dashboard.refreshedDescription'),
     });
   };
 
@@ -387,7 +389,7 @@ useEffect(() => {
   });
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Athlete Dashboard" showBack backTo="/" />
+      <AppHeader title={t('athlete.dashboard.title')} showBack backTo="/" />
       
       {/* Logout Button */}
       <div className="mobile-container pt-4">
@@ -398,7 +400,7 @@ useEffect(() => {
           className="ml-auto flex items-center gap-2"
         >
           <LogOut className="h-4 w-4 text-primary-foreground shrink-0" strokeWidth={2.5} />
-          Logout
+          {t('athlete.dashboard.logout')}
         </Button>
       </div>
       
@@ -418,7 +420,7 @@ useEffect(() => {
               size="icon"
               onClick={handleRefresh}
               className="absolute top-4 right-4 h-8 w-8"
-              title="Refresh data"
+              title={t('athlete.dashboard.refresh')}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -449,16 +451,16 @@ useEffect(() => {
                 <div className="w-20 h-20 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trophy className="h-10 w-10 text-warning" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Profile Not Linked</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">{t('athlete.dashboard.profileNotLinked')}</h3>
                 <p className="text-muted-foreground mb-3">
-                  Your account is not yet linked to an athlete profile.
+                  {t('athlete.dashboard.profileNotLinkedDesc')}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Please contact your coach or administrator to link your account.
+                  {t('athlete.dashboard.contactAdmin')}
                 </p>
               </div>
             ) : (
-              <p className="text-center text-muted-foreground">Loading...</p>
+              <p className="text-center text-muted-foreground">{t('common.loading')}</p>
             )}
           </CardContent>
         </Card>
@@ -471,43 +473,43 @@ useEffect(() => {
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <User className="h-3 w-3 mr-1 inline sm:hidden" />
-              Personal
+              {t('athlete.tabs.personal')}
             </TabsTrigger>
             <TabsTrigger 
               value="training" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Clock className="h-3 w-3 mr-1 inline sm:hidden" />
-              Training
+              {t('athlete.tabs.training')}
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Calendar className="h-3 w-3 mr-1 inline sm:hidden" />
-              Attendance
+              {t('athlete.tabs.attendance')}
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
               <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
-              <span className="hidden sm:inline">Championships</span>
-              <span className="sm:hidden">Champs</span>
+              <span className="hidden sm:inline">{t('athlete.tabs.championships')}</span>
+              <span className="sm:hidden">{t('shared.championships.short')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <ImageIcon className="h-3 w-3 mr-1 inline sm:hidden" />
-              Media
+              {t('athlete.tabs.media')}
             </TabsTrigger>
             <TabsTrigger 
               value="estagios" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
-              Estágios
+              {t('athlete.tabs.estagios')}
             </TabsTrigger>
           </TabsList>
 
