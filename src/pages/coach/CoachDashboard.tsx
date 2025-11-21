@@ -1902,7 +1902,7 @@ const CoachDashboard = () => {
                                                     key={`${athlete.athleteId}-${idx}`}
                                                     className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
                                                   >
-                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 flex-1">
                                                       <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
                                                         <User className="h-4 w-4 text-primary" />
                                                       </div>
