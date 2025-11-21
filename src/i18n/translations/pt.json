@@ -105,5 +105,265 @@
   },
   "footer": {
     "rights": "Todos os direitos reservados"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Painel de Administração",
+      "subtitle": "Gerir dados do sistema e ver relatórios",
+      "refresh": "Atualizar",
+      "loggedInAs": "Sessão iniciada como",
+      "signOut": "Terminar Sessão"
+    },
+    "stats": {
+      "totalReceived": "Total Recebido desde Setembro",
+      "totalReceivedMonth": "Total Recebido Este Mês",
+      "outstandingLearningMonth": "Em Dívida Learning/Pré-Comp (Mês)",
+      "outstandingCompetitionMonth": "Em Dívida Competição (Mês)",
+      "outstandingLearningSept": "Em Dívida Learning/Pré-Comp (Set+)",
+      "outstandingCompetitionSept": "Em Dívida Competição (Set+)",
+      "totalPaidCoaches": "Total Pago a Treinadores (Set+)",
+      "coachPaymentsMonth": "Pagamentos a Treinadores Este Mês",
+      "totalLearning": "Total Atletas Learning",
+      "totalPreCompetition": "Total Atletas Pré-Competição",
+      "totalCompetition": "Total Atletas Competição"
+    },
+    "management": {
+      "title": "Ferramentas de Gestão",
+      "users": "Gerir Utilizadores",
+      "usersDesc": "Adicionar, editar e remover treinadores, atletas e encarregados",
+      "athletes": "Gestão de Atletas",
+      "athletesDesc": "Acesso completo aos perfis e dados de atletas",
+      "payments": "Administração de Pagamentos",
+      "paymentsDesc": "Definir mensalidades, marcar pagamentos e ver relatórios financeiros",
+      "attendance": "Gestão de Presenças",
+      "attendanceDesc": "Pesquisar atletas e gerir os seus registos de presença",
+      "viewUsers": "Ver Utilizadores",
+      "manageAthletes": "Gerir Atletas",
+      "paymentSettings": "Configurações de Pagamento",
+      "manageAttendance": "Gerir Presenças"
+    },
+    "coachAttendance": {
+      "title": "Gestão de Presenças por Treinador",
+      "subtitle": "Ver desagregação de sessões de treino por treinador",
+      "selectCoach": "Selecionar Treinador",
+      "allCoaches": "Todos os Treinadores",
+      "trainingDays": "Dias de Treino",
+      "year": "Ano"
+    }
+  },
+  "coach": {
+    "dashboard": {
+      "title": "Painel do Treinador",
+      "welcome": "Bem-vindo,",
+      "search": "Pesquisar Atletas",
+      "searchPlaceholder": "Introduza nome ou ID do atleta",
+      "registerAttendance": "Registar Presença",
+      "bulkRegister": "Registo em Massa",
+      "trainingHistory": "Relatório de Histórico de Treinos",
+      "noResults": "Nenhum atleta encontrado",
+      "quickStats": "Estatísticas Rápidas",
+      "totalSessions": "Total de Sessões",
+      "thisMonth": "Este Mês",
+      "logout": "Terminar Sessão"
+    },
+    "attendance": {
+      "date": "Data",
+      "shift": "Turno",
+      "morning": "Manhã",
+      "afternoon": "Tarde",
+      "beach": "Praia",
+      "notes": "Notas",
+      "photos": "Fotos",
+      "videos": "Vídeos",
+      "uploadPhotos": "Carregar Fotos",
+      "uploadVideos": "Carregar Vídeos",
+      "saveAttendance": "Guardar Presença",
+      "cancel": "Cancelar",
+      "select": "Selecionar"
+    },
+    "tabs": {
+      "personal": "Info Pessoal",
+      "training": "Info de Treino",
+      "attendance": "Presenças",
+      "annualSummary": "Resumo Anual",
+      "media": "Multimédia",
+      "championships": "Campeonatos",
+      "estagios": "Estágios",
+      "payments": "Pagamentos"
+    },
+    "status": {
+      "present": "Presente",
+      "absent": "Ausente",
+      "justified": "Justificado"
+    },
+    "report": {
+      "title": "Relatório de Histórico de Treinos",
+      "filters": "Filtros",
+      "dateRange": "Intervalo de Datas",
+      "athlete": "Atleta",
+      "beach": "Praia",
+      "allAthletes": "Todos os Atletas",
+      "allBeaches": "Todas as Praias",
+      "viewPDF": "Ver PDF",
+      "downloadPDF": "Descarregar PDF",
+      "generating": "A gerar PDF...",
+      "clearFilters": "Limpar Filtros",
+      "summary": "Resumo",
+      "sessions": "sessões",
+      "athletes": "atletas",
+      "beaches": "praias"
+    }
+  },
+  "athlete": {
+    "dashboard": {
+      "title": "Painel do Atleta",
+      "logout": "Terminar Sessão",
+      "refresh": "Atualizar dados",
+      "profileNotLinked": "Perfil Não Associado",
+      "profileNotLinkedDesc": "A sua conta ainda não está associada a um perfil de atleta",
+      "contactAdmin": "Contacte o seu treinador ou administrador para associar a conta",
+      "welcome": "Bem-vindo,",
+      "level": "Nível"
+    },
+    "tabs": {
+      "personal": "Pessoal",
+      "training": "Treino",
+      "attendance": "Presenças",
+      "annualSummary": "Resumo Anual",
+      "media": "Multimédia",
+      "championships": "Campeonatos",
+      "estagios": "Estágios"
+    },
+    "attendance": {
+      "monthNavigation": "Navegar meses",
+      "summary": "Resumo",
+      "noRecords": "Sem registos de presença este mês",
+      "present": "Presente",
+      "justified": "Justificado",
+      "absent": "Ausente"
+    },
+    "personal": {
+      "name": "Nome",
+      "email": "Email",
+      "phone": "Telefone",
+      "dateOfBirth": "Data de Nascimento",
+      "address": "Morada"
+    },
+    "training": {
+      "level": "Nível de Surf",
+      "planType": "Tipo de Plano",
+      "trainingDays": "Dias de Treino",
+      "trainingsPerWeek": "Treinos por Semana"
+    },
+    "packBalance": {
+      "title": "Saldo do Pack",
+      "remaining": "Sessões Restantes",
+      "history": "Histórico de Compras"
+    }
+  },
+  "guardian": {
+    "dashboard": {
+      "title": "Painel do Encarregado",
+      "familyArea": "Área Familiar",
+      "selectChild": "Selecione um educando para ver a sua informação",
+      "noChildren": "Nenhum atleta encontrado para este encarregado",
+      "welcome": "Bem-vindo,",
+      "logout": "Terminar Sessão"
+    },
+    "payments": {
+      "summary": "Resumo de Pagamentos",
+      "nextPayment": "Próximo Pagamento",
+      "outstanding": "Em Dívida",
+      "history": "Histórico de Pagamentos",
+      "filterYear": "Filtrar por Ano",
+      "allYears": "Todos os Anos",
+      "paid": "Pago",
+      "unpaid": "Por Pagar",
+      "partial": "Parcial",
+      "month": "Mês",
+      "amount": "Valor",
+      "status": "Estado",
+      "planType": "Tipo de Plano"
+    },
+    "tabs": {
+      "attendance": "Presenças",
+      "annualSummary": "Resumo Anual",
+      "media": "Multimédia",
+      "championships": "Campeonatos",
+      "estagios": "Estágios"
+    }
+  },
+  "shared": {
+    "packBalance": {
+      "exceeded": "Limite de Sessões do Pack Excedido",
+      "athleteMessage": "Usou mais {count} sessão/sessões do que o seu pack inclui. Por favor adquira sessões adicionais.",
+      "guardianMessage": "{name} excedeu o limite do pack em {count} sessão/sessões. Pode ser necessário pagamento adicional.",
+      "coachMessage": "Saldo do pack de {name}: -{count} sessão/sessões. Pode continuar a treinar, mas o encarregado deve ser notificado."
+    },
+    "reports": {
+      "title": "Relatórios",
+      "generate": "Gerar Relatório",
+      "reportType": "Tipo de Relatório",
+      "dateRange": "Intervalo de Datas",
+      "financial": "Relatório Financeiro",
+      "personal": "Relatório Pessoal",
+      "overall": "Relatório Geral",
+      "attendance": "Relatório de Presenças",
+      "coachPayments": "Pagamentos a Treinadores",
+      "viewPDF": "Ver PDF",
+      "downloadPDF": "Descarregar PDF",
+      "filters": "Filtros",
+      "athlete": "Atleta",
+      "coach": "Treinador",
+      "outstandingOnly": "Apenas Em Dívida",
+      "currentMonth": "Apenas Mês Atual",
+      "surfLevel": "Nível de Surf"
+    },
+    "coachPayments": {
+      "title": "Pagamentos a Treinadores",
+      "subtitle": "Gerir e acompanhar registos de pagamentos a treinadores",
+      "addPayment": "Adicionar Pagamento",
+      "editPayment": "Editar Pagamento",
+      "coachName": "Nome do Treinador",
+      "paymentDate": "Data de Pagamento",
+      "amount": "Valor",
+      "month": "Pagamento Referente ao Mês",
+      "year": "Ano",
+      "notes": "Notas",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "byMonth": "Por Mês",
+      "history": "Histórico de Pagamentos",
+      "allCoaches": "Todos os Treinadores",
+      "actions": "Ações",
+      "totalPaid": "Total Pago",
+      "selectCoach": "Selecionar Treinador",
+      "selectMonth": "Selecionar Mês",
+      "allMonths": "Todos os Meses"
+    },
+    "media": {
+      "photos": "Fotos",
+      "videos": "Vídeos",
+      "noMedia": "Sem multimédia disponível",
+      "view": "Ver",
+      "download": "Descarregar"
+    },
+    "championships": {
+      "title": "Campeonatos",
+      "name": "Nome",
+      "category": "Categoria",
+      "location": "Localização",
+      "startDate": "Data de Início",
+      "endDate": "Data de Fim",
+      "noChampionships": "Sem campeonatos registados"
+    },
+    "estagios": {
+      "title": "Estágios",
+      "name": "Nome",
+      "location": "Localização",
+      "startDate": "Data de Início",
+      "endDate": "Data de Fim",
+      "noEstagios": "Sem estágios registados"
+    }
   }
 }

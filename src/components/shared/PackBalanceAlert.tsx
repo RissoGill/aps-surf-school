@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { calculatePackBalance } from "@/utils/packBalance";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface PackBalanceAlertProps {
   athleteId: string;
@@ -10,6 +11,7 @@ interface PackBalanceAlertProps {
 }
 
 export function PackBalanceAlert({ athleteId, athleteName, showFor }: PackBalanceAlertProps) {
+  const { t } = useLanguage();
   const { data: balance, isLoading } = useQuery({
     queryKey: ['pack-balance', athleteId],
     queryFn: () => calculatePackBalance(athleteId),
@@ -25,11 +27,15 @@ export function PackBalanceAlert({ athleteId, athleteName, showFor }: PackBalanc
   const getMessage = () => {
     switch (showFor) {
       case 'athlete':
-        return `You've used ${sessionsOver} more session${sessionsOver > 1 ? 's' : ''} than your pack includes. Please purchase additional sessions.`;
+        return t('shared.packBalance.athleteMessage').replace('{count}', sessionsOver.toString());
       case 'guardian':
-        return `${athleteName || 'Athlete'} has exceeded their pack limit by ${sessionsOver} session${sessionsOver > 1 ? 's' : ''}. Additional payment may be required.`;
+        return t('shared.packBalance.guardianMessage')
+          .replace('{name}', athleteName || 'Athlete')
+          .replace('{count}', sessionsOver.toString());
       case 'coach':
-        return `${athleteName || 'Athlete'}'s pack balance: -${sessionsOver} session${sessionsOver > 1 ? 's' : ''}. They can continue training, but guardian should be notified.`;
+        return t('shared.packBalance.coachMessage')
+          .replace('{name}', athleteName || 'Athlete')
+          .replace('{count}', sessionsOver.toString());
       default:
         return '';
     }
@@ -38,7 +44,7 @@ export function PackBalanceAlert({ athleteId, athleteName, showFor }: PackBalanc
   return (
     <Alert variant="destructive" className="mb-4">
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Pack Session Limit Exceeded</AlertTitle>
+      <AlertTitle>{t('shared.packBalance.exceeded')}</AlertTitle>
       <AlertDescription>{getMessage()}</AlertDescription>
     </Alert>
   );

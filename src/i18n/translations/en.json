@@ -105,5 +105,265 @@
   },
   "footer": {
     "rights": "All rights reserved"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Administration Dashboard",
+      "subtitle": "Manage system data and view reports",
+      "refresh": "Refresh",
+      "loggedInAs": "Logged in as",
+      "signOut": "Sign Out"
+    },
+    "stats": {
+      "totalReceived": "Total Received from September",
+      "totalReceivedMonth": "Total Received This Month",
+      "outstandingLearningMonth": "Outstanding Learning/Pre-Comp (Month)",
+      "outstandingCompetitionMonth": "Outstanding Competition (Month)",
+      "outstandingLearningSept": "Outstanding Learning/Pre-Comp (Sept+)",
+      "outstandingCompetitionSept": "Outstanding Competition (Sept+)",
+      "totalPaidCoaches": "Total Paid to Coaches (Sept+)",
+      "coachPaymentsMonth": "Coach Payments This Month",
+      "totalLearning": "Total Learning Athletes",
+      "totalPreCompetition": "Total Pre-Competition Athletes",
+      "totalCompetition": "Total Competition Athletes"
+    },
+    "management": {
+      "title": "Management Tools",
+      "users": "Manage Users",
+      "usersDesc": "Add, edit, and remove coaches, athletes, and guardians",
+      "athletes": "Athlete Management",
+      "athletesDesc": "Full CRUD access to athlete profiles and data",
+      "payments": "Payment Administration",
+      "paymentsDesc": "Set fees, mark payments, and view financial reports",
+      "attendance": "Attendance Management",
+      "attendanceDesc": "Search athletes and manage their attendance records",
+      "viewUsers": "View Users",
+      "manageAthletes": "Manage Athletes",
+      "paymentSettings": "Payment Settings",
+      "manageAttendance": "Manage Attendance"
+    },
+    "coachAttendance": {
+      "title": "Coach Attendance Management",
+      "subtitle": "View training session breakdown by coach",
+      "selectCoach": "Select Coach",
+      "allCoaches": "All Coaches",
+      "trainingDays": "Training Days",
+      "year": "Year"
+    }
+  },
+  "coach": {
+    "dashboard": {
+      "title": "Coach Dashboard",
+      "welcome": "Welcome,",
+      "search": "Search Athletes",
+      "searchPlaceholder": "Enter athlete name or ID",
+      "registerAttendance": "Register Attendance",
+      "bulkRegister": "Bulk Register",
+      "trainingHistory": "Training History Report",
+      "noResults": "No athletes found",
+      "quickStats": "Quick Stats",
+      "totalSessions": "Total Sessions",
+      "thisMonth": "This Month",
+      "logout": "Logout"
+    },
+    "attendance": {
+      "date": "Date",
+      "shift": "Shift",
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "beach": "Beach",
+      "notes": "Notes",
+      "photos": "Photos",
+      "videos": "Videos",
+      "uploadPhotos": "Upload Photos",
+      "uploadVideos": "Upload Videos",
+      "saveAttendance": "Save Attendance",
+      "cancel": "Cancel",
+      "select": "Select"
+    },
+    "tabs": {
+      "personal": "Personal Info",
+      "training": "Training Info",
+      "attendance": "Attendance",
+      "annualSummary": "Annual Summary",
+      "media": "Media",
+      "championships": "Championships",
+      "estagios": "Training Camps",
+      "payments": "Payments"
+    },
+    "status": {
+      "present": "Present",
+      "absent": "Absent",
+      "justified": "Justified"
+    },
+    "report": {
+      "title": "Training History Report",
+      "filters": "Filters",
+      "dateRange": "Date Range",
+      "athlete": "Athlete",
+      "beach": "Beach",
+      "allAthletes": "All Athletes",
+      "allBeaches": "All Beaches",
+      "viewPDF": "View PDF",
+      "downloadPDF": "Download PDF",
+      "generating": "Generating PDF...",
+      "clearFilters": "Clear Filters",
+      "summary": "Summary",
+      "sessions": "sessions",
+      "athletes": "athletes",
+      "beaches": "beaches"
+    }
+  },
+  "athlete": {
+    "dashboard": {
+      "title": "Athlete Dashboard",
+      "logout": "Logout",
+      "refresh": "Refresh data",
+      "profileNotLinked": "Profile Not Linked",
+      "profileNotLinkedDesc": "Your account is not yet linked to an athlete profile",
+      "contactAdmin": "Please contact your coach or administrator to link your account",
+      "welcome": "Welcome,",
+      "level": "Level"
+    },
+    "tabs": {
+      "personal": "Personal",
+      "training": "Training",
+      "attendance": "Attendance",
+      "annualSummary": "Annual Summary",
+      "media": "Media",
+      "championships": "Championships",
+      "estagios": "Training Camps"
+    },
+    "attendance": {
+      "monthNavigation": "Navigate months",
+      "summary": "Summary",
+      "noRecords": "No attendance records for this month",
+      "present": "Present",
+      "justified": "Justified",
+      "absent": "Absent"
+    },
+    "personal": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "dateOfBirth": "Date of Birth",
+      "address": "Address"
+    },
+    "training": {
+      "level": "Surf Level",
+      "planType": "Plan Type",
+      "trainingDays": "Training Days",
+      "trainingsPerWeek": "Trainings per Week"
+    },
+    "packBalance": {
+      "title": "Pack Balance",
+      "remaining": "Remaining Sessions",
+      "history": "Purchase History"
+    }
+  },
+  "guardian": {
+    "dashboard": {
+      "title": "Guardian Dashboard",
+      "familyArea": "Family Area",
+      "selectChild": "Select a child to view their information",
+      "noChildren": "No athletes found for this guardian",
+      "welcome": "Welcome,",
+      "logout": "Logout"
+    },
+    "payments": {
+      "summary": "Payments Summary",
+      "nextPayment": "Next Payment",
+      "outstanding": "Outstanding",
+      "history": "Payment History",
+      "filterYear": "Filter by Year",
+      "allYears": "All Years",
+      "paid": "Paid",
+      "unpaid": "Unpaid",
+      "partial": "Partial",
+      "month": "Month",
+      "amount": "Amount",
+      "status": "Status",
+      "planType": "Plan Type"
+    },
+    "tabs": {
+      "attendance": "Attendance",
+      "annualSummary": "Annual Summary",
+      "media": "Media",
+      "championships": "Championships",
+      "estagios": "Training Camps"
+    }
+  },
+  "shared": {
+    "packBalance": {
+      "exceeded": "Pack Session Limit Exceeded",
+      "athleteMessage": "You've used {count} more session(s) than your pack includes. Please purchase additional sessions.",
+      "guardianMessage": "{name} has exceeded their pack limit by {count} session(s). Additional payment may be required.",
+      "coachMessage": "{name}'s pack balance: -{count} session(s). They can continue training, but guardian should be notified."
+    },
+    "reports": {
+      "title": "Reports",
+      "generate": "Generate Report",
+      "reportType": "Report Type",
+      "dateRange": "Date Range",
+      "financial": "Financial Report",
+      "personal": "Personal Report",
+      "overall": "Overall Report",
+      "attendance": "Attendance Report",
+      "coachPayments": "Coach Payments",
+      "viewPDF": "View PDF",
+      "downloadPDF": "Download PDF",
+      "filters": "Filters",
+      "athlete": "Athlete",
+      "coach": "Coach",
+      "outstandingOnly": "Outstanding Only",
+      "currentMonth": "Current Month Only",
+      "surfLevel": "Surf Level"
+    },
+    "coachPayments": {
+      "title": "Coach Payments",
+      "subtitle": "Manage and track coach payment records",
+      "addPayment": "Add Payment",
+      "editPayment": "Edit Payment",
+      "coachName": "Coach Name",
+      "paymentDate": "Payment Date",
+      "amount": "Amount",
+      "month": "Payment For Month",
+      "year": "Year",
+      "notes": "Notes",
+      "cancel": "Cancel",
+      "save": "Save",
+      "byMonth": "By Month",
+      "history": "Payment History",
+      "allCoaches": "All Coaches",
+      "actions": "Actions",
+      "totalPaid": "Total Paid",
+      "selectCoach": "Select Coach",
+      "selectMonth": "Select Month",
+      "allMonths": "All Months"
+    },
+    "media": {
+      "photos": "Photos",
+      "videos": "Videos",
+      "noMedia": "No media available",
+      "view": "View",
+      "download": "Download"
+    },
+    "championships": {
+      "title": "Championships",
+      "name": "Name",
+      "category": "Category",
+      "location": "Location",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "noChampionships": "No championships registered"
+    },
+    "estagios": {
+      "title": "Training Camps",
+      "name": "Name",
+      "location": "Location",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "noEstagios": "No training camps registered"
+    }
   }
 }
