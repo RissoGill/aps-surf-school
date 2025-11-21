@@ -10,10 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AthleteLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -43,8 +45,8 @@ const AthleteLogin = () => {
 
       if (error || !userRecord) {
         toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
+          title: t('login.error'),
+          description: t('login.invalidCredentials'),
           variant: "destructive",
         });
         return;
@@ -57,7 +59,7 @@ const AthleteLogin = () => {
         .eq('athlete_id', userRecord.athlete_id)
         .maybeSingle();
 
-      const athleteName = athleteData?.first_name || "Athlete";
+      const athleteName = athleteData?.first_name || t('login.athlete');
 
       // Store session in localStorage
       localStorage.setItem('athleteSession', JSON.stringify({
@@ -68,14 +70,14 @@ const AthleteLogin = () => {
       }));
 
       toast({
-        title: "Login Successful",
-        description: `Welcome back, ${athleteName}!`,
+        title: t('login.success'),
+        description: t('login.welcomeBack').replace('{name}', athleteName),
       });
       navigate("/dashboard/athlete");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
+        title: t('login.error'),
+        description: t('login.unexpectedError'),
         variant: "destructive",
       });
     } finally {
@@ -92,7 +94,7 @@ const AthleteLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Athlete Login" showBack backTo="/" />
+      <AppHeader title={t('login.athlete')} showBack backTo="/" />
       
       <main className="mobile-container py-8">
         <Card className="shadow-medium animate-slide-up">
@@ -100,21 +102,21 @@ const AthleteLogin = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-4 mx-auto">
               <Trophy className="h-8 w-8 text-success" />
             </div>
-            <CardTitle className="text-2xl">Athlete Portal</CardTitle>
+            <CardTitle className="text-2xl">{t('login.athletePortal')}</CardTitle>
             <CardDescription>
-              View your training schedule and progress
+              {t('login.athleteDescription')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('login.email')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="athlete@email.com"
+                  placeholder={t('login.athletePlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -123,12 +125,12 @@ const AthleteLogin = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleInputChange}
                   required
@@ -141,7 +143,7 @@ const AthleteLogin = () => {
                 className="w-full touch-friendly bg-success hover:bg-success/90"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </form>
           </CardContent>

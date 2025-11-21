@@ -10,10 +10,12 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const GuardianLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -48,8 +50,8 @@ const GuardianLogin = () => {
 
       if (error || !userRecord) {
         toast({
-          title: "Login failed",
-          description: "Invalid email or password. Please try again.",
+          title: t('login.error'),
+          description: t('login.invalidCredentials'),
           variant: "destructive",
         });
         return;
@@ -64,14 +66,14 @@ const GuardianLogin = () => {
       }));
 
       toast({
-        title: "Login successful",
-        description: "Welcome back, Guardian!",
+        title: t('login.success'),
+        description: t('login.welcomeGuardian'),
       });
       navigate("/dashboard/guardian");
     } catch (err: any) {
       toast({
-        title: "Login failed",
-        description: err?.message || "An unexpected error occurred",
+        title: t('login.error'),
+        description: err?.message || t('login.unexpectedError'),
         variant: "destructive",
       });
     } finally {
@@ -88,7 +90,7 @@ const GuardianLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Guardian Login" showBack backTo="/" />
+      <AppHeader title={t('login.guardian')} showBack backTo="/" />
       
       <main className="mobile-container py-8">
         <Card className="shadow-medium animate-slide-up">
@@ -96,21 +98,21 @@ const GuardianLogin = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-warning/10 mb-4 mx-auto">
               <Heart className="h-8 w-8 text-warning" />
             </div>
-            <CardTitle className="text-2xl">Guardian Portal</CardTitle>
+            <CardTitle className="text-2xl">{t('login.guardianPortal')}</CardTitle>
             <CardDescription>
-              Track your child's progress and manage payments
+              {t('login.guardianDescription')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email or Code</Label>
+                <Label htmlFor="email">{t('login.emailOrCode')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="text"
-                  placeholder="PA01 or parent@email.com"
+                  placeholder={t('login.emailOrCodePlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -119,12 +121,12 @@ const GuardianLogin = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleInputChange}
                   required
@@ -137,7 +139,7 @@ const GuardianLogin = () => {
                 className="w-full touch-friendly bg-warning hover:bg-warning/90"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </form>
           </CardContent>

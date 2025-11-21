@@ -10,10 +10,12 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const CoachLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -48,8 +50,8 @@ const CoachLogin = () => {
           }
   
           localStorage.setItem('coach_session', JSON.stringify(coach));
-          const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || 'Coach';
-          toast({ title: "Login Successful", description: `Welcome back, ${coachName}!` });
+          const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || t('login.coach');
+          toast({ title: t('login.success'), description: t('login.welcomeBack').replace('{name}', coachName) });
           navigate("/dashboard/coach");
           return;
         }
@@ -68,14 +70,14 @@ const CoachLogin = () => {
       }
 
       localStorage.setItem('coach_session', JSON.stringify(legacyCoach));
-      const legacyName = [legacyCoach.first_name, legacyCoach.last_name].filter(Boolean).join(' ') || 'Coach';
-      toast({ title: "Login Successful", description: `Welcome back, ${legacyName}!` });
+      const legacyName = [legacyCoach.first_name, legacyCoach.last_name].filter(Boolean).join(' ') || t('login.coach');
+      toast({ title: t('login.success'), description: t('login.welcomeBack').replace('{name}', legacyName) });
       navigate("/dashboard/coach");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials",
+        title: t('login.error'),
+        description: error.message || t('login.invalidCredentials'),
         variant: "destructive",
       });
     } finally {
@@ -92,7 +94,7 @@ const CoachLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Coach Login" showBack backTo="/" />
+      <AppHeader title={t('login.coach')} showBack backTo="/" />
       
       <main className="mobile-container py-8">
         <Card className="shadow-medium animate-slide-up">
@@ -100,21 +102,21 @@ const CoachLogin = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4 mx-auto">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Coach Portal</CardTitle>
+            <CardTitle className="text-2xl">{t('login.coachPortal')}</CardTitle>
             <CardDescription>
-              Access your coaching dashboard to manage athletes
+              {t('login.coachDescription')}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email or Coach ID</Label>
+                <Label htmlFor="email">{t('login.emailOrCoachId')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="coach@apssurfschool.com or T01"
+                  placeholder={t('login.coachPlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
@@ -123,12 +125,12 @@ const CoachLogin = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleInputChange}
                   required
@@ -141,7 +143,7 @@ const CoachLogin = () => {
                 className="w-full touch-friendly gradient-primary hover:opacity-90"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                {isLoading ? t('login.signingIn') : t('login.signIn')}
               </Button>
             </form>
           </CardContent>
