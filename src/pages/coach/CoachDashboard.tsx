@@ -1271,8 +1271,9 @@ const CoachDashboard = () => {
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
       };
 
-      const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
-      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const worker: any = (html2pdf as any)().from(element).set(opt).toPdf();
+      const pdf: any = await worker.get('pdf');
+      const pdfUrl = pdf.output('bloburl');
 
       // Navigate the viewer to the PDF
       viewer.location.href = pdfUrl;
