@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProcessedLogo from "@/components/ProcessedLogo";
+import LanguageSelector from "@/components/shared/LanguageSelector";
 
 interface AppHeaderProps {
   title?: string;
@@ -40,6 +41,8 @@ const AppHeader = ({ title, showBack = false, backTo = "/" }: AppHeaderProps) =>
             {title}
           </h1>
         )}
+
+        <LanguageSelector />
       </div>
     </header>
   );

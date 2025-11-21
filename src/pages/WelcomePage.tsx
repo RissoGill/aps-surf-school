@@ -6,35 +6,37 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import ProcessedLogo from "@/components/ProcessedLogo";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const roles = [
     {
-      title: "Coach",
-      description: "Manage athlete training and attendance",
+      titleKey: "roles.coach.title",
+      descriptionKey: "roles.coach.description",
       icon: Users,
       color: "primary",
       path: "/login/coach",
     },
     {
-      title: "Athlete",
-      description: "View your training schedule and progress",
+      titleKey: "roles.athlete.title",
+      descriptionKey: "roles.athlete.description",
       icon: Trophy,
       color: "success",
       path: "/login/athlete",
     },
     {
-      title: "Guardian",
-      description: "Track your child's progress and payments",
+      titleKey: "roles.guardian.title",
+      descriptionKey: "roles.guardian.description",
       icon: Heart,
       color: "warning",
       path: "/login/guardian",
     },
     {
-      title: "Administration",
-      description: "Full access to school management",
+      titleKey: "roles.administration.title",
+      descriptionKey: "roles.administration.description",
       icon: Settings,
       color: "secondary",
       path: "/login/administration",
@@ -55,11 +57,11 @@ const WelcomePage = () => {
               alt="APS Surf School"
               rounded={false}
             />
-            <h1 className="text-3xl font-bold text-foreground">Welcome to APS</h1>
+            <h1 className="text-3xl font-bold text-foreground">{t('welcome.title')}</h1>
           </div>
 
           <p className="text-muted-foreground">
-            Choose your profile to access your personalized dashboard
+            {t('welcome.subtitle')}
           </p>
         </div>
 
@@ -67,7 +69,7 @@ const WelcomePage = () => {
         <div className="grid grid-cols-2 gap-4">
           {roles.map((role) => (
             <Card
-              key={role.title}
+              key={role.titleKey}
               className="animate-fade-in cursor-pointer hover:shadow-medium transition-all duration-200 active:scale-95"
               onClick={() => navigate(role.path)}
             >
@@ -77,9 +79,9 @@ const WelcomePage = () => {
                 >
                   <role.icon className={`h-6 w-6 text-${role.color}`} />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">{role.title}</h3>
+                <h3 className="font-semibold text-foreground mb-2">{t(role.titleKey)}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {role.description}
+                  {t(role.descriptionKey)}
                 </p>
               </CardContent>
             </Card>

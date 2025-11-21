@@ -1,6 +1,9 @@
 import { Mail, Phone } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AppFooter = () => {
+  const { t } = useLanguage();
+  
   return (
     <footer className="bg-secondary/50 border-t py-6 mt-8">
       <div className="mobile-container text-center space-y-3">
@@ -14,7 +17,7 @@ const AppFooter = () => {
           </a>
         </div>
         <p className="text-xs text-muted-foreground">
-          © 2024 APS Surf School. All rights reserved.
+          © 2024 APS Surf School. {t('footer.rights')}.
         </p>
       </div>
     </footer>
