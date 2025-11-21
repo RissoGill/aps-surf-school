@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,7 @@ const MONTHS = [
 ];
 
 export const CoachPaymentsCard = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -313,29 +315,29 @@ export const CoachPaymentsCard = () => {
               <Euro className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h4 className="font-medium text-foreground mb-1">Coach Payments</h4>
-              <p className="text-sm text-muted-foreground">Manage and track coach payment records</p>
+              <h4 className="font-medium text-foreground mb-1">{t('shared.coachPayments.title')}</h4>
+              <p className="text-sm text-muted-foreground">{t('shared.coachPayments.subtitle')}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                Add Payment
+                {t('shared.coachPayments.addPayment')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>{editingPayment ? 'Edit' : 'Add'} Payment</DialogTitle>
+                <DialogTitle>{editingPayment ? t('shared.coachPayments.editPayment') : t('shared.coachPayments.addPayment')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
-                  <Label>Coach Name *</Label>
+                  <Label>{t('shared.coachPayments.coachName')} *</Label>
                   <Select
                     value={formData.coach_id}
                     onValueChange={(value) => setFormData({ ...formData, coach_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select coach" />
+                      <SelectValue placeholder={t('shared.coachPayments.selectCoach')} />
                     </SelectTrigger>
                     <SelectContent>
                       {coaches?.map((coach) => (
@@ -348,7 +350,7 @@ export const CoachPaymentsCard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Payment Date *</Label>
+                  <Label>{t('shared.coachPayments.paymentDate')} *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -375,7 +377,7 @@ export const CoachPaymentsCard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (€) *</Label>
+                  <Label htmlFor="amount">{t('shared.coachPayments.amount')} (€) *</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -387,13 +389,13 @@ export const CoachPaymentsCard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Payment For Month *</Label>
+                  <Label>{t('shared.coachPayments.month')} *</Label>
                   <Select
                     value={formData.payment_month}
                     onValueChange={(value) => setFormData({ ...formData, payment_month: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select month" />
+                      <SelectValue placeholder={t('shared.coachPayments.selectMonth')} />
                     </SelectTrigger>
                     <SelectContent>
                       {MONTHS.map((month) => (
@@ -406,7 +408,7 @@ export const CoachPaymentsCard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Notes</Label>
+                  <Label>{t('shared.coachPayments.notes')}</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -417,10 +419,10 @@ export const CoachPaymentsCard = () => {
 
                 <div className="flex gap-3 pt-4">
                   <Button onClick={handleSubmit} className="flex-1">
-                    {editingPayment ? 'Update' : 'Add'} Payment
+                    {editingPayment ? t('common.edit') : t('common.save')}
                   </Button>
                   <Button variant="outline" onClick={handleCloseDialog}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                 </div>
               </div>
@@ -433,14 +435,14 @@ export const CoachPaymentsCard = () => {
         {/* Tabs */}
         <Tabs defaultValue="monthly" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="monthly">By Month</TabsTrigger>
-            <TabsTrigger value="history">Payment History</TabsTrigger>
+            <TabsTrigger value="monthly">{t('shared.coachPayments.byMonth')}</TabsTrigger>
+            <TabsTrigger value="history">{t('shared.coachPayments.history')}</TabsTrigger>
           </TabsList>
 
           {/* By Month Tab */}
           <TabsContent value="monthly" className="space-y-4 mt-4">
             <div className="flex items-center gap-3">
-              <Label className="text-sm">Year:</Label>
+              <Label className="text-sm">{t('shared.coachPayments.year')}:</Label>
               <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -475,10 +477,10 @@ export const CoachPaymentsCard = () => {
             <div className="flex flex-wrap gap-3">
               <Select value={selectedCoachFilter} onValueChange={setSelectedCoachFilter}>
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="All Coaches" />
+                  <SelectValue placeholder={t('shared.coachPayments.allCoaches')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Coaches</SelectItem>
+                  <SelectItem value="all">{t('shared.coachPayments.allCoaches')}</SelectItem>
                   {coaches?.map((coach) => (
                     <SelectItem key={coach.coach_id} value={coach.coach_id}>
                       {coach.first_name} {coach.last_name}
@@ -489,10 +491,10 @@ export const CoachPaymentsCard = () => {
 
               <Select value={selectedMonthFilter} onValueChange={setSelectedMonthFilter}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="All Months" />
+                  <SelectValue placeholder={t('shared.coachPayments.allMonths')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Months</SelectItem>
+                  <SelectItem value="all">{t('shared.coachPayments.allMonths')}</SelectItem>
                   {MONTHS.map(month => (
                     <SelectItem key={month} value={month}>{month}</SelectItem>
                   ))}
@@ -504,19 +506,19 @@ export const CoachPaymentsCard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Coach</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>For Month</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('shared.coachPayments.coachName')}</TableHead>
+                    <TableHead>{t('attendance.date')}</TableHead>
+                    <TableHead>{t('shared.coachPayments.month')}</TableHead>
+                    <TableHead>{t('shared.coachPayments.amount')}</TableHead>
+                    <TableHead>{t('shared.coachPayments.notes')}</TableHead>
+                    <TableHead className="text-right">{t('shared.coachPayments.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        Loading...
+                        {t('common.loading')}
                       </TableCell>
                     </TableRow>
                   ) : filteredPayments && filteredPayments.length > 0 ? (
