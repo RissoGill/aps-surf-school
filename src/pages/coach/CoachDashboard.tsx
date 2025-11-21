@@ -1907,7 +1907,7 @@ const CoachDashboard = () => {
                                                         <User className="h-4 w-4 text-primary" />
                                                       </div>
                                                       <span 
-                                                        className="text-base font-semibold text-foreground leading-snug" 
+                                                        className="text-sm font-medium text-foreground leading-snug" 
                                                         title={athlete.athleteName}
                                                       >
                                                         {athlete.athleteName}
@@ -1916,7 +1916,7 @@ const CoachDashboard = () => {
                                                     {athlete.beachLocation && (
                                                       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-md flex-shrink-0">
                                                         <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                                                        <span className="font-medium whitespace-nowrap">{athlete.beachLocation}</span>
+                                                        <span className="font-medium truncate max-w-[150px]" title={athlete.beachLocation}>{athlete.beachLocation}</span>
                                                       </div>
                                                     )}
                                                   </div>
