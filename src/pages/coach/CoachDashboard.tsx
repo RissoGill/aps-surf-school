@@ -1076,7 +1076,7 @@ const CoachDashboard = () => {
             .header {
               text-align: center;
               margin-bottom: 30px;
-              border-bottom: 2px solid #0077be;
+              border-bottom: 2px solid #31A896;
               padding-bottom: 20px;
             }
             .header img {
@@ -1085,7 +1085,7 @@ const CoachDashboard = () => {
             }
             .header h1 {
               margin: 10px 0;
-              color: #0077be;
+              color: #31A896;
               font-size: 24px;
             }
             .header p {
@@ -1109,7 +1109,7 @@ const CoachDashboard = () => {
             .stat-value {
               font-size: 24px;
               font-weight: bold;
-              color: #0077be;
+              color: #31A896;
               margin-bottom: 5px;
             }
             .stat-label {
@@ -1130,7 +1130,7 @@ const CoachDashboard = () => {
               margin-bottom: 20px;
             }
             th {
-              background: #0077be;
+              background: #31A896;
               color: white;
               padding: 12px;
               text-align: left;
@@ -1146,9 +1146,9 @@ const CoachDashboard = () => {
               background: #f8f9fa;
             }
             .month-header {
-              background: #e3f2fd;
+              background: #e8f5f1;
               font-weight: bold;
-              color: #0077be;
+              color: #31A896;
               padding: 8px 12px;
               font-size: 14px;
             }
@@ -1156,9 +1156,11 @@ const CoachDashboard = () => {
               text-align: center;
               margin-top: 30px;
               padding-top: 20px;
+              padding-bottom: 20px;
               border-top: 1px solid #e0e0e0;
               color: #666;
               font-size: 12px;
+              page-break-inside: avoid;
             }
           </style>
         </head>
@@ -1240,7 +1242,7 @@ const CoachDashboard = () => {
       element.innerHTML = htmlContent;
 
       const opt = {
-        margin: 10,
+        margin: [10, 10, 15, 10] as [number, number, number, number],
         filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
@@ -1264,7 +1266,7 @@ const CoachDashboard = () => {
       element.innerHTML = htmlContent;
 
       const opt = {
-        margin: 10,
+        margin: [10, 10, 15, 10] as [number, number, number, number],
         filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
