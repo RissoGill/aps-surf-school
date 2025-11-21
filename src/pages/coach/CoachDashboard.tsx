@@ -1807,7 +1807,7 @@ const CoachDashboard = () => {
               {/* Training Sessions Display - Monthly View */}
               {Object.keys(filteredTrainingSessionsByMonth).length > 0 && (
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-foreground">Monthly Breakdown</h4>
+                  <h4 className="font-medium text-foreground">Monthly Breakdown</h4>
                   <div className="space-y-3">
                     {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
                       const [year, monthNum] = month.split('-');
@@ -1832,7 +1832,7 @@ const CoachDashboard = () => {
                                 <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                               )}
                               <div className="text-left min-w-0">
-                                <span className="text-lg font-semibold block text-foreground">{monthName} {year}</span>
+                                <span className="font-medium block text-foreground">{monthName} {year}</span>
                                 <span className="text-sm text-muted-foreground block">
                                   {count} training {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} total {totalAthletesInMonth === 1 ? 'session' : 'sessions'}
                                 </span>
