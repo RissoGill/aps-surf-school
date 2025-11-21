@@ -1239,6 +1239,22 @@ const CoachDashboard = () => {
 
   // View PDF in new tab
   const viewTrainingHistoryPDF = async () => {
+    // Open new tab immediately to prevent popup blockers
+    const viewer = window.open('', '_blank');
+    
+    // Check if popup was blocked
+    if (!viewer) {
+      toast({ 
+        title: "Popup Blocked", 
+        description: "Please allow popups for this site or use the Download PDF option", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    // Show loading message in the new tab
+    viewer.document.write('<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>');
+
     try {
       const htmlContent = generateTrainingHistoryHTML();
       const element = document.createElement('div');
@@ -1254,9 +1270,12 @@ const CoachDashboard = () => {
 
       const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
       const pdfUrl = URL.createObjectURL(pdf);
-      window.location.href = pdfUrl;
+      
+      // Navigate the viewer to the PDF
+      viewer.location.href = pdfUrl;
     } catch (error) {
       console.error('Error generating PDF:', error);
+      viewer.close();
       toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
     }
   };
