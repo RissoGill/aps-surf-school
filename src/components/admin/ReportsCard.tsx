@@ -273,8 +273,9 @@ export const ReportsCard = () => {
     };
 
     try {
-      const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
-      const pdfUrl = URL.createObjectURL(pdf);
+      const worker: any = (html2pdf as any)().from(element).set(opt).toPdf();
+      const pdf: any = await worker.get('pdf');
+      const pdfUrl = pdf.output('bloburl');
       viewer.location.href = pdfUrl;
     } catch (error) {
       console.error('Error generating PDF:', error);
