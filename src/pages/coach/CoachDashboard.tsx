@@ -1268,18 +1268,17 @@ const CoachDashboard = () => {
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
-      const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
-      const pdfUrl = URL.createObjectURL(pdf);
+      // Let html2pdf generate a blob URL directly
+      const pdfUrl = await html2pdf().from(element).set(opt).outputPdf('bloburl');
       
       // Navigate the viewer to the PDF
-      viewer.location.href = pdfUrl;
+      viewer.location.href = pdfUrl as string;
     } catch (error) {
       console.error('Error generating PDF:', error);
       viewer.close();
       toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
     }
   };
-
   // Download PDF
   const downloadTrainingHistoryPDF = async () => {
     try {
