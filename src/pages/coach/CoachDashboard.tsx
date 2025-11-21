@@ -1907,7 +1907,7 @@ const CoachDashboard = () => {
                                                         <User className="h-4 w-4 text-primary" />
                                                       </div>
                                                       <span 
-                                                        className="text-base font-semibold text-foreground truncate" 
+                                                        className="text-base font-semibold text-foreground leading-snug" 
                                                         title={athlete.athleteName}
                                                       >
                                                         {athlete.athleteName}
