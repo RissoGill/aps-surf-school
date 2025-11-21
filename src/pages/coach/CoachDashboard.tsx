@@ -1082,6 +1082,9 @@ const CoachDashboard = () => {
             .header img {
               width: 120px;
               margin-bottom: 15px;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
             }
             .header h1 {
               margin: 10px 0;
