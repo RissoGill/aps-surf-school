@@ -1252,35 +1252,15 @@ const CoachDashboard = () => {
       return;
     }
 
-    // Show loading message in the new tab
-    viewer.document.write(
-      '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>'
-    );
-    viewer.document.close();
-
     try {
       const htmlContent = generateTrainingHistoryHTML();
-      const element = document.createElement('div');
-      element.innerHTML = htmlContent;
-
-      const opt = {
-        margin: 10,
-        filename: `training-history-${coachDisplayName}-${format(new Date(), 'yyyy-MM-dd')}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-      };
-
-      const worker: any = (html2pdf as any)().from(element).set(opt).toPdf();
-      const pdf: any = await worker.get('pdf');
-      const pdfUrl = pdf.output('bloburl');
-
-      // Navigate the viewer to the PDF
-      viewer.location.href = pdfUrl;
+      viewer.document.open();
+      viewer.document.write(htmlContent);
+      viewer.document.close();
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error opening report:', error);
       viewer.close();
-      toast({ title: 'Error', description: 'Failed to generate PDF', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to open report', variant: 'destructive' });
     }
   };
 
