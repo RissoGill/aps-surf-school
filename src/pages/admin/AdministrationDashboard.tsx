@@ -14,10 +14,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo, useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AdministrationDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
   const [selectedCoach, setSelectedCoach] = useState<string>("");
   const [sessionValid, setSessionValid] = useState(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
@@ -30,8 +32,8 @@ const AdministrationDashboard = () => {
       
       if (!session) {
         toast({
-          title: "Session expired",
-          description: "Please log in again",
+          title: t('login.sessionExpired'),
+          description: t('login.pleaseLoginAgain'),
           variant: "destructive",
         });
         navigate("/login/administration");
@@ -48,8 +50,8 @@ const AdministrationDashboard = () => {
       if (!roleData) {
         await supabase.auth.signOut();
         toast({
-          title: "Access denied",
-          description: "Admin privileges required",
+          title: t('login.accessDenied'),
+          description: t('login.noAdminPrivileges'),
           variant: "destructive",
         });
         navigate("/login/administration");
@@ -68,8 +70,8 @@ const AdministrationDashboard = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         toast({
-          title: "Signed out",
-          description: "Redirecting to login...",
+          title: t('login.signedOut'),
+          description: t('login.redirectingToLogin'),
         });
         navigate("/login/administration");
       } else if (event === 'TOKEN_REFRESHED') {
@@ -622,67 +624,67 @@ const AdministrationDashboard = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
     queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
     toast({
-      title: "Refreshing data...",
-      description: "Loading the latest information",
+      title: t('admin.dashboard.refreshing'),
+      description: t('admin.dashboard.loadingLatest'),
     });
   };
 
   const adminActions = [
     {
-      title: "Manage Users",
-      description: "Add, edit, and remove coaches, athletes, and guardians",
+      title: t('admin.management.users'),
+      description: t('admin.management.usersDesc'),
       icon: Users,
       color: "primary",
-      action: "View Users"
+      action: t('admin.management.viewUsers')
     },
     {
-      title: "Athlete Management", 
-      description: "Full CRUD access to athlete profiles and data",
+      title: t('admin.management.athletes'), 
+      description: t('admin.management.athletesDesc'),
       icon: UserPlus,
       color: "success",
-      action: "Manage Athletes"
+      action: t('admin.management.manageAthletes')
     },
     {
-      title: "Payment Administration",
-      description: "Set fees, mark payments, and view financial reports",
+      title: t('admin.management.payments'),
+      description: t('admin.management.paymentsDesc'),
       icon: Euro,
       color: "warning",
-      action: "Payment Settings"
+      action: t('admin.management.paymentSettings')
     },
     {
-      title: "Attendance Management",
-      description: "Search athletes and manage their attendance records",
+      title: t('admin.management.attendance'),
+      description: t('admin.management.attendanceDesc'),
       icon: Calendar,
       color: "secondary",
-      action: "Manage Attendance"
+      action: t('admin.management.manageAttendance')
     }
   ];
 
   const fmt = (n: number | undefined) => (typeof n === 'number' && isFinite(n) ? n.toFixed(2) : '0.00');
 
   const quickStats = [
-    { label: "Total Received from September", value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
-    { label: "Total Received This Month", value: `€${fmt(paymentsData?.totalReceivedThisMonth)}` , color: "success" },
-    { label: "Outstanding Learning/Pre-Comp (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
-    { label: "Outstanding Competition (Month)", value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
-    { label: "Outstanding Learning/Pre-Comp (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
-    { label: "Outstanding Competition (Sept+)", value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
-    { label: "Total Paid to Coaches (Sept+)", value: `€${fmt(paymentsData?.totalPaidToCoaches)}` , color: "primary" },
-    { label: "Coach Payments This Month", value: `€${fmt(paymentsData?.coachPaymentsThisMonth)}` , color: "primary" },
+    { label: t('admin.stats.totalReceived'), value: `€${fmt(paymentsData?.annualFeesReceived)}` , color: "primary" },
+    { label: t('admin.stats.totalReceivedMonth'), value: `€${fmt(paymentsData?.totalReceivedThisMonth)}` , color: "success" },
+    { label: t('admin.stats.outstandingLearningMonth'), value: `€${fmt(paymentsData?.currentMonthOutstandingLearning)}` , color: "destructive" },
+    { label: t('admin.stats.outstandingCompetitionMonth'), value: `€${fmt(paymentsData?.currentMonthOutstandingCompetition)}` , color: "destructive" },
+    { label: t('admin.stats.outstandingLearningSept'), value: `€${fmt(paymentsData?.septemberOnwardsOutstandingLearning)}` , color: "warning" },
+    { label: t('admin.stats.outstandingCompetitionSept'), value: `€${fmt(paymentsData?.septemberOnwardsOutstandingCompetition)}` , color: "warning" },
+    { label: t('admin.stats.totalPaidCoaches'), value: `€${fmt(paymentsData?.totalPaidToCoaches)}` , color: "primary" },
+    { label: t('admin.stats.coachPaymentsMonth'), value: `€${fmt(paymentsData?.coachPaymentsThisMonth)}` , color: "primary" },
     { 
-      label: "Total Learning Athletes", 
+      label: t('admin.stats.totalLearning'), 
       value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'learning').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
     },
     { 
-      label: "Total Pre-Competition Athletes", 
+      label: t('admin.stats.totalPreCompetition'), 
       value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'pre-competition').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
     },
     { 
-      label: "Total Competition Athletes", 
+      label: t('admin.stats.totalCompetition'), 
       value: (athletes?.filter((a: any) => a.is_active !== false && a.surf_level?.trim().toLowerCase() === 'competition').length || 0).toString(), 
       color: "success",
       span: "col-span-1"
@@ -707,7 +709,7 @@ const AdministrationDashboard = () => {
           <div className="bg-muted/50 border-b px-4 py-2 text-sm">
             <div className="mobile-container flex items-center justify-between">
               <span>
-                Logged in as: <strong className="text-foreground">{currentUser}</strong> 
+                {t('admin.dashboard.loggedInAs')}: <strong className="text-foreground">{currentUser}</strong> 
                 <Badge variant="secondary" className="ml-2 text-xs">{userRole}</Badge>
               </span>
               <Button 
@@ -718,7 +720,7 @@ const AdministrationDashboard = () => {
                   navigate("/login/administration");
                 }}
               >
-                Sign Out
+                {t('admin.dashboard.signOut')}
               </Button>
             </div>
           </div>
@@ -726,12 +728,12 @@ const AdministrationDashboard = () => {
           <main className="mobile-container py-6">
             <div className="mb-6 flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Administration Dashboard</h2>
-                <p className="text-muted-foreground">Manage system data and view reports</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">{t('admin.dashboard.title')}</h2>
+                <p className="text-muted-foreground">{t('admin.dashboard.subtitle')}</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            {t('admin.dashboard.refresh')}
           </Button>
         </div>
         {/* Admin Header */}
@@ -741,8 +743,8 @@ const AdministrationDashboard = () => {
               <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Settings className="h-8 w-8 text-secondary-foreground" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Admin Dashboard</h2>
-              <p className="text-muted-foreground">Complete school management access</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">{t('admin.dashboard.adminDashboard')}</h2>
+              <p className="text-muted-foreground">{t('admin.dashboard.completeAccess')}</p>
             </div>
           </CardContent>
         </Card>
@@ -793,12 +795,12 @@ const AdministrationDashboard = () => {
 
         {/* Admin Actions */}
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-foreground mb-4 text-center">Management Tools</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-4 text-center">{t('admin.management.title')}</h3>
           
           {adminActions
             .filter(action => {
               // Only super_admin can see "Manage Users"
-              if (action.title === "Manage Users") {
+              if (action.title === t('admin.management.users')) {
                 return userRole === 'super_admin';
               }
               return true;
@@ -823,21 +825,14 @@ const AdministrationDashboard = () => {
                 key={index} 
                 className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
                 onClick={() => {
-                  switch(action.title) {
-                    case "Manage Users":
-                      navigate("/admin/users");
-                      break;
-                    case "Athlete Management":
-                      navigate("/admin/athletes");
-                      break;
-                    case "Payment Administration":
-                      navigate("/admin/payments");
-                      break;
-                    case "Attendance Management":
-                      navigate("/admin/attendance");
-                      break;
-                    default:
-                      break;
+                  if (action.title === t('admin.management.users')) {
+                    navigate("/admin/users");
+                  } else if (action.title === t('admin.management.athletes')) {
+                    navigate("/admin/athletes");
+                  } else if (action.title === t('admin.management.payments')) {
+                    navigate("/admin/payments");
+                  } else if (action.title === t('admin.management.attendance')) {
+                    navigate("/admin/attendance");
                   }
                 }}
               >
@@ -885,15 +880,15 @@ const AdministrationDashboard = () => {
                     <User className="h-6 w-6 text-secondary" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-foreground mb-1">Coach Attendance Management</h4>
-                    <p className="text-sm text-muted-foreground">View training session breakdown by coach</p>
+                    <h4 className="font-medium text-foreground mb-1">{t('admin.coachAttendance.title')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('admin.coachAttendance.subtitle')}</p>
                   </div>
                 </div>
               </div>
               <div className="mt-4">
                 <Select value={selectedCoach} onValueChange={setSelectedCoach}>
                   <SelectTrigger className="w-full md:w-64 bg-background">
-                    <SelectValue placeholder="Choose Coach" />
+                    <SelectValue placeholder={t('admin.coachAttendance.selectCoach')} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover z-50">
                     {Object.keys(trainingDaysByCoachByMonth).sort((a, b) => a.localeCompare(b)).map((coach) => (
@@ -915,9 +910,9 @@ const AdministrationDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Monthly breakdown */}
                     <div>
-                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Month</h5>
+                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">{t('admin.coachAttendance.byMonth')}</h5>
                       {Object.keys(trainingDaysByCoachByMonth[selectedCoach]).length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">No monthly data</p>
+                        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.coachAttendance.noMonthlyData')}</p>
                       ) : (
                         <div className="space-y-2 max-h-60 overflow-y-auto">
                           {Object.entries(trainingDaysByCoachByMonth[selectedCoach]).map(([month, count]) => {
@@ -926,7 +921,7 @@ const AdministrationDashboard = () => {
                             return (
                               <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                                 <span className="text-sm font-medium">{monthName} {year}</span>
-                                <Badge variant="secondary">{count} days</Badge>
+                                <Badge variant="secondary">{count} {t('admin.coachAttendance.days')}</Badge>
                               </div>
                             );
                           })}
@@ -936,15 +931,15 @@ const AdministrationDashboard = () => {
                     
                     {/* Yearly breakdown */}
                     <div>
-                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">By Year</h5>
+                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">{t('admin.coachAttendance.byYear')}</h5>
                       {!trainingDaysByCoachByYear[selectedCoach] || Object.keys(trainingDaysByCoachByYear[selectedCoach]).length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">No yearly data</p>
+                        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.coachAttendance.noYearlyData')}</p>
                       ) : (
                         <div className="space-y-2">
                           {Object.entries(trainingDaysByCoachByYear[selectedCoach]).map(([year, count]) => (
                             <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                               <span className="text-sm font-medium">{year}</span>
-                              <Badge variant="secondary">{count} days</Badge>
+                              <Badge variant="secondary">{count} {t('admin.coachAttendance.days')}</Badge>
                             </div>
                           ))}
                         </div>
