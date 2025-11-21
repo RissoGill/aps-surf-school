@@ -1239,6 +1239,7 @@ const CoachDashboard = () => {
 
   // View PDF in new tab
   const viewTrainingHistoryPDF = async () => {
+    toast({ title: "Generating PDF", description: "Please wait..." });
     try {
       const htmlContent = generateTrainingHistoryHTML();
       const element = document.createElement('div');
@@ -1252,12 +1253,27 @@ const CoachDashboard = () => {
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
+      console.log('Starting PDF generation...');
       const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
+      console.log('PDF generated successfully');
+      
       const pdfUrl = URL.createObjectURL(pdf);
-      window.open(pdfUrl, '_blank');
+      console.log('Opening PDF in new tab:', pdfUrl);
+      
+      const newWindow = window.open(pdfUrl, '_blank');
+      
+      if (!newWindow) {
+        toast({ 
+          title: "Pop-up Blocked", 
+          description: "Please allow pop-ups to view the PDF", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Success", description: "PDF opened in new tab" });
+      }
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to generate PDF. Check console for details.", variant: "destructive" });
     }
   };
 
