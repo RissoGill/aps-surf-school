@@ -1241,19 +1241,22 @@ const CoachDashboard = () => {
   const viewTrainingHistoryPDF = async () => {
     // Open new tab immediately to prevent popup blockers
     const viewer = window.open('', '_blank');
-    
+
     // Check if popup was blocked
     if (!viewer) {
-      toast({ 
-        title: "Popup Blocked", 
-        description: "Please allow popups for this site or use the Download PDF option", 
-        variant: "destructive" 
+      toast({
+        title: "Popup Blocked",
+        description: "Please allow popups for this site or use the Download PDF option",
+        variant: "destructive",
       });
       return;
     }
 
     // Show loading message in the new tab
-    viewer.document.write('<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>');
+    viewer.document.write(
+      '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>'
+    );
+    viewer.document.close();
 
     try {
       const htmlContent = generateTrainingHistoryHTML();
@@ -1262,23 +1265,24 @@ const CoachDashboard = () => {
 
       const opt = {
         margin: 10,
-        filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
+        filename: `training-history-${coachDisplayName}-${format(new Date(), 'yyyy-MM-dd')}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
       };
 
-      // Let html2pdf generate a blob URL directly
-      const pdfUrl = await html2pdf().from(element).set(opt).outputPdf('bloburl');
-      
+      const pdfBlob = await html2pdf().from(element).set(opt).outputPdf('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
       // Navigate the viewer to the PDF
-      viewer.location.href = pdfUrl as string;
+      viewer.location.href = pdfUrl;
     } catch (error) {
       console.error('Error generating PDF:', error);
       viewer.close();
-      toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
+      toast({ title: 'Error', description: 'Failed to generate PDF', variant: 'destructive' });
     }
   };
+
   // Download PDF
   const downloadTrainingHistoryPDF = async () => {
     try {
