@@ -38,6 +38,10 @@
     "unexpectedError": "Ocorreu um erro inesperado",
     "accessDenied": "Acesso Negado",
     "noAdminPrivileges": "Não tem privilégios de administrador.",
+    "sessionExpired": "Sessão expirada",
+    "pleaseLoginAgain": "Por favor inicie sessão novamente",
+    "signedOut": "Sessão terminada",
+    "redirectingToLogin": "A redirecionar para o login...",
     "welcomeGuardian": "Bem-vindo de volta, Encarregado!",
     "welcomeAdmin": "Bem-vindo de volta, Administrador!",
     "welcomeBack": "Bem-vindo de volta, {name}!",
@@ -138,8 +142,12 @@
       "title": "Painel de Administração",
       "subtitle": "Gerir dados do sistema e ver relatórios",
       "refresh": "Atualizar",
+      "refreshing": "A atualizar dados...",
+      "loadingLatest": "A carregar a informação mais recente",
       "loggedInAs": "Sessão iniciada como",
-      "signOut": "Terminar Sessão"
+      "signOut": "Terminar Sessão",
+      "adminDashboard": "Painel de Administração",
+      "completeAccess": "Acesso completo à gestão da escola"
     },
     "stats": {
       "totalReceived": "Total Recebido desde Setembro",
@@ -175,7 +183,12 @@
       "selectCoach": "Selecionar Treinador",
       "allCoaches": "Todos os Treinadores",
       "trainingDays": "Dias de Treino",
-      "year": "Ano"
+      "year": "Ano",
+      "byMonth": "Por Mês",
+      "byYear": "Por Ano",
+      "noMonthlyData": "Sem dados mensais",
+      "noYearlyData": "Sem dados anuais",
+      "days": "dias"
     }
   },
   "coach": {

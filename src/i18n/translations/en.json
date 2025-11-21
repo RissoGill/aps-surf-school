@@ -38,6 +38,10 @@
     "unexpectedError": "An unexpected error occurred",
     "accessDenied": "Access Denied",
     "noAdminPrivileges": "You do not have administrator privileges.",
+    "sessionExpired": "Session expired",
+    "pleaseLoginAgain": "Please log in again",
+    "signedOut": "Signed out",
+    "redirectingToLogin": "Redirecting to login...",
     "welcomeGuardian": "Welcome back, Guardian!",
     "welcomeAdmin": "Welcome back, Administrator!",
     "welcomeBack": "Welcome back, {name}!",
@@ -138,8 +142,12 @@
       "title": "Administration Dashboard",
       "subtitle": "Manage system data and view reports",
       "refresh": "Refresh",
+      "refreshing": "Refreshing data...",
+      "loadingLatest": "Loading the latest information",
       "loggedInAs": "Logged in as",
-      "signOut": "Sign Out"
+      "signOut": "Sign Out",
+      "adminDashboard": "Admin Dashboard",
+      "completeAccess": "Complete school management access"
     },
     "stats": {
       "totalReceived": "Total Received from September",
@@ -175,7 +183,12 @@
       "selectCoach": "Select Coach",
       "allCoaches": "All Coaches",
       "trainingDays": "Training Days",
-      "year": "Year"
+      "year": "Year",
+      "byMonth": "By Month",
+      "byYear": "By Year",
+      "noMonthlyData": "No monthly data",
+      "noYearlyData": "No yearly data",
+      "days": "days"
     }
   },
   "coach": {
