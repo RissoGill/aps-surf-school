@@ -309,19 +309,19 @@ export const CoachPaymentsCard = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Euro className="h-6 w-6 text-primary" />
             </div>
-            <div>
+            <div className="flex-1 md:min-w-[200px]">
               <h4 className="font-medium text-foreground mb-1">{t('shared.coachPayments.title')}</h4>
               <p className="text-sm text-muted-foreground">{t('shared.coachPayments.subtitle')}</p>
             </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" className="w-full lg:w-auto lg:self-start shrink-0">
                 {t('shared.coachPayments.addPayment')}
               </Button>
             </DialogTrigger>
