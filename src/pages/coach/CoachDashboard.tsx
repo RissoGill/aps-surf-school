@@ -1239,41 +1239,25 @@ const CoachDashboard = () => {
 
   // View PDF in new tab
   const viewTrainingHistoryPDF = async () => {
-    toast({ title: "Generating PDF", description: "Please wait..." });
     try {
       const htmlContent = generateTrainingHistoryHTML();
       const element = document.createElement('div');
       element.innerHTML = htmlContent;
 
       const opt = {
-        margin: [10, 10, 15, 10] as [number, number, number, number],
+        margin: 10,
         filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
-      console.log('Starting PDF generation...');
       const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
-      console.log('PDF generated successfully');
-      
       const pdfUrl = URL.createObjectURL(pdf);
-      console.log('Opening PDF in new tab:', pdfUrl);
-      
-      const newWindow = window.open(pdfUrl, '_blank');
-      
-      if (!newWindow) {
-        toast({ 
-          title: "Pop-up Blocked", 
-          description: "Please allow pop-ups to view the PDF", 
-          variant: "destructive" 
-        });
-      } else {
-        toast({ title: "Success", description: "PDF opened in new tab" });
-      }
+      window.open(pdfUrl, '_blank');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast({ title: "Error", description: "Failed to generate PDF. Check console for details.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to generate PDF", variant: "destructive" });
     }
   };
 
@@ -1285,7 +1269,7 @@ const CoachDashboard = () => {
       element.innerHTML = htmlContent;
 
       const opt = {
-        margin: [10, 10, 15, 10] as [number, number, number, number],
+        margin: 10,
         filename: `training-history-${coachDisplayName}-${format(new Date(), "yyyy-MM-dd")}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
