@@ -246,28 +246,42 @@ export const ReportsCard = () => {
   const viewReport = async () => {
     if (!reportData) return;
 
+    // Open new tab immediately to prevent popup blockers
+    const viewer = window.open('', '_blank');
+
+    if (!viewer) {
+      toast.error("Popup blocked. Please allow popups for this site or use the Download PDF option.");
+      return;
+    }
+
+    // Show loading message in the new tab
+    viewer.document.write(
+      '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>'
+    );
+    viewer.document.close();
+
     const htmlContent = generateReportHTML(reportData);
     const element = document.createElement('div');
     element.innerHTML = htmlContent;
 
     const opt = {
       margin: 10,
-      filename: `${reportData.type}_report_${format(reportData.generatedAt, "yyyy-MM-dd")}.pdf`,
+      filename: `${reportData.type}_report_${format(reportData.generatedAt, 'yyyy-MM-dd')}.pdf`,
       image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
     };
 
     try {
       const pdf = await html2pdf().from(element).set(opt).outputPdf('blob');
       const pdfUrl = URL.createObjectURL(pdf);
-      window.open(pdfUrl, '_blank');
+      viewer.location.href = pdfUrl;
     } catch (error) {
       console.error('Error generating PDF:', error);
+      viewer.close();
       toast.error('Failed to generate PDF');
     }
   };
-
   const downloadReport = async () => {
     if (!reportData) return;
 
