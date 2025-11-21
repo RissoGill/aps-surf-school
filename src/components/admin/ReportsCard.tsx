@@ -254,33 +254,15 @@ export const ReportsCard = () => {
       return;
     }
 
-    // Show loading message in the new tab
-    viewer.document.write(
-      '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;"><h2>Generating PDF...</h2></body></html>'
-    );
-    viewer.document.close();
-
-    const htmlContent = generateReportHTML(reportData);
-    const element = document.createElement('div');
-    element.innerHTML = htmlContent;
-
-    const opt = {
-      margin: 10,
-      filename: `${reportData.type}_report_${format(reportData.generatedAt, 'yyyy-MM-dd')}.pdf`,
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
-    };
-
     try {
-      const worker: any = (html2pdf as any)().from(element).set(opt).toPdf();
-      const pdf: any = await worker.get('pdf');
-      const pdfUrl = pdf.output('bloburl');
-      viewer.location.href = pdfUrl;
+      const htmlContent = generateReportHTML(reportData);
+      viewer.document.open();
+      viewer.document.write(htmlContent);
+      viewer.document.close();
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error opening report:', error);
       viewer.close();
-      toast.error('Failed to generate PDF');
+      toast.error('Failed to open report');
     }
   };
   const downloadReport = async () => {
