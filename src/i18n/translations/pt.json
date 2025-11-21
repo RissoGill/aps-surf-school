@@ -1,0 +1,109 @@
+{
+  "welcome": {
+    "title": "Bem-vindo à APS",
+    "subtitle": "Escolha o seu perfil para aceder ao seu painel personalizado"
+  },
+  "roles": {
+    "coach": {
+      "title": "Treinador",
+      "description": "Gerir treino e presenças de atletas"
+    },
+    "athlete": {
+      "title": "Atleta",
+      "description": "Ver o seu horário de treino e progresso"
+    },
+    "guardian": {
+      "title": "Encarregado",
+      "description": "Acompanhar o progresso e pagamentos do seu educando"
+    },
+    "administration": {
+      "title": "Administração",
+      "description": "Acesso completo à gestão da escola"
+    }
+  },
+  "login": {
+    "title": "Iniciar Sessão",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "emailOrCode": "Email ou Código",
+    "submit": "Entrar",
+    "error": "Credenciais inválidas",
+    "success": "Login com sucesso"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "download": "Descarregar",
+    "loading": "A carregar...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "refresh": "Atualizar"
+  },
+  "dashboard": {
+    "coach": {
+      "title": "Painel do Treinador",
+      "athletes": "Atletas",
+      "attendance": "Presenças",
+      "reports": "Relatórios"
+    },
+    "athlete": {
+      "title": "Painel do Atleta",
+      "schedule": "Horário",
+      "progress": "Progresso",
+      "championships": "Campeonatos"
+    },
+    "guardian": {
+      "title": "Painel do Encarregado",
+      "children": "Educandos",
+      "payments": "Pagamentos",
+      "attendance": "Presenças"
+    },
+    "admin": {
+      "title": "Painel de Administração",
+      "users": "Utilizadores",
+      "athletes": "Atletas",
+      "payments": "Pagamentos",
+      "reports": "Relatórios"
+    }
+  },
+  "attendance": {
+    "title": "Registo de Presenças",
+    "date": "Data",
+    "status": "Estado",
+    "present": "Presente",
+    "absent": "Ausente",
+    "notes": "Notas",
+    "location": "Localização",
+    "shift": "Turno"
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "amount": "Valor",
+    "status": "Estado",
+    "date": "Data",
+    "paid": "Pago",
+    "pending": "Pendente",
+    "overdue": "Atrasado"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "generate": "Gerar Relatório",
+    "viewPdf": "Ver PDF",
+    "downloadPdf": "Descarregar PDF",
+    "trainingHistory": "Histórico de Treinos"
+  },
+  "footer": {
+    "rights": "Todos os direitos reservados"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "welcome": {
+    "title": "Welcome to APS",
+    "subtitle": "Choose your profile to access your personalized dashboard"
+  },
+  "roles": {
+    "coach": {
+      "title": "Coach",
+      "description": "Manage athlete training and attendance"
+    },
+    "athlete": {
+      "title": "Athlete",
+      "description": "View your training schedule and progress"
+    },
+    "guardian": {
+      "title": "Guardian",
+      "description": "Track your child's progress and payments"
+    },
+    "administration": {
+      "title": "Administration",
+      "description": "Full access to school management"
+    }
+  },
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "emailOrCode": "Email or Code",
+    "submit": "Sign In",
+    "error": "Invalid credentials",
+    "success": "Login successful"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh"
+  },
+  "dashboard": {
+    "coach": {
+      "title": "Coach Dashboard",
+      "athletes": "Athletes",
+      "attendance": "Attendance",
+      "reports": "Reports"
+    },
+    "athlete": {
+      "title": "Athlete Dashboard",
+      "schedule": "Schedule",
+      "progress": "Progress",
+      "championships": "Championships"
+    },
+    "guardian": {
+      "title": "Guardian Dashboard",
+      "children": "Children",
+      "payments": "Payments",
+      "attendance": "Attendance"
+    },
+    "admin": {
+      "title": "Administration Dashboard",
+      "users": "Users",
+      "athletes": "Athletes",
+      "payments": "Payments",
+      "reports": "Reports"
+    }
+  },
+  "attendance": {
+    "title": "Attendance Records",
+    "date": "Date",
+    "status": "Status",
+    "present": "Present",
+    "absent": "Absent",
+    "notes": "Notes",
+    "location": "Location",
+    "shift": "Shift"
+  },
+  "payments": {
+    "title": "Payments",
+    "amount": "Amount",
+    "status": "Status",
+    "date": "Date",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue"
+  },
+  "reports": {
+    "title": "Reports",
+    "generate": "Generate Report",
+    "viewPdf": "View PDF",
+    "downloadPdf": "Download PDF",
+    "trainingHistory": "Training History"
+  },
+  "footer": {
+    "rights": "All rights reserved"
+  }
+}
