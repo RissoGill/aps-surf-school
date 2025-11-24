@@ -69,6 +69,38 @@ const PaymentManagement = () => {
     notes: ""
   });
 
+  const translateMonth = (month: string): string => {
+    if (!month) return "";
+
+    const normalized = month
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "");
+
+    const monthKeyMap: Record<string, string> = {
+      january: "january", jan: "january", janeiro: "january",
+      february: "february", feb: "february", fevereiro: "february",
+      march: "march", mar: "march", marco: "march",
+      april: "april", apr: "april", abril: "april",
+      may: "may", mai: "may", maio: "may",
+      june: "june", jun: "june", junho: "june",
+      july: "july", jul: "july", julho: "july",
+      august: "august", aug: "august", agosto: "august",
+      september: "september", sep: "september", sept: "september", setembro: "september",
+      october: "october", oct: "october", outubro: "october",
+      november: "november", nov: "november", novembro: "november",
+      december: "december", dec: "december", dezembro: "december"
+    };
+
+    const canonical = monthKeyMap[normalized] || normalized;
+    const translationKey = `admin.paymentManagement.months.${canonical}`;
+    const translated = t(translationKey);
+
+    return translated !== translationKey ? translated : month;
+  };
+
+
   // Fetch all athletes for search
   const { data: athletes } = useQuery({
     queryKey: ['athletes-search'],
@@ -726,7 +758,7 @@ const PaymentManagement = () => {
                           
                           return (
                             <TableRow key={payment.payment_id}>
-                              <TableCell className="font-medium">{payment.month} {payment.year}</TableCell>
+                              <TableCell className="font-medium">{translateMonth(payment.month)} {payment.year}</TableCell>
                               
                               {/* Plan Type */}
                               <TableCell>
@@ -746,7 +778,11 @@ const PaymentManagement = () => {
                                     </SelectContent>
                                   </Select>
                                 ) : (
-                                  payment.plan_type || '-'
+                                  payment.plan_type
+                                    ? (['month', 'pack1', 'pack5', 'pack10'].includes(payment.plan_type)
+                                        ? t(`admin.paymentManagement.${payment.plan_type}`)
+                                        : payment.plan_type)
+                                    : '-'
                                 )}
                               </TableCell>
                               
