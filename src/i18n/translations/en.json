@@ -598,7 +598,53 @@
       "selectChild": "Select a child to view their information",
       "noChildren": "No athletes found for this guardian",
       "welcome": "Welcome,",
-      "logout": "Logout"
+      "logout": "Logout",
+      "loggedOut": "Logged Out",
+      "loggedOutDesc": "See you soon!",
+      "errorNoProfile": "Guardian profile not found. Please contact administration.",
+      "errorNoAthletes": "No athletes linked to your account.",
+      "backToLogin": "Back to Login"
+    },
+    "familyArea": {
+      "title": "Family Area",
+      "selectChild": "Select a child to view their information"
+    },
+    "athleteCard": {
+      "level": "Level",
+      "beginner": "Beginner",
+      "sessionsPerWeek": "sessions per week"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "payments": "Payments",
+      "attendance": "Attendance",
+      "annualSummary": "Annual Summary",
+      "media": "Media",
+      "championships": "Championships",
+      "champs": "Champs",
+      "estagios": "Training Camps"
+    },
+    "packSummary": {
+      "title": "Your pack summary",
+      "totalSessions": "Total Sessions",
+      "sessionsUsed": "Sessions Used",
+      "remainingSessions": "Remaining Sessions",
+      "activeSince": "Pack active since",
+      "purchaseHistory": "Purchase History",
+      "active": "Active",
+      "sessionsPack": "sessions pack",
+      "sessions": "sessions",
+      "payment": "Payment:",
+      "noActivePack": "No active pack found"
+    },
+    "overview": {
+      "paymentSummary": "Payment Summary",
+      "nextPayment": "Next Payment",
+      "due": "Due:",
+      "outstanding": "Outstanding",
+      "recentPayments": "Recent Payments",
+      "paid": "Paid:",
+      "noRecentPayments": "No recent payments found"
     },
     "payments": {
       "summary": "Payments Summary",
@@ -610,17 +656,43 @@
       "paid": "Paid",
       "unpaid": "Unpaid",
       "partial": "Partial",
+      "due": "Due:",
+      "amountDue": "Amount Due:",
+      "amountPaid": "Amount Paid:",
+      "paidOn": "Paid on:",
+      "noPayments": "No payments found",
+      "allRecordsSorted": "All payment records sorted by date",
       "month": "Month",
       "amount": "Amount",
       "status": "Status",
       "planType": "Plan Type"
     },
-    "tabs": {
-      "attendance": "Attendance",
-      "annualSummary": "Annual Summary",
-      "media": "Media",
-      "championships": "Championships",
-      "estagios": "Training Camps"
+    "media": {
+      "title": "Photos & Videos",
+      "description": "Media from training sessions",
+      "noMedia": "No photos or videos yet",
+      "noMediaDesc": "Coaches will upload media from training sessions",
+      "photos": "Photos",
+      "videos": "Videos",
+      "coach": "Coach:"
+    },
+    "championships": {
+      "title": "Championships",
+      "description": "Registered competitions and events",
+      "noChampionships": "No championships registered",
+      "category": "Category:",
+      "gender": "Gender:",
+      "location": "Location:",
+      "start": "Start:",
+      "end": "End:"
+    },
+    "estagios": {
+      "title": "Training Camps",
+      "description": "Training camps and internships",
+      "noEstagios": "No training camp registrations found",
+      "location": "Location:",
+      "start": "Start:",
+      "end": "End:"
     }
   },
   "shared": {
