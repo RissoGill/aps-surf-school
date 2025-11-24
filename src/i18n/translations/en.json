@@ -79,7 +79,9 @@
     "filter": "Filter",
     "export": "Export",
     "import": "Import",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "notAvailable": "N/A",
+    "unknown": "Unknown"
   },
   "dashboard": {
     "coach": {
@@ -535,33 +537,42 @@
       "loggedOutDescription": "See you soon!",
       "errorLoadingProfile": "Error loading athlete profile"
     },
-    "personal": {
-      "title": "Personal Information",
-      "level": "Level",
-      "noData": "No data available",
-      "emergencyContacts": "Emergency Contacts",
-      "mother": "Mother",
-      "father": "Father"
-    },
-    "training": {
-      "scheduleTitle": "Training Schedule",
-      "weeklySessions": "Weekly Trainings",
-      "sessionsPerWeek": "trainings per week",
-      "notSpecified": "Not specified",
-      "transportation": "Transportation",
-      "serviceProvided": "Service Provided",
-      "noService": "No Service",
-      "pickupAddress": "Pickup Address",
-      "dropoffAddress": "Drop-off Address"
-    },
-    "attendance": {
-      "recordDescription": "Your training record",
-      "coach": "Coach:",
-      "beach": "Beach:",
-      "notes": "Notes:",
-      "monthlySummary": "Monthly Summary",
-      "notPresent": "Not Present"
-    },
+      "personal": {
+        "title": "Personal Information",
+        "dateOfBirth": "Date of Birth",
+        "phone": "Phone",
+        "address": "Address",
+        "level": "Level",
+        "noData": "No data available",
+        "emergencyContacts": "Emergency Contacts",
+        "mother": "Mother",
+        "father": "Father",
+        "name": "Name",
+        "email": "Email"
+      },
+      "training": {
+        "scheduleTitle": "Training Schedule",
+        "weeklySessions": "Weekly Trainings",
+        "sessionsPerWeek": "trainings per week",
+        "trainingDays": "Training Days",
+        "notSpecified": "Not specified",
+        "transportation": "Transportation",
+        "serviceProvided": "Service Provided",
+        "noService": "No Service",
+        "pickupAddress": "Pickup Address",
+        "dropoffAddress": "Drop-off Address"
+      },
+      "attendance": {
+        "recordDescription": "Your training record",
+        "noRecords": "No attendance records for this month",
+        "coach": "Coach:",
+        "beach": "Beach:",
+        "notes": "Notes:",
+        "monthlySummary": "Monthly Summary",
+        "present": "Present",
+        "justified": "Justified",
+        "notPresent": "Not Present"
+      },
     "championships": {
       "title": "My Championships",
       "description": "View all championships you are registered for",
