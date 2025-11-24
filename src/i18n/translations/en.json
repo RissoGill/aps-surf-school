@@ -491,7 +491,12 @@
       "profileNotLinkedDesc": "Your account is not yet linked to an athlete profile",
       "contactAdmin": "Please contact your coach or administrator to link your account",
       "welcome": "Welcome,",
-      "level": "Level"
+      "level": "Level",
+      "refreshed": "Data refreshed",
+      "refreshedDescription": "Your data has been successfully updated",
+      "loggedOut": "Logged Out",
+      "loggedOutDescription": "See you soon!",
+      "errorLoadingProfile": "Error loading athlete profile"
     },
     "tabs": {
       "personal": "Personal",
@@ -502,26 +507,47 @@
       "championships": "Championships",
       "estagios": "Training Camps"
     },
-    "attendance": {
-      "monthNavigation": "Navigate months",
-      "summary": "Summary",
-      "noRecords": "No attendance records for this month",
-      "present": "Present",
-      "justified": "Justified",
-      "absent": "Absent"
-    },
     "personal": {
+      "title": "Personal Information",
       "name": "Name",
       "email": "Email",
       "phone": "Phone",
       "dateOfBirth": "Date of Birth",
-      "address": "Address"
+      "address": "Address",
+      "level": "Level",
+      "noData": "No data available",
+      "emergencyContacts": "Emergency Contacts",
+      "mother": "Mother",
+      "father": "Father"
     },
     "training": {
+      "scheduleTitle": "Training Schedule",
       "level": "Surf Level",
       "planType": "Plan Type",
       "trainingDays": "Training Days",
-      "trainingsPerWeek": "Trainings per Week"
+      "trainingsPerWeek": "Trainings per Week",
+      "weeklySessions": "Weekly Trainings",
+      "sessionsPerWeek": "trainings per week",
+      "notSpecified": "Not specified",
+      "transportation": "Transportation",
+      "serviceProvided": "Service Provided",
+      "noService": "No Service",
+      "pickupAddress": "Pickup Address",
+      "dropoffAddress": "Drop-off Address"
+    },
+    "attendance": {
+      "monthNavigation": "Navigate months",
+      "summary": "Summary",
+      "recordDescription": "Your training record",
+      "noRecords": "No attendance records for this month",
+      "coach": "Coach:",
+      "beach": "Beach:",
+      "notes": "Notes:",
+      "monthlySummary": "Monthly Summary",
+      "present": "Present",
+      "justified": "Justified",
+      "absent": "Absent",
+      "notPresent": "Not Present"
     },
     "packBalance": {
       "title": "Pack Balance",
@@ -536,49 +562,15 @@
       "payment": "Payment:",
       "noActivePack": "No active pack found"
     },
-    "dashboard": {
-      "refreshed": "Data refreshed",
-      "refreshedDescription": "Your data has been successfully updated",
-      "loggedOut": "Logged Out",
-      "loggedOutDescription": "See you soon!",
-      "errorLoadingProfile": "Error loading athlete profile"
+    "media": {
+      "title": "Photos & Videos",
+      "description": "Media shared by your coaches",
+      "noMedia": "No photos or videos yet",
+      "noMediaDescription": "Your coaches will upload media from training sessions",
+      "photos": "Photos",
+      "videos": "Videos",
+      "coach": "Coach:"
     },
-      "personal": {
-        "title": "Personal Information",
-        "dateOfBirth": "Date of Birth",
-        "phone": "Phone",
-        "address": "Address",
-        "level": "Level",
-        "noData": "No data available",
-        "emergencyContacts": "Emergency Contacts",
-        "mother": "Mother",
-        "father": "Father",
-        "name": "Name",
-        "email": "Email"
-      },
-      "training": {
-        "scheduleTitle": "Training Schedule",
-        "weeklySessions": "Weekly Trainings",
-        "sessionsPerWeek": "trainings per week",
-        "trainingDays": "Training Days",
-        "notSpecified": "Not specified",
-        "transportation": "Transportation",
-        "serviceProvided": "Service Provided",
-        "noService": "No Service",
-        "pickupAddress": "Pickup Address",
-        "dropoffAddress": "Drop-off Address"
-      },
-      "attendance": {
-        "recordDescription": "Your training record",
-        "noRecords": "No attendance records for this month",
-        "coach": "Coach:",
-        "beach": "Beach:",
-        "notes": "Notes:",
-        "monthlySummary": "Monthly Summary",
-        "present": "Present",
-        "justified": "Justified",
-        "notPresent": "Not Present"
-      },
     "championships": {
       "title": "My Championships",
       "description": "View all championships you are registered for",
@@ -590,15 +582,6 @@
       "unnamedChampionship": "Unnamed Championship",
       "registered": "Registered",
       "goodLuck": "Good luck! Remember to check with your coach for competition details and requirements."
-    },
-    "media": {
-      "title": "Photos & Videos",
-      "description": "Media shared by your coaches",
-      "noMedia": "No photos or videos yet",
-      "noMediaDescription": "Your coaches will upload media from training sessions",
-      "photos": "Photos",
-      "videos": "Videos",
-      "coach": "Coach:"
     },
     "estagios": {
       "description": "Training camps and internships you are registered for",
