@@ -935,10 +935,27 @@ const GuardianDashboard = () => {
     // Validate input
     if (!monthStr || monthStr.trim() === '') return monthStr || '-';
     
-    const monthNumber = parseInt(monthStr);
+    // Map of English month names to numbers
+    const monthMap: { [key: string]: number } = {
+      'january': 1, 'february': 2, 'march': 3, 'april': 4,
+      'may': 5, 'june': 6, 'july': 7, 'august': 8,
+      'september': 9, 'october': 10, 'november': 11, 'december': 12
+    };
     
-    // Check if parsing was successful and month is in valid range
-    if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    let monthNumber: number;
+    
+    // Check if it's already a number
+    const parsedNumber = parseInt(monthStr);
+    if (!isNaN(parsedNumber)) {
+      monthNumber = parsedNumber;
+    } else {
+      // Try to convert from English month name
+      const normalizedMonth = monthStr.toLowerCase().trim();
+      monthNumber = monthMap[normalizedMonth] || 0;
+    }
+    
+    // Validate month is in valid range
+    if (monthNumber < 1 || monthNumber > 12) {
       console.warn('Invalid month value:', monthStr);
       return monthStr;
     }
