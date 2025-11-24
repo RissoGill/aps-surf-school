@@ -27,7 +27,7 @@ interface AnnualSummary {
 }
 
 export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -99,9 +99,9 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Present": return t('coach.annualSummary.present');
-      case "Absent": return t('coach.annualSummary.notPresent');
-      case "Justified": return t('coach.annualSummary.justified');
+      case "Present": return t('coach.annualAttendance.present');
+      case "Absent": return t('coach.annualAttendance.absent');
+      case "Justified": return t('coach.annualAttendance.justified');
       default: return status;
     }
   };
@@ -110,7 +110,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
     <Card className="shadow-soft">
         <CardHeader>
           <h4 className="font-medium text-foreground">
-            {t('coach.annualSummary.title')}
+            {t('coach.annualAttendance.title')}
           </h4>
         </CardHeader>
       <CardContent className="space-y-3">
@@ -119,7 +119,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">{summary.year}</p>
               <Badge variant="default" className="text-xs font-normal bg-primary">
-                {summary.total} {t('coach.annualSummary.total')}
+                {summary.total} {t('coach.annualAttendance.total')}
               </Badge>
             </div>
             <div className="grid grid-cols-3 gap-4 text-center font-normal">
@@ -127,19 +127,19 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                 <p className="text-2xl font-normal text-success">
                   {summary.statusCounts['Present'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.present')}</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualAttendance.present')}</p>
               </div>
               <div>
                 <p className="text-2xl font-normal text-warning">
                   {summary.statusCounts['Justified'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.justified')}</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualAttendance.justified')}</p>
               </div>
               <div>
                 <p className="text-2xl font-normal text-destructive">
                   {summary.statusCounts['Absent'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.notPresent')}</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualAttendance.absent')}</p>
               </div>
             </div>
           </div>
@@ -148,10 +148,10 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
         {/* Year selector and details */}
         <div className="pt-4 border-t space-y-3">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">{t('coach.annualSummary.viewDetailsFor')}</label>
+            <label className="text-sm font-medium">{t('coach.annualAttendance.viewDetailsFor')}</label>
             <Select value={selectedYear} onValueChange={handleYearChange}>
               <SelectTrigger className="w-32 bg-background">
-                <SelectValue placeholder={t('coach.annualSummary.selectYear')} />
+                <SelectValue placeholder={t('coach.annualAttendance.selectYear')} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
                 {sortedSummaries.map((summary) => (
@@ -170,12 +170,12 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                   {isExpanded ? (
                     <>
                       <ChevronUp className="h-4 w-4 mr-2" />
-                      {t('coach.annualSummary.hideRecords')}
+                      {t('coach.annualAttendance.hideRecords')}
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4 mr-2" />
-                      {t('coach.annualSummary.showRecords').replace('{count}', selectedYearRecords.length.toString())}
+                      {t('coach.annualAttendance.showRecords').replace('{count}', selectedYearRecords.length.toString())}
                     </>
                   )}
                 </Button>
@@ -183,7 +183,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
               <CollapsibleContent className="space-y-2 pt-3">
                 {selectedYearRecords.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    {t('coach.annualSummary.noRecords').replace('{year}', selectedYear)}
+                    {t('coach.annualAttendance.noRecords').replace('{year}', selectedYear)}
                   </p>
                 ) : (
                   selectedYearRecords.map((record) => (
@@ -197,17 +197,17 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-muted-foreground">{t('coach.annualSummary.coach')}</span> 
+                          <span className="text-muted-foreground">{t('coach.annualAttendance.coach')}</span> 
                           <span className="font-medium">{record.coach || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-muted-foreground">{t('coach.annualSummary.beach')}</span> 
+                          <span className="text-muted-foreground">{t('coach.annualAttendance.beach')}</span> 
                           <span className="font-medium">{record.beach_location || 'N/A'}</span>
                         </div>
                         {record.notes && (
                           <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded">
-                            <span className="font-medium">{t('coach.annualSummary.notes')}</span> {record.notes}
+                            <span className="font-medium">{t('coach.annualAttendance.notes')}</span> {record.notes}
                           </div>
                         )}
                       </div>

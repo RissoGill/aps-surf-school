@@ -180,7 +180,7 @@
       }
     },
     "monthlyAttendance": {
-      "title": "Monthly Attendance - {month}",
+      "title": "Monthly Attendance Summary",
       "present": "Present",
       "absent": "Absent",
       "justified": "Justified",
@@ -197,7 +197,7 @@
       "notSet": "Not set"
     },
     "annualAttendance": {
-      "title": "Annual Attendance - {year}",
+      "title": "Annual Attendance Summary",
       "present": "Present",
       "absent": "Absent",
       "justified": "Justified",
@@ -205,6 +205,9 @@
       "viewDetailsFor": "View details for",
       "hideDetailsFor": "Hide details for",
       "selectYear": "Select year",
+      "hideRecords": "Hide records",
+      "showRecords": "Show {count} record(s)",
+      "noRecords": "No attendance records for {year}",
       "noAttendanceRecords": "No attendance records found for this year",
       "detailedRecords": "Detailed Records for {month}",
       "date": "Date",

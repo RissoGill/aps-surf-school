@@ -180,7 +180,7 @@
       }
     },
     "monthlyAttendance": {
-      "title": "Presenças Mensais - {month}",
+      "title": "Resumo Mensal de Presenças",
       "present": "Presente",
       "absent": "Ausente",
       "justified": "Justificado",
@@ -197,7 +197,7 @@
       "notSet": "Não definido"
     },
     "annualAttendance": {
-      "title": "Presenças Anuais - {year}",
+      "title": "Resumo Anual de Presenças",
       "present": "Presente",
       "absent": "Ausente",
       "justified": "Justificado",
@@ -205,6 +205,9 @@
       "viewDetailsFor": "Ver detalhes para",
       "hideDetailsFor": "Ocultar detalhes para",
       "selectYear": "Selecionar ano",
+      "hideRecords": "Ocultar registos",
+      "showRecords": "Mostrar {count} registo(s)",
+      "noRecords": "Sem registos de presença para {year}",
       "noAttendanceRecords": "Nenhum registo de presença encontrado para este ano",
       "detailedRecords": "Registos Detalhados para {month}",
       "date": "Data",
