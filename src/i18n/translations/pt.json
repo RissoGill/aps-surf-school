@@ -83,6 +83,12 @@
     "notAvailable": "N/D",
     "unknown": "Desconhecido"
   },
+  "footer": {
+    "rights": "Todos os direitos reservados",
+    "mainSponsors": "Patrocinadores Principais",
+    "ourPartners": "Os Nossos Parceiros",
+    "verifiedBy": "Escola Verificada Por"
+  },
   "dashboard": {
     "coach": {
       "title": "Painel do Treinador",

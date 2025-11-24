@@ -83,6 +83,12 @@
     "notAvailable": "N/A",
     "unknown": "Unknown"
   },
+  "footer": {
+    "rights": "All rights reserved",
+    "mainSponsors": "Main Sponsors",
+    "ourPartners": "Our Partners",
+    "verifiedBy": "School Verified By"
+  },
   "dashboard": {
     "coach": {
       "title": "Coach Dashboard",
