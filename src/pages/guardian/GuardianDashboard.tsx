@@ -14,6 +14,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { calculatePackBalance } from "@/utils/packBalance";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
   Id: string;
@@ -27,6 +28,7 @@ interface AttendanceRecord {
 }
 
 const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any }) => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   useEffect(() => {
     if (!athleteId) return;
@@ -131,7 +133,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
       {isPack && (
         <Card className="shadow-soft mb-4">
           <CardHeader>
-            <h4 className="font-medium text-title">Your pack summary</h4>
+            <h4 className="font-medium text-title">{t('guardian.packSummary.title')}</h4>
           </CardHeader>
           <CardContent>
             {packBalance ? (
@@ -139,27 +141,27 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold text-primary">{packBalance.totalTokens}</p>
-                    <p className="text-xs text-muted-foreground">Total Sessions</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.packSummary.totalSessions')}</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-success">{packBalance.usedTokens}</p>
-                    <p className="text-xs text-muted-foreground">Sessions Used</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.packSummary.sessionsUsed')}</p>
                   </div>
                 </div>
                 <div className="text-center pt-4 border-t">
                   <p className={`text-2xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
                     {packBalance.balance}
                   </p>
-                  <p className="text-xs text-muted-foreground">Remaining Sessions</p>
+                  <p className="text-xs text-muted-foreground">{t('guardian.packSummary.remainingSessions')}</p>
                 </div>
                 <div className="text-center text-xs text-muted-foreground pt-2">
-                  Pack active since {new Date(packBalance.purchaseDate).toLocaleDateString()}
+                  {t('guardian.packSummary.activeSince')} {new Date(packBalance.purchaseDate).toLocaleDateString()}
                 </div>
 
                 {/* Purchase History */}
                 {packHistory.length > 0 && (
                   <div className="pt-4 border-t space-y-3">
-                    <h4 className="text-sm font-semibold text-title">Purchase History</h4>
+                    <h4 className="text-sm font-semibold text-title">{t('guardian.packSummary.purchaseHistory')}</h4>
                     <div className="space-y-2">
                       {packHistory.map((pack) => (
                         <div 
@@ -176,19 +178,19 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                                 {new Date(pack.purchase_date).toLocaleDateString()}
                               </p>
                               {pack.active && (
-                                <Badge className="bg-success text-white text-xs">Active</Badge>
+                                <Badge className="bg-success text-white text-xs">{t('guardian.packSummary.active')}</Badge>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                              {pack.total_tokens} sessions pack
+                              {pack.total_tokens} {t('guardian.packSummary.sessionsPack')}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm text-foreground">
-                              {pack.total_tokens} sessions
+                              {pack.total_tokens} {t('guardian.packSummary.sessions')}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Payment: {pack.payment_id}
+                              {t('guardian.packSummary.payment')} {pack.payment_id}
                             </p>
                           </div>
                         </div>
@@ -198,7 +200,7 @@ const AttendanceTab = ({ athleteId, athlete }: { athleteId: string; athlete: any
                 )}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground py-4">No active pack found</p>
+              <p className="text-center text-muted-foreground py-4">{t('guardian.packSummary.noActivePack')}</p>
             )}
           </CardContent>
         </Card>
@@ -249,6 +251,7 @@ const AnnualAttendanceSummaryWrapper = ({ athleteId }: { athleteId: string }) =>
 };
 
 const MediaTab = ({ athleteId }: { athleteId: string }) => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   useEffect(() => {
     if (!athleteId) return;
@@ -307,9 +310,9 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
       <CardHeader>
         <h4 className="font-medium text-title flex items-center gap-2">
           <ImageIcon className="h-6 w-6" />
-          Photos & Videos
+          {t('guardian.media.title')}
         </h4>
-        <CardDescription>Media from training sessions</CardDescription>
+        <CardDescription>{t('guardian.media.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -323,9 +326,9 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
             <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <ImageIcon className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">No photos or videos yet</p>
+            <p className="text-muted-foreground">{t('guardian.media.noMedia')}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Coaches will upload media from training sessions
+              {t('guardian.media.noMediaDesc')}
             </p>
           </div>
         ) : (
@@ -335,7 +338,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
               <div>
                 <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <ImageIcon className="h-4 w-4" />
-                  Photos ({allPhotos.length})
+                  {t('guardian.media.photos')} ({allPhotos.length})
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {allPhotos.map((photo, idx) => (
@@ -364,7 +367,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                             )}
                             {photo.coach && (
                               <p className="text-xs text-muted-foreground truncate">
-                                Coach: {photo.coach}
+                                {t('guardian.media.coach')} {photo.coach}
                               </p>
                             )}
                           </div>
@@ -391,7 +394,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
               <div>
                 <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <Video className="h-4 w-4" />
-                  Videos ({allVideos.length})
+                  {t('guardian.media.videos')} ({allVideos.length})
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {allVideos.map((video, idx) => (
@@ -425,7 +428,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
                             )}
                             {video.coach && (
                               <p className="text-xs text-muted-foreground truncate">
-                                Coach: {video.coach}
+                                {t('guardian.media.coach')} {video.coach}
                               </p>
                             )}
                           </div>
@@ -454,6 +457,7 @@ const MediaTab = ({ athleteId }: { athleteId: string }) => {
 };
 
 const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
+  const { t } = useLanguage();
   const { data: championships = [], isLoading } = useQuery({
     queryKey: ['guardian-championships', athleteId],
     queryFn: async () => {
@@ -485,9 +489,9 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
       <CardHeader>
         <h4 className="font-medium text-foreground flex items-center gap-2">
           <Trophy className="h-6 w-6" />
-          Championships
+          {t('guardian.championships.title')}
         </h4>
-        <CardDescription>Registered championships and competitions</CardDescription>
+        <CardDescription>{t('guardian.championships.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -496,7 +500,7 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
           </div>
         ) : championships.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No championship registrations found
+            {t('guardian.championships.noChampionships')}
           </p>
         ) : (
           <div className="space-y-3">
@@ -506,25 +510,25 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {championship.categoria && (
                     <div>
-                      <span className="text-muted-foreground">Category:</span>
+                      <span className="text-muted-foreground">{t('guardian.championships.category')}</span>
                       <p className="font-medium">{championship.categoria}</p>
                     </div>
                   )}
                   {championship.gender && (
                     <div>
-                      <span className="text-muted-foreground">Gender:</span>
+                      <span className="text-muted-foreground">{t('guardian.championships.gender')}</span>
                       <p className="font-medium">{championship.gender}</p>
                     </div>
                   )}
                   {championship.local && (
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Location:</span>
+                      <span className="text-muted-foreground">{t('guardian.championships.location')}</span>
                       <p className="font-medium">{championship.local}</p>
                     </div>
                   )}
                   {championship.data_inicio && (
                     <div>
-                      <span className="text-muted-foreground">Start:</span>
+                      <span className="text-muted-foreground">{t('guardian.championships.start')}</span>
                       <p className="font-medium">
                         {new Date(championship.data_inicio).toLocaleDateString('pt-PT')}
                       </p>
@@ -532,7 +536,7 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
                   )}
                   {championship.data_fim && (
                     <div>
-                      <span className="text-muted-foreground">End:</span>
+                      <span className="text-muted-foreground">{t('guardian.championships.end')}</span>
                       <p className="font-medium">
                         {new Date(championship.data_fim).toLocaleDateString('pt-PT')}
                       </p>
@@ -549,6 +553,7 @@ const ChampionshipsTab = ({ athleteId }: { athleteId: string }) => {
 };
 
 const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
+  const { t } = useLanguage();
   const { data: estagios = [], isLoading } = useQuery({
     queryKey: ['guardian-estagios', athleteId],
     queryFn: async () => {
@@ -580,9 +585,9 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
       <CardHeader>
         <h4 className="font-medium text-foreground flex items-center gap-2">
           <Plane className="h-6 w-6" />
-          Estágios
+          {t('guardian.estagios.title')}
         </h4>
-        <CardDescription>Training camps and internships</CardDescription>
+        <CardDescription>{t('guardian.estagios.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -591,7 +596,7 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
           </div>
         ) : estagios.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No estágios registrations found
+            {t('guardian.estagios.noEstagios')}
           </p>
         ) : (
           <div className="space-y-3">
@@ -601,13 +606,13 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {estagio.local && (
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Location:</span>
+                      <span className="text-muted-foreground">{t('guardian.estagios.location')}</span>
                       <p className="font-medium">{estagio.local}</p>
                     </div>
                   )}
                   {estagio.data_inicio && (
                     <div>
-                      <span className="text-muted-foreground">Start:</span>
+                      <span className="text-muted-foreground">{t('guardian.estagios.start')}</span>
                       <p className="font-medium">
                         {new Date(estagio.data_inicio).toLocaleDateString('pt-PT')}
                       </p>
@@ -615,7 +620,7 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
                   )}
                   {estagio.data_fim && (
                     <div>
-                      <span className="text-muted-foreground">End:</span>
+                      <span className="text-muted-foreground">{t('guardian.estagios.end')}</span>
                       <p className="font-medium">
                         {new Date(estagio.data_fim).toLocaleDateString('pt-PT')}
                       </p>
@@ -632,6 +637,7 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
 };
 
 const GuardianDashboard = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
@@ -642,8 +648,8 @@ const GuardianDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('guardianSession');
     toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
+      title: t('guardian.dashboard.loggedOut'),
+      description: t('guardian.dashboard.loggedOutDesc'),
     });
     navigate("/login/guardian");
   };
@@ -966,19 +972,19 @@ const GuardianDashboard = () => {
     console.log('Showing error state:', { guardianId, hasAthlete: !!athlete });
     return (
       <div className="min-h-screen bg-gradient-surface">
-        <AppHeader title="Guardian Dashboard" showBack backTo="/" />
+        <AppHeader title={t('guardian.dashboard.title')} showBack backTo="/" />
         <main className="mobile-container py-6">
           <Card>
             <CardContent className="p-6 text-center">
               <p className="text-muted-foreground mb-4">
                 {!guardianId 
-                  ? "Guardian profile not found. Please contact administration."
-                  : "No athletes linked to your account."}
+                  ? t('guardian.dashboard.errorNoProfile')
+                  : t('guardian.dashboard.errorNoAthletes')}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
                 Debug: guardianId={guardianId || 'null'}, athletes={athletes?.length || 0}
               </p>
-              <Button onClick={() => navigate("/login/guardian")}>Back to Login</Button>
+              <Button onClick={() => navigate("/login/guardian")}>{t('guardian.dashboard.backToLogin')}</Button>
             </CardContent>
           </Card>
         </main>
@@ -988,7 +994,7 @@ const GuardianDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Guardian Dashboard" showBack backTo="/" />
+      <AppHeader title={t('guardian.dashboard.title')} showBack backTo="/" />
       
       <main className="mobile-container py-6">
         {/* Logout Button */}
@@ -999,7 +1005,7 @@ const GuardianDashboard = () => {
             onClick={handleLogout}
             className="touch-friendly"
           >
-            Logout
+            {t('guardian.dashboard.logout')}
           </Button>
         </div>
 
@@ -1009,9 +1015,9 @@ const GuardianDashboard = () => {
             <CardHeader>
               <h4 className="font-medium text-foreground flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
-                Family Area
+                {t('guardian.familyArea.title')}
               </h4>
-              <CardDescription>Select a child to view their information</CardDescription>
+              <CardDescription>{t('guardian.familyArea.selectChild')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1054,7 +1060,7 @@ const GuardianDashboard = () => {
               </h2>
               <div className="flex flex-col items-center gap-2">
                 <Badge className="gradient-primary text-white border-none shadow-soft">
-                  {athlete.surf_level || 'Beginner'} Level
+                  {athlete.surf_level || t('guardian.athleteCard.beginner')} {t('guardian.athleteCard.level')}
                 </Badge>
                 {athlete.plan_type && (
                   <Badge variant="outline" className="border-primary/30">
@@ -1063,7 +1069,7 @@ const GuardianDashboard = () => {
                 )}
               </div>
               <p className="text-muted-foreground mt-2">
-                {athlete.trainings_per_week || 0} sessions per week
+                {athlete.trainings_per_week || 0} {t('guardian.athleteCard.sessionsPerWeek')}
               </p>
             </div>
           </CardContent>
@@ -1076,40 +1082,40 @@ const GuardianDashboard = () => {
               value="overview" 
               className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
-              Overview
+              {t('guardian.tabs.overview')}
             </TabsTrigger>
             <TabsTrigger 
               value="payments" 
               className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
-              Payments
+              {t('guardian.tabs.payments')}
             </TabsTrigger>
             <TabsTrigger 
               value="attendance" 
               className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
-              Attendance
+              {t('guardian.tabs.attendance')}
             </TabsTrigger>
             <TabsTrigger 
               value="media" 
               className="data-[state=active]:bg-success data-[state=active]:text-success-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
-              Media
+              {t('guardian.tabs.media')}
             </TabsTrigger>
             <TabsTrigger 
               value="championships" 
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[100px]"
             >
               <Trophy className="h-3 w-3 mr-1 inline sm:hidden" />
-              <span className="hidden sm:inline">Championships</span>
-              <span className="sm:hidden">Champs</span>
+              <span className="hidden sm:inline">{t('guardian.tabs.championships')}</span>
+              <span className="sm:hidden">{t('guardian.tabs.champs')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="estagios" 
               className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
             >
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
-              Estágios
+              {t('guardian.tabs.estagios')}
             </TabsTrigger>
           </TabsList>
 
@@ -1117,20 +1123,20 @@ const GuardianDashboard = () => {
           <TabsContent value="overview" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground">Payment Summary</h4>
+                <h4 className="font-medium text-foreground">{t('guardian.overview.paymentSummary')}</h4>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
-                    <p className="text-xs text-muted-foreground">Next Payment</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.overview.nextPayment')}</p>
                     {nextPaymentDueDate && (
-                      <p className="text-xs text-muted-foreground mt-1">Due: {nextPaymentDueDate}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('guardian.overview.due')} {nextPaymentDueDate}</p>
                     )}
                   </div>
                   <div className="p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
-                    <p className="text-xs text-muted-foreground">Outstanding</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.overview.outstanding')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1138,7 +1144,7 @@ const GuardianDashboard = () => {
 
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-foreground">Recent Payments</h4>
+                <h4 className="font-medium text-foreground">{t('guardian.overview.recentPayments')}</h4>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -1157,7 +1163,7 @@ const GuardianDashboard = () => {
                       <div key={payment.payment_id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                         <div>
                           <p className="font-medium">{getMonthName(payment.month)} {payment.year}</p>
-                          <p className="text-sm text-muted-foreground">Paid: {paymentDate}</p>
+                          <p className="text-sm text-muted-foreground">{t('guardian.overview.paid')} {paymentDate}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">{formatCurrency(payment.amount_paid || 0)}</p>
@@ -1170,7 +1176,7 @@ const GuardianDashboard = () => {
                     );
                   })}
                   {recentPaidPayments.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">No recent payments found</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t('guardian.overview.noRecentPayments')}</p>
                   )}
                 </div>
               </CardContent>
@@ -1183,21 +1189,21 @@ const GuardianDashboard = () => {
               <CardHeader>
                 <h4 className="font-medium text-foreground flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
-                  Payment Summary
+                  {t('guardian.payments.summary')}
                 </h4>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="text-center p-3 bg-accent/50 rounded-lg">
                     <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
-                    <p className="text-xs text-muted-foreground">Next Payment</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.payments.nextPayment')}</p>
                     {nextPaymentDueDate && (
-                      <p className="text-xs text-muted-foreground mt-1">Due: {nextPaymentDueDate}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('guardian.payments.due')} {nextPaymentDueDate}</p>
                     )}
                   </div>
                   <div className="text-center p-3 bg-destructive/10 rounded-lg">
                     <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
-                    <p className="text-xs text-muted-foreground">Outstanding</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.payments.outstanding')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1206,19 +1212,19 @@ const GuardianDashboard = () => {
             <Card className="shadow-soft">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Payment History</h4>
+                  <h4 className="font-medium text-foreground">{t('guardian.payments.history')}</h4>
                   <select
                     className="text-sm border rounded px-2 py-1"
                     value={selectedYear || ''}
                     onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
                   >
-                    <option value="">All Years</option>
+                    <option value="">{t('guardian.payments.allYears')}</option>
                     {availableYears.map(year => (
                       <option key={year} value={year}>{year}</option>
                     ))}
                   </select>
                 </div>
-                <CardDescription>All payment records sorted by date</CardDescription>
+                <CardDescription>{t('guardian.payments.allRecordsSorted')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -1235,7 +1241,7 @@ const GuardianDashboard = () => {
                           <div>
                             <p className="font-medium">{getMonthName(payment.month)} {payment.year}</p>
                             <p className="text-xs text-muted-foreground">
-                              Due: {payment.year}-{payment.month}-05
+                              {t('guardian.payments.due')} {payment.year}-{payment.month}-05
                             </p>
                           </div>
                           <Badge className={statusInfo.color}>
@@ -1245,17 +1251,17 @@ const GuardianDashboard = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
-                            <p className="text-muted-foreground">Amount Due:</p>
+                            <p className="text-muted-foreground">{t('guardian.payments.amountDue')}</p>
                             <p className="font-medium">{formatCurrency(payment.amount_due || 0)}</p>
                           </div>
                           <div>
-                            <p className="text-muted-foreground">Amount Paid:</p>
+                            <p className="text-muted-foreground">{t('guardian.payments.amountPaid')}</p>
                             <p className="font-medium">{formatCurrency(payment.amount_paid || 0)}</p>
                           </div>
                         </div>
                         {payment.payment_date && (
                           <p className="text-xs text-muted-foreground mt-2">
-                            Paid on: {new Date(payment.payment_date).toLocaleDateString('pt-PT', { 
+                            {t('guardian.payments.paidOn')} {new Date(payment.payment_date).toLocaleDateString('pt-PT', { 
                               year: 'numeric', 
                               month: 'short', 
                               day: 'numeric' 
@@ -1266,7 +1272,7 @@ const GuardianDashboard = () => {
                     );
                   })}
                   {filteredPayments?.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">No payments found</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t('guardian.payments.noPayments')}</p>
                   )}
                 </div>
               </CardContent>

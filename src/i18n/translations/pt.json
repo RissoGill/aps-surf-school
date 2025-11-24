@@ -598,7 +598,53 @@
       "selectChild": "Selecione um educando para ver a sua informação",
       "noChildren": "Nenhum atleta encontrado para este encarregado",
       "welcome": "Bem-vindo,",
-      "logout": "Terminar Sessão"
+      "logout": "Terminar Sessão",
+      "loggedOut": "Sessão Terminada",
+      "loggedOutDesc": "Até breve!",
+      "errorNoProfile": "Perfil de encarregado não encontrado. Por favor contacte a administração.",
+      "errorNoAthletes": "Nenhum atleta associado à sua conta.",
+      "backToLogin": "Voltar ao Login"
+    },
+    "familyArea": {
+      "title": "Área Familiar",
+      "selectChild": "Selecione um educando para ver a sua informação"
+    },
+    "athleteCard": {
+      "level": "Nível",
+      "beginner": "Iniciante",
+      "sessionsPerWeek": "treinos por semana"
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "payments": "Pagamentos",
+      "attendance": "Presenças",
+      "annualSummary": "Resumo Anual",
+      "media": "Multimédia",
+      "championships": "Campeonatos",
+      "champs": "Campeonatos",
+      "estagios": "Estágios"
+    },
+    "packSummary": {
+      "title": "Resumo do seu pack",
+      "totalSessions": "Total de Treinos",
+      "sessionsUsed": "Treinos Usados",
+      "remainingSessions": "Treinos Restantes",
+      "activeSince": "Pack ativo desde",
+      "purchaseHistory": "Histórico de Compras",
+      "active": "Ativo",
+      "sessionsPack": "pack de treinos",
+      "sessions": "treinos",
+      "payment": "Pagamento:",
+      "noActivePack": "Nenhum pack ativo encontrado"
+    },
+    "overview": {
+      "paymentSummary": "Resumo de Pagamentos",
+      "nextPayment": "Próximo Pagamento",
+      "due": "Vence:",
+      "outstanding": "Em Dívida",
+      "recentPayments": "Pagamentos Recentes",
+      "paid": "Pago:",
+      "noRecentPayments": "Nenhum pagamento recente encontrado"
     },
     "payments": {
       "summary": "Resumo de Pagamentos",
@@ -610,17 +656,43 @@
       "paid": "Pago",
       "unpaid": "Por Pagar",
       "partial": "Parcial",
+      "due": "Vence:",
+      "amountDue": "Valor em Dívida:",
+      "amountPaid": "Valor Pago:",
+      "paidOn": "Pago em:",
+      "noPayments": "Nenhum pagamento encontrado",
+      "allRecordsSorted": "Todos os registos de pagamento ordenados por data",
       "month": "Mês",
       "amount": "Valor",
       "status": "Estado",
       "planType": "Tipo de Plano"
     },
-    "tabs": {
-      "attendance": "Presenças",
-      "annualSummary": "Resumo Anual",
-      "media": "Multimédia",
-      "championships": "Campeonatos",
-      "estagios": "Estágios"
+    "media": {
+      "title": "Fotos e Vídeos",
+      "description": "Multimédia das sessões de treino",
+      "noMedia": "Ainda sem fotos ou vídeos",
+      "noMediaDesc": "Os treinadores vão carregar multimédia das sessões de treino",
+      "photos": "Fotos",
+      "videos": "Vídeos",
+      "coach": "Treinador:"
+    },
+    "championships": {
+      "title": "Campeonatos",
+      "description": "Competições e eventos registados",
+      "noChampionships": "Nenhum campeonato registado",
+      "category": "Categoria:",
+      "gender": "Género:",
+      "location": "Local:",
+      "start": "Início:",
+      "end": "Fim:"
+    },
+    "estagios": {
+      "title": "Estágios",
+      "description": "Estágios e campos de treino",
+      "noEstagios": "Nenhum registo de estágio encontrado",
+      "location": "Local:",
+      "start": "Início:",
+      "end": "Fim:"
     }
   },
   "shared": {
