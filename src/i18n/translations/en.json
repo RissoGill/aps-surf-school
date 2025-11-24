@@ -228,7 +228,9 @@
       "father": "Father",
       "transport": "Transport",
       "pickup": "Pickup",
-      "dropoff": "Drop-off"
+      "dropoff": "Drop-off",
+      "athlete": "athlete",
+      "athletes": "athletes"
     },
     "mediaGallery": {
       "title": "Media Gallery",
