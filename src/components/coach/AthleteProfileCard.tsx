@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, User, Phone, Mail, MapPin, Car } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AthleteProfileCardProps {
   athlete: {
@@ -29,6 +30,8 @@ interface AthleteProfileCardProps {
 }
 
 export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCardProps) => {
+  const { t } = useLanguage();
+  
   const getInitials = () => {
     const first = athlete.first_name?.[0] || '';
     const last = athlete.last_name?.[0] || '';
@@ -58,7 +61,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
             )}
             {athlete.date_of_birth && (
               <span className="text-xs text-muted-foreground">
-                Born: {new Date(athlete.date_of_birth).toLocaleDateString()}
+                {t('coach.athleteProfile.born')} {new Date(athlete.date_of_birth).toLocaleDateString()}
               </span>
             )}
           </div>
@@ -70,22 +73,22 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
-            Training Schedule
+            {t('coach.athleteProfile.trainingSchedule')}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm pl-6">
             {athlete.plan_type && (
               <div className="text-muted-foreground">
-                <span className="text-title">Plan:</span> {athlete.plan_type}
+                <span className="text-title">{t('coach.athleteProfile.plan')}</span> {athlete.plan_type}
               </div>
             )}
             {athlete.training_days && (
               <div className="text-muted-foreground">
-                <span className="text-title">Days:</span> {athlete.training_days}
+                <span className="text-title">{t('coach.athleteProfile.days')}</span> {athlete.training_days}
               </div>
             )}
             {athlete.trainings_per_week && (
               <div className="text-muted-foreground">
-                <span className="text-title">Per Week:</span> {athlete.trainings_per_week}
+                <span className="text-title">{t('coach.athleteProfile.perWeek')}</span> {athlete.trainings_per_week}
               </div>
             )}
           </div>
@@ -97,7 +100,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
-            Contact Information
+            {t('coach.athleteProfile.contactInfo')}
           </h4>
           <div className="grid grid-cols-1 gap-2 text-sm pl-6">
             {athlete.phone && (
@@ -127,12 +130,12 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
-            Guardian Information
+            {t('coach.athleteProfile.guardianInfo')}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-6">
             {athlete.mother_name && (
               <div className="space-y-1">
-                <p className="text-sm text-title">Mother</p>
+                <p className="text-sm text-title">{t('coach.athleteProfile.mother')}</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>{athlete.mother_name}</p>
                   {athlete.mother_phone && (
@@ -152,7 +155,7 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
             )}
             {athlete.father_name && (
               <div className="space-y-1">
-                <p className="text-sm text-title">Father</p>
+                <p className="text-sm text-title">{t('coach.athleteProfile.father')}</p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>{athlete.father_name}</p>
                   {athlete.father_phone && (
@@ -179,17 +182,17 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
             <Car className="h-4 w-4 text-primary" />
-            Transport Information
+            {t('coach.athleteProfile.transportInfo')}
           </h4>
           <div className="grid grid-cols-1 gap-2 text-sm pl-6">
             {athlete.pickup_address && (
               <div className="text-muted-foreground">
-                <span className="text-title">Pickup:</span> {athlete.pickup_address}
+                <span className="text-title">{t('coach.athleteProfile.pickup')}</span> {athlete.pickup_address}
               </div>
             )}
             {athlete.dropoff_address && (
               <div className="text-muted-foreground">
-                <span className="text-title">Drop-off:</span> {athlete.dropoff_address}
+                <span className="text-title">{t('coach.athleteProfile.dropoff')}</span> {athlete.dropoff_address}
               </div>
             )}
           </div>

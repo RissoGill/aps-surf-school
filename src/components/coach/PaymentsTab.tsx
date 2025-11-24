@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Euro, Calendar, TrendingUp, Receipt, ArrowUpDown, ArrowUp, ArrowDown, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useMemo } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface CoachPayment {
   id: string;
@@ -24,6 +25,7 @@ interface PaymentsTabProps {
 }
 
 export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
+  const { t } = useLanguage();
   const [filterYear, setFilterYear] = useState<string>("all");
   const [filterMonth, setFilterMonth] = useState<string>("all");
   const [sortField, setSortField] = useState<"payment_date" | "amount">("payment_date");

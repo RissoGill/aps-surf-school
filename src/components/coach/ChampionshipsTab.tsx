@@ -10,6 +10,7 @@ import { Trophy, MapPin, Calendar, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Championship {
   id: number;
@@ -27,6 +28,7 @@ interface ChampionshipsTabProps {
 }
 
 export const ChampionshipsTab = ({ athleteId, athleteName }: ChampionshipsTabProps) => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [registering, setRegistering] = useState<number | null>(null);
