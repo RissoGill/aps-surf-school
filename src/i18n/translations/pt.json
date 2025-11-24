@@ -518,7 +518,77 @@
     "packBalance": {
       "title": "Saldo do Pack",
       "remaining": "Treinos Restantes",
-      "history": "Histórico de Compras"
+      "history": "Histórico de Compras",
+      "summary": "Resumo do seu pack",
+      "totalSessions": "Total de Treinos",
+      "sessionsUsed": "Treinos Utilizados",
+      "activeSince": "Pack ativo desde",
+      "active": "Ativo",
+      "sessions": "treinos",
+      "payment": "Pagamento:",
+      "noActivePack": "Nenhum pack ativo encontrado"
+    },
+    "dashboard": {
+      "refreshed": "Dados atualizados",
+      "refreshedDescription": "Os seus dados foram atualizados com sucesso",
+      "loggedOut": "Sessão Terminada",
+      "loggedOutDescription": "Até breve!",
+      "errorLoadingProfile": "Erro ao carregar perfil do atleta"
+    },
+    "personal": {
+      "title": "Informação Pessoal",
+      "level": "Nível",
+      "noData": "Sem dados disponíveis",
+      "emergencyContacts": "Contactos de Emergência",
+      "mother": "Mãe",
+      "father": "Pai"
+    },
+    "training": {
+      "scheduleTitle": "Horário de Treino",
+      "weeklySessions": "Treinos Semanais",
+      "sessionsPerWeek": "treinos por semana",
+      "notSpecified": "Não especificado",
+      "transportation": "Transporte",
+      "serviceProvided": "Serviço Fornecido",
+      "noService": "Sem Serviço",
+      "pickupAddress": "Morada de Recolha",
+      "dropoffAddress": "Morada de Entrega"
+    },
+    "attendance": {
+      "recordDescription": "O seu registo de treinos",
+      "coach": "Treinador:",
+      "beach": "Praia:",
+      "notes": "Notas:",
+      "monthlySummary": "Resumo Mensal",
+      "notPresent": "Ausente"
+    },
+    "championships": {
+      "title": "Meus Campeonatos",
+      "description": "Ver todos os campeonatos em que está inscrito",
+      "loading": "A carregar informação dos campeonatos...",
+      "noChampionships": "Ainda Sem Campeonatos",
+      "noChampionshipsDesc": "Ainda não foi inscrito em nenhum campeonato.",
+      "checkBack": "Volte mais tarde ou contacte o seu treinador para mais informações.",
+      "yourChampionships": "Os Seus Campeonatos",
+      "unnamedChampionship": "Campeonato Sem Nome",
+      "registered": "Inscrito",
+      "goodLuck": "Boa sorte! Lembre-se de verificar com o seu treinador os detalhes e requisitos da competição."
+    },
+    "media": {
+      "title": "Fotos & Vídeos",
+      "description": "Multimédia partilhada pelos seus treinadores",
+      "noMedia": "Ainda sem fotos ou vídeos",
+      "noMediaDescription": "Os seus treinadores vão carregar multimédia das sessões de treino",
+      "photos": "Fotos",
+      "videos": "Vídeos",
+      "coach": "Treinador:"
+    },
+    "estagios": {
+      "description": "Estágios e campos de treino em que está inscrito",
+      "noEstagios": "Ainda não está inscrito em nenhum estágio",
+      "location": "Localização:",
+      "start": "Início:",
+      "end": "Fim:"
     }
   },
   "guardian": {
