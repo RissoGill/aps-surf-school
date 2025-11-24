@@ -26,44 +26,44 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<WelcomePage />} />
-          
-          {/* Auth Routes */}
-          <Route path="/login/coach" element={<CoachLogin />} />
-          <Route path="/login/athlete" element={<AthleteLogin />} />
-          <Route path="/login/guardian" element={<GuardianLogin />} />
-          <Route path="/login/administration" element={<AdministrationLogin />} />
-          
-          {/* Dashboard Routes */}
-          <Route path="/dashboard/coach" element={<CoachDashboard />} />
-          <Route path="/athlete/:id" element={<AthleteDetails />} />
-          <Route path="/dashboard/athlete" element={<AthleteDashboard />} />
-          <Route path="/dashboard/athlete/:id" element={<AthleteDashboard />} />
-          <Route path="/dashboard/guardian" element={<GuardianDashboard />} />
-          <Route path="/dashboard/administration" element={<AdministrationDashboard />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/athletes" element={<AthleteManagement />} />
-          <Route path="/admin/payments" element={<PaymentManagement />} />
-          <Route path="/admin/attendance" element={<AttendanceManagement />} />
-          
-          {/* Attendance Routes */}
-          <Route path="/attendance/athletes" element={<AthletesList />} />
-          <Route path="/attendance/records" element={<AttendanceRecords />} />
-          
-          {/* Catch-all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+    <BrowserRouter>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<WelcomePage />} />
+            
+            {/* Auth Routes */}
+            <Route path="/login/coach" element={<CoachLogin />} />
+            <Route path="/login/athlete" element={<AthleteLogin />} />
+            <Route path="/login/guardian" element={<GuardianLogin />} />
+            <Route path="/login/administration" element={<AdministrationLogin />} />
+            
+            {/* Dashboard Routes */}
+            <Route path="/dashboard/coach" element={<CoachDashboard />} />
+            <Route path="/athlete/:id" element={<AthleteDetails />} />
+            <Route path="/dashboard/athlete" element={<AthleteDashboard />} />
+            <Route path="/dashboard/athlete/:id" element={<AthleteDashboard />} />
+            <Route path="/dashboard/guardian" element={<GuardianDashboard />} />
+            <Route path="/dashboard/administration" element={<AdministrationDashboard />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/athletes" element={<AthleteManagement />} />
+            <Route path="/admin/payments" element={<PaymentManagement />} />
+            <Route path="/admin/attendance" element={<AttendanceManagement />} />
+            
+            {/* Attendance Routes */}
+            <Route path="/attendance/athletes" element={<AthletesList />} />
+            <Route path="/attendance/records" element={<AttendanceRecords />} />
+            
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </LanguageProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
