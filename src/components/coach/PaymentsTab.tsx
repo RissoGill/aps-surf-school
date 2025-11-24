@@ -63,10 +63,20 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
     return years.sort((a, b) => b - a);
   }, [payments]);
 
-  const availableMonths = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  const availableMonths = useMemo(() => [
+    t('coach.payments.months.january'),
+    t('coach.payments.months.february'),
+    t('coach.payments.months.march'),
+    t('coach.payments.months.april'),
+    t('coach.payments.months.may'),
+    t('coach.payments.months.june'),
+    t('coach.payments.months.july'),
+    t('coach.payments.months.august'),
+    t('coach.payments.months.september'),
+    t('coach.payments.months.october'),
+    t('coach.payments.months.november'),
+    t('coach.payments.months.december')
+  ], [t]);
 
   // Filter and sort payments
   const filteredAndSortedPayments = useMemo(() => {
@@ -137,7 +147,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               <div className="p-1.5 bg-success/20 rounded-lg">
                 <Calendar className="h-4 w-4 text-success" />
               </div>
-              <span className="text-xs font-medium text-muted-foreground">This Year</span>
+              <span className="text-xs font-medium text-muted-foreground">{t('coach.payments.thisYear')}</span>
             </div>
             <div className="text-xl font-normal text-success truncate">{totalThisYear.toFixed(2)}€</div>
             <p className="text-xs text-muted-foreground mt-0.5">{currentYear}</p>
@@ -150,7 +160,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
               <div className="p-1.5 bg-success/20 rounded-lg">
                 <Receipt className="h-4 w-4 text-success" />
               </div>
-              <span className="text-xs font-medium text-muted-foreground">Last Payment</span>
+              <span className="text-xs font-medium text-muted-foreground">{t('coach.payments.lastPayment')}</span>
             </div>
             {lastPayment ? (
               <>
@@ -160,7 +170,7 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                 </p>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">No payments yet</div>
+              <div className="text-sm text-muted-foreground">{t('coach.payments.noPaymentsYet')}</div>
             )}
           </CardContent>
         </Card>
@@ -169,9 +179,11 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
       {/* Payment History Table */}
       <Card>
         <CardHeader>
-          <h4 className="font-medium text-foreground">Payment History</h4>
+          <h4 className="font-medium text-foreground">{t('coach.payments.paymentHistory')}</h4>
           <CardDescription>
-            {filteredAndSortedPayments.length} payment{filteredAndSortedPayments.length !== 1 ? 's' : ''} found
+            {filteredAndSortedPayments.length} {filteredAndSortedPayments.length === 1 
+              ? t('coach.payments.paymentsFound.singular')
+              : t('coach.payments.paymentsFound.plural')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -179,10 +191,10 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
           <div className="flex flex-col sm:flex-row gap-3">
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder="Year" />
+                <SelectValue placeholder={t('coach.payments.filters.year')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
+                <SelectItem value="all">{t('coach.payments.filters.allYears')}</SelectItem>
                 {availableYears.map(year => (
                   <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                 ))}
@@ -190,12 +202,12 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
             </Select>
             <Select value={filterMonth} onValueChange={setFilterMonth}>
               <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder="Month" />
+                <SelectValue placeholder={t('coach.payments.filters.month')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
-                {availableMonths.map(month => (
-                  <SelectItem key={month} value={month}>{month}</SelectItem>
+                <SelectItem value="all">{t('coach.payments.filters.allMonths')}</SelectItem>
+                {availableMonths.map((month, index) => (
+                  <SelectItem key={index} value={month}>{month}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -212,21 +224,21 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                       onClick={() => handleSort("payment_date")}
                     >
                       <div className="flex items-center font-semibold">
-                        Payment Date
+                        {t('coach.payments.table.paymentDate')}
                         <SortIcon field="payment_date" />
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold">For Month/Year</TableHead>
+                    <TableHead className="font-semibold">{t('coach.payments.table.forMonthYear')}</TableHead>
                     <TableHead 
                       className="cursor-pointer hover:bg-muted/70 transition-colors select-none text-right"
                       onClick={() => handleSort("amount")}
                     >
                       <div className="flex items-center justify-end font-semibold">
-                        Amount
+                        {t('coach.payments.table.amount')}
                         <SortIcon field="amount" />
                       </div>
                     </TableHead>
-                    <TableHead className="font-semibold">Notes</TableHead>
+                    <TableHead className="font-semibold">{t('coach.payments.table.notes')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -263,11 +275,11 @@ export const PaymentsTab = ({ coachId }: PaymentsTabProps) => {
                       <TableCell colSpan={4} className="h-32">
                         <div className="flex flex-col items-center justify-center text-center py-6">
                           <FileText className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                          <p className="text-sm font-medium text-foreground mb-1">No payments found</p>
+                          <p className="text-sm font-medium text-foreground mb-1">{t('coach.payments.emptyState.noPaymentsFound')}</p>
                           <p className="text-xs text-muted-foreground">
                             {filterYear !== "all" || filterMonth !== "all"
-                              ? "Try adjusting your filters"
-                              : "Payment records will appear here once added"}
+                              ? t('coach.payments.emptyState.adjustFilters')
+                              : t('coach.payments.emptyState.recordsWillAppear')}
                           </p>
                         </div>
                       </TableCell>

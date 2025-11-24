@@ -235,6 +235,47 @@
       "video": "Vídeo",
       "videos": "Vídeos",
       "noDate": "Sem data"
+    },
+    "payments": {
+      "thisYear": "Este Ano",
+      "lastPayment": "Último Pagamento",
+      "noPaymentsYet": "Ainda sem pagamentos",
+      "paymentHistory": "Histórico de Pagamentos",
+      "paymentsFound": {
+        "singular": "pagamento encontrado",
+        "plural": "pagamentos encontrados"
+      },
+      "filters": {
+        "year": "Ano",
+        "allYears": "Todos os Anos",
+        "month": "Mês",
+        "allMonths": "Todos os Meses"
+      },
+      "months": {
+        "january": "Janeiro",
+        "february": "Fevereiro",
+        "march": "Março",
+        "april": "Abril",
+        "may": "Maio",
+        "june": "Junho",
+        "july": "Julho",
+        "august": "Agosto",
+        "september": "Setembro",
+        "october": "Outubro",
+        "november": "Novembro",
+        "december": "Dezembro"
+      },
+      "table": {
+        "paymentDate": "Data de Pagamento",
+        "forMonthYear": "Para Mês/Ano",
+        "amount": "Valor",
+        "notes": "Notas"
+      },
+      "emptyState": {
+        "noPaymentsFound": "Nenhum pagamento encontrado",
+        "adjustFilters": "Tente ajustar os filtros",
+        "recordsWillAppear": "Os registos de pagamento aparecerão aqui quando adicionados"
+      }
     }
   },
   "admin": {

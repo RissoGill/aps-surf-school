@@ -235,6 +235,47 @@
       "video": "Video",
       "videos": "Videos",
       "noDate": "No date"
+    },
+    "payments": {
+      "thisYear": "This Year",
+      "lastPayment": "Last Payment",
+      "noPaymentsYet": "No payments yet",
+      "paymentHistory": "Payment History",
+      "paymentsFound": {
+        "singular": "payment found",
+        "plural": "payments found"
+      },
+      "filters": {
+        "year": "Year",
+        "allYears": "All Years",
+        "month": "Month",
+        "allMonths": "All Months"
+      },
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "table": {
+        "paymentDate": "Payment Date",
+        "forMonthYear": "For Month/Year",
+        "amount": "Amount",
+        "notes": "Notes"
+      },
+      "emptyState": {
+        "noPaymentsFound": "No payments found",
+        "adjustFilters": "Try adjusting your filters",
+        "recordsWillAppear": "Payment records will appear here once added"
+      }
     }
   },
   "admin": {
