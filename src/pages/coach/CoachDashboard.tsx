@@ -92,7 +92,7 @@ const CoachDashboard = () => {
   const [coachData, setCoachData] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Training history filters
   const [historyDateRange, setHistoryDateRange] = useState<{start: string, end: string}>({
@@ -1821,7 +1821,7 @@ const CoachDashboard = () => {
                   <div className="space-y-3">
                     {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
                       const [year, monthNum] = month.split('-');
-                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'long' });
+                      const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString(language === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long' });
                       const isExpanded = expandedMonths.has(month);
                       const count = Object.keys(sessionsByDate).length;
                       
@@ -1858,7 +1858,7 @@ const CoachDashboard = () => {
                               <div className="space-y-3">
                                 {Object.entries(sessionsByDate).map(([date, athletesList]) => {
                                   const dateObj = new Date(date);
-                                  const dayName = dateObj.toLocaleDateString('default', { weekday: 'long' });
+                                  const dayName = dateObj.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { weekday: 'long' });
                                   const dayNum = dateObj.getDate();
                                   const athleteCount = athletesList.length;
                                   

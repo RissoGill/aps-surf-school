@@ -228,7 +228,9 @@
       "father": "Pai",
       "transport": "Transporte",
       "pickup": "Recolha",
-      "dropoff": "Entrega"
+      "dropoff": "Entrega",
+      "athlete": "atleta",
+      "athletes": "atletas"
     },
     "mediaGallery": {
       "title": "Galeria de Multimédia",
