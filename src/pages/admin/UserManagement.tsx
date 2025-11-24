@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const coachSchema = z.object({
   coach_id: z.string().min(1, "Coach ID is required"),
@@ -70,6 +71,7 @@ type Athlete = z.infer<typeof athleteSchema>;
 type Guardian = z.infer<typeof guardianSchema> & { id?: string; auth_uid?: string; created_at?: string };
 
 const UserManagement = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [sessionValid, setSessionValid] = useState(false);
   const [coaches, setCoaches] = useState<Coach[]>([]);
@@ -90,7 +92,7 @@ const UserManagement = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        toast.error("Session expired. Please log in again.");
+        toast.error(t('admin.userManagement.sessionExpired'));
         navigate("/login/administration");
         return;
       }
@@ -104,7 +106,7 @@ const UserManagement = () => {
 
       if (!roleData) {
         await supabase.auth.signOut();
-        toast.error("Access denied. Super admin privileges required.");
+        toast.error(t('admin.userManagement.accessDenied'));
         navigate("/login/administration");
         return;
       }
@@ -145,7 +147,7 @@ const UserManagement = () => {
       setGuardians(guardiansData || []);
     } catch (error: any) {
       console.error('Error fetching users:', error);
-      toast.error("Failed to load users: " + error.message);
+      toast.error(t('admin.userManagement.failedToLoadUsers') + ": " + error.message);
     } finally {
       setLoading(false);
     }
@@ -215,11 +217,11 @@ const UserManagement = () => {
         if (selectedUser) {
           const { error } = await supabase.from('coach').update(validatedData).eq('coach_id', selectedUser.coach_id);
           if (error) throw error;
-          toast.success("Coach updated successfully");
+          toast.success(t('admin.userManagement.coachUpdated'));
         } else {
           const { error } = await supabase.from('coach').insert([validatedData]);
           if (error) throw error;
-          toast.success("Coach added successfully");
+          toast.success(t('admin.userManagement.coachAdded'));
         }
       } else if (activeTab === "athletes") {
         const dataToValidate = { ...formData };
@@ -233,22 +235,22 @@ const UserManagement = () => {
         if (selectedUser) {
           const { error } = await supabase.from('atletas').update(supabaseData).eq('athlete_id', selectedUser.athlete_id);
           if (error) throw error;
-          toast.success("Athlete updated successfully");
+          toast.success(t('admin.userManagement.athleteUpdated'));
         } else {
           const { error } = await supabase.from('atletas').insert([supabaseData]);
           if (error) throw error;
-          toast.success("Athlete added successfully");
+          toast.success(t('admin.userManagement.athleteAdded'));
         }
       } else if (activeTab === "guardians") {
         const validatedData = guardianSchema.parse(formData);
         if (selectedUser) {
           const { error } = await supabase.from('guardians').update(validatedData).eq('id', selectedUser.id);
           if (error) throw error;
-          toast.success("Guardian updated successfully");
+          toast.success(t('admin.userManagement.guardianUpdated'));
         } else {
           const { error } = await supabase.from('guardians').insert([validatedData]);
           if (error) throw error;
-          toast.success("Guardian added successfully");
+          toast.success(t('admin.userManagement.guardianAdded'));
         }
       }
       
@@ -259,9 +261,9 @@ const UserManagement = () => {
     } catch (error: any) {
       console.error('Error saving user:', error);
       if (error instanceof z.ZodError) {
-        toast.error("Validation error: " + error.errors[0].message);
+        toast.error(t('admin.userManagement.validationError') + ": " + error.errors[0].message);
       } else {
-        toast.error("Failed to save user: " + error.message);
+        toast.error(t('admin.userManagement.failedToSaveUser') + ": " + error.message);
       }
     } finally {
       setIsSaving(false);
@@ -272,7 +274,7 @@ const UserManagement = () => {
   if (!sessionValid) {
     return (
       <div className="min-h-screen bg-gradient-surface">
-        <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
+        <AppHeader title={t('admin.userManagement.title')} showBack backTo="/dashboard/administration" />
         <main className="mobile-container py-6">
           <div className="flex items-center justify-center min-h-[60vh]">
             <Skeleton className="h-8 w-48 mx-auto" />
@@ -285,28 +287,28 @@ const UserManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="User Management" showBack backTo="/dashboard/administration" />
+      <AppHeader title={t('admin.userManagement.title')} showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
         <Card className="shadow-soft">
           <CardHeader>
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <CardTitle>Manage Users</CardTitle>
-                <CardDescription>Add, edit coaches, athletes, and guardians</CardDescription>
+                <CardTitle>{t('admin.userManagement.title')}</CardTitle>
+                <CardDescription>{t('admin.userManagement.subtitle')}</CardDescription>
               </div>
               <Button onClick={handleAdd} className="touch-friendly">
                 <UserPlus className="h-4 w-4 mr-2" />
-                Add New
+                {t('admin.userManagement.addNew')}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setSelectedUserId(""); setOpen(false); }}>
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="coaches">Coaches</TabsTrigger>
-                <TabsTrigger value="athletes">Athletes</TabsTrigger>
-                <TabsTrigger value="guardians">Guardians</TabsTrigger>
+                <TabsTrigger value="coaches">{t('admin.userManagement.coaches')}</TabsTrigger>
+                <TabsTrigger value="athletes">{t('admin.userManagement.athletes')}</TabsTrigger>
+                <TabsTrigger value="guardians">{t('admin.userManagement.guardians')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="coaches">
@@ -315,7 +317,7 @@ const UserManagement = () => {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <Label>Select Coach</Label>
+                      <Label>{t('admin.userManagement.selectCoach')}</Label>
                       <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                           <Button
@@ -330,9 +332,9 @@ const UserManagement = () => {
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0" align="start">
                           <Command>
-                            <CommandInput placeholder="Search coaches..." />
+                            <CommandInput placeholder={t('admin.userManagement.searchCoaches')} />
                             <CommandList>
-                              <CommandEmpty>No coach found.</CommandEmpty>
+                              <CommandEmpty>{t('admin.userManagement.noCoachFound')}</CommandEmpty>
                               <CommandGroup>
                                 {coaches.map((coach) => (
                                   <CommandItem
@@ -365,7 +367,7 @@ const UserManagement = () => {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <Label>Select Athlete</Label>
+                      <Label>{t('admin.userManagement.selectAthlete')}</Label>
                       <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                           <Button
@@ -380,9 +382,9 @@ const UserManagement = () => {
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0" align="start">
                           <Command>
-                            <CommandInput placeholder="Search athletes..." />
+                            <CommandInput placeholder={t('admin.userManagement.searchAthletes')} />
                             <CommandList>
-                              <CommandEmpty>No athlete found.</CommandEmpty>
+                              <CommandEmpty>{t('admin.userManagement.noAthleteFound')}</CommandEmpty>
                               <CommandGroup>
                                 {athletes.map((athlete) => (
                                   <CommandItem
@@ -415,7 +417,7 @@ const UserManagement = () => {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <Label>Select Guardian</Label>
+                      <Label>{t('admin.userManagement.selectGuardian')}</Label>
                       <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                           <Button
@@ -430,9 +432,9 @@ const UserManagement = () => {
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0" align="start">
                           <Command>
-                            <CommandInput placeholder="Search guardians..." />
+                            <CommandInput placeholder={t('admin.userManagement.searchGuardians')} />
                             <CommandList>
-                              <CommandEmpty>No guardian found.</CommandEmpty>
+                              <CommandEmpty>{t('admin.userManagement.noGuardianFound')}</CommandEmpty>
                               <CommandGroup>
                                 {guardians.map((guardian) => (
                                   <CommandItem

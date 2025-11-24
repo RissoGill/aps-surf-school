@@ -14,6 +14,7 @@ import { Search, Calendar, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AppHeader from "@/components/shared/AppHeader";
 import AppFooter from "@/components/shared/AppFooter";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Athlete {
   athlete_id: string;
@@ -34,6 +35,7 @@ interface AttendanceRecord {
 }
 
 const AttendanceManagement = () => {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
@@ -146,12 +148,12 @@ const AttendanceManagement = () => {
         queryClient.invalidateQueries({ queryKey: ['guardian-media', selectedAthlete.athlete_id] });
       }
       queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
-      toast({ title: "Success", description: "Attendance record updated successfully" });
+      toast({ title: t('admin.attendanceManagement.success'), description: t('admin.attendanceManagement.recordUpdated') });
       setEditDialogOpen(false);
     },
     onError: (error: any) => {
       toast({ 
-        title: "Error", 
+        title: t('admin.attendanceManagement.error'), 
         description: error.message,
         variant: "destructive"
       });
@@ -180,12 +182,12 @@ const AttendanceManagement = () => {
         queryClient.invalidateQueries({ queryKey: ['guardian-media', selectedAthlete.athlete_id] });
       }
       queryClient.invalidateQueries({ queryKey: ['admin-athletes-attendance'] });
-      toast({ title: "Success", description: "Attendance record deleted successfully" });
+      toast({ title: t('admin.attendanceManagement.success'), description: t('admin.attendanceManagement.recordDeleted') });
       setDeleteDialogOpen(false);
     },
     onError: (error: any) => {
       toast({ 
-        title: "Error", 
+        title: t('admin.attendanceManagement.error'), 
         description: error.message,
         variant: "destructive"
       });
@@ -254,23 +256,23 @@ const AttendanceManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Attendance Management" showBack backTo="/dashboard/administration" />
+      <AppHeader title={t('admin.attendanceManagement.title')} showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
         <Card className="shadow-soft mb-6">
           <CardHeader>
             <CardTitle className="text-title text-2xl font-bold flex items-center gap-2">
               <Calendar className="h-6 w-6 text-primary" />
-              Athlete Attendance Management
+              {t('admin.attendanceManagement.athleteSearch')}
             </CardTitle>
-            <CardDescription>Search for an athlete to view and manage their attendance records</CardDescription>
+            <CardDescription>{t('admin.attendanceManagement.searchDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search athlete by name..."
+                placeholder={t('admin.attendanceManagement.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -299,7 +301,7 @@ const AttendanceManagement = () => {
             {selectedAthlete && (
               <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
                 <div>
-                  <p className="font-medium">Selected Athlete:</p>
+                  <p className="font-medium">{t('admin.attendanceManagement.selectedAthlete')}</p>
                   <p className="text-sm text-muted-foreground">
                     {selectedAthlete.first_name} {selectedAthlete.last_name}
                   </p>
@@ -312,7 +314,7 @@ const AttendanceManagement = () => {
                     setSearchTerm("");
                   }}
                 >
-                  Clear
+                  {t('admin.attendanceManagement.clear')}
                 </Button>
               </div>
             )}
@@ -323,28 +325,28 @@ const AttendanceManagement = () => {
         {selectedAthlete && (
           <Card className="shadow-soft">
             <CardHeader>
-              <CardTitle className="text-title">Attendance Records</CardTitle>
+              <CardTitle className="text-title">{t('admin.attendanceManagement.attendanceRecords')}</CardTitle>
               <CardDescription>
-                Double-click on any record to view details and manage
+                {t('admin.attendanceManagement.doubleClickHint')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingAttendance ? (
-                <div className="text-center py-8 text-muted-foreground">Loading attendance records...</div>
+                <div className="text-center py-8 text-muted-foreground">{t('admin.attendanceManagement.loadingRecords')}</div>
               ) : !attendanceRecords?.length ? (
-                <div className="text-center py-8 text-muted-foreground">No attendance records found</div>
+                <div className="text-center py-8 text-muted-foreground">{t('admin.attendanceManagement.noRecordsFound')}</div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Coach</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Shift</TableHead>
-                        <TableHead>Beach</TableHead>
-                        <TableHead>Notes</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.date')}</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.coach')}</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.status')}</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.shift')}</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.beach')}</TableHead>
+                        <TableHead>{t('admin.attendanceManagement.notes')}</TableHead>
+                        <TableHead className="text-right">{t('admin.attendanceManagement.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -13,6 +13,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { z } from "zod";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Athlete {
   athlete_id: string;
@@ -83,6 +84,7 @@ const athleteEditSchema = z.object({
 });
 
 const AthleteManagement = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,13 +152,13 @@ const AthleteManagement = () => {
       setSelectedAthlete(updatedAthlete as Athlete);
 
       toast({
-        title: "Success",
-        description: `Athlete ${newActiveStatus ? 'activated' : 'deactivated'} successfully`
+        title: t('admin.athleteManagement.success'),
+        description: newActiveStatus ? t('admin.athleteManagement.athleteActivated') : t('admin.athleteManagement.athleteDeactivated')
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: `Failed to ${newActiveStatus ? 'activate' : 'deactivate'} athlete`,
+        title: t('admin.athleteManagement.error'),
+        description: newActiveStatus ? t('admin.athleteManagement.failedToActivate') : t('admin.athleteManagement.failedToDeactivate'),
         variant: "destructive"
       });
     }
@@ -192,8 +194,8 @@ const AthleteManagement = () => {
           athlete_id: selectedAthlete.athlete_id,
         });
         toast({
-          title: 'Update not applied',
-          description: 'No changes were saved. Please ensure you have permission and try again.',
+          title: t('admin.athleteManagement.updateNotApplied'),
+          description: t('admin.athleteManagement.updateDescription'),
           variant: 'destructive',
         });
         return;
@@ -206,22 +208,22 @@ const AthleteManagement = () => {
       setSelectedAthlete(updatedAthlete as Athlete);
 
       toast({
-        title: "Success",
-        description: "Athlete information updated successfully"
+        title: t('admin.athleteManagement.success'),
+        description: t('admin.athleteManagement.athleteUpdated')
       });
 
       setIsEditing(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          title: "Validation Error",
+          title: t('admin.athleteManagement.validationError'),
           description: error.errors[0].message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to update athlete information",
+          title: t('admin.athleteManagement.error'),
+          description: t('admin.athleteManagement.failedToUpdate'),
           variant: "destructive"
         });
       }
@@ -230,13 +232,13 @@ const AthleteManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Athlete Management" showBack backTo="/dashboard/administration" />
+      <AppHeader title={t('admin.athleteManagement.title')} showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-title">Athlete Management</h2>
-          <p className="text-muted-foreground">Search for an athlete to view and edit their information</p>
+          <h2 className="text-2xl font-bold text-title">{t('admin.athleteManagement.title')}</h2>
+          <p className="text-muted-foreground">{t('admin.athleteManagement.subtitle')}</p>
         </div>
 
         {/* Search Bar */}
@@ -244,15 +246,15 @@ const AthleteManagement = () => {
           <CardHeader>
             <CardTitle className="text-title text-2xl font-bold flex items-center gap-2">
               <User className="h-6 w-6 text-primary" />
-              Athlete Search
+              {t('admin.athleteManagement.athleteSearch')}
             </CardTitle>
-            <CardDescription>Search for an athlete to view and manage their profile</CardDescription>
+            <CardDescription>{t('admin.athleteManagement.searchDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search athlete by name or ID..."
+                placeholder={t('admin.athleteManagement.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 touch-friendly"
@@ -283,16 +285,16 @@ const AthleteManagement = () => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <p className="font-medium">Selected Athlete:</p>
+                      <p className="font-medium">{t('admin.athleteManagement.selectedAthlete')}</p>
                       {selectedAthlete.is_active ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                           <UserCheck className="h-3 w-3" />
-                          Active
+                          {t('admin.athleteManagement.active')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
                           <UserX className="h-3 w-3" />
-                          Inactive
+                          {t('admin.athleteManagement.inactive')}
                         </span>
                       )}
                     </div>
@@ -323,7 +325,7 @@ const AthleteManagement = () => {
                       className="flex-1 sm:flex-none"
                     >
                       <Edit2 className="h-4 w-4 mr-1" />
-                      Edit Profile
+                      {t('admin.athleteManagement.editProfile')}
                     </Button>
                     <Button
                       variant={selectedAthlete.is_active ? "destructive" : "default"}
@@ -334,12 +336,12 @@ const AthleteManagement = () => {
                       {selectedAthlete.is_active ? (
                         <>
                           <UserX className="h-4 w-4 mr-1" />
-                          Deactivate
+                          {t('admin.athleteManagement.deactivate')}
                         </>
                       ) : (
                         <>
                           <UserCheck className="h-4 w-4 mr-1" />
-                          Activate
+                          {t('admin.athleteManagement.activate')}
                         </>
                       )}
                     </Button>
@@ -356,20 +358,20 @@ const AthleteManagement = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-title">Athlete Profile</CardTitle>
+                  <CardTitle className="text-title">{t('admin.athleteManagement.athleteProfile')}</CardTitle>
                   <CardDescription>
-                    {isEditing ? "Edit athlete information" : "View athlete information"}
+                    {isEditing ? t('admin.athleteManagement.editInfo') : t('admin.athleteManagement.viewInfo')}
                   </CardDescription>
                 </div>
                 {isEditing && (
                   <div className="flex gap-2">
                     <Button size="sm" variant="default" onClick={handleEditSave}>
                       <Save className="h-4 w-4 mr-1" />
-                      Save
+                      {t('admin.athleteManagement.save')}
                     </Button>
                     <Button size="sm" variant="outline" onClick={handleEditCancel}>
                       <X className="h-4 w-4 mr-1" />
-                      Cancel
+                      {t('admin.athleteManagement.cancel')}
                     </Button>
                   </div>
                 )}
@@ -379,9 +381,9 @@ const AthleteManagement = () => {
             <CardContent>
               <Tabs defaultValue="personal" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="personal">Personal</TabsTrigger>
-                  <TabsTrigger value="parents">Parents</TabsTrigger>
-                  <TabsTrigger value="training">Training</TabsTrigger>
+                  <TabsTrigger value="personal">{t('admin.athleteManagement.personal')}</TabsTrigger>
+                  <TabsTrigger value="parents">{t('admin.athleteManagement.parents')}</TabsTrigger>
+                  <TabsTrigger value="training">{t('admin.athleteManagement.training')}</TabsTrigger>
                 </TabsList>
                 
                 {/* Personal Information Tab */}
