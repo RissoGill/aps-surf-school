@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, MapPin, Calendar, Users } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Championship {
   id: number;
@@ -21,6 +22,8 @@ interface AthleteChampionshipsTabProps {
 }
 
 export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabProps) => {
+  const { t } = useLanguage();
+  
   // Fetch championship registrations for this athlete
   const { data: registrations, isLoading: loadingRegistrations } = useQuery({
     queryKey: ['athlete-championship-registrations', athleteId],
@@ -77,12 +80,12 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
     return (
       <div className="text-center p-8">
         <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No Championships Yet</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-2">{t('athlete.championships.noChampionships')}</h3>
         <p className="text-muted-foreground text-sm">
-          You haven't been registered for any championships yet.
+          {t('athlete.championships.noChampionshipsDesc')}
         </p>
         <p className="text-muted-foreground text-sm mt-2">
-          Check back later or contact your coach for more information.
+          {t('athlete.championships.checkBack')}
         </p>
       </div>
     );
@@ -92,7 +95,7 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <Trophy className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">Your Championships</h3>
+        <h3 className="text-lg font-semibold">{t('athlete.championships.yourChampionships')}</h3>
       </div>
 
       <div className="space-y-3">
@@ -102,10 +105,10 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
               <div className="flex items-start justify-between gap-4">
                 <h4 className="font-medium text-foreground flex items-center gap-2">
                   <Trophy className="h-4 w-4 text-primary" />
-                  {championship.nome_campeonato || 'Unnamed Championship'}
+                  {championship.nome_campeonato || t('athlete.championships.unnamedChampionship')}
                 </h4>
                 <Badge variant="default" className="bg-success text-success-foreground">
-                  Registered
+                  {t('athlete.championships.registered')}
                 </Badge>
               </div>
             </CardHeader>
@@ -147,7 +150,7 @@ export const AthleteChampionshipsTab = ({ athleteId }: AthleteChampionshipsTabPr
 
               <div className="pt-2 border-t border-border">
                 <p className="text-xs text-muted-foreground">
-                  Good luck! Remember to check with your coach for competition details and requirements.
+                  {t('athlete.championships.goodLuck')}
                 </p>
               </div>
             </CardContent>

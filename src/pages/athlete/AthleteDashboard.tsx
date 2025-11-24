@@ -57,7 +57,7 @@ interface AttendanceRecord {
 const AthleteDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedMonth, setSelectedMonth] = useState({ month: new Date().getMonth(), year: new Date().getFullYear() });
   const [userAuthId, setUserAuthId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -317,7 +317,7 @@ useEffect(() => {
 
   const getMonthName = (month: number, year: number) => {
     const date = new Date(year, month);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric' });
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -517,7 +517,7 @@ useEffect(() => {
           <TabsContent value="personal" className="space-y-4">
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-title">Personal Information</h4>
+                <h4 className="font-medium text-title">{t('athlete.personal.title')}</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -529,35 +529,35 @@ useEffect(() => {
                 ) : athlete ? (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-title mb-1">Date of Birth</p>
-                      <p className={athlete.date_of_birth ? "" : "text-muted-foreground"}>{athlete.date_of_birth || 'N/A'}</p>
+                      <p className="text-title mb-1">{t('athlete.personal.dateOfBirth')}</p>
+                      <p className={athlete.date_of_birth ? "" : "text-muted-foreground"}>{athlete.date_of_birth || t('common.notAvailable')}</p>
                     </div>
                     <div>
-                      <p className="text-title mb-1">Phone</p>
-                      <p className={athlete.phone ? "" : "text-muted-foreground"}>{athlete.phone || 'N/A'}</p>
+                      <p className="text-title mb-1">{t('athlete.personal.phone')}</p>
+                      <p className={athlete.phone ? "" : "text-muted-foreground"}>{athlete.phone || t('common.notAvailable')}</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-title mb-1">Address</p>
-                      <p className={athlete.address ? "" : "text-muted-foreground"}>{athlete.address || 'N/A'}</p>
+                      <p className="text-title mb-1">{t('athlete.personal.address')}</p>
+                      <p className={athlete.address ? "" : "text-muted-foreground"}>{athlete.address || t('common.notAvailable')}</p>
                     </div>
                     <div>
-                      <p className="text-title mb-1">Level</p>
+                      <p className="text-title mb-1">{t('athlete.personal.level')}</p>
                       {athlete.surf_level ? (
                         <Badge className="gradient-primary text-white border-none">{athlete.surf_level}</Badge>
                       ) : (
-                        <p className="text-muted-foreground">N/A</p>
+                        <p className="text-muted-foreground">{t('common.notAvailable')}</p>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground">No data available</p>
+                  <p className="text-center text-muted-foreground">{t('athlete.personal.noData')}</p>
                 )}
               </CardContent>
             </Card>
 
             <Card className="shadow-soft">
               <CardHeader>
-                <h4 className="font-medium text-title">Emergency Contacts</h4>
+                <h4 className="font-medium text-title">{t('athlete.personal.emergencyContacts')}</h4>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingAthlete ? (
@@ -567,28 +567,28 @@ useEffect(() => {
                     <div>
                       <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                         <User className="h-5 w-5 text-success" />
-                        Mother
+                        {t('athlete.personal.mother')}
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-title">Name:</span> <span className={athlete.mother_name ? "" : "text-muted-foreground"}>{athlete.mother_name || 'N/A'}</span></p>
-                        <p><span className="text-title">Phone:</span> <span className={athlete.mother_phone ? "" : "text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : 'N/A'}</span></p>
-                        <p><span className="text-title">Email:</span> <span className={athlete.mother_email ? "" : "text-muted-foreground"}>{athlete.mother_email || 'N/A'}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.name')}:</span> <span className={athlete.mother_name ? "" : "text-muted-foreground"}>{athlete.mother_name || t('common.notAvailable')}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.phone')}:</span> <span className={athlete.mother_phone ? "" : "text-muted-foreground"}>{athlete.mother_phone ? `+${athlete.mother_phone}` : t('common.notAvailable')}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.email')}:</span> <span className={athlete.mother_email ? "" : "text-muted-foreground"}>{athlete.mother_email || t('common.notAvailable')}</span></p>
                       </div>
                     </div>
                     <div>
                       <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                         <User className="h-5 w-5 text-success" />
-                        Father
+                        {t('athlete.personal.father')}
                       </h4>
                       <div className="text-sm space-y-1">
-                        <p><span className="text-title">Name:</span> <span className={athlete.father_name ? "" : "text-muted-foreground"}>{athlete.father_name || 'N/A'}</span></p>
-                        <p><span className="text-title">Phone:</span> <span className={athlete.father_phone ? "" : "text-muted-foreground"}>{athlete.father_phone || 'N/A'}</span></p>
-                        <p><span className="text-title">Email:</span> <span className={athlete.father_email ? "" : "text-muted-foreground"}>{athlete.father_email || 'N/A'}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.name')}:</span> <span className={athlete.father_name ? "" : "text-muted-foreground"}>{athlete.father_name || t('common.notAvailable')}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.phone')}:</span> <span className={athlete.father_phone ? "" : "text-muted-foreground"}>{athlete.father_phone || t('common.notAvailable')}</span></p>
+                        <p><span className="text-title">{t('athlete.personal.email')}:</span> <span className={athlete.father_email ? "" : "text-muted-foreground"}>{athlete.father_email || t('common.notAvailable')}</span></p>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <p className="text-center text-muted-foreground">No data available</p>
+                  <p className="text-center text-muted-foreground">{t('athlete.personal.noData')}</p>
                 )}
               </CardContent>
             </Card>
@@ -600,7 +600,7 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title flex items-center gap-2">
                   <Calendar className="h-6 w-6 text-primary" />
-                  Training Schedule
+                  {t('athlete.training.scheduleTitle')}
                 </h4>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -609,29 +609,29 @@ useEffect(() => {
                 ) : athlete ? (
                   <>
                     <div>
-                      <p className="text-sm text-title mb-2">Weekly Sessions</p>
+                      <p className="text-sm text-title mb-2">{t('athlete.training.weeklySessions')}</p>
                       <div className="flex items-center gap-2">
                         <div className="w-12 h-12 gradient-primary rounded-full flex items-center justify-center shadow-soft">
                           <span className="text-xl font-bold text-white">{athlete.trainings_per_week || 0}</span>
                         </div>
-                        <p className="text-sm">sessions per week</p>
+                        <p className="text-sm">{t('athlete.training.sessionsPerWeek')}</p>
                       </div>
                     </div>
                     
                     <div>
-                      <p className="text-sm text-title mb-3">Training Days</p>
+                      <p className="text-sm text-title mb-3">{t('athlete.training.trainingDays')}</p>
                       {athlete.training_days ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <Clock className="h-5 w-5 text-primary" />
                           <span className="text-sm text-foreground">{athlete.training_days}</span>
                         </div>
                       ) : (
-                        <p className="text-muted-foreground">Not specified</p>
+                        <p className="text-muted-foreground">{t('athlete.training.notSpecified')}</p>
                       )}
                     </div>
                   </>
                 ) : (
-                  <p className="text-center text-muted-foreground">No data available</p>
+                  <p className="text-center text-muted-foreground">{t('athlete.personal.noData')}</p>
                 )}
               </CardContent>
             </Card>
@@ -640,7 +640,7 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title flex items-center gap-2">
                   <MapPin className="h-6 w-6 text-warning" />
-                  Transportation
+                  {t('athlete.training.transportation')}
                 </h4>
               </CardHeader>
               <CardContent>
@@ -650,26 +650,26 @@ useEffect(() => {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       {athlete.transport ? (
-                        <Badge className="bg-success/10 text-success">Service Provided</Badge>
+                        <Badge className="bg-success/10 text-success">{t('athlete.training.serviceProvided')}</Badge>
                       ) : (
-                        <Badge variant="secondary">No Service</Badge>
+                        <Badge variant="secondary">{t('athlete.training.noService')}</Badge>
                       )}
                     </div>
                     {athlete.transport && (
                       <div className="text-sm space-y-2">
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-title text-xs">Pickup Address</p>
-                          <p className={athlete.pickup_address ? "" : "text-muted-foreground"}>{athlete.pickup_address || 'N/A'}</p>
+                          <p className="text-title text-xs">{t('athlete.training.pickupAddress')}</p>
+                          <p className={athlete.pickup_address ? "" : "text-muted-foreground"}>{athlete.pickup_address || t('common.notAvailable')}</p>
                         </div>
                         <div className="p-2 bg-warning/5 rounded-md border border-warning/20">
-                          <p className="text-title text-xs">Drop-off Address</p>
-                          <p className={athlete.dropoff_address ? "" : "text-muted-foreground"}>{athlete.dropoff_address || 'N/A'}</p>
+                          <p className="text-title text-xs">{t('athlete.training.dropoffAddress')}</p>
+                          <p className={athlete.dropoff_address ? "" : "text-muted-foreground"}>{athlete.dropoff_address || t('common.notAvailable')}</p>
                         </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground">No data available</p>
+                  <p className="text-center text-muted-foreground">{t('athlete.personal.noData')}</p>
                 )}
               </CardContent>
             </Card>
@@ -703,7 +703,7 @@ useEffect(() => {
                     </Button>
                   </div>
                 </div>
-                <CardDescription>Your training session record</CardDescription>
+                <CardDescription>{t('athlete.attendance.recordDescription')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingAttendance ? (
@@ -716,31 +716,31 @@ useEffect(() => {
                   <div className="space-y-3">
                     {getAttendanceForMonth(selectedMonth.month, selectedMonth.year).length === 0 ? (
                       <p className="text-center text-muted-foreground py-6">
-                        No attendance records for this month
+                        {t('athlete.attendance.noRecords')}
                       </p>
                     ) : (
                       getAttendanceForMonth(selectedMonth.month, selectedMonth.year).map((record) => (
                         <div key={record.id} className="border border-border rounded-lg p-3 space-y-2 hover:bg-accent/5 transition-colors">
                           <div className="flex items-center justify-between">
-                            <p className="text-foreground">{record.date || 'N/A'}</p>
+                            <p className="text-foreground">{record.date || t('common.notAvailable')}</p>
                             <Badge className={getStatusColor(record.status)}>
-                              {record.status || 'Unknown'}
+                              {record.status || t('common.unknown')}
                             </Badge>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground">Coach:</span> 
-                              <span>{record.coach || 'N/A'}</span>
+                              <span className="text-muted-foreground">{t('athlete.attendance.coach')}</span> 
+                              <span>{record.coach || t('common.notAvailable')}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground">Beach:</span> 
-                              <span>{record.beach_location || 'N/A'}</span>
+                              <span className="text-muted-foreground">{t('athlete.attendance.beach')}</span> 
+                              <span>{record.beach_location || t('common.notAvailable')}</span>
                             </div>
                             {record.notes && (
                               <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded text-xs">
-                                <span className="font-medium">Notes:</span> {record.notes}
+                                <span className="font-medium">{t('athlete.attendance.notes')}</span> {record.notes}
                               </div>
                             )}
                           </div>
@@ -756,8 +756,8 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title">
                   {athlete?.plan_type && athlete.plan_type.toLowerCase() !== 'month' 
-                    ? 'Your pack summary' 
-                    : 'Monthly Summary'}
+                    ? t('athlete.packBalance.summary')
+                    : t('athlete.attendance.monthlySummary')}
                 </h4>
               </CardHeader>
               <CardContent>
@@ -770,27 +770,27 @@ useEffect(() => {
                       <div className="grid grid-cols-2 gap-4 text-center">
                         <div>
                           <p className="text-2xl font-bold text-primary">{packBalance.totalTokens}</p>
-                          <p className="text-xs text-muted-foreground">Total Sessions</p>
+                          <p className="text-xs text-muted-foreground">{t('athlete.packBalance.totalSessions')}</p>
                         </div>
                         <div>
                           <p className="text-2xl font-bold text-success">{packBalance.usedTokens}</p>
-                          <p className="text-xs text-muted-foreground">Sessions Used</p>
+                          <p className="text-xs text-muted-foreground">{t('athlete.packBalance.sessionsUsed')}</p>
                         </div>
                       </div>
                       <div className="text-center pt-4 border-t">
                         <p className={`text-3xl font-bold ${packBalance.balance < 0 ? 'text-destructive' : 'text-success'}`}>
                           {packBalance.balance}
                         </p>
-                        <p className="text-xs text-muted-foreground">Remaining Sessions</p>
+                        <p className="text-xs text-muted-foreground">{t('athlete.packBalance.remaining')}</p>
                       </div>
                       <div className="text-center text-xs text-muted-foreground pt-2">
-                        Pack active since {new Date(packBalance.purchaseDate).toLocaleDateString()}
+                        {t('athlete.packBalance.activeSince')} {new Date(packBalance.purchaseDate).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
                       </div>
 
                       {/* Purchase History */}
                       {packHistory.length > 0 && (
                         <div className="pt-4 border-t space-y-3">
-                          <h4 className="text-sm font-semibold text-title">Purchase History</h4>
+                          <h4 className="text-sm font-semibold text-title">{t('athlete.packBalance.history')}</h4>
                           <div className="space-y-2">
                             {packHistory.map((pack) => (
                               <div 
@@ -804,22 +804,22 @@ useEffect(() => {
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                     <p className="text-sm font-medium">
-                                      {new Date(pack.purchase_date).toLocaleDateString()}
+                                      {new Date(pack.purchase_date).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
                                     </p>
                                     {pack.active && (
-                                      <Badge className="bg-success text-white text-xs">Active</Badge>
+                                      <Badge className="bg-success text-white text-xs">{t('athlete.packBalance.active')}</Badge>
                                     )}
                                   </div>
                                   <p className="text-xs text-muted-foreground">
-                                    {pack.total_tokens} sessions pack
+                                    {pack.total_tokens} {t('athlete.packBalance.sessions')}
                                   </p>
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm font-bold text-foreground">
-                                    {pack.total_tokens} sessions
+                                    {pack.total_tokens} {t('athlete.packBalance.sessions')}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    Payment: {pack.payment_id}
+                                    {t('athlete.packBalance.payment')} {pack.payment_id}
                                   </p>
                                 </div>
                               </div>
@@ -829,22 +829,22 @@ useEffect(() => {
                       )}
                     </div>
                   ) : (
-                    <p className="text-center text-muted-foreground py-4">No active pack found</p>
+                    <p className="text-center text-muted-foreground py-4">{t('athlete.packBalance.noActivePack')}</p>
                   )
                 ) : (
                   // Monthly plan summary
                   <div className="grid grid-cols-3 gap-4 text-center font-normal">
                     <div>
                       <p className="text-2xl font-normal text-success">{calculateMonthlySummary().present}</p>
-                      <p className="text-xs text-muted-foreground">Present</p>
+                      <p className="text-xs text-muted-foreground">{t('athlete.attendance.present')}</p>
                     </div>
                     <div>
                       <p className="text-2xl font-normal text-warning">{calculateMonthlySummary().justified}</p>
-                      <p className="text-xs text-muted-foreground">Justified</p>
+                      <p className="text-xs text-muted-foreground">{t('athlete.attendance.justified')}</p>
                     </div>
                     <div>
                       <p className="text-2xl font-normal text-destructive">{calculateMonthlySummary().absent}</p>
-                      <p className="text-xs text-muted-foreground">Not Present</p>
+                      <p className="text-xs text-muted-foreground">{t('athlete.attendance.notPresent')}</p>
                     </div>
                   </div>
                 )}
@@ -862,10 +862,10 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title flex items-center gap-2">
                   <Trophy className="h-6 w-6" />
-                  My Championships
+                  {t('athlete.championships.title')}
                 </h4>
                 <CardDescription>
-                  View all championships you are registered for
+                  {t('athlete.championships.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -873,7 +873,7 @@ useEffect(() => {
                   <AthleteChampionshipsTab athleteId={athleteId} />
                 ) : (
                   <p className="text-center text-muted-foreground py-8">
-                    Loading championship information...
+                    {t('athlete.championships.loading')}
                   </p>
                 )}
               </CardContent>
@@ -886,9 +886,9 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title flex items-center gap-2">
                   <ImageIcon className="h-6 w-6" />
-                  Photos & Videos
+                  {t('athlete.media.title')}
                 </h4>
-                <CardDescription>Media shared by your coaches</CardDescription>
+                <CardDescription>{t('athlete.media.description')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoadingAttendance ? (
@@ -921,9 +921,9 @@ useEffect(() => {
                       <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <ImageIcon className="h-8 w-8 text-muted-foreground" />
                       </div>
-                      <p className="text-muted-foreground">No photos or videos yet</p>
+                      <p className="text-muted-foreground">{t('athlete.media.noMedia')}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Your coaches will upload media from training sessions
+                        {t('athlete.media.noMediaDescription')}
                       </p>
                     </div>
                   ) : (
@@ -933,7 +933,7 @@ useEffect(() => {
                         <div>
                           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                             <ImageIcon className="h-4 w-4" />
-                            Photos ({allPhotos.length})
+                            {t('athlete.media.photos')} ({allPhotos.length})
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {allPhotos.map((photo, idx) => (
@@ -953,7 +953,7 @@ useEffect(() => {
                                       {photo.date && (
                                         <p className="text-xs font-medium text-foreground flex items-center gap-1">
                                           <Calendar className="h-3 w-3" />
-                                          {new Date(photo.date).toLocaleDateString('pt-PT', {
+                                          {new Date(photo.date).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', {
                                             day: '2-digit',
                                             month: 'short',
                                             year: 'numeric'
@@ -962,7 +962,7 @@ useEffect(() => {
                                       )}
                                       {photo.coach && (
                                         <p className="text-xs text-muted-foreground truncate">
-                                          Coach: {photo.coach}
+                                          {t('athlete.media.coach')} {photo.coach}
                                         </p>
                                       )}
                                     </div>
@@ -989,7 +989,7 @@ useEffect(() => {
                         <div>
                           <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                             <Video className="h-4 w-4" />
-                            Videos ({allVideos.length})
+                            {t('athlete.media.videos')} ({allVideos.length})
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {allVideos.map((video, idx) => (
@@ -1014,7 +1014,7 @@ useEffect(() => {
                                       {video.date && (
                                         <p className="text-xs font-medium text-foreground flex items-center gap-1">
                                           <Calendar className="h-3 w-3" />
-                                          {new Date(video.date).toLocaleDateString('pt-PT', {
+                                          {new Date(video.date).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', {
                                             day: '2-digit',
                                             month: 'short',
                                             year: 'numeric'
@@ -1023,7 +1023,7 @@ useEffect(() => {
                                       )}
                                       {video.coach && (
                                         <p className="text-xs text-muted-foreground truncate">
-                                          Coach: {video.coach}
+                                          {t('athlete.media.coach')} {video.coach}
                                         </p>
                                       )}
                                     </div>
@@ -1057,9 +1057,9 @@ useEffect(() => {
               <CardHeader>
                 <h4 className="font-medium text-title flex items-center gap-2">
                   <Plane className="h-6 w-6 text-primary" />
-                  Estágios
+                  {t('athlete.tabs.estagios')}
                 </h4>
-                <CardDescription>Training camps and internships you are registered for</CardDescription>
+                <CardDescription>{t('athlete.estagios.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isLoadingEstagios ? (
@@ -1068,7 +1068,7 @@ useEffect(() => {
                   </div>
                 ) : estagios.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    You are not registered for any estágios yet
+                    {t('athlete.estagios.noEstagios')}
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -1078,23 +1078,23 @@ useEffect(() => {
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           {estagio.local && (
                             <div className="col-span-2">
-                              <span className="text-muted-foreground">Location:</span>
+                              <span className="text-muted-foreground">{t('athlete.estagios.location')}</span>
                               <p className="font-medium">{estagio.local}</p>
                             </div>
                           )}
                           {estagio.data_inicio && (
                             <div>
-                              <span className="text-muted-foreground">Start:</span>
+                              <span className="text-muted-foreground">{t('athlete.estagios.start')}</span>
                               <p className="font-medium">
-                                {new Date(estagio.data_inicio).toLocaleDateString('pt-PT')}
+                                {new Date(estagio.data_inicio).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
                               </p>
                             </div>
                           )}
                           {estagio.data_fim && (
                             <div>
-                              <span className="text-muted-foreground">End:</span>
+                              <span className="text-muted-foreground">{t('athlete.estagios.end')}</span>
                               <p className="font-medium">
-                                {new Date(estagio.data_fim).toLocaleDateString('pt-PT')}
+                                {new Date(estagio.data_fim).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
                               </p>
                             </div>
                           )}

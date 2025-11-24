@@ -518,7 +518,77 @@
     "packBalance": {
       "title": "Pack Balance",
       "remaining": "Remaining Trainings",
-      "history": "Purchase History"
+      "history": "Purchase History",
+      "summary": "Your pack summary",
+      "totalSessions": "Total Trainings",
+      "sessionsUsed": "Trainings Used",
+      "activeSince": "Pack active since",
+      "active": "Active",
+      "sessions": "trainings",
+      "payment": "Payment:",
+      "noActivePack": "No active pack found"
+    },
+    "dashboard": {
+      "refreshed": "Data refreshed",
+      "refreshedDescription": "Your data has been successfully updated",
+      "loggedOut": "Logged Out",
+      "loggedOutDescription": "See you soon!",
+      "errorLoadingProfile": "Error loading athlete profile"
+    },
+    "personal": {
+      "title": "Personal Information",
+      "level": "Level",
+      "noData": "No data available",
+      "emergencyContacts": "Emergency Contacts",
+      "mother": "Mother",
+      "father": "Father"
+    },
+    "training": {
+      "scheduleTitle": "Training Schedule",
+      "weeklySessions": "Weekly Trainings",
+      "sessionsPerWeek": "trainings per week",
+      "notSpecified": "Not specified",
+      "transportation": "Transportation",
+      "serviceProvided": "Service Provided",
+      "noService": "No Service",
+      "pickupAddress": "Pickup Address",
+      "dropoffAddress": "Drop-off Address"
+    },
+    "attendance": {
+      "recordDescription": "Your training record",
+      "coach": "Coach:",
+      "beach": "Beach:",
+      "notes": "Notes:",
+      "monthlySummary": "Monthly Summary",
+      "notPresent": "Not Present"
+    },
+    "championships": {
+      "title": "My Championships",
+      "description": "View all championships you are registered for",
+      "loading": "Loading championship information...",
+      "noChampionships": "No Championships Yet",
+      "noChampionshipsDesc": "You haven't been registered for any championships yet.",
+      "checkBack": "Check back later or contact your coach for more information.",
+      "yourChampionships": "Your Championships",
+      "unnamedChampionship": "Unnamed Championship",
+      "registered": "Registered",
+      "goodLuck": "Good luck! Remember to check with your coach for competition details and requirements."
+    },
+    "media": {
+      "title": "Photos & Videos",
+      "description": "Media shared by your coaches",
+      "noMedia": "No photos or videos yet",
+      "noMediaDescription": "Your coaches will upload media from training sessions",
+      "photos": "Photos",
+      "videos": "Videos",
+      "coach": "Coach:"
+    },
+    "estagios": {
+      "description": "Training camps and internships you are registered for",
+      "noEstagios": "You are not registered for any training camps yet",
+      "location": "Location:",
+      "start": "Start:",
+      "end": "End:"
     }
   },
   "guardian": {
