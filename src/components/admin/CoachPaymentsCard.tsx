@@ -62,6 +62,42 @@ export const CoachPaymentsCard = () => {
     notes: "",
   });
 
+  const translateMonth = (month: string): string => {
+    const monthMap: Record<string, string> = {
+      'January': t('shared.coachPayments.months.january'),
+      'February': t('shared.coachPayments.months.february'),
+      'March': t('shared.coachPayments.months.march'),
+      'April': t('shared.coachPayments.months.april'),
+      'May': t('shared.coachPayments.months.may'),
+      'June': t('shared.coachPayments.months.june'),
+      'July': t('shared.coachPayments.months.july'),
+      'August': t('shared.coachPayments.months.august'),
+      'September': t('shared.coachPayments.months.september'),
+      'October': t('shared.coachPayments.months.october'),
+      'November': t('shared.coachPayments.months.november'),
+      'December': t('shared.coachPayments.months.december'),
+    };
+    return monthMap[month] || month;
+  };
+
+  const translateMonthShort = (month: string): string => {
+    const monthMap: Record<string, string> = {
+      'January': t('shared.coachPayments.months.jan'),
+      'February': t('shared.coachPayments.months.feb'),
+      'March': t('shared.coachPayments.months.mar'),
+      'April': t('shared.coachPayments.months.apr'),
+      'May': t('shared.coachPayments.months.may_short'),
+      'June': t('shared.coachPayments.months.jun'),
+      'July': t('shared.coachPayments.months.jul'),
+      'August': t('shared.coachPayments.months.aug'),
+      'September': t('shared.coachPayments.months.sep'),
+      'October': t('shared.coachPayments.months.oct'),
+      'November': t('shared.coachPayments.months.nov'),
+      'December': t('shared.coachPayments.months.dec'),
+    };
+    return monthMap[month] || month;
+  };
+
   // Fetch all coaches
   const { data: coaches } = useQuery({
     queryKey: ['coaches'],
@@ -400,7 +436,7 @@ export const CoachPaymentsCard = () => {
                     <SelectContent>
                       {MONTHS.map((month) => (
                         <SelectItem key={month} value={month}>
-                          {month}
+                          {translateMonth(month)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -463,7 +499,7 @@ export const CoachPaymentsCard = () => {
                 return (
                   <Card key={month} className={cn(!hasPayments && "opacity-50")}>
                     <CardContent className="p-3">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">{month.slice(0, 3)}</p>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">{translateMonthShort(month)}</p>
                       <p className="text-sm font-normal truncate">{data.total.toFixed(0)}€</p>
                     </CardContent>
                   </Card>
@@ -496,7 +532,7 @@ export const CoachPaymentsCard = () => {
                 <SelectContent>
                   <SelectItem value="all">{t('shared.coachPayments.allMonths')}</SelectItem>
                   {MONTHS.map(month => (
-                    <SelectItem key={month} value={month}>{month}</SelectItem>
+                    <SelectItem key={month} value={month}>{translateMonth(month)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -534,7 +570,7 @@ export const CoachPaymentsCard = () => {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-xs">
-                            {payment.payment_month.slice(0, 3)} {payment.payment_year}
+                            {translateMonthShort(payment.payment_month)} {payment.payment_year}
                           </Badge>
                         </TableCell>
                         <TableCell className="font-semibold">
