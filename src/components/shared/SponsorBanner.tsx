@@ -8,15 +8,18 @@ import quintaMarinhaLogo from "@/assets/quinta-marinha-logo.png";
 import cultoImagemLogo from "@/assets/culto-imagem-logo.png";
 import fpsCertificationLogo from "@/assets/fps-certification-logo.png";
 import turismoPortugalLogo from "@/assets/turismo-portugal-logo.png";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const SponsorBanner = () => {
+  const { t } = useLanguage();
+  
   return (
     <div className="bg-card border-t py-6 mt-8">
       <div className="mobile-container space-y-8">
         {/* Main Sponsors */}
         <div>
           <h3 className="text-sm font-medium text-title mb-4 text-center">
-            Main Sponsors
+            {t('footer.mainSponsors')}
           </h3>
           <div className="flex justify-center items-center gap-6">
             <img 
@@ -35,7 +38,7 @@ const SponsorBanner = () => {
         {/* Our Partners */}
         <div>
           <h3 className="text-sm font-medium text-title mb-4 text-center">
-            Our Partners
+            {t('footer.ourPartners')}
           </h3>
           <div className="flex flex-wrap justify-center items-center gap-6">
             <img 
@@ -69,7 +72,7 @@ const SponsorBanner = () => {
         {/* School Verified By */}
         <div>
           <h3 className="text-sm font-medium text-title mb-4 text-center">
-            School Verified By
+            {t('footer.verifiedBy')}
           </h3>
           <div className="flex justify-center items-center gap-6">
             <img 

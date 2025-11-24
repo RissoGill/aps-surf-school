@@ -135,7 +135,10 @@
     "trainingHistory": "Histórico de Treinos"
   },
   "footer": {
-    "rights": "Todos os direitos reservados"
+    "rights": "Todos os direitos reservados",
+    "mainSponsors": "Patrocinadores Oficiais",
+    "ourPartners": "Nossos Parceiros",
+    "verifiedBy": "Escola Certificada por"
   },
   "admin": {
     "dashboard": {
