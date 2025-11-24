@@ -15,6 +15,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { z } from "zod";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Payment {
   payment_id: string;
@@ -47,6 +48,7 @@ const paymentEditSchema = z.object({
 
 const PaymentManagement = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
@@ -248,8 +250,8 @@ const PaymentManagement = () => {
         await queryClient.invalidateQueries({ queryKey: ['atletas'] });
         
         toast({
-          title: "Success",
-          description: "Pack record created successfully"
+          title: t('admin.paymentManagement.success'),
+          description: t('admin.paymentManagement.packCreatedSuccess')
         });
         
         return;
@@ -286,8 +288,8 @@ const PaymentManagement = () => {
           carriedOverTokens = Math.abs(balance);
           
           toast({
-            title: "Negative Balance Carried Forward",
-            description: `Previous pack had -${Math.abs(balance)} sessions. This will be deducted from the new pack.`,
+            title: t('admin.paymentManagement.negativeBalanceCarried'),
+            description: t('admin.paymentManagement.negativeBalanceDescription').replace('{balance}', Math.abs(balance).toString()),
             variant: "default"
           });
         }
@@ -361,10 +363,10 @@ const PaymentManagement = () => {
       const isRLSError = error?.code === '42501' || errorMessage.includes('policy');
       
       toast({
-        title: isRLSError ? "Permission Error" : "Pack Creation Failed",
+        title: isRLSError ? t('admin.paymentManagement.permissionError') : t('admin.paymentManagement.packCreationFailed'),
         description: isRLSError 
-          ? "Insufficient permissions to create pack record. Please check RLS policies." 
-          : `Failed to create pack record: ${errorMessage.slice(0, 100)}`,
+          ? t('admin.paymentManagement.permissionDescription')
+          : t('admin.paymentManagement.packCreationDescription').replace('{error}', errorMessage.slice(0, 100)),
         variant: "destructive"
       });
     }
@@ -428,24 +430,24 @@ const PaymentManagement = () => {
       });
 
       toast({
-        title: "Success",
+        title: t('admin.paymentManagement.success'),
         description: validated.plan_type && ['pack1', 'pack5', 'pack10'].includes(validated.plan_type)
-          ? "Payment and pack record created successfully"
-          : "Payment updated successfully"
+          ? t('admin.paymentManagement.paymentAndPackSuccess')
+          : t('admin.paymentManagement.paymentUpdatedSuccess')
       });
 
       handleEditCancel();
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          title: "Validation Error",
+          title: t('admin.paymentManagement.validationError'),
           description: error.errors[0].message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to update payment",
+          title: t('admin.paymentManagement.error'),
+          description: t('admin.paymentManagement.updateFailed'),
           variant: "destructive"
         });
       }
@@ -459,13 +461,13 @@ const PaymentManagement = () => {
 
     // If both are 0, consider it as Paid (no amount due, no amount owed)
     if (amountDue === 0 && amountPaid === 0) {
-      return { label: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
+      return { label: t('admin.paymentManagement.paid'), color: "bg-success/10 text-success", icon: CheckCircle };
     } else if (amountPaid === 0) {
-      return { label: "Unpaid", color: "bg-destructive/10 text-destructive", icon: AlertCircle };
+      return { label: t('admin.paymentManagement.unpaid'), color: "bg-destructive/10 text-destructive", icon: AlertCircle };
     } else if (amountPaid >= amountDue) {
-      return { label: "Paid", color: "bg-success/10 text-success", icon: CheckCircle };
+      return { label: t('admin.paymentManagement.paid'), color: "bg-success/10 text-success", icon: CheckCircle };
     } else {
-      return { label: "Partial", color: "bg-warning/10 text-warning", icon: Clock };
+      return { label: t('admin.paymentManagement.partial'), color: "bg-warning/10 text-warning", icon: Clock };
     }
   };
 
@@ -561,13 +563,13 @@ const PaymentManagement = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Payment Management" showBack backTo="/dashboard/administration" />
+      <AppHeader title={t('admin.paymentManagement.title')} showBack backTo="/dashboard/administration" />
       
       <main className="mobile-container py-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Payment Management</h2>
-          <p className="text-muted-foreground">Search for an athlete to view their payments</p>
+          <h2 className="text-2xl font-bold text-foreground">{t('admin.paymentManagement.title')}</h2>
+          <p className="text-muted-foreground">{t('admin.paymentManagement.subtitle')}</p>
         </div>
 
         {/* Search Bar */}
@@ -575,15 +577,15 @@ const PaymentManagement = () => {
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
               <Euro className="h-6 w-6 text-primary" />
-              Athlete Payment Search
+              {t('admin.paymentManagement.searchTitle')}
             </CardTitle>
-            <CardDescription>Search for an athlete to view and manage their payment records</CardDescription>
+            <CardDescription>{t('admin.paymentManagement.searchDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search athlete by name..."
+                placeholder={t('admin.paymentManagement.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 touch-friendly"
@@ -612,7 +614,7 @@ const PaymentManagement = () => {
             {selectedAthlete && (
               <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
                 <div>
-                  <p className="font-medium">Selected Athlete:</p>
+                  <p className="font-medium">{t('admin.paymentManagement.selectedAthlete')}</p>
                   <p className="text-sm text-muted-foreground">
                     {selectedAthlete.first_name} {selectedAthlete.last_name}
                   </p>
@@ -625,7 +627,7 @@ const PaymentManagement = () => {
                     setSearchTerm("");
                   }}
                 >
-                  Clear
+                  {t('admin.paymentManagement.clear')}
                 </Button>
               </div>
             )}
@@ -641,8 +643,8 @@ const PaymentManagement = () => {
                 <CardContent className="p-4 text-center">
                   <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
                   <p className="text-lg font-bold text-destructive">€{outstanding.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">Outstanding</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Current & past unpaid</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.outstanding')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.outstandingDescription')}</p>
                 </CardContent>
               </Card>
               
@@ -650,8 +652,8 @@ const PaymentManagement = () => {
                 <CardContent className="p-4 text-center">
                   <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
                   <p className="text-lg font-bold text-foreground">€{nextPayment.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">Next Payment</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Due by 5th of month</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.nextPayment')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.nextPaymentDescription')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -660,11 +662,13 @@ const PaymentManagement = () => {
             {needsPackCreation && latestPackPayment && (
               <Alert className="mb-6">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Pack Payment Without Pack Record</AlertTitle>
+                <AlertTitle>{t('admin.paymentManagement.packPaymentAlert')}</AlertTitle>
                 <AlertDescription className="flex items-center justify-between">
                   <span>
-                    Found a {latestPackPayment.plan_type} payment ({latestPackPayment.payment_id}) from {latestPackPayment.payment_date} 
-                    but no corresponding pack record exists.
+                    {t('admin.paymentManagement.packPaymentDescription')
+                      .replace('{planType}', latestPackPayment.plan_type)
+                      .replace('{paymentId}', latestPackPayment.payment_id)
+                      .replace('{date}', latestPackPayment.payment_date || '')}
                   </span>
                   <Button 
                     variant="outline" 
@@ -679,7 +683,7 @@ const PaymentManagement = () => {
                       );
                     }}
                   >
-                    Create Pack Record
+                    {t('admin.paymentManagement.createPackRecord')}
                   </Button>
                 </AlertDescription>
               </Alert>
@@ -688,28 +692,30 @@ const PaymentManagement = () => {
             {/* Payments Table */}
             <Card className="shadow-medium">
               <CardHeader>
-                <CardTitle>Payment Records</CardTitle>
-                <CardDescription>Payment history for {selectedAthlete.first_name} {selectedAthlete.last_name} (September 2025 - September 2026)</CardDescription>
+                <CardTitle>{t('admin.paymentManagement.paymentRecords')}</CardTitle>
+                <CardDescription>
+                  {t('admin.paymentManagement.paymentHistory').replace('{athleteName}', `${selectedAthlete.first_name} ${selectedAthlete.last_name}`)}
+                </CardDescription>
               </CardHeader>
               
               <CardContent>
                 {isLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading payments...</div>
+                  <div className="text-center py-8 text-muted-foreground">{t('admin.paymentManagement.loadingPayments')}</div>
                 ) : payments.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No payment records found</div>
+                  <div className="text-center py-8 text-muted-foreground">{t('admin.paymentManagement.noPayments')}</div>
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Period</TableHead>
-                          <TableHead>Plan Type</TableHead>
-                          <TableHead>Amount Due</TableHead>
-                          <TableHead>Amount Paid</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Notes</TableHead>
-                          <TableHead>Actions</TableHead>
+                          <TableHead>{t('admin.paymentManagement.period')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.planType')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.amountDue')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.amountPaid')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.status')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.date')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.notes')}</TableHead>
+                          <TableHead>{t('admin.paymentManagement.actions')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -730,13 +736,13 @@ const PaymentManagement = () => {
                                     onValueChange={(value) => setEditForm({ ...editForm, plan_type: value })}
                                   >
                                     <SelectTrigger className="w-32">
-                                      <SelectValue placeholder="Select plan" />
+                                      <SelectValue placeholder={t('admin.paymentManagement.selectPlan')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="month">Month</SelectItem>
-                                      <SelectItem value="pack1">Pack 1</SelectItem>
-                                      <SelectItem value="pack5">Pack 5</SelectItem>
-                                      <SelectItem value="pack10">Pack 10</SelectItem>
+                                      <SelectItem value="month">{t('admin.paymentManagement.month')}</SelectItem>
+                                      <SelectItem value="pack1">{t('admin.paymentManagement.pack1')}</SelectItem>
+                                      <SelectItem value="pack5">{t('admin.paymentManagement.pack5')}</SelectItem>
+                                      <SelectItem value="pack10">{t('admin.paymentManagement.pack10')}</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 ) : (
@@ -775,11 +781,11 @@ const PaymentManagement = () => {
                               </TableCell>
                               
               {/* Status */}
-              <TableCell>
+                              <TableCell>
                 <Badge className={status.color}>
                   <StatusIcon className="h-3 w-3 mr-1" />
                   {status.label}
-                  {isEditing && <span className="ml-1 text-[10px]">(auto)</span>}
+                  {isEditing && <span className="ml-1 text-[10px]">({t('admin.paymentManagement.auto')})</span>}
                 </Badge>
               </TableCell>
                               
@@ -799,22 +805,22 @@ const PaymentManagement = () => {
                                 )}
                               </TableCell>
                               
-                              {/* Notes */}
-                              <TableCell className="min-w-[260px] max-w-xl align-top">
-                                {isEditing ? (
-                                  <Textarea
-                                    value={editForm.notes}
-                                    onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                                    placeholder="Add notes..."
-                                    className="min-h-[120px] text-base w-full resize-y"
-                                    rows={3}
-                                  />
-                                ) : (
-                                  <div className="text-sm text-foreground whitespace-pre-wrap">
-                                    {payment.notes || '-'}
-                                  </div>
-                                )}
-                              </TableCell>
+                               {/* Notes */}
+                               <TableCell className="min-w-[260px] max-w-xl align-top">
+                                 {isEditing ? (
+                                   <Textarea
+                                     value={editForm.notes}
+                                     onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                                     placeholder={t('admin.paymentManagement.addNotes')}
+                                     className="min-h-[120px] text-base w-full resize-y"
+                                     rows={3}
+                                   />
+                                 ) : (
+                                   <div className="text-sm text-foreground whitespace-pre-wrap">
+                                     {payment.notes || '-'}
+                                   </div>
+                                 )}
+                               </TableCell>
                               
                               {/* Actions */}
                               <TableCell>
