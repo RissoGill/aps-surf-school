@@ -637,7 +637,7 @@ const EstagiosTab = ({ athleteId }: { athleteId: string }) => {
 };
 
 const GuardianDashboard = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [guardianId, setGuardianId] = useState<string | null>(null);
@@ -932,9 +932,13 @@ const GuardianDashboard = () => {
   };
 
   const getMonthName = (monthStr: string) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                    'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[parseInt(monthStr) - 1] || monthStr;
+    const monthNumber = parseInt(monthStr) - 1;
+    if (monthNumber < 0 || monthNumber > 11) return monthStr;
+    
+    const date = new Date(2025, monthNumber, 1);
+    return date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { 
+      month: 'long' 
+    });
   };
 
   // Get the last 2 paid payments (with payment_date) for current athlete
