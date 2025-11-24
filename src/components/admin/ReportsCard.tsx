@@ -70,7 +70,7 @@ export const ReportsCard = () => {
 
   const generateReport = async () => {
     if (!reportType || !startDate || !endDate) {
-      toast.error("Please select report type and date range");
+      toast.error(t('shared.reports.selectTypeAndDates'));
       return;
     }
 
@@ -236,10 +236,10 @@ export const ReportsCard = () => {
         data
       });
 
-      toast.success("Report generated successfully");
+      toast.success(t('shared.reports.success'));
     } catch (error) {
       console.error("Error generating report:", error);
-      toast.error("Failed to generate report");
+      toast.error(t('shared.reports.error'));
     } finally {
       setIsGenerating(false);
     }
@@ -252,7 +252,7 @@ export const ReportsCard = () => {
     const viewer = window.open('', '_blank');
 
     if (!viewer) {
-      toast.error("Popup blocked. Please allow popups for this site or use the Download PDF option.");
+      toast.error(t('shared.reports.popupBlocked'));
       return;
     }
 
@@ -264,7 +264,7 @@ export const ReportsCard = () => {
     } catch (error) {
       console.error('Error opening report:', error);
       viewer.close();
-      toast.error('Failed to open report');
+      toast.error(t('shared.reports.failedToOpen'));
     }
   };
   const downloadReport = async () => {
@@ -284,10 +284,10 @@ export const ReportsCard = () => {
 
     try {
       await html2pdf().from(element).set(opt).save();
-      toast.success("PDF downloaded successfully");
+      toast.success(t('shared.reports.pdfDownloaded'));
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF');
+      toast.error(t('shared.reports.failedToDownload'));
     }
   };
 
@@ -511,42 +511,42 @@ export const ReportsCard = () => {
             <FileText className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h4 className="font-medium text-foreground mb-1">Generate Reports</h4>
-            <p className="text-sm text-muted-foreground">Create financial, personal, overall, attendance, and coach payments reports</p>
+            <h4 className="font-medium text-foreground mb-1">{t('shared.reports.title')}</h4>
+            <p className="text-sm text-muted-foreground">{t('shared.reports.description')}</p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Report Type</label>
+            <label className="text-sm font-medium">{t('shared.reports.reportType')}</label>
             <Select value={reportType} onValueChange={(value) => {
               setReportType(value as ReportType);
               setSelectedAthlete("");
               setSelectedCoach("");
             }}>
               <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Select report type" />
+                <SelectValue placeholder={t('shared.reports.selectReportType')} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                <SelectItem value="financial">Financial Report</SelectItem>
-                <SelectItem value="personal">Personal/Athletes Report</SelectItem>
-                <SelectItem value="overall">Overall Summary</SelectItem>
-                <SelectItem value="attendance">Attendance Report</SelectItem>
-                <SelectItem value="coach_payments">Coach Payments Report</SelectItem>
+                <SelectItem value="financial">{t('shared.reports.financial')}</SelectItem>
+                <SelectItem value="personal">{t('shared.reports.personal')}</SelectItem>
+                <SelectItem value="overall">{t('shared.reports.overall')}</SelectItem>
+                <SelectItem value="attendance">{t('shared.reports.attendance')}</SelectItem>
+                <SelectItem value="coach_payments">{t('shared.reports.coachPayments')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {(reportType === "financial" || reportType === "attendance" || reportType === "personal") && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Athlete (Optional)</label>
+              <label className="text-sm font-medium">{t('shared.reports.athlete')} ({t('shared.reports.optional')})</label>
               <Select value={selectedAthlete} onValueChange={setSelectedAthlete}>
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="All athletes" />
+                  <SelectValue placeholder={t('shared.reports.allAthletes')} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50 max-h-[300px]">
-                  <SelectItem value="all">All athletes</SelectItem>
+                  <SelectItem value="all">{t('shared.reports.allAthletes')}</SelectItem>
                   {athletes.map((athlete) => (
                     <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
                       {athlete.first_name} {athlete.last_name}
@@ -567,7 +567,7 @@ export const ReportsCard = () => {
                     onCheckedChange={(checked) => setShowOnlyOutstanding(checked as boolean)}
                   />
                   <label htmlFor="outstanding" className="text-sm font-medium cursor-pointer">
-                    Show only outstanding payments
+                    {t('shared.reports.outstandingOnly')}
                   </label>
                 </div>
                 
@@ -578,13 +578,13 @@ export const ReportsCard = () => {
                     onCheckedChange={(checked) => setFilterByCurrentMonth(checked as boolean)}
                   />
                   <label htmlFor="currentMonth" className="text-sm font-medium cursor-pointer">
-                    Filter by current month only
+                    {t('shared.reports.currentMonth')}
                   </label>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Filter by Surf Level (Optional)</label>
+                <label className="text-sm font-medium">{t('shared.reports.surfLevel')} ({t('shared.reports.optional')})</label>
                 <div className="space-y-2">
                   {['Learning', 'Pre-Competition', 'Competition'].map((level) => (
                     <div key={level} className="flex items-center space-x-2">
@@ -611,13 +611,13 @@ export const ReportsCard = () => {
 
           {reportType === "coach_payments" && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">Coach (Optional)</label>
+              <label className="text-sm font-medium">{t('shared.reports.coach')} ({t('shared.reports.optional')})</label>
               <Select value={selectedCoach} onValueChange={setSelectedCoach}>
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="All coaches" />
+                  <SelectValue placeholder={t('shared.reports.allCoaches')} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50 max-h-[300px]">
-                  <SelectItem value="all">All coaches</SelectItem>
+                  <SelectItem value="all">{t('shared.reports.allCoaches')}</SelectItem>
                   {coaches.map((coach) => (
                     <SelectItem key={coach.coach_id} value={coach.coach_id}>
                       {coach.first_name} {coach.last_name}
@@ -629,7 +629,7 @@ export const ReportsCard = () => {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Start Date</label>
+            <label className="text-sm font-medium">{t('shared.reports.startDate')}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -640,7 +640,7 @@ export const ReportsCard = () => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PPP") : "Pick start date"}
+                  {startDate ? format(startDate, "PPP") : t('shared.reports.pickStartDate')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
@@ -655,7 +655,7 @@ export const ReportsCard = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">End Date</label>
+            <label className="text-sm font-medium">{t('shared.reports.endDate')}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -666,7 +666,7 @@ export const ReportsCard = () => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PPP") : "Pick end date"}
+                  {endDate ? format(endDate, "PPP") : t('shared.reports.pickEndDate')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
@@ -687,18 +687,18 @@ export const ReportsCard = () => {
           variant="default"
           className="w-full"
         >
-          {isGenerating ? "Generating..." : "Generate Report"}
+          {isGenerating ? t('shared.reports.generating') : t('shared.reports.generate')}
         </Button>
 
         {reportData && (
           <div className="flex flex-col gap-2 pt-4 border-t">
             <Button onClick={downloadReport} variant="default" className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Download PDF
+              {t('shared.reports.downloadPDF')}
             </Button>
             <Button onClick={viewReport} variant="outline" className="w-full">
               <Eye className="mr-2 h-4 w-4" />
-              View PDF
+              {t('shared.reports.viewPDF')}
             </Button>
           </div>
         )}
