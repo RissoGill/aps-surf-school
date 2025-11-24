@@ -325,7 +325,7 @@
     },
     "coachAttendance": {
       "title": "Coach Attendance Management",
-      "subtitle": "View training session breakdown by coach",
+      "subtitle": "View training breakdown by coach",
       "selectCoach": "Select Coach",
       "allCoaches": "All Coaches",
       "trainingDays": "Training Days",
@@ -376,7 +376,7 @@
       "success": "Success",
       "packCreatedSuccess": "Pack record created successfully",
       "negativeBalanceCarried": "Negative Balance Carried Forward",
-      "negativeBalanceDescription": "Previous pack had -{balance} sessions. This will be deducted from the new pack.",
+      "negativeBalanceDescription": "Previous pack had -{balance} trainings. This will be deducted from the new pack.",
       "paymentUpdatedSuccess": "Payment updated successfully",
       "paymentAndPackSuccess": "Payment and pack record created successfully",
       "validationError": "Validation Error",
@@ -517,7 +517,7 @@
     },
     "packBalance": {
       "title": "Pack Balance",
-      "remaining": "Remaining Sessions",
+      "remaining": "Remaining Trainings",
       "history": "Purchase History"
     }
   },
@@ -555,10 +555,10 @@
   },
   "shared": {
     "packBalance": {
-      "exceeded": "Pack Session Limit Exceeded",
-      "athleteMessage": "You've used {count} more session(s) than your pack includes. Please purchase additional sessions.",
-      "guardianMessage": "{name} has exceeded their pack limit by {count} session(s). Additional payment may be required.",
-      "coachMessage": "{name}'s pack balance: -{count} session(s). They can continue training, but guardian should be notified."
+      "exceeded": "Pack Training Limit Exceeded",
+      "athleteMessage": "You've used {count} more training(s) than your pack includes. Please purchase additional trainings.",
+      "guardianMessage": "{name} has exceeded their pack limit by {count} training(s). Additional payment may be required.",
+      "coachMessage": "{name}'s pack balance: -{count} training(s). They can continue training, but guardian should be notified."
     },
     "reports": {
       "title": "Reports",
@@ -674,7 +674,7 @@
     "welcomeBack": "Welcome Back",
     "subtitle": "Manage your athletes and track their progress",
     "thisMonth": "This Month",
-    "totalAnnualSessions": "Total Annual Sessions",
+    "totalAnnualSessions": "Total Annual Trainings",
     "searchTitle": "Search athletes by Name",
     "searchDescription": "Find and select athletes to view their details",
     "searchPlaceholder": "Search athletes by name...",
@@ -707,7 +707,7 @@
     "myPayments": "My Payments",
     "paymentDescription": "View your payment history and summaries",
     "trainingHistory": {
-      "title": "Training Session History",
+      "title": "Training History",
       "description": "View complete training records and generate reports",
       "filterByDateRange": "Filter by Date Range",
       "startDate": "Start Date",
@@ -727,14 +727,14 @@
       "totalDays": "Total Days",
       "athletesTrained": "Athletes Trained",
       "mostActiveBeach": "Most Active Beach",
-      "avgPerSession": "Avg per Session",
+      "avgPerSession": "Avg per Training",
       "filtersAndSearch": "Filters & Search",
       "clearAll": "Clear All",
       "trainingDays": "training days",
-      "athleteSessions": "athlete sessions",
+      "athleteSessions": "athlete trainings",
       "viewDetails": "View Details",
       "hideDetails": "Hide Details",
-      "reportTitle": "Training Session History Report",
+      "reportTitle": "Training History Report",
       "coach": "Coach:",
       "generated": "Generated:",
       "appliedFilters": "Applied Filters:",
@@ -747,7 +747,7 @@
       "athleteColumn": "Athlete",
       "shiftColumn": "Shift",
       "beachColumn": "Beach Location",
-      "footer": "APS - Academia de Performance Surf | Training Session History Report"
+      "footer": "APS - Academia de Performance Surf | Training History Report"
     },
     "toast": {
       "error": "Error",
