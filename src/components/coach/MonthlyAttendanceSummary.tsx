@@ -5,6 +5,7 @@ import { Calendar, ChevronDown, MapPin } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
   id: string;
@@ -27,6 +28,8 @@ interface MonthlySummary {
 }
 
 export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummaryProps) => {
+  const { t } = useLanguage();
+  
   // Group attendance by month - keep original status for display, but count separately
   const monthlySummaries = attendance.reduce((acc, record) => {
     if (!record.date) return acc;
@@ -100,9 +103,9 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Present": return "Present";
-      case "Absent": return "Not Present";
-      case "Justified": return "Justified";
+      case "Present": return t('coach.monthlySummary.present');
+      case "Absent": return t('coach.monthlySummary.notPresent');
+      case "Justified": return t('coach.monthlySummary.justified');
       default: return status;
     }
   };
@@ -113,11 +116,11 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
         <div className="flex items-center justify-between">
           <h4 className="text-base font-medium text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Monthly Summary
+            {t('coach.monthlySummary.title')}
           </h4>
           <Select value={selectedMonthKey} onValueChange={handleMonthChange}>
             <SelectTrigger className="w-[180px] h-8 text-sm">
-              <SelectValue placeholder="Select month" />
+              <SelectValue placeholder={t('coach.monthlySummary.selectMonth')} />
             </SelectTrigger>
             <SelectContent className="bg-card z-50">
               {sortedSummaries.map((summary) => (
@@ -137,15 +140,15 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 variant="ghost"
                 className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent"
               >
-                <div className="flex items-center justify-between w-full">
-                  <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="text-xs font-normal bg-primary">
-                      {selectedSummary.total} total
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {isExpanded ? 'Hide details' : 'View details'}
-                    </span>
+                  <div className="flex items-center justify-between w-full">
+                    <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="text-xs font-normal bg-primary">
+                        {selectedSummary.total} {t('coach.monthlySummary.total')}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {isExpanded ? t('coach.monthlySummary.hideDetails') : t('coach.monthlySummary.viewDetails')}
+                      </span>
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${
                         isExpanded ? 'transform rotate-180' : ''
@@ -187,16 +190,16 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                         <CardContent className="p-3">
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div>
-                              <span className="text-muted-foreground">Date:</span>
+                              <span className="text-muted-foreground">{t('coach.monthlySummary.date')}</span>
                               <p className="font-medium">{formattedDate}</p>
                             </div>
                             <div>
-                              <span className="text-muted-foreground">Status:</span>
-                              <p className="font-medium">{record.status || 'Not set'}</p>
+                              <span className="text-muted-foreground">{t('coach.monthlySummary.status')}</span>
+                              <p className="font-medium">{record.status || t('coach.monthlySummary.notSet')}</p>
                             </div>
                             {record.coach && (
                               <div>
-                                <span className="text-muted-foreground">Coach:</span>
+                                <span className="text-muted-foreground">{t('coach.monthlySummary.coach')}</span>
                                 <p className="font-medium">{record.coach}</p>
                               </div>
                             )}
@@ -204,14 +207,14 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                               <div className="flex items-start gap-1">
                                 <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
                                 <div>
-                                  <span className="text-muted-foreground">Beach:</span>
+                                  <span className="text-muted-foreground">{t('coach.monthlySummary.beach')}</span>
                                   <p className="font-medium">{record.beach_location}</p>
                                 </div>
                               </div>
                             )}
                             {record.notes && (
                               <div className="col-span-2">
-                                <span className="text-muted-foreground">Notes:</span>
+                                <span className="text-muted-foreground">{t('coach.monthlySummary.notes')}</span>
                                 <p className="font-medium">{record.notes}</p>
                               </div>
                             )}

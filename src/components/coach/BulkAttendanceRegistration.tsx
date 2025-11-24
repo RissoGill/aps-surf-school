@@ -10,18 +10,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface BulkAttendanceRegistrationProps {
   coachId: string;
 }
 
 export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrationProps) => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
   const [athleteStatuses, setAthleteStatuses] = useState<Record<string, string>>({});
-  const [selectedShift, setSelectedShift] = useState("Morning");
+  const [selectedShift, setSelectedShift] = useState(t('coach.bulkAttendance.morning'));
   const [beachLocation, setBeachLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +53,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const handleAddAthlete = (athleteId: string) => {
     if (!selectedAthletes.includes(athleteId)) {
       setSelectedAthletes([...selectedAthletes, athleteId]);
-      setAthleteStatuses(prev => ({ ...prev, [athleteId]: "Present" }));
+      setAthleteStatuses(prev => ({ ...prev, [athleteId]: t('coach.bulkAttendance.present') }));
     }
     setSearchQuery("");
     setShowDropdown(false);
@@ -71,7 +73,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
     setSelectedAthletes(allAthleteIds);
     const newStatuses: Record<string, string> = {};
     allAthleteIds.forEach(id => {
-      newStatuses[id] = "Present";
+      newStatuses[id] = t('coach.bulkAttendance.present');
     });
     setAthleteStatuses(newStatuses);
     setShowDropdown(false);
@@ -94,8 +96,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const handleMarkAttendance = async () => {
     if (selectedAthletes.length === 0) {
       toast({
-        title: "No Athletes Selected",
-        description: "Please select at least one athlete.",
+        title: t('coach.bulkAttendance.noAthletesSelected'),
+        description: t('coach.bulkAttendance.selectAtLeastOne'),
         variant: "destructive",
       });
       return;
@@ -104,8 +106,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
     if (!selectedShift) {
       toast({
-        title: "Shift Required",
-        description: "Please select a shift (Morning or Afternoon).",
+        title: t('coach.bulkAttendance.shiftRequired'),
+        description: t('coach.bulkAttendance.selectShiftMessage'),
         variant: "destructive",
       });
       return;
@@ -138,15 +140,17 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       if (duplicateAthleteIds.size > 0) {
         const duplicateNames = Array.from(duplicateAthleteIds).map(id => getAthleteName(id)).join(', ');
         toast({
-          title: "Skipping Duplicates",
-          description: `${duplicateAthleteIds.size} athlete(s) already have attendance: ${duplicateNames}. Proceeding with the rest.`,
+          title: t('coach.bulkAttendance.skippingDuplicates'),
+          description: t('coach.bulkAttendance.athletesAlreadyHave')
+            .replace('{count}', duplicateAthleteIds.size.toString())
+            .replace('{names}', duplicateNames),
         });
       }
 
       if (toInsert.length === 0) {
         toast({
-          title: "No Attendance to Mark",
-          description: "All selected athletes already have attendance for this date and shift.",
+          title: t('coach.bulkAttendance.noAttendanceToMark'),
+          description: t('coach.bulkAttendance.allHaveAttendance'),
         });
         setIsSubmitting(false);
         return;
@@ -232,8 +236,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       const skippedCount = toInsert.length - successCount + duplicateAthleteIds.size;
 
       toast({
-        title: "Success",
-        description: `Marked attendance for ${successCount} athlete(s). Skipped ${skippedCount} duplicate(s).`,
+        title: t('coach.bulkAttendance.success'),
+        description: t('coach.bulkAttendance.markedFor')
+          .replace('{count}', successCount.toString())
+          .replace('{skipped}', skippedCount.toString()),
       });
 
       // Clear selections
@@ -248,8 +254,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
     } catch (error: any) {
       console.error('Error marking attendance:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to mark attendance. Please try again.",
+        title: t('coach.bulkAttendance.error'),
+        description: error.message || t('coach.bulkAttendance.failedToMark'),
         variant: "destructive",
       });
     } finally {
@@ -262,17 +268,17 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       <CardHeader>
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          <h4 className="font-medium text-foreground">Register Multiple Attendances</h4>
+          <h4 className="font-medium text-foreground">{t('coach.bulkAttendance.title')}</h4>
         </div>
         <CardDescription>
-          Save time by marking attendance for several athletes in one go
+          {t('coach.bulkAttendance.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label htmlFor="training-date">Training Date</Label>
+            <Label htmlFor="training-date">{t('coach.bulkAttendance.trainingDate')}</Label>
             <Input
               id="training-date"
               type="date"
@@ -284,14 +290,14 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
           {/* Shift Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="training-shift">Shift</Label>
+            <Label htmlFor="training-shift">{t('coach.bulkAttendance.shift')}</Label>
             <Select value={selectedShift} onValueChange={setSelectedShift}>
               <SelectTrigger id="training-shift">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Morning">Morning</SelectItem>
-                <SelectItem value="Afternoon">Afternoon</SelectItem>
+                <SelectItem value={t('coach.bulkAttendance.morning')}>{t('coach.bulkAttendance.morning')}</SelectItem>
+                <SelectItem value={t('coach.bulkAttendance.afternoon')}>{t('coach.bulkAttendance.afternoon')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -299,12 +305,12 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
         {/* Athletes Multi-Select */}
         <div className="space-y-2">
-          <Label htmlFor="athletes-search">Select Athletes</Label>
+          <Label htmlFor="athletes-search">{t('coach.bulkAttendance.selectAthletes')}</Label>
           <div className="relative">
             <Input
               id="athletes-search"
               type="text"
-              placeholder="Search athletes..."
+              placeholder={t('coach.bulkAttendance.searchAthletes')}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -324,7 +330,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                     onClick={handleSelectAll}
                     className="flex-1"
                   >
-                    Select All
+                    {t('coach.bulkAttendance.selectAll')}
                   </Button>
                   <Button
                     type="button"
@@ -333,12 +339,12 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                     onClick={() => setShowDropdown(false)}
                     className="flex-1"
                   >
-                    Close
+                    {t('coach.bulkAttendance.close')}
                   </Button>
                 </div>
                 <div className="p-1">
                   {filteredAthletes.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground">No athletes found</div>
+                    <div className="p-2 text-sm text-muted-foreground">{t('coach.bulkAttendance.noAthletesFound')}</div>
                   ) : (
                     filteredAthletes.map((athlete) => (
                       <button
@@ -350,7 +356,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                       >
                         {athlete.first_name} {athlete.last_name}
                         {selectedAthletes.includes(athlete.athlete_id) && (
-                          <span className="ml-2 text-xs text-muted-foreground">(selected)</span>
+                          <span className="ml-2 text-xs text-muted-foreground">({t('coach.bulkAttendance.selected')})</span>
                         )}
                       </button>
                     ))
@@ -364,7 +370,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           {selectedAthletes.length > 0 && (
             <div className="space-y-3 mt-4">
               <div className="flex items-center justify-between">
-                <Label className="text-sm">Selected Athletes ({selectedAthletes.length})</Label>
+                <Label className="text-sm">{t('coach.bulkAttendance.selectedAthletes')} ({selectedAthletes.length})</Label>
                 <Button
                   type="button"
                   variant="ghost"
@@ -372,7 +378,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                   onClick={handleClearAll}
                   className="h-8 px-3 text-xs"
                 >
-                  Clear All
+                  {t('coach.bulkAttendance.clearAll')}
                 </Button>
               </div>
               <div className="space-y-2">
@@ -382,16 +388,16 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                       {getAthleteName(athleteId)}
                     </div>
                     <Select 
-                      value={athleteStatuses[athleteId] || "Present"} 
+                      value={athleteStatuses[athleteId] || t('coach.bulkAttendance.present')} 
                       onValueChange={(value) => handleStatusChange(athleteId, value)}
                     >
                       <SelectTrigger className="w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Present">Present</SelectItem>
-                        <SelectItem value="Absent">Absent</SelectItem>
-                        <SelectItem value="Justified">Justified</SelectItem>
+                        <SelectItem value={t('coach.bulkAttendance.present')}>{t('coach.bulkAttendance.present')}</SelectItem>
+                        <SelectItem value={t('coach.bulkAttendance.absent')}>{t('coach.bulkAttendance.absent')}</SelectItem>
+                        <SelectItem value={t('coach.bulkAttendance.justified')}>{t('coach.bulkAttendance.justified')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <button
@@ -410,11 +416,11 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
         {/* Beach Location */}
         <div className="space-y-2">
-          <Label htmlFor="beach-location">Beach Location (Optional)</Label>
+          <Label htmlFor="beach-location">{t('coach.bulkAttendance.beachLocation')}</Label>
           <Input
             id="beach-location"
             type="text"
-            placeholder="e.g., Praia Grande"
+            placeholder={t('coach.bulkAttendance.beachPlaceholder')}
             value={beachLocation}
             onChange={(e) => setBeachLocation(e.target.value)}
           />
@@ -422,10 +428,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
         {/* Notes */}
         <div className="space-y-2">
-          <Label htmlFor="bulk-notes">Notes (Optional)</Label>
+          <Label htmlFor="bulk-notes">{t('coach.bulkAttendance.notes')}</Label>
           <Textarea
             id="bulk-notes"
-            placeholder="Add notes that apply to all selected athletes..."
+            placeholder={t('coach.bulkAttendance.notesPlaceholder')}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
@@ -439,7 +445,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
             disabled={isSubmitting || selectedAthletes.length === 0}
             className="flex-1"
           >
-            {isSubmitting ? "Saving..." : `Mark Attendance (${selectedAthletes.length})`}
+            {isSubmitting ? t('coach.bulkAttendance.saving') : `${t('coach.bulkAttendance.markAttendance')} (${selectedAthletes.length})`}
           </Button>
         </div>
       </CardContent>

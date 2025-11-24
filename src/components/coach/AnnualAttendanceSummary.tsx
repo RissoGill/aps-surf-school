@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Calendar, ChevronDown, ChevronUp, User, MapPin } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
   id: string;
@@ -26,6 +27,7 @@ interface AnnualSummary {
 }
 
 export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryProps) => {
+  const { t } = useLanguage();
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -97,9 +99,9 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Present": return "Present";
-      case "Absent": return "Not Present";
-      case "Justified": return "Justified";
+      case "Present": return t('coach.annualSummary.present');
+      case "Absent": return t('coach.annualSummary.notPresent');
+      case "Justified": return t('coach.annualSummary.justified');
       default: return status;
     }
   };
@@ -108,7 +110,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
     <Card className="shadow-soft">
         <CardHeader>
           <h4 className="font-medium text-foreground">
-            Annual Summary
+            {t('coach.annualSummary.title')}
           </h4>
         </CardHeader>
       <CardContent className="space-y-3">
@@ -117,7 +119,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-foreground">{summary.year}</p>
               <Badge variant="default" className="text-xs font-normal bg-primary">
-                {summary.total} total
+                {summary.total} {t('coach.annualSummary.total')}
               </Badge>
             </div>
             <div className="grid grid-cols-3 gap-4 text-center font-normal">
@@ -125,19 +127,19 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                 <p className="text-2xl font-normal text-success">
                   {summary.statusCounts['Present'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">Present</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.present')}</p>
               </div>
               <div>
                 <p className="text-2xl font-normal text-warning">
                   {summary.statusCounts['Justified'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">Justified</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.justified')}</p>
               </div>
               <div>
                 <p className="text-2xl font-normal text-destructive">
                   {summary.statusCounts['Absent'] || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">Not Present</p>
+                <p className="text-xs text-muted-foreground">{t('coach.annualSummary.notPresent')}</p>
               </div>
             </div>
           </div>
@@ -146,10 +148,10 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
         {/* Year selector and details */}
         <div className="pt-4 border-t space-y-3">
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">View details for:</label>
+            <label className="text-sm font-medium">{t('coach.annualSummary.viewDetailsFor')}</label>
             <Select value={selectedYear} onValueChange={handleYearChange}>
               <SelectTrigger className="w-32 bg-background">
-                <SelectValue placeholder="Select year" />
+                <SelectValue placeholder={t('coach.annualSummary.selectYear')} />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
                 {sortedSummaries.map((summary) => (
@@ -168,12 +170,12 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                   {isExpanded ? (
                     <>
                       <ChevronUp className="h-4 w-4 mr-2" />
-                      Hide attendance records
+                      {t('coach.annualSummary.hideRecords')}
                     </>
                   ) : (
                     <>
                       <ChevronDown className="h-4 w-4 mr-2" />
-                      Show {selectedYearRecords.length} attendance records
+                      {t('coach.annualSummary.showRecords').replace('{count}', selectedYearRecords.length.toString())}
                     </>
                   )}
                 </Button>
@@ -181,7 +183,7 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
               <CollapsibleContent className="space-y-2 pt-3">
                 {selectedYearRecords.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    No attendance records for {selectedYear}
+                    {t('coach.annualSummary.noRecords').replace('{year}', selectedYear)}
                   </p>
                 ) : (
                   selectedYearRecords.map((record) => (
@@ -195,17 +197,17 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-muted-foreground">Coach:</span> 
+                          <span className="text-muted-foreground">{t('coach.annualSummary.coach')}</span> 
                           <span className="font-medium">{record.coach || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-muted-foreground">Beach:</span> 
+                          <span className="text-muted-foreground">{t('coach.annualSummary.beach')}</span> 
                           <span className="font-medium">{record.beach_location || 'N/A'}</span>
                         </div>
                         {record.notes && (
                           <div className="col-span-2 mt-1 p-2 bg-muted/50 rounded">
-                            <span className="font-medium">Notes:</span> {record.notes}
+                            <span className="font-medium">{t('coach.annualSummary.notes')}</span> {record.notes}
                           </div>
                         )}
                       </div>

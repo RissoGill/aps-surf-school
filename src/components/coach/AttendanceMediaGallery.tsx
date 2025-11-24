@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Image as ImageIcon, Video, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
   id: string;
@@ -20,6 +21,8 @@ interface AttendanceMediaGalleryProps {
 }
 
 export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryProps) => {
+  const { t } = useLanguage();
+  
   // Filter attendance records that have media
   const recordsWithMedia = attendance.filter(
     (record) => (record.photos && record.photos.length > 0) || (record.videos && record.videos.length > 0)
@@ -31,12 +34,12 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
         <CardHeader>
           <h4 className="text-lg font-medium text-foreground flex items-center gap-2">
             <ImageIcon className="h-5 w-5 text-primary" />
-            Media Gallery
+            {t('coach.mediaGallery.title')}
           </h4>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-4">
-            No media uploaded yet
+            {t('coach.mediaGallery.noMedia')}
           </p>
         </CardContent>
       </Card>
@@ -48,7 +51,7 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
       <CardHeader>
         <h4 className="text-lg font-medium text-foreground flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-primary" />
-          Media Gallery
+          {t('coach.mediaGallery.title')}
         </h4>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -58,7 +61,7 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">
-                {record.date ? format(new Date(record.date), 'MMM d, yyyy') : 'No date'}
+                {record.date ? format(new Date(record.date), 'MMM d, yyyy') : t('coach.mediaGallery.noDate')}
               </span>
               {record.beach_location && (
                 <Badge variant="outline" className="text-xs">
@@ -73,7 +76,7 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
                 <div className="flex items-center gap-2">
                   <ImageIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    {record.photos.length} {record.photos.length === 1 ? 'Photo' : 'Photos'}
+                    {record.photos.length} {record.photos.length === 1 ? t('coach.mediaGallery.photo') : t('coach.mediaGallery.photos')}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -103,7 +106,7 @@ export const AttendanceMediaGallery = ({ attendance }: AttendanceMediaGalleryPro
                 <div className="flex items-center gap-2">
                   <Video className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    {record.videos.length} {record.videos.length === 1 ? 'Video' : 'Videos'}
+                    {record.videos.length} {record.videos.length === 1 ? t('coach.mediaGallery.video') : t('coach.mediaGallery.videos')}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
