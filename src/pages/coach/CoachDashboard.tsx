@@ -31,6 +31,7 @@ import { EstagiosTab } from "@/components/coach/EstagiosTab";
 import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { PaymentsTab } from "@/components/coach/PaymentsTab";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
   id: string;
@@ -91,6 +92,7 @@ const CoachDashboard = () => {
   const [coachData, setCoachData] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
 
   // Training history filters
   const [historyDateRange, setHistoryDateRange] = useState<{start: string, end: string}>({
@@ -341,8 +343,8 @@ const CoachDashboard = () => {
   const handleSaveAttendance = async (athleteId: string) => {
     if (!athleteId || !newAttendance.date) {
       toast({
-        title: "Error",
-        description: "Please fill in the date before uploading",
+        title: t('coachDashboard.toast.error'),
+        description: t('coachDashboard.toast.fillDate'),
         variant: "destructive",
       });
       return;
@@ -350,8 +352,8 @@ const CoachDashboard = () => {
 
     if (!newAttendance.shift) {
       toast({
-        title: "Error",
-        description: "Please select a shift (Morning or Afternoon)",
+        title: t('coachDashboard.toast.error'),
+        description: t('coachDashboard.toast.selectShiftMsg'),
         variant: "destructive",
       });
       return;
@@ -359,8 +361,8 @@ const CoachDashboard = () => {
 
     if (!coachData?.coach_id) {
       toast({
-        title: "Error",
-        description: "Coach profile not loaded. Please refresh the page.",
+        title: t('coachDashboard.toast.error'),
+        description: t('coachDashboard.toast.profileNotLoaded'),
         variant: "destructive",
       });
       return;
@@ -388,8 +390,8 @@ const CoachDashboard = () => {
 
       if (existingRecords.length > 0) {
         toast({
-          title: "Duplicate Attendance",
-          description: "Attendance for this athlete and shift already exists on this date.",
+          title: t('coachDashboard.toast.duplicateTitle'),
+          description: t('coachDashboard.toast.duplicateDescription'),
           variant: "destructive",
         });
         setIsUploading(false);
@@ -457,8 +459,8 @@ const CoachDashboard = () => {
         const errorMsg = insertError.message || '';
         if (errorMsg.includes('Attendance for this athlete and shift already exists on this date') || insertError.code === 'P0001') {
           toast({
-            title: "Duplicate Attendance",
-            description: "Attendance for this athlete and shift already exists on this date.",
+            title: t('coachDashboard.toast.duplicateTitle'),
+            description: t('coachDashboard.toast.duplicateDescription'),
             variant: "destructive",
           });
           setIsUploading(false);
@@ -476,8 +478,8 @@ const CoachDashboard = () => {
 
         if (data?.duplicate) {
           toast({
-            title: "Duplicate Attendance",
-            description: "Attendance for this athlete and shift already exists on this date.",
+            title: t('coachDashboard.toast.duplicateTitle'),
+            description: t('coachDashboard.toast.duplicateDescription'),
             variant: "destructive",
           });
           setIsUploading(false);
@@ -517,8 +519,8 @@ const CoachDashboard = () => {
       }
 
       toast({
-        title: "Success",
-        description: "Attendance recorded successfully",
+        title: t('coachDashboard.toast.success'),
+        description: t('coachDashboard.toast.attendanceRecorded'),
       });
 
       setIsDialogOpen(false);
@@ -536,8 +538,8 @@ const CoachDashboard = () => {
     } catch (error: any) {
       console.error('Attendance save error:', error);
       toast({
-        title: "Error",
-        description: (error?.message || '').includes('row-level security') ? 'Permission denied. Please log in via email/password or contact admin.' : (error.message || "Failed to save attendance"),
+        title: t('coachDashboard.toast.error'),
+        description: (error?.message || '').includes('row-level security') ? t('coachDashboard.toast.permissionDenied') : (error.message || t('coachDashboard.toast.failedToSave')),
         variant: "destructive",
       });
     } finally {
@@ -583,8 +585,8 @@ const CoachDashboard = () => {
     queryClient.invalidateQueries({ queryKey: ['athletes'] });
     queryClient.invalidateQueries({ queryKey: ['attendance'] });
     toast({
-      title: "Refreshing data...",
-      description: "Loading the latest information",
+      title: t('coachDashboard.toast.refreshing'),
+      description: t('coachDashboard.toast.loadingLatest'),
     });
   };
 
@@ -1054,18 +1056,18 @@ const CoachDashboard = () => {
   // Generate HTML for PDF export
   const generateTrainingHistoryHTML = (): string => {
     const activeFilters = [];
-    if (historyDateRange.start) activeFilters.push(`From: ${historyDateRange.start}`);
-    if (historyDateRange.end) activeFilters.push(`To: ${historyDateRange.end}`);
-    if (historyAthleteFilter !== 'all') activeFilters.push(`Athlete: ${historyAthleteFilter}`);
-    if (historyBeachFilter !== 'all') activeFilters.push(`Beach: ${historyBeachFilter}`);
-    if (historySearchQuery) activeFilters.push(`Search: ${historySearchQuery}`);
+    if (historyDateRange.start) activeFilters.push(`${t('coachDashboard.trainingHistory.from')} ${historyDateRange.start}`);
+    if (historyDateRange.end) activeFilters.push(`${t('coachDashboard.trainingHistory.to')} ${historyDateRange.end}`);
+    if (historyAthleteFilter !== 'all') activeFilters.push(`${t('coachDashboard.trainingHistory.athlete')} ${historyAthleteFilter}`);
+    if (historyBeachFilter !== 'all') activeFilters.push(`${t('coachDashboard.beach')}: ${historyBeachFilter}`);
+    if (historySearchQuery) activeFilters.push(`${t('coachDashboard.trainingHistory.searchTerm')} ${historySearchQuery}`);
 
     return `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Training Session History Report</title>
+          <title>${t('coachDashboard.trainingHistory.reportTitle')}</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -1170,39 +1172,39 @@ const CoachDashboard = () => {
         <body>
           <div class="header">
             <img src="${apsLogoImage}" alt="APS Logo" />
-            <h1>Training Session History Report</h1>
-            <p><strong>Coach:</strong> ${coachDisplayName}</p>
-            <p><strong>Generated:</strong> ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
-            ${activeFilters.length > 0 ? `<p><strong>Applied Filters:</strong> ${activeFilters.join(' | ')}</p>` : ''}
+            <h1>${t('coachDashboard.trainingHistory.reportTitle')}</h1>
+            <p><strong>${t('coachDashboard.trainingHistory.coach')}</strong> ${coachDisplayName}</p>
+            <p><strong>${t('coachDashboard.trainingHistory.generated')}</strong> ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+            ${activeFilters.length > 0 ? `<p><strong>${t('coachDashboard.trainingHistory.appliedFilters')}</strong> ${activeFilters.join(' | ')}</p>` : ''}
           </div>
 
           <div class="summary-stats">
             <div class="stat-box">
               <div class="stat-value">${summaryStats.totalDays}</div>
-              <div class="stat-label">Total Days</div>
+              <div class="stat-label">${t('coachDashboard.trainingHistory.totalDays')}</div>
             </div>
             <div class="stat-box">
               <div class="stat-value">${summaryStats.uniqueAthletesCount}</div>
-              <div class="stat-label">Athletes Trained</div>
+              <div class="stat-label">${t('coachDashboard.trainingHistory.athletesTrained')}</div>
             </div>
             <div class="stat-box">
               <div class="stat-value">${summaryStats.mostActiveBeach}</div>
-              <div class="stat-label">Most Active Beach</div>
+              <div class="stat-label">${t('coachDashboard.trainingHistory.mostActiveBeach')}</div>
             </div>
             <div class="stat-box">
               <div class="stat-value">${summaryStats.avgAthletesPerSession}</div>
-              <div class="stat-label">Avg per Session</div>
+              <div class="stat-label">${t('coachDashboard.trainingHistory.avgPerSession')}</div>
             </div>
           </div>
 
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Day</th>
-                <th>Athlete</th>
-                <th>Shift</th>
-                <th>Beach Location</th>
+                <th>${t('coachDashboard.trainingHistory.dateColumn')}</th>
+                <th>${t('coachDashboard.trainingHistory.dayColumn')}</th>
+                <th>${t('coachDashboard.trainingHistory.athleteColumn')}</th>
+                <th>${t('coachDashboard.trainingHistory.shiftColumn')}</th>
+                <th>${t('coachDashboard.trainingHistory.beachColumn')}</th>
               </tr>
             </thead>
             <tbody>
@@ -1230,7 +1232,7 @@ const CoachDashboard = () => {
           </table>
 
           <div class="footer">
-            <p>APS - Academia de Performance Surf | Training Session History Report</p>
+            <p>${t('coachDashboard.trainingHistory.footer')}</p>
           </div>
         </body>
       </html>
@@ -1245,8 +1247,8 @@ const CoachDashboard = () => {
     // Check if popup was blocked
     if (!viewer) {
       toast({
-        title: "Popup Blocked",
-        description: "Please allow popups for this site or use the Download PDF option",
+        title: t('coachDashboard.toast.popupBlocked'),
+        description: t('coachDashboard.toast.popupBlockedDesc'),
         variant: "destructive",
       });
       return;
@@ -1260,7 +1262,7 @@ const CoachDashboard = () => {
     } catch (error) {
       console.error('Error opening report:', error);
       viewer.close();
-      toast({ title: 'Error', description: 'Failed to open report', variant: 'destructive' });
+      toast({ title: t('coachDashboard.toast.error'), description: t('coachDashboard.toast.pdfFailed'), variant: 'destructive' });
     }
   };
 
@@ -1280,10 +1282,10 @@ const CoachDashboard = () => {
       };
 
       await html2pdf().from(element).set(opt).save();
-      toast({ title: "Success", description: "PDF downloaded successfully" });
+      toast({ title: t('coachDashboard.toast.success'), description: t('coachDashboard.toast.pdfDownloaded') });
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast({ title: "Error", description: "Failed to download PDF", variant: "destructive" });
+      toast({ title: t('coachDashboard.toast.error'), description: t('coachDashboard.toast.pdfFailed'), variant: "destructive" });
     }
   };
 
@@ -1302,14 +1304,14 @@ const CoachDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-surface">
-      <AppHeader title="Coach Dashboard" showBack backTo="/" />
+      <AppHeader title={t('coachDashboard.title')} showBack backTo="/" />
       
       <main className="mobile-container py-6">
         {/* Welcome Section */}
         <div className="mb-4">
           <div className="flex items-start justify-between mb-2">
             <h2 className="text-2xl font-bold text-foreground">
-              {`Welcome Back, ${
+              {`${t('coachDashboard.welcomeBack')}, ${
                 coachDisplayName ||
                 (() => {
                   const map: Record<string, string> = {
@@ -1342,7 +1344,7 @@ const CoachDashboard = () => {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            Manage your athletes and track their progress
+            {t('coachDashboard.subtitle')}
           </p>
         </div>
 
@@ -1356,7 +1358,7 @@ const CoachDashboard = () => {
               ) : (
                 <p className="text-2xl font-normal text-foreground">{currentMonthTrainingSessions}</p>
               )}
-              <p className="text-sm text-muted-foreground">This Month</p>
+              <p className="text-sm text-muted-foreground">{t('coachDashboard.thisMonth')}</p>
             </CardContent>
           </Card>
 
@@ -1368,7 +1370,7 @@ const CoachDashboard = () => {
               ) : (
                 <p className="text-2xl font-normal text-foreground">{totalTrainingSessions}</p>
               )}
-              <p className="text-sm text-muted-foreground">Total Annual Sessions</p>
+              <p className="text-sm text-muted-foreground">{t('coachDashboard.totalAnnualSessions')}</p>
             </CardContent>
           </Card>
         </div>
@@ -1383,17 +1385,17 @@ const CoachDashboard = () => {
           <CardHeader>
             <h4 className="font-medium text-foreground flex items-center gap-2">
               <Search className="h-5 w-5" />
-              Search athletes by Name
+              {t('coachDashboard.searchTitle')}
             </h4>
             <CardDescription>
-              Find and select athletes to view their details
+              {t('coachDashboard.searchDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search athletes by name..."
+                placeholder={t('coachDashboard.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 touch-friendly"
@@ -1410,10 +1412,10 @@ const CoachDashboard = () => {
           <CardHeader>
             <h4 className="font-medium text-foreground flex items-center gap-2">
               <User className="h-5 w-5" />
-              Athletes & Attendance
+              {t('coachDashboard.athletesAndAttendance')}
             </h4>
             <CardDescription>
-              View athletes and their attendance records
+              {t('coachDashboard.athletesDescription')}
             </CardDescription>
           </CardHeader>
           
@@ -1435,7 +1437,7 @@ const CoachDashboard = () => {
             ) : filteredAthletes.length === 0 ? (
               <div className="p-6 text-center">
                 <p className="text-muted-foreground">
-                  {searchQuery ? "No athletes found matching your search" : "No athletes found"}
+                  {searchQuery ? t('coachDashboard.noAthletesSearch') : t('coachDashboard.noAthletes')}
                 </p>
               </div>
             ) : (
@@ -1449,19 +1451,19 @@ const CoachDashboard = () => {
                             value="view"
                             className="data-[state=active]:bg-view data-[state=active]:text-view-foreground text-xs sm:text-sm px-2"
                           >
-                            View Info
+                            {t('coachDashboard.viewInfo')}
                           </TabsTrigger>
                           <TabsTrigger 
                             value="add"
                             className="data-[state=active]:bg-attendance data-[state=active]:text-attendance-foreground text-xs sm:text-sm px-2"
                           >
-                            Upload media
+                            {t('coachDashboard.uploadMedia')}
                           </TabsTrigger>
-                          <TabsTrigger 
+                          <TabsTrigger
                             value="registrations"
                             className="data-[state=active]:bg-registrations data-[state=active]:text-registrations-foreground text-xs sm:text-sm px-2"
                           >
-                            Register
+                            {t('coachDashboard.register')}
                           </TabsTrigger>
                         </TabsList>
                         
@@ -1489,10 +1491,10 @@ const CoachDashboard = () => {
                         
                         <TabsContent value="add" className="space-y-4">
                           <div className="pt-4 space-y-4">
-                            <h3 className="text-lg font-semibold">Upload Media for {athlete.first_name} {athlete.last_name}</h3>
+                            <h3 className="text-lg font-semibold">{t('coachDashboard.uploadMediaFor')} {athlete.first_name} {athlete.last_name}</h3>
                             
                             <div className="space-y-2">
-                              <Label>Date</Label>
+                              <Label>{t('coachDashboard.date')}</Label>
                               <Input
                                 type="date"
                                 value={newAttendance.date}
@@ -1501,24 +1503,24 @@ const CoachDashboard = () => {
                             </div>
                             
                             <div className="space-y-2">
-                              <Label>Shift *</Label>
+                              <Label>{t('coachDashboard.shift')} *</Label>
                               <select
                                 value={newAttendance.shift}
                                 onChange={(e) => setNewAttendance({ ...newAttendance, shift: e.target.value })}
                                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                               >
-                                <option value="">Select shift...</option>
-                                <option value="Morning">Morning</option>
-                                <option value="Afternoon">Afternoon</option>
+                                <option value="">{t('coachDashboard.selectShift')}</option>
+                                <option value="Morning">{t('coachDashboard.morning')}</option>
+                                <option value="Afternoon">{t('coachDashboard.afternoon')}</option>
                               </select>
                             </div>
                             
                             <div className="space-y-2">
-                              <Label>Beach Location</Label>
+                              <Label>{t('coachDashboard.beach')}</Label>
                               <Input
                                 value={newAttendance.praia}
                                 onChange={(e) => setNewAttendance({ ...newAttendance, praia: e.target.value })}
-                                placeholder="Enter beach name"
+                                placeholder={t('coachDashboard.enterBeach')}
                               />
                             </div>
                             
@@ -1526,7 +1528,7 @@ const CoachDashboard = () => {
                             <div className="space-y-2">
                               <Label className="flex items-center gap-2">
                                 <ImageIcon className="h-4 w-4" />
-                                Photos
+                                {t('coachDashboard.photos')}
                               </Label>
                               <div className="space-y-2">
                                 <Input
@@ -1540,7 +1542,7 @@ const CoachDashboard = () => {
                                 />
                                 {uploadedPhotos && uploadedPhotos.length > 0 && (
                                   <p className="text-sm text-muted-foreground">
-                                    {uploadedPhotos.length} photo(s) selected
+                                    {uploadedPhotos.length} {t('coachDashboard.photosSelected')}
                                   </p>
                                 )}
                               </div>
@@ -1550,7 +1552,7 @@ const CoachDashboard = () => {
                             <div className="space-y-2">
                               <Label className="flex items-center gap-2">
                                 <Video className="h-4 w-4" />
-                                Videos
+                                {t('coachDashboard.videos')}
                               </Label>
                               <div className="space-y-2">
                                 <Input
@@ -1564,18 +1566,18 @@ const CoachDashboard = () => {
                                 />
                                 {uploadedVideos && uploadedVideos.length > 0 && (
                                   <p className="text-sm text-muted-foreground">
-                                    {uploadedVideos.length} video(s) selected
+                                    {uploadedVideos.length} {t('coachDashboard.videosSelected')}
                                   </p>
                                 )}
                               </div>
                             </div>
                             
                             <div className="space-y-2">
-                              <Label>Notes (optional)</Label>
+                              <Label>{t('coachDashboard.notesOptional')}</Label>
                               <Textarea
                                 value={newAttendance.notas}
                                 onChange={(e) => setNewAttendance({ ...newAttendance, notas: e.target.value })}
-                                placeholder="Add any additional notes..."
+                                placeholder={t('coachDashboard.notesPlaceholder')}
                                 rows={3}
                               />
                             </div>
@@ -1591,10 +1593,10 @@ const CoachDashboard = () => {
                               {isUploading ? (
                                 <>
                                   <Upload className="h-4 w-4 mr-2 animate-spin" />
-                                  Uploading...
+                                  {t('coachDashboard.uploading')}
                                 </>
                               ) : (
-                                "Upload Media"
+                                t('coachDashboard.uploadButton')
                               )}
                             </Button>
                           </div>
@@ -1608,13 +1610,13 @@ const CoachDashboard = () => {
                                   value="championships" 
                                   className="data-[state=active]:bg-championships data-[state=active]:text-championships-foreground text-sm"
                                 >
-                                  Championships
+                                  {t('coachDashboard.championships')}
                                 </TabsTrigger>
                                 <TabsTrigger 
                                   value="estagios"
                                   className="data-[state=active]:bg-estagios data-[state=active]:text-estagios-foreground text-sm"
                                 >
-                                  Estágios
+                                  {t('coachDashboard.estagios')}
                                 </TabsTrigger>
                               </TabsList>
                               
@@ -1644,10 +1646,10 @@ const CoachDashboard = () => {
             <CardHeader>
               <h4 className="font-medium text-foreground flex items-center gap-2">
                 <Euro className="h-5 w-5" />
-                My Payments
+                {t('coachDashboard.myPayments')}
               </h4>
               <CardDescription>
-                View your payment history and summaries
+                {t('coachDashboard.paymentDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1660,8 +1662,8 @@ const CoachDashboard = () => {
         {!isLoading && (Object.keys(trainingDaysByMonth).length > 0 || Object.keys(trainingDaysByYear).length > 0) && (
           <Card className="shadow-soft mb-6">
             <CardHeader className="pb-4">
-              <h4 className="font-medium text-foreground">Your Training Session History</h4>
-              <CardDescription>Detailed breakdown of your training days</CardDescription>
+              <h4 className="font-medium text-foreground">{t('coachDashboard.trainingHistory.title')}</h4>
+              <CardDescription>{t('coachDashboard.trainingHistory.description')}</CardDescription>
             </CardHeader>
             <CardContent>
               {/* PDF Action Buttons */}
@@ -1673,7 +1675,7 @@ const CoachDashboard = () => {
                   className="flex items-center gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  Download PDF
+                  {t('coachDashboard.trainingHistory.downloadPDF')}
                 </Button>
                 <Button 
                   variant="outline" 
@@ -1682,7 +1684,7 @@ const CoachDashboard = () => {
                   className="flex items-center gap-2"
                 >
                   <Eye className="h-4 w-4" />
-                  View PDF
+                  {t('coachDashboard.trainingHistory.viewPDF')}
                 </Button>
               </div>
               
@@ -1690,21 +1692,21 @@ const CoachDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
                   <div className="text-xl font-medium text-primary">{summaryStats.totalDays}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Total Days</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t('coachDashboard.trainingHistory.totalDays')}</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
                   <div className="text-xl font-medium text-primary">{summaryStats.uniqueAthletesCount}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Athletes Trained</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t('coachDashboard.trainingHistory.athletesTrained')}</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
                   <div className="text-xl font-medium text-primary">
                     {summaryStats.mostActiveBeach}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Most Active Beach</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t('coachDashboard.trainingHistory.mostActiveBeach')}</div>
                 </div>
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-b from-primary/5 to-background p-4 text-center shadow-sm">
                   <div className="text-xl font-medium text-primary">{summaryStats.avgAthletesPerSession}</div>
-                  <div className="text-xs text-muted-foreground mt-1">Avg per Session</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t('coachDashboard.trainingHistory.avgPerSession')}</div>
                 </div>
               </div>
 
@@ -1713,7 +1715,7 @@ const CoachDashboard = () => {
                 <div className="flex items-center justify-between mb-2">
                   <h5 className="text-sm font-medium flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    Filters & Search
+                    {t('coachDashboard.trainingHistory.filtersAndSearch')}
                   </h5>
                   <Button 
                     variant="ghost" 
@@ -1722,14 +1724,14 @@ const CoachDashboard = () => {
                     className="text-xs h-7"
                   >
                     <X className="h-3 w-3 mr-1" />
-                    Clear All
+                    {t('coachDashboard.trainingHistory.clearAll')}
                   </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                   {/* Date Range Filter */}
                   <div className="space-y-1">
-                    <Label className="text-xs">Start Date</Label>
+                    <Label className="text-xs">{t('coachDashboard.trainingHistory.startDate')}</Label>
                     <Input 
                       type="date" 
                       value={historyDateRange.start}
@@ -1738,7 +1740,7 @@ const CoachDashboard = () => {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">End Date</Label>
+                    <Label className="text-xs">{t('coachDashboard.trainingHistory.endDate')}</Label>
                     <Input 
                       type="date" 
                       value={historyDateRange.end}
@@ -1749,13 +1751,13 @@ const CoachDashboard = () => {
                   
                   {/* Athlete Filter */}
                   <div className="space-y-1">
-                    <Label className="text-xs">Athlete</Label>
+                    <Label className="text-xs">{t('coachDashboard.trainingHistory.filterByAthlete')}</Label>
                     <Select value={historyAthleteFilter} onValueChange={setHistoryAthleteFilter}>
                       <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="All Athletes" />
+                        <SelectValue placeholder={t('coachDashboard.trainingHistory.allAthletes')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Athletes</SelectItem>
+                        <SelectItem value="all">{t('coachDashboard.trainingHistory.allAthletes')}</SelectItem>
                         {uniqueAthletesList.map(athlete => (
                           <SelectItem key={athlete.id} value={athlete.id}>
                             {athlete.name}
@@ -1767,13 +1769,13 @@ const CoachDashboard = () => {
                   
                   {/* Beach Filter */}
                   <div className="space-y-1">
-                    <Label className="text-xs">Beach Location</Label>
+                    <Label className="text-xs">{t('coachDashboard.trainingHistory.filterByBeach')}</Label>
                     <Select value={historyBeachFilter} onValueChange={setHistoryBeachFilter}>
                       <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="All Beaches" />
+                        <SelectValue placeholder={t('coachDashboard.trainingHistory.allBeaches')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Beaches</SelectItem>
+                        <SelectItem value="all">{t('coachDashboard.trainingHistory.allBeaches')}</SelectItem>
                         {uniqueBeachLocations.map(beach => (
                           <SelectItem key={beach} value={beach}>
                             {beach}
@@ -1788,7 +1790,7 @@ const CoachDashboard = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by athlete name, date, or location..."
+                    placeholder={t('coachDashboard.trainingHistory.searchPlaceholder')}
                     value={historySearchQuery}
                     onChange={(e) => setHistorySearchQuery(e.target.value)}
                     className="pl-10 h-9 text-sm"
@@ -1802,12 +1804,12 @@ const CoachDashboard = () => {
                   <div className="bg-muted/30 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                     <Search className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h5 className="text-lg font-semibold mb-2">No results found</h5>
+                  <h5 className="text-lg font-semibold mb-2">{t('coachDashboard.trainingHistory.noResults')}</h5>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Try adjusting your filters or search query
+                    {t('coachDashboard.trainingHistory.tryAdjusting')}
                   </p>
                   <Button variant="outline" size="sm" onClick={clearAllFilters}>
-                    Clear All Filters
+                    {t('coachDashboard.trainingHistory.clearAllFilters')}
                   </Button>
                 </div>
               )}
@@ -1815,7 +1817,7 @@ const CoachDashboard = () => {
               {/* Training Sessions Display - Monthly View */}
               {Object.keys(filteredTrainingSessionsByMonth).length > 0 && (
                 <div className="space-y-4">
-                  <h4 className="font-medium text-foreground">Monthly Breakdown</h4>
+                  <h4 className="font-medium text-foreground">{t('coachDashboard.trainingHistory.monthlyBreakdown')}</h4>
                   <div className="space-y-3">
                     {Object.entries(filteredTrainingSessionsByMonth).map(([month, sessionsByDate]) => {
                       const [year, monthNum] = month.split('-');
@@ -1842,7 +1844,7 @@ const CoachDashboard = () => {
                               <div className="text-left min-w-0">
                                 <span className="font-medium block text-foreground">{monthName} {year}</span>
                                 <span className="text-sm text-muted-foreground block">
-                                  {count} training {count === 1 ? 'day' : 'days'} • {totalAthletesInMonth} total {totalAthletesInMonth === 1 ? 'session' : 'sessions'}
+                                  {count} {t('coachDashboard.trainingHistory.trainingDays')} • {totalAthletesInMonth} {t('coachDashboard.trainingHistory.athleteSessions')}
                                 </span>
                               </div>
                             </div>
@@ -1890,7 +1892,7 @@ const CoachDashboard = () => {
                                           </div>
                                         </div>
                                         <Badge variant="default" className="text-sm font-medium flex-shrink-0">
-                                          {athleteCount} {athleteCount === 1 ? 'athlete' : 'athletes'}
+                                          {athleteCount} {athleteCount === 1 ? t('coach.athleteProfile.athlete') : t('coach.athleteProfile.athletes')}
                                         </Badge>
                                       </div>
                                       
@@ -1902,7 +1904,7 @@ const CoachDashboard = () => {
                                             <div key={shift} className="space-y-2">
                                               <div className={`text-sm font-bold ${colors.text} flex items-center gap-2 px-2`}>
                                                 <Clock className="h-4 w-4" />
-                                                {shift} - {shiftAthletes.length} {shiftAthletes.length === 1 ? 'athlete' : 'athletes'}
+                                                {shift} - {shiftAthletes.length} {shiftAthletes.length === 1 ? t('coach.athleteProfile.athlete') : t('coach.athleteProfile.athletes')}
                                               </div>
                                               <div className="space-y-2 pl-2">
                                                 {shiftAthletes.map((athlete, idx) => (
