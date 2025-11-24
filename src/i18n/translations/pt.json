@@ -656,8 +656,7 @@
         "oct": "Out",
         "nov": "Nov",
         "dec": "Dez"
-      }
-      ,
+      },
       "selectCoach": "Selecionar Treinador",
       "selectMonth": "Selecionar Mês",
       "allMonths": "Todos os Meses"

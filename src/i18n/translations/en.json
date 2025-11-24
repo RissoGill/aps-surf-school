@@ -484,8 +484,7 @@
         "oct": "Oct",
         "nov": "Nov",
         "dec": "Dec"
-      }
-      ,
+      },
       "selectCoach": "Select Coach",
       "selectMonth": "Select Month",
       "allMonths": "All Months"
