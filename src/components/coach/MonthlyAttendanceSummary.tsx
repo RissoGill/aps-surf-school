@@ -28,7 +28,7 @@ interface MonthlySummary {
 }
 
 export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummaryProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Group attendance by month - keep original status for display, but count separately
   const monthlySummaries = attendance.reduce((acc, record) => {
@@ -37,7 +37,7 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
     const originalStatus = record.status && record.status.trim() ? record.status.trim() : 'Unmarked';
     const date = new Date(record.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const monthName = date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric' });
 
     if (!acc[monthKey]) {
       acc[monthKey] = {
@@ -103,9 +103,9 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Present": return t('coach.monthlySummary.present');
-      case "Absent": return t('coach.monthlySummary.notPresent');
-      case "Justified": return t('coach.monthlySummary.justified');
+      case "Present": return t('coach.monthlyAttendance.present');
+      case "Absent": return t('coach.monthlyAttendance.absent');
+      case "Justified": return t('coach.monthlyAttendance.justified');
       default: return status;
     }
   };
@@ -116,11 +116,11 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
         <div className="flex items-center justify-between">
           <h4 className="text-base font-medium text-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            {t('coach.monthlySummary.title')}
+            {t('coach.monthlyAttendance.title')}
           </h4>
           <Select value={selectedMonthKey} onValueChange={handleMonthChange}>
             <SelectTrigger className="w-[180px] h-8 text-sm">
-              <SelectValue placeholder={t('coach.monthlySummary.selectMonth')} />
+              <SelectValue placeholder={t('coach.monthlyAttendance.selectMonth')} />
             </SelectTrigger>
             <SelectContent className="bg-card z-50">
               {sortedSummaries.map((summary) => (
@@ -140,15 +140,15 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 variant="ghost"
                 className="w-full flex items-center justify-between p-0 h-auto hover:bg-transparent"
               >
-                  <div className="flex items-center justify-between w-full">
-                    <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="default" className="text-xs font-normal bg-primary">
-                        {selectedSummary.total} {t('coach.monthlySummary.total')}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {isExpanded ? t('coach.monthlySummary.hideDetails') : t('coach.monthlySummary.viewDetails')}
-                      </span>
+                    <div className="flex items-center justify-between w-full">
+                      <p className="text-sm font-medium text-foreground">{selectedSummary.month}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-xs font-normal bg-primary">
+                          {selectedSummary.total} {t('coach.monthlyAttendance.total')}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {isExpanded ? t('coach.monthlyAttendance.hideDetails') : t('coach.monthlyAttendance.viewDetails')}
+                        </span>
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${
                         isExpanded ? 'transform rotate-180' : ''
@@ -179,27 +179,26 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                 {/* Attendance Records Details */}
                 <div className="space-y-2">
                   {selectedMonthRecords.map((record) => {
-                    const formattedDate = record.date ? new Date(record.date).toLocaleDateString('pt-PT', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    }) : '-';
+                    const formattedDate = record.date ? new Date(record.date).toLocaleDateString(
+                      language === 'pt' ? 'pt-PT' : 'en-GB', 
+                      { year: 'numeric', month: 'short', day: 'numeric' }
+                    ) : '-';
                     
                     return (
                       <Card key={record.id} className="bg-accent/30">
                         <CardContent className="p-3">
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div>
-                              <span className="text-muted-foreground">{t('coach.monthlySummary.date')}</span>
+                              <span className="text-muted-foreground">{t('coach.monthlyAttendance.date')}</span>
                               <p className="font-medium">{formattedDate}</p>
                             </div>
                             <div>
-                              <span className="text-muted-foreground">{t('coach.monthlySummary.status')}</span>
-                              <p className="font-medium">{record.status || t('coach.monthlySummary.notSet')}</p>
+                              <span className="text-muted-foreground">{t('coach.monthlyAttendance.status')}</span>
+                              <p className="font-medium">{record.status || t('coach.monthlyAttendance.notSet')}</p>
                             </div>
                             {record.coach && (
                               <div>
-                                <span className="text-muted-foreground">{t('coach.monthlySummary.coach')}</span>
+                                <span className="text-muted-foreground">{t('coach.monthlyAttendance.coach')}</span>
                                 <p className="font-medium">{record.coach}</p>
                               </div>
                             )}
@@ -207,14 +206,14 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
                               <div className="flex items-start gap-1">
                                 <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
                                 <div>
-                                  <span className="text-muted-foreground">{t('coach.monthlySummary.beach')}</span>
+                                  <span className="text-muted-foreground">{t('coach.monthlyAttendance.beach')}</span>
                                   <p className="font-medium">{record.beach_location}</p>
                                 </div>
                               </div>
                             )}
                             {record.notes && (
                               <div className="col-span-2">
-                                <span className="text-muted-foreground">{t('coach.monthlySummary.notes')}</span>
+                                <span className="text-muted-foreground">{t('coach.monthlyAttendance.notes')}</span>
                                 <p className="font-medium">{record.notes}</p>
                               </div>
                             )}
