@@ -79,7 +79,9 @@
     "filter": "Filtrar",
     "export": "Exportar",
     "import": "Importar",
-    "refresh": "Atualizar"
+    "refresh": "Atualizar",
+    "notAvailable": "N/D",
+    "unknown": "Desconhecido"
   },
   "dashboard": {
     "coach": {
@@ -535,33 +537,42 @@
       "loggedOutDescription": "Até breve!",
       "errorLoadingProfile": "Erro ao carregar perfil do atleta"
     },
-    "personal": {
-      "title": "Informação Pessoal",
-      "level": "Nível",
-      "noData": "Sem dados disponíveis",
-      "emergencyContacts": "Contactos de Emergência",
-      "mother": "Mãe",
-      "father": "Pai"
-    },
-    "training": {
-      "scheduleTitle": "Horário de Treino",
-      "weeklySessions": "Treinos Semanais",
-      "sessionsPerWeek": "treinos por semana",
-      "notSpecified": "Não especificado",
-      "transportation": "Transporte",
-      "serviceProvided": "Serviço Fornecido",
-      "noService": "Sem Serviço",
-      "pickupAddress": "Morada de Recolha",
-      "dropoffAddress": "Morada de Entrega"
-    },
-    "attendance": {
-      "recordDescription": "O seu registo de treinos",
-      "coach": "Treinador:",
-      "beach": "Praia:",
-      "notes": "Notas:",
-      "monthlySummary": "Resumo Mensal",
-      "notPresent": "Ausente"
-    },
+      "personal": {
+        "title": "Informação Pessoal",
+        "dateOfBirth": "Data de Nascimento",
+        "phone": "Telefone",
+        "address": "Morada",
+        "level": "Nível",
+        "noData": "Sem dados disponíveis",
+        "emergencyContacts": "Contactos de Emergência",
+        "mother": "Mãe",
+        "father": "Pai",
+        "name": "Nome",
+        "email": "Email"
+      },
+      "training": {
+        "scheduleTitle": "Horário de Treino",
+        "weeklySessions": "Treinos Semanais",
+        "sessionsPerWeek": "treinos por semana",
+        "trainingDays": "Dias de Treino",
+        "notSpecified": "Não especificado",
+        "transportation": "Transporte",
+        "serviceProvided": "Serviço Fornecido",
+        "noService": "Sem Serviço",
+        "pickupAddress": "Morada de Recolha",
+        "dropoffAddress": "Morada de Entrega"
+      },
+      "attendance": {
+        "recordDescription": "O seu registo de treinos",
+        "noRecords": "Sem registos de presença este mês",
+        "coach": "Treinador:",
+        "beach": "Praia:",
+        "notes": "Notas:",
+        "monthlySummary": "Resumo Mensal",
+        "present": "Presente",
+        "justified": "Justificado",
+        "notPresent": "Ausente"
+      },
     "championships": {
       "title": "Meus Campeonatos",
       "description": "Ver todos os campeonatos em que está inscrito",
