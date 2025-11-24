@@ -23,7 +23,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
   const [athleteStatuses, setAthleteStatuses] = useState<Record<string, string>>({});
-  const [selectedShift, setSelectedShift] = useState(t('coach.bulkAttendance.morning'));
+  const [selectedShift, setSelectedShift] = useState("Manhã");
   const [beachLocation, setBeachLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +53,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const handleAddAthlete = (athleteId: string) => {
     if (!selectedAthletes.includes(athleteId)) {
       setSelectedAthletes([...selectedAthletes, athleteId]);
-      setAthleteStatuses(prev => ({ ...prev, [athleteId]: t('coach.bulkAttendance.present') }));
+      setAthleteStatuses(prev => ({ ...prev, [athleteId]: "Present" }));
     }
     setSearchQuery("");
     setShowDropdown(false);
@@ -73,7 +73,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
     setSelectedAthletes(allAthleteIds);
     const newStatuses: Record<string, string> = {};
     allAthleteIds.forEach(id => {
-      newStatuses[id] = t('coach.bulkAttendance.present');
+      newStatuses[id] = "Present";
     });
     setAthleteStatuses(newStatuses);
     setShowDropdown(false);
@@ -296,8 +296,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={t('coach.bulkAttendance.morning')}>{t('coach.bulkAttendance.morning')}</SelectItem>
-                <SelectItem value={t('coach.bulkAttendance.afternoon')}>{t('coach.bulkAttendance.afternoon')}</SelectItem>
+                <SelectItem value="Manhã">{t('coach.bulkAttendance.morning')}</SelectItem>
+                <SelectItem value="Tarde">{t('coach.bulkAttendance.afternoon')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -388,16 +388,16 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                       {getAthleteName(athleteId)}
                     </div>
                     <Select 
-                      value={athleteStatuses[athleteId] || t('coach.bulkAttendance.present')} 
+                      value={athleteStatuses[athleteId] || "Present"} 
                       onValueChange={(value) => handleStatusChange(athleteId, value)}
                     >
                       <SelectTrigger className="w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={t('coach.bulkAttendance.present')}>{t('coach.bulkAttendance.present')}</SelectItem>
-                        <SelectItem value={t('coach.bulkAttendance.absent')}>{t('coach.bulkAttendance.absent')}</SelectItem>
-                        <SelectItem value={t('coach.bulkAttendance.justified')}>{t('coach.bulkAttendance.justified')}</SelectItem>
+                        <SelectItem value="Present">{t('coach.bulkAttendance.present')}</SelectItem>
+                        <SelectItem value="Absent">{t('coach.bulkAttendance.absent')}</SelectItem>
+                        <SelectItem value="Justified">{t('coach.bulkAttendance.justified')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <button
