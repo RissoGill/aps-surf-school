@@ -135,7 +135,10 @@
     "trainingHistory": "Training History"
   },
   "footer": {
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "mainSponsors": "Main Sponsors",
+    "ourPartners": "Our Partners",
+    "verifiedBy": "School Verified By"
   },
   "admin": {
     "dashboard": {
