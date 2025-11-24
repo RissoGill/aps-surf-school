@@ -325,7 +325,7 @@
     },
     "coachAttendance": {
       "title": "Gestão de Presenças por Treinador",
-      "subtitle": "Ver desagregação de sessões de treino por treinador",
+      "subtitle": "Ver desagregação de treinos por treinador",
       "selectCoach": "Selecionar Treinador",
       "allCoaches": "Todos os Treinadores",
       "trainingDays": "Dias de Treino",
@@ -376,7 +376,7 @@
       "success": "Sucesso",
       "packCreatedSuccess": "Registo de pack criado com sucesso",
       "negativeBalanceCarried": "Saldo Negativo Transferido",
-      "negativeBalanceDescription": "O pack anterior tinha -{balance} sessões. Isto será deduzido do novo pack.",
+      "negativeBalanceDescription": "O pack anterior tinha -{balance} treinos. Isto será deduzido do novo pack.",
       "paymentUpdatedSuccess": "Pagamento atualizado com sucesso",
       "paymentAndPackSuccess": "Pagamento e registo de pack criados com sucesso",
       "validationError": "Erro de Validação",
@@ -517,7 +517,7 @@
     },
     "packBalance": {
       "title": "Saldo do Pack",
-      "remaining": "Sessões Restantes",
+      "remaining": "Treinos Restantes",
       "history": "Histórico de Compras"
     }
   },
@@ -555,10 +555,10 @@
   },
   "shared": {
     "packBalance": {
-      "exceeded": "Limite de Sessões do Pack Excedido",
-      "athleteMessage": "Usou mais {count} sessão/sessões do que o seu pack inclui. Por favor adquira sessões adicionais.",
-      "guardianMessage": "{name} excedeu o limite do pack em {count} sessão/sessões. Pode ser necessário pagamento adicional.",
-      "coachMessage": "Saldo do pack de {name}: -{count} sessão/sessões. Pode continuar a treinar, mas o encarregado deve ser notificado."
+      "exceeded": "Limite de Treinos do Pack Excedido",
+      "athleteMessage": "Usou mais {count} treino(s) do que o seu pack inclui. Por favor adquira treinos adicionais.",
+      "guardianMessage": "{name} excedeu o limite do pack em {count} treino(s). Pode ser necessário pagamento adicional.",
+      "coachMessage": "Saldo do pack de {name}: -{count} treino(s). Pode continuar a treinar, mas o encarregado deve ser notificado."
     },
     "reports": {
       "title": "Relatórios",
@@ -674,7 +674,7 @@
     "welcomeBack": "Bem-vindo",
     "subtitle": "Gerir atletas e acompanhar progresso",
     "thisMonth": "Este Mês",
-    "totalAnnualSessions": "Sessões Anuais Totais",
+    "totalAnnualSessions": "Treinos Anuais Totais",
     "searchTitle": "Pesquisar atletas por Nome",
     "searchDescription": "Encontrar e selecionar atletas para ver os seus detalhes",
     "searchPlaceholder": "Pesquisar atletas por nome...",
@@ -707,7 +707,7 @@
     "myPayments": "Os Meus Pagamentos",
     "paymentDescription": "Ver histórico de pagamentos e resumos",
     "trainingHistory": {
-      "title": "Histórico de Sessões de Treino",
+      "title": "Histórico de Treinos",
       "description": "Ver registos completos de treino e gerar relatórios",
       "filterByDateRange": "Filtrar por Intervalo de Datas",
       "startDate": "Data de Início",
@@ -727,14 +727,14 @@
       "totalDays": "Total de Dias",
       "athletesTrained": "Atletas Treinados",
       "mostActiveBeach": "Praia Mais Ativa",
-      "avgPerSession": "Média por Sessão",
+      "avgPerSession": "Média por Treino",
       "filtersAndSearch": "Filtros & Pesquisa",
       "clearAll": "Limpar Tudo",
       "trainingDays": "dias de treino",
-      "athleteSessions": "sessões de atletas",
+      "athleteSessions": "treinos de atletas",
       "viewDetails": "Ver Detalhes",
       "hideDetails": "Ocultar Detalhes",
-      "reportTitle": "Relatório de Histórico de Sessões de Treino",
+      "reportTitle": "Relatório de Histórico de Treinos",
       "coach": "Treinador:",
       "generated": "Gerado:",
       "appliedFilters": "Filtros Aplicados:",
@@ -747,7 +747,7 @@
       "athleteColumn": "Atleta",
       "shiftColumn": "Turno",
       "beachColumn": "Localização da Praia",
-      "footer": "APS - Academia de Performance Surf | Relatório de Histórico de Sessões de Treino"
+      "footer": "APS - Academia de Performance Surf | Relatório de Histórico de Treinos"
     },
     "toast": {
       "error": "Erro",
