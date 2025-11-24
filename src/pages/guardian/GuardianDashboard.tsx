@@ -932,10 +932,26 @@ const GuardianDashboard = () => {
   };
 
   const getMonthName = (monthStr: string) => {
-    const monthNumber = parseInt(monthStr) - 1;
-    if (monthNumber < 0 || monthNumber > 11) return monthStr;
+    // Validate input
+    if (!monthStr || monthStr.trim() === '') return monthStr || '-';
     
-    const date = new Date(2025, monthNumber, 1);
+    const monthNumber = parseInt(monthStr);
+    
+    // Check if parsing was successful and month is in valid range
+    if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+      console.warn('Invalid month value:', monthStr);
+      return monthStr;
+    }
+    
+    // Create date with validated month (subtract 1 because Date months are 0-indexed)
+    const date = new Date(2025, monthNumber - 1, 1);
+    
+    // Double-check the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn('Failed to create valid date for month:', monthStr);
+      return monthStr;
+    }
+    
     return date.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { 
       month: 'long' 
     });
