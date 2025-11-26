@@ -44,7 +44,7 @@ const AdministrationDashboard = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id)
-        .in('role', ['admin', 'super_admin'])
+        .in('role', ['admin', 'super_admin', 'reports_viewer'])
         .maybeSingle();
 
       if (!roleData) {
@@ -793,19 +793,20 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
-        {/* Admin Actions */}
-        <div className="space-y-4">
-          <h3 className="text-2xl font-bold text-foreground mb-4 text-center">{t('admin.management.title')}</h3>
-          
-          {adminActions
-            .filter(action => {
-              // Only super_admin can see "Manage Users"
-              if (action.title === t('admin.management.users')) {
-                return userRole === 'super_admin';
-              }
-              return true;
-            })
-            .map((action, index) => {
+        {/* Admin Actions - Hidden for reports_viewer */}
+        {userRole !== 'reports_viewer' && (
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-foreground mb-4 text-center">{t('admin.management.title')}</h3>
+            
+            {adminActions
+              .filter(action => {
+                // Only super_admin can see "Manage Users"
+                if (action.title === t('admin.management.users')) {
+                  return userRole === 'super_admin';
+                }
+                return true;
+              })
+              .map((action, index) => {
             const bgColorClass = 
               action.color === "primary" ? "bg-primary/10" :
               action.color === "success" ? "bg-success/10" :
@@ -860,6 +861,7 @@ const AdministrationDashboard = () => {
             );
           })}
         </div>
+        )}
 
         {/* Coach Attendance Management */}
         {isLoading ? (
@@ -954,7 +956,7 @@ const AdministrationDashboard = () => {
 
         {/* Coach Payments Card */}
         <div className="mt-6">
-          <CoachPaymentsCard />
+          <CoachPaymentsCard userRole={userRole} />
         </div>
 
         {/* Reports Card */}

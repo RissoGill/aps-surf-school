@@ -38,6 +38,7 @@
     "unexpectedError": "Ocorreu um erro inesperado",
     "accessDenied": "Acesso Negado",
     "noAdminPrivileges": "Não tem privilégios de administrador.",
+    "welcomeReportsViewer": "Bem-vindo! Pode consultar dados e gerar relatórios.",
     "sessionExpired": "Sessão expirada",
     "pleaseLoginAgain": "Por favor inicie sessão novamente",
     "signedOut": "Sessão terminada",
