@@ -38,6 +38,7 @@
     "unexpectedError": "An unexpected error occurred",
     "accessDenied": "Access Denied",
     "noAdminPrivileges": "You do not have administrator privileges.",
+    "welcomeReportsViewer": "Welcome! You can view data and generate reports.",
     "sessionExpired": "Session expired",
     "pleaseLoginAgain": "Please log in again",
     "signedOut": "Signed out",

@@ -43,7 +43,11 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-export const CoachPaymentsCard = () => {
+interface CoachPaymentsCardProps {
+  userRole?: string | null;
+}
+
+export const CoachPaymentsCard = ({ userRole }: CoachPaymentsCardProps) => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -355,12 +359,13 @@ export const CoachPaymentsCard = () => {
               <p className="text-sm text-muted-foreground">{t('shared.coachPayments.subtitle')}</p>
             </div>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="w-full lg:w-auto lg:self-start shrink-0">
-                {t('shared.coachPayments.addPayment')}
-              </Button>
-            </DialogTrigger>
+          {userRole !== 'reports_viewer' && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="w-full lg:w-auto lg:self-start shrink-0">
+                  {t('shared.coachPayments.addPayment')}
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>{editingPayment ? t('shared.coachPayments.editPayment') : t('shared.coachPayments.addPayment')}</DialogTitle>
@@ -464,6 +469,7 @@ export const CoachPaymentsCard = () => {
               </div>
             </DialogContent>
           </Dialog>
+          )}
         </div>
       </CardHeader>
 
@@ -547,7 +553,9 @@ export const CoachPaymentsCard = () => {
                     <TableHead>{t('shared.coachPayments.month')}</TableHead>
                     <TableHead>{t('shared.coachPayments.amount')}</TableHead>
                     <TableHead>{t('shared.coachPayments.notes')}</TableHead>
-                    <TableHead className="text-right">{t('shared.coachPayments.actions')}</TableHead>
+                    {userRole !== 'reports_viewer' && (
+                      <TableHead className="text-right">{t('shared.coachPayments.actions')}</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -582,26 +590,28 @@ export const CoachPaymentsCard = () => {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(payment)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                if (confirm('Delete this payment?')) {
-                                  deleteMutation.mutate(payment.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
+                          {userRole !== 'reports_viewer' && (
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(payment)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm('Delete this payment?')) {
+                                    deleteMutation.mutate(payment.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))

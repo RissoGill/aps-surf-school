@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard, Edit2, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const paymentEditSchema = z.object({
 const PaymentManagement = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
@@ -68,6 +70,34 @@ const PaymentManagement = () => {
     plan_type: "",
     notes: ""
   });
+
+  // Session validation on mount
+  useEffect(() => {
+    const validateSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({ title: t('login.sessionExpired'), variant: "destructive" });
+        navigate("/login/administration");
+        return;
+      }
+
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .in('role', ['admin', 'super_admin'])
+        .maybeSingle();
+
+      if (!roleData) {
+        toast({ title: t('login.accessDenied'), variant: "destructive" });
+        navigate("/dashboard/administration");
+        return;
+      }
+    };
+
+    validateSession();
+  }, [navigate, t, toast]);
 
   const translateMonth = (month: string): string => {
     if (!month) return "";

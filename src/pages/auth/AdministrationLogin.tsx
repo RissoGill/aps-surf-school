@@ -42,12 +42,12 @@ const AdministrationLogin = () => {
         return;
       }
 
-      // Verify user has admin or super_admin role
+      // Verify user has admin, super_admin, or reports_viewer role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', data.user.id)
-        .in('role', ['admin', 'super_admin'])
+        .in('role', ['admin', 'super_admin', 'reports_viewer'])
         .maybeSingle();
 
       if (roleError || !roleData) {
@@ -63,7 +63,9 @@ const AdministrationLogin = () => {
 
       toast({
         title: t('login.success'),
-        description: t('login.welcomeAdmin'),
+        description: roleData.role === 'reports_viewer' 
+          ? t('login.welcomeReportsViewer')
+          : t('login.welcomeAdmin'),
       });
       navigate("/dashboard/administration");
     } catch (error) {
