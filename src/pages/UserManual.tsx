@@ -52,9 +52,9 @@ const UserManual = () => {
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="coach">{t('userManual.coach.title')}</TabsTrigger>
-                <TabsTrigger value="athlete">{t('userManual.athlete.title')}</TabsTrigger>
-                <TabsTrigger value="guardian">{t('userManual.guardian.title')}</TabsTrigger>
+                <TabsTrigger value="coach">{t('userManual.tabs.coach')}</TabsTrigger>
+                <TabsTrigger value="athlete">{t('userManual.tabs.athlete')}</TabsTrigger>
+                <TabsTrigger value="guardian">{t('userManual.tabs.guardian')}</TabsTrigger>
               </TabsList>
 
               {/* Coach Manual */}
@@ -74,7 +74,6 @@ const UserManual = () => {
                       <li>{t('userManual.coach.login.step1')}</li>
                       <li>{t('userManual.coach.login.step2')}</li>
                       <li>{t('userManual.coach.login.step3')}</li>
-                      <li>{t('userManual.coach.login.step4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -126,17 +125,17 @@ const UserManual = () => {
                         <Users className="h-16 w-16 text-muted-foreground" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-normal mb-2">{t('userManual.coach.bulkAttendance.title')}</h3>
-                    <CardDescription>{t('userManual.coach.bulkAttendance.description')}</CardDescription>
+                    <h3 className="text-lg font-normal mb-2">{t('userManual.coach.bulk.title')}</h3>
+                    <CardDescription>{t('userManual.coach.bulk.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.coach.bulkAttendance.step1')}</li>
-                      <li>{t('userManual.coach.bulkAttendance.step2')}</li>
-                      <li>{t('userManual.coach.bulkAttendance.step3')}</li>
-                      <li>{t('userManual.coach.bulkAttendance.step4')}</li>
-                      <li>{t('userManual.coach.bulkAttendance.step5')}</li>
-                      <li>{t('userManual.coach.bulkAttendance.step6')}</li>
+                      <li>{t('userManual.coach.bulk.step1')}</li>
+                      <li>{t('userManual.coach.bulk.step2')}</li>
+                      <li>{t('userManual.coach.bulk.step3')}</li>
+                      <li>{t('userManual.coach.bulk.step4')}</li>
+                      <li>{t('userManual.coach.bulk.step5')}</li>
+                      <li>{t('userManual.coach.bulk.step6')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -153,10 +152,10 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.coach.profile.info1')}</li>
-                      <li>{t('userManual.coach.profile.info2')}</li>
-                      <li>{t('userManual.coach.profile.info3')}</li>
-                      <li>{t('userManual.coach.profile.info4')}</li>
+                      <li>{t('userManual.coach.profile.feature1')}</li>
+                      <li>{t('userManual.coach.profile.feature2')}</li>
+                      <li>{t('userManual.coach.profile.feature3')}</li>
+                      <li>{t('userManual.coach.profile.feature4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -173,8 +172,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.coach.championships.action1')}</li>
-                      <li>{t('userManual.coach.championships.action2')}</li>
+                      <li>{t('userManual.coach.championships.feature1')}</li>
+                      <li>{t('userManual.coach.championships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -191,8 +190,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.coach.internships.action1')}</li>
-                      <li>{t('userManual.coach.internships.action2')}</li>
+                      <li>{t('userManual.coach.internships.feature1')}</li>
+                      <li>{t('userManual.coach.internships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -270,7 +269,6 @@ const UserManual = () => {
                       <li>{t('userManual.athlete.login.step1')}</li>
                       <li>{t('userManual.athlete.login.step2')}</li>
                       <li>{t('userManual.athlete.login.step3')}</li>
-                      <li>{t('userManual.athlete.login.step4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -287,12 +285,12 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.tabs.tab1')}</li>
-                      <li>{t('userManual.athlete.tabs.tab2')}</li>
-                      <li>{t('userManual.athlete.tabs.tab3')}</li>
-                      <li>{t('userManual.athlete.tabs.tab4')}</li>
-                      <li>{t('userManual.athlete.tabs.tab5')}</li>
-                      <li>{t('userManual.athlete.tabs.tab6')}</li>
+                      <li>{t('userManual.athlete.tabs.personal')}</li>
+                      <li>{t('userManual.athlete.tabs.training')}</li>
+                      <li>{t('userManual.athlete.tabs.attendance')}</li>
+                      <li>{t('userManual.athlete.tabs.championships')}</li>
+                      <li>{t('userManual.athlete.tabs.media')}</li>
+                      <li>{t('userManual.athlete.tabs.internships')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -304,15 +302,15 @@ const UserManual = () => {
                         <User className="h-16 w-16 text-muted-foreground" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-normal mb-2">{t('userManual.athlete.personalData.title')}</h3>
-                    <CardDescription>{t('userManual.athlete.personalData.description')}</CardDescription>
+                    <h3 className="text-lg font-normal mb-2">{t('userManual.athlete.personal.title')}</h3>
+                    <CardDescription>{t('userManual.athlete.personal.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.personalData.info1')}</li>
-                      <li>{t('userManual.athlete.personalData.info2')}</li>
-                      <li>{t('userManual.athlete.personalData.info3')}</li>
-                      <li>{t('userManual.athlete.personalData.info4')}</li>
+                      <li>{t('userManual.athlete.personal.feature1')}</li>
+                      <li>{t('userManual.athlete.personal.feature2')}</li>
+                      <li>{t('userManual.athlete.personal.feature3')}</li>
+                      <li>{t('userManual.athlete.personal.feature4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -329,9 +327,9 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.training.info1')}</li>
-                      <li>{t('userManual.athlete.training.info2')}</li>
-                      <li>{t('userManual.athlete.training.info3')}</li>
+                      <li>{t('userManual.athlete.training.feature1')}</li>
+                      <li>{t('userManual.athlete.training.feature2')}</li>
+                      <li>{t('userManual.athlete.training.feature3')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -368,7 +366,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.championships.info1')}</li>
+                      <li>{t('userManual.athlete.championships.feature1')}</li>
+                      <li>{t('userManual.athlete.championships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -404,7 +403,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.internships.info1')}</li>
+                      <li>{t('userManual.athlete.internships.feature1')}</li>
+                      <li>{t('userManual.athlete.internships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -420,9 +420,7 @@ const UserManual = () => {
                     <CardDescription>{t('userManual.athlete.refresh.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.refresh.step1')}</li>
-                    </ul>
+                    <p>{t('userManual.athlete.refresh.description')}</p>
                   </CardContent>
                 </Card>
 
@@ -437,9 +435,7 @@ const UserManual = () => {
                     <CardDescription>{t('userManual.athlete.logout.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.athlete.logout.step1')}</li>
-                    </ul>
+                    <p>{t('userManual.athlete.logout.description')}</p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -461,7 +457,6 @@ const UserManual = () => {
                       <li>{t('userManual.guardian.login.step1')}</li>
                       <li>{t('userManual.guardian.login.step2')}</li>
                       <li>{t('userManual.guardian.login.step3')}</li>
-                      <li>{t('userManual.guardian.login.step4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -473,13 +468,13 @@ const UserManual = () => {
                         <Users className="h-16 w-16 text-muted-foreground" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-normal mb-2">{t('userManual.guardian.familyArea.title')}</h3>
-                    <CardDescription>{t('userManual.guardian.familyArea.description')}</CardDescription>
+                    <h3 className="text-lg font-normal mb-2">{t('userManual.guardian.family.title')}</h3>
+                    <CardDescription>{t('userManual.guardian.family.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.familyArea.feature1')}</li>
-                      <li>{t('userManual.guardian.familyArea.feature2')}</li>
+                      <li>{t('userManual.guardian.family.feature1')}</li>
+                      <li>{t('userManual.guardian.family.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -496,11 +491,11 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.tabs.tab1')}</li>
-                      <li>{t('userManual.guardian.tabs.tab2')}</li>
-                      <li>{t('userManual.guardian.tabs.tab3')}</li>
-                      <li>{t('userManual.guardian.tabs.tab4')}</li>
-                      <li>{t('userManual.guardian.tabs.tab5')}</li>
+                      <li>{t('userManual.guardian.tabs.overview')}</li>
+                      <li>{t('userManual.guardian.tabs.payments')}</li>
+                      <li>{t('userManual.guardian.tabs.media')}</li>
+                      <li>{t('userManual.guardian.tabs.championships')}</li>
+                      <li>{t('userManual.guardian.tabs.internships')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -537,10 +532,10 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.pack.info1')}</li>
-                      <li>{t('userManual.guardian.pack.info2')}</li>
-                      <li>{t('userManual.guardian.pack.info3')}</li>
-                      <li>{t('userManual.guardian.pack.info4')}</li>
+                      <li>{t('userManual.guardian.pack.feature1')}</li>
+                      <li>{t('userManual.guardian.pack.feature2')}</li>
+                      <li>{t('userManual.guardian.pack.feature3')}</li>
+                      <li>{t('userManual.guardian.pack.feature4')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -595,7 +590,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.championships.info1')}</li>
+                      <li>{t('userManual.guardian.championships.feature1')}</li>
+                      <li>{t('userManual.guardian.championships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -612,7 +608,8 @@ const UserManual = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.internships.info1')}</li>
+                      <li>{t('userManual.guardian.internships.feature1')}</li>
+                      <li>{t('userManual.guardian.internships.feature2')}</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -628,9 +625,7 @@ const UserManual = () => {
                     <CardDescription>{t('userManual.guardian.logout.description')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <ul className="list-disc pl-6 space-y-2">
-                      <li>{t('userManual.guardian.logout.step1')}</li>
-                    </ul>
+                    <p>{t('userManual.guardian.logout.description')}</p>
                   </CardContent>
                 </Card>
               </TabsContent>
