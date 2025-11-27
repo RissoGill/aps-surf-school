@@ -115,18 +115,21 @@
     "coach": {
       "login": {
         "title": "Como fazer Login",
+        "description": "Passos para aceder ao portal do treinador",
         "step1": "Aceder à página inicial e selecionar 'Treinador'",
         "step2": "Introduzir o seu ID de Treinador (ex: T01) e Palavra-passe",
         "step3": "Clicar no botão 'Entrar'"
       },
       "dashboard": {
         "title": "Dashboard Principal",
+        "description": "Visão geral do painel de controlo do treinador",
         "feature1": "Ver resumo mensal de treinos realizados",
         "feature2": "Consultar estatísticas de atletas treinados",
         "feature3": "Pesquisar atletas rapidamente"
       },
       "attendance": {
         "title": "Registo de Presenças (Individual)",
+        "description": "Como registar a presença de um atleta individualmente",
         "step1": "Selecionar o atleta na lista de atletas",
         "step2": "Clicar no botão 'Registar Presença'",
         "step3": "Preencher os campos: Data, Turno (Manhã/Tarde), e Localização da Praia",
@@ -135,6 +138,7 @@
       },
       "bulk": {
         "title": "Registo de Presenças em Massa",
+        "description": "Como registar presenças de vários atletas ao mesmo tempo",
         "step1": "Aceder ao separador 'Registo em Massa'",
         "step2": "Selecionar a data e o turno (Manhã/Tarde)",
         "step3": "Marcar os atletas que estiveram presentes usando as checkboxes",
@@ -144,6 +148,7 @@
       },
       "profile": {
         "title": "Perfil do Atleta",
+        "description": "Informação detalhada sobre cada atleta",
         "feature1": "Visualizar dados pessoais do atleta (nome, data de nascimento, morada)",
         "feature2": "Consultar contactos de emergência (Mãe e Pai)",
         "feature3": "Ver nível de surf atual do atleta",
@@ -151,22 +156,26 @@
       },
       "championships": {
         "title": "Campeonatos",
+        "description": "Gerir inscrições de atletas em campeonatos",
         "feature1": "Ver lista de campeonatos disponíveis",
         "feature2": "Inscrever atletas em campeonatos selecionando da lista"
       },
       "internships": {
         "title": "Estágios",
+        "description": "Gerir inscrições de atletas em estágios",
         "feature1": "Ver lista de estágios disponíveis",
         "feature2": "Inscrever atletas em estágios selecionando da lista"
       },
       "history": {
         "title": "Histórico de Treinos",
+        "description": "Consultar e exportar histórico completo de treinos",
         "feature1": "Filtrar treinos por data, atleta, ou localização da praia",
         "feature2": "Exportar relatórios detalhados em formato PDF",
         "feature3": "Consultar estatísticas detalhadas de treinos"
       },
       "payments": {
         "title": "Pagamentos do Treinador",
+        "description": "Consultar histórico de pagamentos recebidos",
         "feature1": "Ver histórico completo de pagamentos recebidos",
         "feature2": "Filtrar pagamentos por ano e mês",
         "feature3": "Consultar total de ganhos acumulados"
@@ -179,12 +188,14 @@
     "athlete": {
       "login": {
         "title": "Como fazer Login",
+        "description": "Passos para aceder ao portal do atleta",
         "step1": "Aceder à página inicial e selecionar 'Atleta'",
         "step2": "Introduzir o seu ID de Atleta (ex: A01) e Palavra-passe",
         "step3": "Clicar no botão 'Entrar'"
       },
       "tabs": {
         "title": "Separadores Disponíveis",
+        "description": "Navegação pelos diferentes separadores do dashboard",
         "personal": "Dados Pessoais - Informação pessoal e contactos",
         "training": "Treinos - Horários e informação de treinos",
         "attendance": "Presenças - Histórico de presenças e resumos",
@@ -194,6 +205,7 @@
       },
       "personal": {
         "title": "Dados Pessoais",
+        "description": "Consultar informação pessoal completa",
         "feature1": "Visualizar informação pessoal completa",
         "feature2": "Consultar data de nascimento, morada, e número de telefone",
         "feature3": "Ver nível de surf atual",
@@ -201,12 +213,14 @@
       },
       "training": {
         "title": "Informação de Treinos",
+        "description": "Consultar horários e frequência de treinos",
         "feature1": "Ver número de sessões de treino semanais",
         "feature2": "Consultar dias da semana em que há treino",
         "feature3": "Verificar informação sobre transporte disponível"
       },
       "attendance": {
         "title": "Presenças e Resumos",
+        "description": "Acompanhar histórico de presenças e estatísticas",
         "feature1": "Navegar entre meses usando as setas esquerda/direita",
         "feature2": "Ver estado de cada sessão (Presente/Ausente/Justificado)",
         "feature3": "Consultar resumos mensais e anuais de presenças",
@@ -214,17 +228,20 @@
       },
       "championships": {
         "title": "Campeonatos",
+        "description": "Consultar inscrições em campeonatos",
         "feature1": "Ver lista de campeonatos em que está inscrito",
         "feature2": "Consultar detalhes: nome, local, datas, e categoria"
       },
       "media": {
         "title": "Galeria de Média",
+        "description": "Ver e descarregar fotos e vídeos dos treinos",
         "feature1": "Visualizar fotos tiradas durante os treinos",
         "feature2": "Ver vídeos dos treinos",
         "feature3": "Descarregar fotos e vídeos para o dispositivo"
       },
       "internships": {
         "title": "Estágios",
+        "description": "Consultar inscrições em estágios",
         "feature1": "Ver lista de estágios em que está inscrito",
         "feature2": "Consultar detalhes: nome, local, e datas"
       },
@@ -240,17 +257,20 @@
     "guardian": {
       "login": {
         "title": "Como fazer Login",
+        "description": "Passos para aceder ao portal de encarregado de educação",
         "step1": "Aceder à página inicial e selecionar 'Pais e Família'",
         "step2": "Introduzir o seu ID de Encarregado (ex: PA01) e Palavra-passe",
         "step3": "Clicar no botão 'Entrar'"
       },
       "family": {
         "title": "Área de Família",
+        "description": "Gerir múltiplos perfis de atletas",
         "feature1": "Se tiver múltiplos filhos, pode selecionar entre eles",
         "feature2": "Mudar facilmente entre perfis de diferentes atletas"
       },
       "tabs": {
         "title": "Separadores Disponíveis",
+        "description": "Navegação pelos diferentes separadores do dashboard",
         "overview": "Visão Geral - Resumo completo do atleta",
         "payments": "Pagamentos - Histórico de mensalidades",
         "media": "Média - Fotos e vídeos dos treinos",
@@ -259,6 +279,7 @@
       },
       "overview": {
         "title": "Visão Geral",
+        "description": "Resumo completo da atividade do atleta",
         "feature1": "Ver cartão do atleta com foto, nome, e nível de surf",
         "feature2": "Consultar resumo anual de presenças",
         "feature3": "Verificar saldo de Pack de treinos atual",
@@ -266,6 +287,7 @@
       },
       "pack": {
         "title": "Resumo de Pack",
+        "description": "Consultar saldo e histórico de packs de treino",
         "feature1": "Ver total de sessões de treino adquiridas",
         "feature2": "Consultar número de sessões já utilizadas",
         "feature3": "Verificar sessões restantes disponíveis",
@@ -273,23 +295,27 @@
       },
       "payments": {
         "title": "Histórico de Pagamentos",
+        "description": "Consultar histórico completo de mensalidades",
         "feature1": "Ver histórico completo de pagamentos realizados",
         "feature2": "Filtrar pagamentos por ano e mês",
         "feature3": "Consultar estado de cada pagamento (Pago/Pendente)"
       },
       "media": {
         "title": "Galeria de Média",
+        "description": "Ver fotos e vídeos dos treinos do seu filho/a",
         "feature1": "Visualizar fotos dos treinos do seu filho/a",
         "feature2": "Ver vídeos dos treinos",
         "feature3": "Descarregar fotos e vídeos para o dispositivo"
       },
       "championships": {
         "title": "Campeonatos",
+        "description": "Consultar inscrições em campeonatos",
         "feature1": "Ver campeonatos em que o seu filho/a está inscrito",
         "feature2": "Consultar detalhes de cada campeonato (nome, local, datas)"
       },
       "internships": {
         "title": "Estágios",
+        "description": "Consultar inscrições em estágios",
         "feature1": "Ver estágios em que o seu filho/a está inscrito",
         "feature2": "Consultar detalhes de cada estágio (nome, local, datas)"
       },

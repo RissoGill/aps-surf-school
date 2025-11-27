@@ -115,18 +115,21 @@
     "coach": {
       "login": {
         "title": "How to Login",
+        "description": "Steps to access the coach portal",
         "step1": "Go to the home page and select 'Coach'",
         "step2": "Enter your Coach ID (e.g., T01) and Password",
         "step3": "Click the 'Login' button"
       },
       "dashboard": {
         "title": "Main Dashboard",
+        "description": "Overview of the coach control panel",
         "feature1": "View monthly summary of training sessions",
         "feature2": "Check statistics of trained athletes",
         "feature3": "Quickly search for athletes"
       },
       "attendance": {
         "title": "Attendance Registration (Individual)",
+        "description": "How to register an athlete's attendance individually",
         "step1": "Select the athlete from the athlete list",
         "step2": "Click the 'Register Attendance' button",
         "step3": "Fill in the fields: Date, Shift (Morning/Afternoon), and Beach Location",
@@ -135,6 +138,7 @@
       },
       "bulk": {
         "title": "Bulk Attendance Registration",
+        "description": "How to register multiple athletes' attendance at once",
         "step1": "Go to the 'Bulk Registration' tab",
         "step2": "Select the date and shift (Morning/Afternoon)",
         "step3": "Check the athletes who attended using the checkboxes",
@@ -144,6 +148,7 @@
       },
       "profile": {
         "title": "Athlete Profile",
+        "description": "Detailed information about each athlete",
         "feature1": "View athlete personal data (name, date of birth, address)",
         "feature2": "Check emergency contacts (Mother and Father)",
         "feature3": "See current surf level of the athlete",
@@ -151,22 +156,26 @@
       },
       "championships": {
         "title": "Championships",
+        "description": "Manage athlete enrollments in championships",
         "feature1": "View list of available championships",
         "feature2": "Enroll athletes in championships by selecting from the list"
       },
       "internships": {
         "title": "Internships",
+        "description": "Manage athlete enrollments in internships",
         "feature1": "View list of available internships",
         "feature2": "Enroll athletes in internships by selecting from the list"
       },
       "history": {
         "title": "Training History",
+        "description": "View and export complete training history",
         "feature1": "Filter training sessions by date, athlete, or beach location",
         "feature2": "Export detailed reports in PDF format",
         "feature3": "View detailed training statistics"
       },
       "payments": {
         "title": "Coach Payments",
+        "description": "Check payment history received",
         "feature1": "View complete history of payments received",
         "feature2": "Filter payments by year and month",
         "feature3": "Check total accumulated earnings"
@@ -179,12 +188,14 @@
     "athlete": {
       "login": {
         "title": "How to Login",
+        "description": "Steps to access the athlete portal",
         "step1": "Go to the home page and select 'Athlete'",
         "step2": "Enter your Athlete ID (e.g., A01) and Password",
         "step3": "Click the 'Login' button"
       },
       "tabs": {
         "title": "Available Tabs",
+        "description": "Navigation through different dashboard tabs",
         "personal": "Personal Data - Personal information and contacts",
         "training": "Training - Schedules and training information",
         "attendance": "Attendance - Attendance history and summaries",
@@ -194,6 +205,7 @@
       },
       "personal": {
         "title": "Personal Data",
+        "description": "View complete personal information",
         "feature1": "View complete personal information",
         "feature2": "Check date of birth, address, and phone number",
         "feature3": "See current surf level",
@@ -201,12 +213,14 @@
       },
       "training": {
         "title": "Training Information",
+        "description": "View training schedules and frequency",
         "feature1": "See number of weekly training sessions",
         "feature2": "Check which days of the week have training",
         "feature3": "Verify available transport information"
       },
       "attendance": {
         "title": "Attendance and Summaries",
+        "description": "Track attendance history and statistics",
         "feature1": "Navigate between months using left/right arrows",
         "feature2": "View status of each session (Present/Absent/Justified)",
         "feature3": "Check monthly and annual attendance summaries",
@@ -214,17 +228,20 @@
       },
       "championships": {
         "title": "Championships",
+        "description": "View championship registrations",
         "feature1": "View list of championships you are enrolled in",
         "feature2": "Check details: name, location, dates, and category"
       },
       "media": {
         "title": "Media Gallery",
+        "description": "View and download training photos and videos",
         "feature1": "View photos taken during training sessions",
         "feature2": "Watch training videos",
         "feature3": "Download photos and videos to your device"
       },
       "internships": {
         "title": "Internships",
+        "description": "View internship registrations",
         "feature1": "View list of internships you are enrolled in",
         "feature2": "Check details: name, location, and dates"
       },
@@ -240,17 +257,20 @@
     "guardian": {
       "login": {
         "title": "How to Login",
+        "description": "Steps to access the guardian portal",
         "step1": "Go to the home page and select 'Parents and Family'",
         "step2": "Enter your Guardian ID (e.g., PA01) and Password",
         "step3": "Click the 'Login' button"
       },
       "family": {
         "title": "Family Area",
+        "description": "Manage multiple athlete profiles",
         "feature1": "If you have multiple children, you can select between them",
         "feature2": "Easily switch between different athlete profiles"
       },
       "tabs": {
         "title": "Available Tabs",
+        "description": "Navigation through different dashboard tabs",
         "overview": "Overview - Complete athlete summary",
         "payments": "Payments - Payment history",
         "media": "Media - Photos and videos from training",
@@ -259,6 +279,7 @@
       },
       "overview": {
         "title": "Overview",
+        "description": "Complete summary of athlete activity",
         "feature1": "View athlete card with photo, name, and surf level",
         "feature2": "Check annual attendance summary",
         "feature3": "Verify current training Pack balance",
@@ -266,6 +287,7 @@
       },
       "pack": {
         "title": "Pack Summary",
+        "description": "View training pack balance and history",
         "feature1": "View total training sessions purchased",
         "feature2": "Check number of sessions already used",
         "feature3": "Verify remaining available sessions",
@@ -273,23 +295,27 @@
       },
       "payments": {
         "title": "Payment History",
+        "description": "View complete payment history",
         "feature1": "View complete history of payments made",
         "feature2": "Filter payments by year and month",
         "feature3": "Check status of each payment (Paid/Pending)"
       },
       "media": {
         "title": "Media Gallery",
+        "description": "View your child's training photos and videos",
         "feature1": "View photos from your child's training sessions",
         "feature2": "Watch training videos",
         "feature3": "Download photos and videos to your device"
       },
       "championships": {
         "title": "Championships",
+        "description": "View championship registrations",
         "feature1": "View championships your child is enrolled in",
         "feature2": "Check details of each championship (name, location, dates)"
       },
       "internships": {
         "title": "Internships",
+        "description": "View internship registrations",
         "feature1": "View internships your child is enrolled in",
         "feature2": "Check details of each internship (name, location, dates)"
       },
