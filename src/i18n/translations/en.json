@@ -325,6 +325,7 @@
     },
     "management": {
       "title": "Management Tools",
+      "view": "View",
       "users": "Manage Users",
       "usersDesc": "Add, edit, and remove coaches, athletes, and guardians",
       "athletes": "Athlete Management",

@@ -773,20 +773,19 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
-        {/* Admin Actions - Hidden for reports_viewer */}
-        {userRole !== 'reports_viewer' && (
-          <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-foreground mb-4 text-center">{t('admin.management.title')}</h3>
-            
-            {adminActions
-              .filter(action => {
-                // Only super_admin can see "Manage Users"
-                if (action.title === t('admin.management.users')) {
-                  return userRole === 'super_admin';
-                }
-                return true;
-              })
-              .map((action, index) => {
+        {/* Admin Actions - Show for all roles */}
+        <div className="space-y-4">
+          <h3 className="text-2xl font-bold text-foreground mb-4 text-center">{t('admin.management.title')}</h3>
+          
+          {adminActions
+            .filter(action => {
+              // Only super_admin and reports_viewer can see "Manage Users"
+              if (action.title === t('admin.management.users')) {
+                return userRole === 'super_admin' || userRole === 'reports_viewer';
+              }
+              return true;
+            })
+            .map((action, index) => {
             const bgColorClass = 
               action.color === "primary" ? "bg-primary/10" :
               action.color === "success" ? "bg-success/10" :
@@ -833,7 +832,7 @@ const AdministrationDashboard = () => {
                       size="sm"
                       className="w-full lg:w-auto touch-friendly shrink-0 lg:self-start"
                     >
-                      {action.action}
+                      {userRole === 'reports_viewer' ? t('admin.management.view') : action.action}
                     </Button>
                   </div>
                 </CardContent>
@@ -841,7 +840,6 @@ const AdministrationDashboard = () => {
             );
           })}
         </div>
-        )}
 
         {/* Coach Attendance Management */}
         {isLoading ? (
