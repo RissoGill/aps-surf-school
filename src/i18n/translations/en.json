@@ -62,6 +62,8 @@
     "athletePlaceholder": "A01",
     "guardianPortal": "Guardian Portal",
     "guardianDescription": "Track your child's progress and manage payments",
+    "guardianId": "Guardian ID",
+    "guardianPlaceholder": "PA01",
     "adminPortal": "Admin Portal",
     "adminDescription": "Full access to school management system",
     "adminPlaceholder": "admin"
