@@ -186,6 +186,7 @@
       }
     },
     "athlete": {
+      "title": "Athlete Manual",
       "login": {
         "title": "How to Login",
         "description": "Steps to access the athlete portal",
@@ -742,7 +743,8 @@
       "annualSummary": "Annual Summary",
       "media": "Media",
       "championships": "Championships",
-      "estagios": "Training Camps"
+      "estagios": "Training Camps",
+      "manual": "Manual"
     },
     "personal": {
       "title": "Personal Information",
@@ -859,7 +861,8 @@
       "media": "Media",
       "championships": "Championships",
       "champs": "Champs",
-      "estagios": "Training Camps"
+      "estagios": "Training Camps",
+      "manual": "Manual"
     },
     "packSummary": {
       "title": "Your pack summary",
