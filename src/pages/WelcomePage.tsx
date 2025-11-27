@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Trophy, Heart, Settings } from "lucide-react";
+import { Users, Trophy, Heart, Settings, BookOpen } from "lucide-react";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
@@ -66,7 +66,7 @@ const WelcomePage = () => {
         </div>
 
         {/* Role Selection */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           {roles.map((role) => (
             <Card
               key={role.titleKey}
@@ -87,6 +87,24 @@ const WelcomePage = () => {
             </Card>
           ))}
         </div>
+
+        {/* User Manual Link */}
+        <Card
+          className="animate-fade-in cursor-pointer hover:shadow-medium transition-all duration-200 active:scale-95 bg-primary/5"
+          onClick={() => navigate('/manual')}
+        >
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+              <BookOpen className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-left flex-1">
+              <h3 className="font-semibold text-foreground text-sm">{t('footer.userManual')}</h3>
+              <p className="text-xs text-muted-foreground">
+                {t('userManual.subtitle')}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </main>
 
       <SponsorBanner />

@@ -96,6 +96,206 @@
     "ourPartners": "Our Partners",
     "verifiedBy": "School Certified By"
   },
+  "footer": {
+    "rights": "All rights reserved",
+    "certifiedBy": "School Certified By",
+    "userManual": "User Manual"
+  },
+  "userManual": {
+    "title": "User Manual",
+    "subtitle": "Complete guide to using the APS Surf School platform",
+    "tabs": {
+      "coach": "Coach",
+      "athlete": "Athlete",
+      "guardian": "Guardian"
+    },
+    "coach": {
+      "login": {
+        "title": "How to Login",
+        "step1": "Go to the home page and select 'Coach'",
+        "step2": "Enter your Coach ID (e.g., T01) and Password",
+        "step3": "Click the 'Login' button"
+      },
+      "dashboard": {
+        "title": "Main Dashboard",
+        "feature1": "View monthly summary of training sessions",
+        "feature2": "Check statistics of trained athletes",
+        "feature3": "Quickly search for athletes"
+      },
+      "attendance": {
+        "title": "Attendance Registration (Individual)",
+        "step1": "Select the athlete from the athlete list",
+        "step2": "Click the 'Register Attendance' button",
+        "step3": "Fill in the fields: Date, Shift (Morning/Afternoon), and Beach Location",
+        "step4": "Optionally add photos or videos using the upload button",
+        "step5": "Click 'Save' to register the attendance"
+      },
+      "bulk": {
+        "title": "Bulk Attendance Registration",
+        "step1": "Go to the 'Bulk Registration' tab",
+        "step2": "Select the date and shift (Morning/Afternoon)",
+        "step3": "Check the athletes who attended using the checkboxes",
+        "step4": "Set the status for each athlete (Present/Absent/Justified)",
+        "step5": "Add beach location and optional notes",
+        "step6": "Click 'Submit Attendance' to register all at once"
+      },
+      "profile": {
+        "title": "Athlete Profile",
+        "feature1": "View athlete personal data (name, date of birth, address)",
+        "feature2": "Check emergency contacts (Mother and Father)",
+        "feature3": "See current surf level of the athlete",
+        "feature4": "Verify transport information"
+      },
+      "championships": {
+        "title": "Championships",
+        "feature1": "View list of available championships",
+        "feature2": "Enroll athletes in championships by selecting from the list"
+      },
+      "internships": {
+        "title": "Internships",
+        "feature1": "View list of available internships",
+        "feature2": "Enroll athletes in internships by selecting from the list"
+      },
+      "history": {
+        "title": "Training History",
+        "feature1": "Filter training sessions by date, athlete, or beach location",
+        "feature2": "Export detailed reports in PDF format",
+        "feature3": "View detailed training statistics"
+      },
+      "payments": {
+        "title": "Coach Payments",
+        "feature1": "View complete history of payments received",
+        "feature2": "Filter payments by year and month",
+        "feature3": "Check total accumulated earnings"
+      },
+      "logout": {
+        "title": "Logout",
+        "description": "To exit the platform, click the 'Logout' button at the top of the page"
+      }
+    },
+    "athlete": {
+      "login": {
+        "title": "How to Login",
+        "step1": "Go to the home page and select 'Athlete'",
+        "step2": "Enter your Athlete ID (e.g., A01) and Password",
+        "step3": "Click the 'Login' button"
+      },
+      "tabs": {
+        "title": "Available Tabs",
+        "personal": "Personal Data - Personal information and contacts",
+        "training": "Training - Schedules and training information",
+        "attendance": "Attendance - Attendance history and summaries",
+        "championships": "Championships - Competition registrations",
+        "media": "Media - Photo and video gallery from training",
+        "internships": "Internships - Participation in internships"
+      },
+      "personal": {
+        "title": "Personal Data",
+        "feature1": "View complete personal information",
+        "feature2": "Check date of birth, address, and phone number",
+        "feature3": "See current surf level",
+        "feature4": "Verify parents' emergency contacts (Mother and Father)"
+      },
+      "training": {
+        "title": "Training Information",
+        "feature1": "See number of weekly training sessions",
+        "feature2": "Check which days of the week have training",
+        "feature3": "Verify available transport information"
+      },
+      "attendance": {
+        "title": "Attendance and Summaries",
+        "feature1": "Navigate between months using left/right arrows",
+        "feature2": "View status of each session (Present/Absent/Justified)",
+        "feature3": "Check monthly and annual attendance summaries",
+        "feature4": "Verify training Pack balance (if applicable)"
+      },
+      "championships": {
+        "title": "Championships",
+        "feature1": "View list of championships you are enrolled in",
+        "feature2": "Check details: name, location, dates, and category"
+      },
+      "media": {
+        "title": "Media Gallery",
+        "feature1": "View photos taken during training sessions",
+        "feature2": "Watch training videos",
+        "feature3": "Download photos and videos to your device"
+      },
+      "internships": {
+        "title": "Internships",
+        "feature1": "View list of internships you are enrolled in",
+        "feature2": "Check details: name, location, and dates"
+      },
+      "refresh": {
+        "title": "Refresh Data",
+        "description": "To update the data displayed on the dashboard, click the refresh button (rotation icon) at the top of the page"
+      },
+      "logout": {
+        "title": "Logout",
+        "description": "To exit the platform, click the 'Logout' button at the top of the page"
+      }
+    },
+    "guardian": {
+      "login": {
+        "title": "How to Login",
+        "step1": "Go to the home page and select 'Parents and Family'",
+        "step2": "Enter your Guardian ID (e.g., PA01) and Password",
+        "step3": "Click the 'Login' button"
+      },
+      "family": {
+        "title": "Family Area",
+        "feature1": "If you have multiple children, you can select between them",
+        "feature2": "Easily switch between different athlete profiles"
+      },
+      "tabs": {
+        "title": "Available Tabs",
+        "overview": "Overview - Complete athlete summary",
+        "payments": "Payments - Payment history",
+        "media": "Media - Photos and videos from training",
+        "championships": "Championships - Competition registrations",
+        "internships": "Internships - Participation in internships"
+      },
+      "overview": {
+        "title": "Overview",
+        "feature1": "View athlete card with photo, name, and surf level",
+        "feature2": "Check annual attendance summary",
+        "feature3": "Verify current training Pack balance",
+        "feature4": "See list of most recent payments"
+      },
+      "pack": {
+        "title": "Pack Summary",
+        "feature1": "View total training sessions purchased",
+        "feature2": "Check number of sessions already used",
+        "feature3": "Verify remaining available sessions",
+        "feature4": "View complete pack purchase history"
+      },
+      "payments": {
+        "title": "Payment History",
+        "feature1": "View complete history of payments made",
+        "feature2": "Filter payments by year and month",
+        "feature3": "Check status of each payment (Paid/Pending)"
+      },
+      "media": {
+        "title": "Media Gallery",
+        "feature1": "View photos from your child's training sessions",
+        "feature2": "Watch training videos",
+        "feature3": "Download photos and videos to your device"
+      },
+      "championships": {
+        "title": "Championships",
+        "feature1": "View championships your child is enrolled in",
+        "feature2": "Check details of each championship (name, location, dates)"
+      },
+      "internships": {
+        "title": "Internships",
+        "feature1": "View internships your child is enrolled in",
+        "feature2": "Check details of each internship (name, location, dates)"
+      },
+      "logout": {
+        "title": "Logout",
+        "description": "To exit the platform, click the 'Logout' button at the top of the page"
+      }
+    }
+  },
   "dashboard": {
     "coach": {
       "title": "Coach Dashboard",
