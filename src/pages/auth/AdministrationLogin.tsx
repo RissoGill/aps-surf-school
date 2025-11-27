@@ -30,7 +30,7 @@ const AdministrationLogin = () => {
       // Legacy system authentication using users table
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('admin_id, admin_password')
+        .select('admin_id, admin_password, admin_role')
         .eq('admin_id', formData.email)
         .eq('admin_password', formData.password)
         .maybeSingle();
@@ -49,7 +49,7 @@ const AdministrationLogin = () => {
       const adminSession = {
         id: userData.admin_id,
         email: userData.admin_id,
-        role: 'admin'
+        role: userData.admin_role || 'admin'
       };
       
       localStorage.setItem('adminSession', JSON.stringify(adminSession));
