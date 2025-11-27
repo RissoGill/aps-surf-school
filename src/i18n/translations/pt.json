@@ -325,6 +325,7 @@
     },
     "management": {
       "title": "Ferramentas de Gestão",
+      "view": "Ver",
       "users": "Gerir Utilizadores",
       "usersDesc": "Adicionar, editar e remover treinadores, atletas e encarregados",
       "athletes": "Gestão de Atletas",
