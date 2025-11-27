@@ -27,46 +27,38 @@ const AdministrationLogin = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password
-      });
-
-      if (error) {
-        toast({
-          title: t('login.error'),
-          description: error.message,
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Verify user has admin, super_admin, or reports_viewer role
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id)
-        .in('role', ['admin', 'super_admin', 'reports_viewer'])
+      // Legacy system authentication using users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('admin_id, admin_password')
+        .eq('admin_id', formData.email)
+        .eq('admin_password', formData.password)
         .maybeSingle();
 
-      if (roleError || !roleData) {
-        await supabase.auth.signOut();
+      if (userError || !userData) {
         toast({
-          title: t('login.accessDenied'),
-          description: t('login.noAdminPrivileges'),
+          title: t('login.error'),
+          description: t('login.invalidCredentials'),
           variant: "destructive"
         });
         setIsLoading(false);
         return;
       }
+
+      // Store session in localStorage
+      const adminSession = {
+        id: userData.admin_id,
+        email: userData.admin_id,
+        role: 'admin'
+      };
+      
+      localStorage.setItem('adminSession', JSON.stringify(adminSession));
 
       toast({
         title: t('login.success'),
-        description: roleData.role === 'reports_viewer' 
-          ? t('login.welcomeReportsViewer')
-          : t('login.welcomeAdmin'),
+        description: t('login.welcomeAdmin'),
       });
+      
       navigate("/dashboard/administration");
     } catch (error) {
       toast({
@@ -105,12 +97,12 @@ const AdministrationLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('login.email')}</Label>
+                <Label htmlFor="email">{t('login.emailOrId')}</Label>
                 <Input
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder={t('login.adminPlaceholder')}
+                  type="text"
+                  placeholder={t('login.adminIdPlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
