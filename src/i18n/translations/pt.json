@@ -62,6 +62,8 @@
     "athletePlaceholder": "A01",
     "guardianPortal": "Portal do Encarregado",
     "guardianDescription": "Acompanhe o progresso e pagamentos do seu educando",
+    "guardianId": "ID do Encarregado",
+    "guardianPlaceholder": "PA01",
     "adminPortal": "Portal de Administração",
     "adminDescription": "Acesso completo ao sistema de gestão da escola",
     "adminPlaceholder": "admin"

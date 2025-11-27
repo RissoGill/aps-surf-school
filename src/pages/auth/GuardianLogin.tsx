@@ -107,12 +107,12 @@ const GuardianLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('login.emailOrCode')}</Label>
+                <Label htmlFor="email">{t('login.guardianId')}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="text"
-                  placeholder={t('login.emailOrCodePlaceholder')}
+                  placeholder={t('login.guardianPlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
