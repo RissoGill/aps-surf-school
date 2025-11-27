@@ -816,21 +816,21 @@ const AdministrationDashboard = () => {
                   }
                 }}
               >
-                <CardContent className="p-0">
-                  <div className="flex flex-col lg:flex-row lg:items-center p-4 gap-4">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
                     <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
                       <action.icon className={`h-6 w-6 ${textColorClass}`} />
                     </div>
-                  
-                    <div className="flex-1 min-w-[200px]">
+                    <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{action.title}</h4>
                       <p className="text-sm text-muted-foreground whitespace-normal break-words">{action.description}</p>
                     </div>
-                    
+                  </div>
+                  <div className="mt-4 flex justify-end">
                     <Button 
                       variant="default" 
                       size="sm"
-                      className="w-full lg:w-auto touch-friendly shrink-0"
+                      className="w-full sm:w-auto touch-friendly"
                     >
                       {userRole === 'reports_viewer' ? t('admin.management.view') : action.action}
                     </Button>
