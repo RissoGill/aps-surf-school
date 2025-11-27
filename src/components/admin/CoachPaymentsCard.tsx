@@ -349,20 +349,20 @@ export const CoachPaymentsCard = ({ userRole }: CoachPaymentsCardProps) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Euro className="h-6 w-6 text-primary" />
-            </div>
-            <div className="min-w-[200px] max-w-md">
-              <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{t('shared.coachPayments.title')}</h4>
-              <p className="text-sm text-muted-foreground whitespace-normal break-words">{t('shared.coachPayments.subtitle')}</p>
-            </div>
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Euro className="h-6 w-6 text-primary" />
           </div>
-          {userRole !== 'reports_viewer' && (
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{t('shared.coachPayments.title')}</h4>
+            <p className="text-sm text-muted-foreground whitespace-normal break-words">{t('shared.coachPayments.subtitle')}</p>
+          </div>
+        </div>
+        {userRole !== 'reports_viewer' && (
+          <div className="mt-4 flex justify-end">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="w-full lg:w-auto lg:self-start shrink-0">
+                <Button size="sm" className="w-full sm:w-auto">
                   {t('shared.coachPayments.addPayment')}
                 </Button>
               </DialogTrigger>
@@ -469,8 +469,8 @@ export const CoachPaymentsCard = ({ userRole }: CoachPaymentsCardProps) => {
               </div>
             </DialogContent>
           </Dialog>
-          )}
-        </div>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="p-6 space-y-6">
