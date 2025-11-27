@@ -331,7 +331,7 @@
       "athletes": "Athlete Management",
       "athletesDesc": "Full CRUD access to athlete profiles and data",
       "payments": "Payment Administration",
-      "paymentsDesc": "Set fees, mark payments, and view financial reports",
+      "paymentsDesc": "Set fees and mark payments",
       "attendance": "Attendance Management",
       "attendanceDesc": "Search athletes and manage their attendance records",
       "viewUsers": "View Users",
