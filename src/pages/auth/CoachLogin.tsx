@@ -27,58 +27,39 @@ const CoachLogin = () => {
     setIsLoading(true);
 
     try {
-      const identifier = formData.email.trim();
-      const isEmail = identifier.includes('@');
-
-      if (isEmail) {
-        // Try Supabase Auth first when an email is provided
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: identifier,
-          password: formData.password,
-        });
-  
-        if (!authError && authData.user) {
-          const { data: coach, error: coachError } = await supabase
-            .from('coach')
-            .select('coach_id, first_name, last_name, email, coach_user_id')
-            .eq('auth_uid', authData.user.id)
-            .maybeSingle();
-  
-          if (coachError || !coach) {
-            await supabase.auth.signOut();
-            throw new Error("Coach profile not found");
-          }
-  
-          localStorage.setItem('coach_session', JSON.stringify(coach));
-          const coachName = [coach.first_name, coach.last_name].filter(Boolean).join(' ') || t('login.coach');
-          toast({ title: t('login.success'), description: t('login.welcomeBack').replace('{name}', coachName) });
-          navigate("/dashboard/coach");
-          return;
-        }
-      }
-
-      // Fallback: legacy login via coach_user_id + coach_password (no Supabase session)
-      const { data: legacyCoach, error: legacyErr } = await supabase
+      // Legacy system authentication using coach table
+      const { data: coachData, error: coachError } = await supabase
         .from('coach')
         .select('coach_id, first_name, last_name, email, coach_user_id')
-        .eq('coach_user_id', identifier)
+        .eq('coach_user_id', formData.email.trim())
         .eq('coach_password', formData.password)
         .maybeSingle();
 
-      if (legacyErr || !legacyCoach) {
-        throw new Error("Invalid credentials");
+      if (coachError || !coachData) {
+        toast({
+          title: t('login.error'),
+          description: t('login.invalidCredentials'),
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
       }
 
-      localStorage.setItem('coach_session', JSON.stringify(legacyCoach));
-      const legacyName = [legacyCoach.first_name, legacyCoach.last_name].filter(Boolean).join(' ') || t('login.coach');
-      toast({ title: t('login.success'), description: t('login.welcomeBack').replace('{name}', legacyName) });
+      localStorage.setItem('coach_session', JSON.stringify(coachData));
+      const coachName = [coachData.first_name, coachData.last_name].filter(Boolean).join(' ') || t('login.coach');
+      
+      toast({
+        title: t('login.success'),
+        description: t('login.welcomeBack').replace('{name}', coachName),
+      });
+      
       navigate("/dashboard/coach");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: t('login.error'),
-        description: error.message || t('login.invalidCredentials'),
-        variant: "destructive",
+        description: t('login.unexpectedError'),
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -115,8 +96,8 @@ const CoachLogin = () => {
                 <Input
                   id="email"
                   name="email"
-                  type="email"
-                  placeholder={t('login.coachPlaceholder')}
+                  type="text"
+                  placeholder={t('login.coachIdPlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
                   required
