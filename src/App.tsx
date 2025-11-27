@@ -20,6 +20,7 @@ import PaymentManagement from "./pages/admin/PaymentManagement";
 import AttendanceManagement from "./pages/admin/AttendanceManagement";
 import AthletesList from "./pages/attendance/AthletesList";
 import AttendanceRecords from "./pages/attendance/AttendanceRecords";
+import UserManual from "./pages/UserManual";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,9 @@ const App = () => (
             {/* Attendance Routes */}
             <Route path="/attendance/athletes" element={<AthletesList />} />
             <Route path="/attendance/records" element={<AttendanceRecords />} />
+            
+            {/* User Manual */}
+            <Route path="/manual" element={<UserManual />} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
