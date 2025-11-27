@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download, Trophy, Plane, BookOpen } from "lucide-react";
+import { Heart, CreditCard, AlertCircle, CheckCircle, Loader2, Calendar, Image as ImageIcon, Video, Play, Download, Trophy, Plane } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +12,6 @@ import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
-import { GuardianManualContent } from "@/components/manual/GuardianManualContent";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { calculatePackBalance } from "@/utils/packBalance";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -1155,13 +1154,6 @@ const GuardianDashboard = () => {
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
               {t('guardian.tabs.estagios')}
             </TabsTrigger>
-            <TabsTrigger 
-              value="manual" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
-            >
-              <BookOpen className="h-3 w-3 mr-1 inline sm:hidden" />
-              {t('guardian.tabs.manual')}
-            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -1343,11 +1335,6 @@ const GuardianDashboard = () => {
           {/* Estágios Tab */}
           <TabsContent value="estagios">
             {athlete && <EstagiosTab athleteId={athlete.athlete_id} />}
-          </TabsContent>
-
-          {/* Manual Tab */}
-          <TabsContent value="manual">
-            <GuardianManualContent />
           </TabsContent>
         </Tabs>
       </main>

@@ -31,7 +31,6 @@ import { EstagiosTab } from "@/components/coach/EstagiosTab";
 import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { PaymentsTab } from "@/components/coach/PaymentsTab";
-import { CoachManualContent } from "@/components/manual/CoachManualContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {
@@ -1640,13 +1639,6 @@ const CoachDashboard = () => {
           </CardContent>
         </Card>
         )}
-        
-        {/* Manual do Treinador */}
-        <Card className="shadow-soft mb-6">
-          <CardContent className="pt-6">
-            <CoachManualContent />
-          </CardContent>
-        </Card>
 
         {/* Coach Payments Section */}
         {coachData?.coach_id && (
