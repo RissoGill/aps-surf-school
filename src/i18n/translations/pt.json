@@ -104,6 +104,9 @@
   "userManual": {
     "title": "Manual de Utilizador",
     "subtitle": "Guia completo para usar a plataforma APS Surf School",
+    "downloadPdf": "Transferir PDF",
+    "downloadSuccess": "PDF transferido com sucesso",
+    "downloadError": "Erro ao transferir PDF",
     "tabs": {
       "coach": "Treinador",
       "athlete": "Atleta",
