@@ -186,6 +186,7 @@
       }
     },
     "athlete": {
+      "title": "Manual do Atleta",
       "login": {
         "title": "Como fazer Login",
         "description": "Passos para aceder ao portal do atleta",
@@ -742,7 +743,8 @@
       "annualSummary": "Resumo Anual",
       "media": "Multimédia",
       "championships": "Campeonatos",
-      "estagios": "Estágios"
+      "estagios": "Estágios",
+      "manual": "Manual"
     },
     "personal": {
       "title": "Informação Pessoal",
@@ -859,7 +861,8 @@
       "media": "Multimédia",
       "championships": "Campeonatos",
       "champs": "Campeonatos",
-      "estagios": "Estágios"
+      "estagios": "Estágios",
+      "manual": "Manual"
     },
     "packSummary": {
       "title": "Resumo do seu pack",

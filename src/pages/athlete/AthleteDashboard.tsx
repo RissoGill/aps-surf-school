@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone, Plane, RefreshCw } from "lucide-react";
+import { Trophy, Calendar, Clock, MapPin, ChevronLeft, ChevronRight, LogOut, Image as ImageIcon, Video, Play, Download, User, Phone, Plane, RefreshCw, BookOpen } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSumm
 import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { calculatePackBalance } from "@/utils/packBalance";
+import { AthleteManualContent } from "@/components/manual/AthleteManualContent";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Athlete {
@@ -510,6 +511,13 @@ useEffect(() => {
             >
               <Plane className="h-3 w-3 mr-1 inline sm:hidden" />
               {t('athlete.tabs.estagios')}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="manual" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-foreground text-xs font-semibold px-3 py-2 flex-1 min-w-[90px]"
+            >
+              <BookOpen className="h-3 w-3 mr-1 inline sm:hidden" />
+              {t('athlete.tabs.manual')}
             </TabsTrigger>
           </TabsList>
 
@@ -1053,58 +1061,12 @@ useEffect(() => {
 
           {/* Estágios Tab */}
           <TabsContent value="estagios">
-            <Card className="shadow-soft">
-              <CardHeader>
-                <h4 className="font-medium text-title flex items-center gap-2">
-                  <Plane className="h-6 w-6 text-primary" />
-                  {t('athlete.tabs.estagios')}
-                </h4>
-                <CardDescription>{t('athlete.estagios.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isLoadingEstagios ? (
-                  <div className="text-center py-4">
-                    <Skeleton className="h-20 w-full" />
-                  </div>
-                ) : estagios.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    {t('athlete.estagios.noEstagios')}
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {estagios.map((estagio: any) => (
-                      <div key={estagio.id} className="border border-border rounded-lg p-4 bg-card hover:bg-accent/5 transition-colors">
-                        <h3 className="font-semibold text-lg mb-2">{estagio.nome_estagio}</h3>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          {estagio.local && (
-                            <div className="col-span-2">
-                              <span className="text-muted-foreground">{t('athlete.estagios.location')}</span>
-                              <p className="font-medium">{estagio.local}</p>
-                            </div>
-                          )}
-                          {estagio.data_inicio && (
-                            <div>
-                              <span className="text-muted-foreground">{t('athlete.estagios.start')}</span>
-                              <p className="font-medium">
-                                {new Date(estagio.data_inicio).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
-                              </p>
-                            </div>
-                          )}
-                          {estagio.data_fim && (
-                            <div>
-                              <span className="text-muted-foreground">{t('athlete.estagios.end')}</span>
-                              <p className="font-medium">
-                                {new Date(estagio.data_fim).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+...
+          </TabsContent>
+
+          {/* Manual Tab */}
+          <TabsContent value="manual">
+            <AthleteManualContent />
           </TabsContent>
         </Tabs>
       </main>
