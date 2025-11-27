@@ -817,12 +817,12 @@ const AdministrationDashboard = () => {
                 }}
               >
                 <CardContent className="p-0">
-                  <div className="flex flex-col lg:flex-row lg:items-center p-4 gap-4">
+                  <div className="flex flex-col lg:flex-row lg:flex-wrap lg:items-center p-4 gap-4">
                     <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
                       <action.icon className={`h-6 w-6 ${textColorClass}`} />
                     </div>
                   
-                    <div className="flex-1 md:min-w-[200px]">
+                    <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-foreground mb-1">{action.title}</h4>
                       <p className="text-sm text-muted-foreground">{action.description}</p>
                     </div>
