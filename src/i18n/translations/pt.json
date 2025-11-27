@@ -58,12 +58,13 @@
     "coachPlaceholder": "treinador@apssurfschool.com ou T01",
     "athletePortal": "Portal do Atleta",
     "athleteDescription": "Veja o seu horário de treino e progresso",
-    "athletePlaceholder": "atleta@email.com",
+    "athleteId": "ID do Atleta",
+    "athletePlaceholder": "A01",
     "guardianPortal": "Portal do Encarregado",
     "guardianDescription": "Acompanhe o progresso e pagamentos do seu educando",
     "adminPortal": "Portal de Administração",
     "adminDescription": "Acesso completo ao sistema de gestão da escola",
-    "adminPlaceholder": "admin@aps.com"
+    "adminPlaceholder": "admin"
   },
   "common": {
     "save": "Guardar",

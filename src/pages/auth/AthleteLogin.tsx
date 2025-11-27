@@ -111,11 +111,11 @@ const AthleteLogin = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('login.email')}</Label>
+                <Label htmlFor="email">{t('login.athleteId')}</Label>
                 <Input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   placeholder={t('login.athletePlaceholder')}
                   value={formData.email}
                   onChange={handleInputChange}
