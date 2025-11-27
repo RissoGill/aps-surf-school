@@ -74,6 +74,7 @@ const UserManagement = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [sessionValid, setSessionValid] = useState(false);
+  const [userRole, setUserRole] = useState<string>('admin');
   const [coaches, setCoaches] = useState<Coach[]>([]);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -87,43 +88,25 @@ const UserManagement = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [open, setOpen] = useState(false);
 
+  // Session validation on mount - using legacy localStorage auth
   useEffect(() => {
-    const validateSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error(t('admin.userManagement.sessionExpired'));
-        navigate("/login/administration");
-        return;
-      }
+    const adminSessionStr = localStorage.getItem('adminSession');
+    if (!adminSessionStr) {
+      toast.error(t('admin.userManagement.sessionExpired'));
+      navigate("/login/administration");
+      return;
+    }
 
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .eq('role', 'super_admin')
-        .maybeSingle();
-
-      if (!roleData) {
-        await supabase.auth.signOut();
-        toast.error(t('admin.userManagement.accessDenied'));
-        navigate("/login/administration");
-        return;
-      }
-
+    try {
+      const adminSession = JSON.parse(adminSessionStr);
+      setUserRole(adminSession.role || 'admin');
       setSessionValid(true);
-    };
-
-    validateSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        navigate("/login/administration");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    } catch (error) {
+      console.error('Error parsing admin session:', error);
+      toast.error(t('admin.userManagement.sessionExpired'));
+      navigate("/login/administration");
+    }
+  }, [navigate, t]);
 
   useEffect(() => {
     if (sessionValid) {
@@ -297,10 +280,12 @@ const UserManagement = () => {
                 <CardTitle>{t('admin.userManagement.title')}</CardTitle>
                 <CardDescription>{t('admin.userManagement.subtitle')}</CardDescription>
               </div>
-              <Button onClick={handleAdd} className="touch-friendly">
-                <UserPlus className="h-4 w-4 mr-2" />
-                {t('admin.userManagement.addNew')}
-              </Button>
+              {userRole !== 'reports_viewer' && (
+                <Button onClick={handleAdd} className="touch-friendly">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  {t('admin.userManagement.addNew')}
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
