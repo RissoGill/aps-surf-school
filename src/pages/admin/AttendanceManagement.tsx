@@ -45,6 +45,7 @@ const AttendanceManagement = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string>('admin');
   const [editForm, setEditForm] = useState({
     date: "",
     status: "",
@@ -54,32 +55,23 @@ const AttendanceManagement = () => {
     notes: ""
   });
 
-  // Session validation on mount
+  // Session validation on mount - using legacy localStorage auth
   useEffect(() => {
-    const validateSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({ title: t('login.sessionExpired'), variant: "destructive" });
-        navigate("/login/administration");
-        return;
-      }
+    const adminSessionStr = localStorage.getItem('adminSession');
+    if (!adminSessionStr) {
+      toast({ title: t('login.sessionExpired'), variant: "destructive" });
+      navigate("/login/administration");
+      return;
+    }
 
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .in('role', ['admin', 'super_admin'])
-        .maybeSingle();
-
-      if (!roleData) {
-        toast({ title: t('login.accessDenied'), variant: "destructive" });
-        navigate("/dashboard/administration");
-        return;
-      }
-    };
-
-    validateSession();
+    try {
+      const adminSession = JSON.parse(adminSessionStr);
+      setUserRole(adminSession.role || 'admin');
+    } catch (error) {
+      console.error('Error parsing admin session:', error);
+      toast({ title: t('login.sessionExpired'), variant: "destructive" });
+      navigate("/login/administration");
+    }
   }, [navigate, t, toast]);
 
   // Fetch all athletes
@@ -407,28 +399,30 @@ const AttendanceManagement = () => {
                           <TableCell>{record.beach_location || '-'}</TableCell>
                           <TableCell className="max-w-xs truncate">{record.notes || '-'}</TableCell>
                           <TableCell className="text-right">
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEdit(record);
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDelete(record);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            {userRole !== 'reports_viewer' && (
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEdit(record);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(record);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

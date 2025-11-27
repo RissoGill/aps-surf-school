@@ -55,6 +55,7 @@ const PaymentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>('admin');
   const [editForm, setEditForm] = useState<{
     amount_due: string;
     amount_paid: string;
@@ -71,32 +72,23 @@ const PaymentManagement = () => {
     notes: ""
   });
 
-  // Session validation on mount
+  // Session validation on mount - using legacy localStorage auth
   useEffect(() => {
-    const validateSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast({ title: t('login.sessionExpired'), variant: "destructive" });
-        navigate("/login/administration");
-        return;
-      }
+    const adminSessionStr = localStorage.getItem('adminSession');
+    if (!adminSessionStr) {
+      toast({ title: t('login.sessionExpired'), variant: "destructive" });
+      navigate("/login/administration");
+      return;
+    }
 
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .in('role', ['admin', 'super_admin'])
-        .maybeSingle();
-
-      if (!roleData) {
-        toast({ title: t('login.accessDenied'), variant: "destructive" });
-        navigate("/dashboard/administration");
-        return;
-      }
-    };
-
-    validateSession();
+    try {
+      const adminSession = JSON.parse(adminSessionStr);
+      setUserRole(adminSession.role || 'admin');
+    } catch (error) {
+      console.error('Error parsing admin session:', error);
+      toast({ title: t('login.sessionExpired'), variant: "destructive" });
+      navigate("/login/administration");
+    }
   }, [navigate, t, toast]);
 
   const translateMonth = (month: string): string => {
@@ -907,13 +899,15 @@ const PaymentManagement = () => {
                                     </Button>
                                   </div>
                                 ) : (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => handleEditStart(payment)}
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
+                                  userRole !== 'reports_viewer' && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleEditStart(payment)}
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                  )
                                 )}
                               </TableCell>
                             </TableRow>
