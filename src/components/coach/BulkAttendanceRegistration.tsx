@@ -23,7 +23,7 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
   const [athleteStatuses, setAthleteStatuses] = useState<Record<string, string>>({});
-  const [selectedShift, setSelectedShift] = useState("Manhã");
+  const [selectedShift, setSelectedShift] = useState("Morning");
   const [beachLocation, setBeachLocation] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -296,8 +296,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Manhã">{t('coach.bulkAttendance.morning')}</SelectItem>
-                <SelectItem value="Tarde">{t('coach.bulkAttendance.afternoon')}</SelectItem>
+                <SelectItem value="Morning">{t('coach.bulkAttendance.morning')}</SelectItem>
+                <SelectItem value="Afternoon">{t('coach.bulkAttendance.afternoon')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
