@@ -878,7 +878,8 @@
       "outstanding": "Em Dívida",
       "recentPayments": "Pagamentos Recentes",
       "paid": "Pago:",
-      "noRecentPayments": "Nenhum pagamento recente encontrado"
+      "noRecentPayments": "Nenhum pagamento recente encontrado",
+      "loadingPayments": "A carregar pagamentos..."
     },
     "payments": {
       "summary": "Resumo de Pagamentos",
