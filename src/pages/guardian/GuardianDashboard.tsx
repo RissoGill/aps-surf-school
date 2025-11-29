@@ -804,7 +804,7 @@ const GuardianDashboard = () => {
 
   // Fetch payments for all guardian's athletes
   const { data: payments, isLoading: paymentsLoading } = useQuery({
-    queryKey: ['guardian-payments', athletes],
+    queryKey: ['guardian-payments', athletes?.map(a => a.athlete_id)],
     queryFn: async () => {
       if (!athletes || athletes.length === 0) return [];
       
@@ -983,7 +983,7 @@ const GuardianDashboard = () => {
     })
     .slice(0, 2);
 
-  const isLoading = athletesLoading;
+  const isLoading = athletesLoading || (!!athletes && athletes.length > 0 && paymentsLoading);
   const athlete = guardianRole === 'family' 
     ? athletes?.find(a => a.athlete_id === selectedAthleteId) || athletes?.[0] 
     : athletes?.[0]; // For now, display first athlete (or selected for family)
@@ -994,7 +994,10 @@ const GuardianDashboard = () => {
     paymentsLoading,
     guardianId,
     athletesCount: athletes?.length || 0,
-    athlete: athlete ? 'exists' : 'null'
+    athlete: athlete ? 'exists' : 'null',
+    paymentsCount: payments?.length || 0,
+    currentAthletePaymentsCount: currentAthletePayments?.length || 0,
+    recentPaidPaymentsCount: recentPaidPayments?.length || 0
   });
 
   if (isLoading) {
@@ -1158,28 +1161,37 @@ const GuardianDashboard = () => {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
-                <h4 className="font-medium text-foreground">{t('guardian.overview.paymentSummary')}</h4>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="p-3 bg-accent/50 rounded-lg">
-                    <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
-                    <p className="text-xs text-muted-foreground">{t('guardian.overview.nextPayment')}</p>
-                    {nextPaymentDueDate && (
-                      <p className="text-xs text-muted-foreground mt-1">{t('guardian.overview.due')} {nextPaymentDueDate}</p>
-                    )}
-                  </div>
-                  <div className="p-3 bg-destructive/10 rounded-lg">
-                    <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
-                    <p className="text-xs text-muted-foreground">{t('guardian.overview.outstanding')}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {paymentsLoading ? (
+              <Card className="shadow-soft">
+                <CardContent className="p-6 flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <span className="ml-2 text-muted-foreground">{t('guardian.overview.loadingPayments')}</span>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <Card className="shadow-soft">
+                  <CardHeader>
+                    <h4 className="font-medium text-foreground">{t('guardian.overview.paymentSummary')}</h4>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3 text-center">
+                      <div className="p-3 bg-accent/50 rounded-lg">
+                        <p className="text-lg font-bold text-foreground">{formatCurrency(nextPaymentAmount)}</p>
+                        <p className="text-xs text-muted-foreground">{t('guardian.overview.nextPayment')}</p>
+                        {nextPaymentDueDate && (
+                          <p className="text-xs text-muted-foreground mt-1">{t('guardian.overview.due')} {nextPaymentDueDate}</p>
+                        )}
+                      </div>
+                      <div className="p-3 bg-destructive/10 rounded-lg">
+                        <p className="text-lg font-bold text-destructive">{formatCurrency(totalOutstanding)}</p>
+                        <p className="text-xs text-muted-foreground">{t('guardian.overview.outstanding')}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="shadow-soft">
+                <Card className="shadow-soft">
               <CardHeader>
                 <h4 className="font-medium text-foreground">{t('guardian.overview.recentPayments')}</h4>
               </CardHeader>
@@ -1218,6 +1230,8 @@ const GuardianDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+              </>
+            )}
           </TabsContent>
 
           {/* Payments Tab */}

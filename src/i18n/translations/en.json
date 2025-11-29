@@ -878,7 +878,8 @@
       "outstanding": "Outstanding",
       "recentPayments": "Recent Payments",
       "paid": "Paid:",
-      "noRecentPayments": "No recent payments found"
+      "noRecentPayments": "No recent payments found",
+      "loadingPayments": "Loading payments..."
     },
     "payments": {
       "summary": "Payments Summary",
