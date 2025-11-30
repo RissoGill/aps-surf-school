@@ -441,37 +441,37 @@ const AttendanceManagement = () => {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-title">Attendance Record Details</DialogTitle>
+            <DialogTitle className="text-title">{t('admin.attendanceManagement.recordDetails')}</DialogTitle>
             <DialogDescription>
-              View and manage attendance record
+              {t('admin.attendanceManagement.viewDetails')}
             </DialogDescription>
           </DialogHeader>
           {selectedRecord && (
             <div className="space-y-4">
               <div>
-                <Label className="text-title">Date</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.date')}</Label>
                 <p className="font-medium">
                   {selectedRecord.date ? new Date(selectedRecord.date).toLocaleDateString() : '-'}
                 </p>
               </div>
               <div>
-                <Label className="text-title">Coach</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.coach')}</Label>
                 <p className="font-medium">{selectedRecord.coach_name}</p>
               </div>
               <div>
-                <Label className="text-title">Status</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.status')}</Label>
                 <p className="font-medium">{selectedRecord.status || '-'}</p>
               </div>
               <div>
-                <Label className="text-title">Shift</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.shift')}</Label>
                 <p className="font-medium">{selectedRecord.shift || '-'}</p>
               </div>
               <div>
-                <Label className="text-title">Beach Location</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.beachLocation')}</Label>
                 <p className="font-medium">{selectedRecord.beach_location || '-'}</p>
               </div>
               <div>
-                <Label className="text-title">Notes</Label>
+                <Label className="text-title">{t('admin.attendanceManagement.notes')}</Label>
                 <p className="font-medium">{selectedRecord.notes || '-'}</p>
               </div>
             </div>
@@ -481,22 +481,26 @@ const AttendanceManagement = () => {
               variant="outline"
               onClick={() => setViewDialogOpen(false)}
             >
-              Close
+              {t('admin.attendanceManagement.close')}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleEdit(selectedRecord!)}
-            >
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleDelete(selectedRecord!)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
+            {userRole !== 'reports_viewer' && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleEdit(selectedRecord!)}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  {t('common.edit')}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(selectedRecord!)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t('common.delete')}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -505,14 +509,14 @@ const AttendanceManagement = () => {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-title">Edit Attendance Record</DialogTitle>
+            <DialogTitle className="text-title">{t('admin.attendanceManagement.editRecord')}</DialogTitle>
             <DialogDescription>
-              Update the attendance details
+              {t('admin.attendanceManagement.editRecord')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="date" className="text-title">Date</Label>
+              <Label htmlFor="date" className="text-title">{t('admin.attendanceManagement.date')}</Label>
               <Input
                 id="date"
                 type="date"
@@ -521,35 +525,35 @@ const AttendanceManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="status" className="text-title">Status</Label>
+              <Label htmlFor="status" className="text-title">{t('admin.attendanceManagement.status')}</Label>
               <Select value={editForm.status} onValueChange={(value) => setEditForm({ ...editForm, status: value })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={t('admin.attendanceManagement.selectStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Present">Present</SelectItem>
-                  <SelectItem value="Absent">Absent</SelectItem>
-                  <SelectItem value="Justified">Justified</SelectItem>
+                  <SelectItem value="Present">{t('admin.attendanceManagement.present')}</SelectItem>
+                  <SelectItem value="Absent">{t('admin.attendanceManagement.absent')}</SelectItem>
+                  <SelectItem value="Justified">{t('admin.attendanceManagement.justified')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="shift" className="text-title">Shift</Label>
+              <Label htmlFor="shift" className="text-title">{t('admin.attendanceManagement.shift')}</Label>
               <Select value={editForm.shift} onValueChange={(value) => setEditForm({ ...editForm, shift: value })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select shift" />
+                  <SelectValue placeholder={t('admin.attendanceManagement.selectShift')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Morning">Morning</SelectItem>
-                  <SelectItem value="Afternoon">Afternoon</SelectItem>
+                  <SelectItem value="Morning">{t('admin.attendanceManagement.morning')}</SelectItem>
+                  <SelectItem value="Afternoon">{t('admin.attendanceManagement.afternoon')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="coach" className="text-title">Coach</Label>
+              <Label htmlFor="coach" className="text-title">{t('admin.attendanceManagement.coach')}</Label>
               <Select value={editForm.coach_id} onValueChange={(value) => setEditForm({ ...editForm, coach_id: value })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select coach" />
+                  <SelectValue placeholder={t('admin.attendanceManagement.selectCoach')} />
                 </SelectTrigger>
                 <SelectContent>
                   {allCoaches?.map((coach) => (
@@ -561,7 +565,7 @@ const AttendanceManagement = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="beach" className="text-title">Beach Location</Label>
+              <Label htmlFor="beach" className="text-title">{t('admin.attendanceManagement.beachLocation')}</Label>
               <Input
                 id="beach"
                 value={editForm.beach_location}
@@ -570,22 +574,22 @@ const AttendanceManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="notes" className="text-title">Notes</Label>
+              <Label htmlFor="notes" className="text-title">{t('admin.attendanceManagement.notes')}</Label>
               <Textarea
                 id="notes"
                 value={editForm.notes}
                 onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                placeholder="Add any additional notes..."
+                placeholder={t('admin.attendanceManagement.notesPlaceholder')}
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
+              {t('admin.attendanceManagement.cancel')}
             </Button>
             <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              {updateMutation.isPending ? t('common.loading') : t('admin.attendanceManagement.saveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -595,20 +599,18 @@ const AttendanceManagement = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Attendance Record</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.attendanceManagement.deleteRecord')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this attendance record for{' '}
-              {selectedRecord?.date ? new Date(selectedRecord.date).toLocaleDateString() : ''}?
-              This action cannot be undone and will be reflected in athlete and guardian dashboards.
+              {t('admin.attendanceManagement.deleteConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin.attendanceManagement.cancel')}</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {deleteMutation.isPending ? t('common.loading') : t('admin.attendanceManagement.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
