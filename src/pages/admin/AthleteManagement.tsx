@@ -412,7 +412,7 @@ const AthleteManagement = () => {
                 <TabsContent value="personal" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="first_name" className="text-title">First Name *</Label>
+                      <Label htmlFor="first_name" className="text-title">{t('admin.athleteManagement.firstName')} *</Label>
                       {isEditing ? (
                         <Input
                           id="first_name"
@@ -425,7 +425,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="last_name" className="text-title">Last Name *</Label>
+                      <Label htmlFor="last_name" className="text-title">{t('admin.athleteManagement.lastName')} *</Label>
                       {isEditing ? (
                         <Input
                           id="last_name"
@@ -438,7 +438,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="date_of_birth" className="text-title">Date of Birth</Label>
+                      <Label htmlFor="date_of_birth" className="text-title">{t('admin.athleteManagement.dateOfBirth')}</Label>
                       {isEditing ? (
                         <Input
                           id="date_of_birth"
@@ -452,7 +452,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="phone" className="text-title">Phone</Label>
+                      <Label htmlFor="phone" className="text-title">{t('admin.athleteManagement.phone')}</Label>
                       {isEditing ? (
                         <Input
                           id="phone"
@@ -465,7 +465,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="email" className="text-title">Email</Label>
+                      <Label htmlFor="email" className="text-title">{t('admin.athleteManagement.email')}</Label>
                       {isEditing ? (
                         <Input
                           id="email"
@@ -479,7 +479,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="address" className="text-title">Address</Label>
+                      <Label htmlFor="address" className="text-title">{t('admin.athleteManagement.address')}</Label>
                       {isEditing ? (
                         <Input
                           id="address"
@@ -496,10 +496,10 @@ const AthleteManagement = () => {
                 {/* Parents Information Tab */}
                 <TabsContent value="parents" className="space-y-6 mt-4">
                   <div className="space-y-4">
-                    <h4 className="font-medium text-title">Mother Information</h4>
+                    <h4 className="font-medium text-title">{t('admin.athleteManagement.motherName')}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
-                        <Label htmlFor="mother_name" className="text-title">Mother's Name</Label>
+                        <Label htmlFor="mother_name" className="text-title">{t('admin.athleteManagement.motherName')}</Label>
                         {isEditing ? (
                           <Input
                             id="mother_name"
@@ -513,7 +513,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="mother_phone" className="text-title">Mother's Phone</Label>
+                        <Label htmlFor="mother_phone" className="text-title">{t('admin.athleteManagement.motherPhone')}</Label>
                         {isEditing ? (
                           <Input
                             id="mother_phone"
@@ -528,7 +528,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="mother_email" className="text-title">Mother's Email</Label>
+                        <Label htmlFor="mother_email" className="text-title">{t('admin.athleteManagement.motherEmail')}</Label>
                         {isEditing ? (
                           <Input
                             id="mother_email"
@@ -545,10 +545,10 @@ const AthleteManagement = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-medium text-title">Father Information</h4>
+                    <h4 className="font-medium text-title">{t('admin.athleteManagement.fatherName')}</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
-                        <Label htmlFor="father_name" className="text-title">Father's Name</Label>
+                        <Label htmlFor="father_name" className="text-title">{t('admin.athleteManagement.fatherName')}</Label>
                         {isEditing ? (
                           <Input
                             id="father_name"
@@ -562,7 +562,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="father_phone" className="text-title">Father's Phone</Label>
+                        <Label htmlFor="father_phone" className="text-title">{t('admin.athleteManagement.fatherPhone')}</Label>
                         {isEditing ? (
                           <Input
                             id="father_phone"
@@ -576,7 +576,7 @@ const AthleteManagement = () => {
                       </div>
 
                       <div className="min-w-0">
-                        <Label htmlFor="father_email" className="text-title">Father's Email</Label>
+                        <Label htmlFor="father_email" className="text-title">{t('admin.athleteManagement.fatherEmail')}</Label>
                         {isEditing ? (
                           <Input
                             id="father_email"
@@ -597,24 +597,24 @@ const AthleteManagement = () => {
                 <TabsContent value="training" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="plan_type" className="text-title">Plan Type</Label>
+                      <Label htmlFor="plan_type" className="text-title">{t('admin.athleteManagement.planType')}</Label>
                       <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.plan_type || "-"}</p>
                     </div>
 
                     <div>
-                      <Label htmlFor="surf_level" className="text-title">Surf Level</Label>
+                      <Label htmlFor="surf_level" className="text-title">{t('admin.athleteManagement.surfLevel')}</Label>
                       {isEditing ? (
                         <Select
                           value={editForm.surf_level || ""}
                           onValueChange={(value) => setEditForm({ ...editForm, surf_level: value })}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
+                            <SelectValue placeholder={t('admin.athleteManagement.surfLevel')} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="learning">Learning</SelectItem>
-                            <SelectItem value="pre-competition">Pre-Competition</SelectItem>
-                            <SelectItem value="competition">Competition</SelectItem>
+                            <SelectItem value="learning">{t('admin.athleteManagement.learning')}</SelectItem>
+                            <SelectItem value="pre-competition">{t('admin.athleteManagement.preCompetition')}</SelectItem>
+                            <SelectItem value="competition">{t('admin.athleteManagement.competition')}</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
