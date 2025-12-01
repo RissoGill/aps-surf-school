@@ -172,7 +172,15 @@ export const ReportsCard = () => {
           const { data: attendance, error: attendanceError } = await attendanceQuery.order("date", { ascending: false });
           
           if (attendanceError) throw attendanceError;
-          data = attendance || [];
+          
+          // Filter out records where athlete data is missing or incomplete
+          const filteredAttendance = (attendance || []).filter((att: any) => {
+            const firstName = att.atletas?.first_name;
+            // Only include records where athlete has at least a first name
+            return firstName && firstName.trim() !== '';
+          });
+          
+          data = filteredAttendance;
           break;
 
         case "personal":
@@ -347,7 +355,10 @@ export const ReportsCard = () => {
         </tr>
       `}).join("");
     } else if (type === "attendance") {
-      tableRows = (data as any[]).map(att => `
+      const validAttendance = (data as any[]).filter(att => 
+        att.atletas?.first_name && att.atletas?.first_name.trim() !== ''
+      );
+      tableRows = validAttendance.map(att => `
         <tr>
           <td style="border: 1px solid #ddd; padding: 8px;">${att.date}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${att.atletas?.first_name || ""} ${att.atletas?.last_name || ""}</td>
