@@ -169,7 +169,9 @@ export const ReportsCard = () => {
             attendanceQuery = attendanceQuery.eq("athlete_id", selectedAthlete);
           }
           
-          const { data: attendance, error: attendanceError } = await attendanceQuery.order("date", { ascending: false });
+          const { data: attendance, error: attendanceError } = await attendanceQuery
+            .order("date", { ascending: false })
+            .limit(10000); // Increase limit to handle large date ranges with all athletes
           
           if (attendanceError) throw attendanceError;
           
