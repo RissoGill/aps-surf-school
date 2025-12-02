@@ -163,7 +163,8 @@ export const ReportsCard = () => {
               coach:coach_id (first_name, last_name)
             `)
             .gte("date", startStr)
-            .lte("date", endStr);
+            .lte("date", endStr)
+            .in("status", ["Present", "Present ", "Absent", "Justified"]); // Filter only valid attendance statuses
           
           if (selectedAthlete && selectedAthlete !== "all") {
             attendanceQuery = attendanceQuery.eq("athlete_id", selectedAthlete);
@@ -204,7 +205,7 @@ export const ReportsCard = () => {
         case "overall":
           const [paymentsRes, attendanceRes, athletesRes] = await Promise.all([
             supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr),
-            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr),
+            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]),
             supabase.from("atletas").select("*").eq("is_active", true)
           ]);
 
