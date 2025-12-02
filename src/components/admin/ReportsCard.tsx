@@ -159,7 +159,7 @@ export const ReportsCard = () => {
             .from("attendance")
             .select(`
               *,
-              atletas:athlete_id (first_name, last_name, surf_level),
+              atletas:athlete_id (first_name, last_name, surf_level, is_active),
               coach:coach_id (first_name, last_name)
             `)
             .gte("date", startStr)
@@ -176,11 +176,12 @@ export const ReportsCard = () => {
           
           if (attendanceError) throw attendanceError;
           
-          // Filter out records where athlete data is missing or incomplete
+          // Filter out records where athlete data is missing, incomplete, or inactive
           const filteredAttendance = (attendance || []).filter((att: any) => {
             const firstName = att.atletas?.first_name;
-            // Only include records where athlete has at least a first name
-            return firstName && firstName.trim() !== '';
+            const isActive = att.atletas?.is_active;
+            // Only include records where athlete is active and has at least a first name
+            return isActive === true && firstName && firstName.trim() !== '';
           });
           
           data = filteredAttendance;
@@ -203,9 +204,17 @@ export const ReportsCard = () => {
           break;
 
         case "overall":
+          // First get active athlete IDs
+          const { data: activeAthletes } = await supabase
+            .from("atletas")
+            .select("athlete_id")
+            .eq("is_active", true);
+          
+          const activeAthleteIds = (activeAthletes || []).map(a => a.athlete_id);
+
           const [paymentsRes, attendanceRes, athletesRes] = await Promise.all([
             supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr),
-            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]),
+            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]).in("athlete_id", activeAthleteIds),
             supabase.from("atletas").select("*").eq("is_active", true)
           ]);
 
