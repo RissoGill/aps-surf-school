@@ -25,7 +25,30 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Force refresh to clear cache
+// App version for cache busting - change this to force reload
+const APP_VERSION = '20241204-v2';
+
+// Function to clear caches and reload
+const clearCachesAndReload = () => {
+  if ('caches' in window) {
+    (window as Window).caches.keys().then((names) => {
+      names.forEach((name) => caches.delete(name));
+      location.reload();
+    });
+  } else {
+    location.reload();
+  }
+};
+
+// Check and force reload if version mismatch
+const storedVersion = localStorage.getItem('app_version');
+if (storedVersion && storedVersion !== APP_VERSION) {
+  localStorage.setItem('app_version', APP_VERSION);
+  clearCachesAndReload();
+} else if (!storedVersion) {
+  localStorage.setItem('app_version', APP_VERSION);
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
