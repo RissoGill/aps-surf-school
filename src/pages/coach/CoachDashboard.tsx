@@ -1476,7 +1476,7 @@ const CoachDashboard = () => {
                               showFor="coach"
                             />
                             
-                            <AthleteProfileCard athlete={athlete} getLevelColor={getLevelColor} />
+                            <AthleteProfileCard athlete={athlete} athleteId={athlete.athlete_id} getLevelColor={getLevelColor} />
                           </div>
 
                           {/* Annual Summary First, then Monthly with Dropdown */}

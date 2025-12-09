@@ -460,18 +460,30 @@
     },
     "athleteProfile": {
       "born": "Born",
-      "plan": "Plan",
-      "days": "Days",
-      "perWeek": "Per Week",
+      "plan": "Plan:",
+      "days": "Days:",
+      "perWeek": "Per Week:",
       "contact": "Contact",
       "guardian": "Guardian",
       "mother": "Mother",
       "father": "Father",
       "transport": "Transport",
-      "pickup": "Pickup",
-      "dropoff": "Drop-off",
+      "pickup": "Pickup:",
+      "dropoff": "Drop-off:",
       "athlete": "athlete",
-      "athletes": "athletes"
+      "athletes": "athletes",
+      "trainingSchedule": "Training Schedule",
+      "contactInfo": "Contact Information",
+      "guardianInfo": "Guardian Information",
+      "transportInfo": "Transport Information"
+    },
+    "packSummary": {
+      "title": "Pack Summary",
+      "totalSessions": "Total Sessions",
+      "sessionsUsed": "Sessions Used",
+      "remainingSessions": "Remaining Sessions",
+      "activeSince": "Active since",
+      "noActivePack": "No active pack"
     },
     "mediaGallery": {
       "title": "Media Gallery",

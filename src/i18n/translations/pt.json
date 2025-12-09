@@ -460,18 +460,30 @@
     },
     "athleteProfile": {
       "born": "Nascido",
-      "plan": "Plano",
-      "days": "Dias",
-      "perWeek": "Por Semana",
+      "plan": "Plano:",
+      "days": "Dias:",
+      "perWeek": "Por Semana:",
       "contact": "Contacto",
       "guardian": "Encarregado",
       "mother": "Mãe",
       "father": "Pai",
       "transport": "Transporte",
-      "pickup": "Recolha",
-      "dropoff": "Entrega",
+      "pickup": "Recolha:",
+      "dropoff": "Entrega:",
       "athlete": "atleta",
-      "athletes": "atletas"
+      "athletes": "atletas",
+      "trainingSchedule": "Horário de Treino",
+      "contactInfo": "Informações de Contacto",
+      "guardianInfo": "Informação do Encarregado",
+      "transportInfo": "Informação de Transporte"
+    },
+    "packSummary": {
+      "title": "Resumo do Pack",
+      "totalSessions": "Total de Treinos",
+      "sessionsUsed": "Treinos Usados",
+      "remainingSessions": "Treinos Restantes",
+      "activeSince": "Ativo desde",
+      "noActivePack": "Sem pack ativo"
     },
     "mediaGallery": {
       "title": "Galeria de Multimédia",

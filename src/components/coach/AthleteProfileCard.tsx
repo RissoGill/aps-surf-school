@@ -1,7 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, User, Phone, Mail, MapPin, Car } from "lucide-react";
+import { Calendar, User, Phone, Mail, MapPin, Car, Package } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { calculatePackBalance } from "@/utils/packBalance";
 
 interface AthleteProfileCardProps {
   athlete: {
@@ -26,11 +28,20 @@ interface AthleteProfileCardProps {
     dropoff_address: string | null;
     plan_type: string | null;
   };
+  athleteId: string;
   getLevelColor: (level: string) => string;
 }
 
-export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCardProps) => {
-  const { t } = useLanguage();
+export const AthleteProfileCard = ({ athlete, athleteId, getLevelColor }: AthleteProfileCardProps) => {
+  const { t, language } = useLanguage();
+  
+  const isPack = athlete.plan_type?.toLowerCase().startsWith('pack');
+  
+  const { data: packBalance } = useQuery({
+    queryKey: ['packBalance', athleteId],
+    queryFn: () => calculatePackBalance(athleteId),
+    enabled: !!athleteId && isPack,
+  });
   
   const getInitials = () => {
     const first = athlete.first_name?.[0] || '';
@@ -196,6 +207,43 @@ export const AthleteProfileCard = ({ athlete, getLevelColor }: AthleteProfileCar
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Pack Balance Information */}
+      {isPack && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Package className="h-4 w-4 text-primary" />
+            {t('coach.packSummary.title')}
+          </h4>
+          {packBalance ? (
+            <div className="grid grid-cols-2 gap-3 pl-6">
+              <div className="text-center p-2 bg-muted/50 rounded-md">
+                <div className="text-lg font-semibold text-foreground">{packBalance.totalTokens}</div>
+                <div className="text-xs text-muted-foreground">{t('coach.packSummary.totalSessions')}</div>
+              </div>
+              <div className="text-center p-2 bg-muted/50 rounded-md">
+                <div className="text-lg font-semibold text-foreground">{packBalance.usedTokens}</div>
+                <div className="text-xs text-muted-foreground">{t('coach.packSummary.sessionsUsed')}</div>
+              </div>
+              <div className="col-span-2 text-center p-2 bg-muted/50 rounded-md">
+                <div className={`text-xl font-bold ${packBalance.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {packBalance.balance}
+                </div>
+                <div className="text-xs text-muted-foreground">{t('coach.packSummary.remainingSessions')}</div>
+              </div>
+              {packBalance.purchaseDate && (
+                <div className="col-span-2 text-center text-xs text-muted-foreground">
+                  {t('coach.packSummary.activeSince')} {new Date(packBalance.purchaseDate).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground pl-6">
+              {t('coach.packSummary.noActivePack')}
+            </div>
+          )}
         </div>
       )}
     </div>
