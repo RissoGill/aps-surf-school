@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,31 +26,29 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// App version for cache busting - change this to force reload
-const APP_VERSION = '20241204-v2';
+const APP_VERSION = '20241210-v1';
 
-// Function to clear caches and reload
-const clearCachesAndReload = () => {
-  if ('caches' in window) {
-    (window as Window).caches.keys().then((names) => {
-      names.forEach((name) => caches.delete(name));
-      location.reload();
-    });
-  } else {
-    location.reload();
-  }
-};
+const App = () => {
+  useEffect(() => {
+    const storedVersion = localStorage.getItem('app_version');
+    
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      localStorage.setItem('app_version', APP_VERSION);
+      if ('caches' in window && window.caches) {
+        window.caches.keys().then((names) => {
+          names.forEach((name) => window.caches?.delete(name));
+        }).finally(() => {
+          location.reload();
+        });
+      } else {
+        location.reload();
+      }
+    } else if (!storedVersion) {
+      localStorage.setItem('app_version', APP_VERSION);
+    }
+  }, []);
 
-// Check and force reload if version mismatch
-const storedVersion = localStorage.getItem('app_version');
-if (storedVersion && storedVersion !== APP_VERSION) {
-  localStorage.setItem('app_version', APP_VERSION);
-  clearCachesAndReload();
-} else if (!storedVersion) {
-  localStorage.setItem('app_version', APP_VERSION);
-}
-
-const App = () => (
+  return (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <LanguageProvider>
@@ -93,6 +92,7 @@ const App = () => (
       </LanguageProvider>
     </BrowserRouter>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
