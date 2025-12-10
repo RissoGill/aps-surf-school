@@ -13,6 +13,7 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
+import AlertsCard from "@/components/shared/AlertsCard";
 import { calculatePackBalance } from "@/utils/packBalance";
 import { useLanguage } from "@/i18n/LanguageContext";
 

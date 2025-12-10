@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_resolved: boolean
+          message: string
+          resolved_at: string | null
+          resolved_by: string | null
+          target_id: string | null
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_resolved?: boolean
+          message: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          target_id?: string | null
+          target_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_resolved?: boolean
+          message?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          target_id?: string | null
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       atletas: {
         Row: {
           address: string | null
