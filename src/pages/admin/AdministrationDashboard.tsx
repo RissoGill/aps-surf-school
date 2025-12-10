@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw } from "lucide-react";
 import { ReportsCard } from "@/components/admin/ReportsCard";
 import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
+import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -931,6 +932,11 @@ const AdministrationDashboard = () => {
             )}
           </Card>
         )}
+
+        {/* Alerts Management Card */}
+        <div className="mt-6">
+          <AlertsManagementCard userRole={userRole} currentUser={currentUser} />
+        </div>
 
         {/* Coach Payments Card */}
         <div className="mt-6">

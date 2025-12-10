@@ -31,6 +31,7 @@ import { EstagiosTab } from "@/components/coach/EstagiosTab";
 import { BulkAttendanceRegistration } from "@/components/coach/BulkAttendanceRegistration";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { PaymentsTab } from "@/components/coach/PaymentsTab";
+import AlertsCard from "@/components/shared/AlertsCard";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AttendanceRecord {

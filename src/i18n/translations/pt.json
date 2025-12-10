@@ -703,6 +703,39 @@
       "selectMonth": "Selecionar Mês",
       "allMonths": "Todos os Meses"
     },
+    "alerts": {
+      "title": "Alertas",
+      "description": "Gerir alertas e notificações do sistema",
+      "new": "Novo Alerta",
+      "edit": "Editar Alerta",
+      "create": "Criar",
+      "message": "Mensagem",
+      "messagePlaceholder": "Escreva a mensagem do alerta...",
+      "messageRequired": "A mensagem é obrigatória",
+      "targetLabel": "Destinatário",
+      "selectTarget": "Selecionar destinatário",
+      "targetAll": "Todos",
+      "targetCoaches": "Todos os Treinadores",
+      "targetAthletes": "Todos os Atletas",
+      "targetGuardians": "Todos os Encarregados",
+      "targetSpecificCoach": "Treinador Específico",
+      "targetSpecificAthlete": "Atleta Específico",
+      "selectCoach": "Selecionar Treinador",
+      "selectCoachPlaceholder": "Escolha um treinador...",
+      "selectAthlete": "Selecionar Atleta",
+      "selectAthletePlaceholder": "Escolha um atleta...",
+      "noAlerts": "Sem alertas ativos",
+      "resolved": "Resolvido",
+      "pending": "Pendente",
+      "markResolved": "Marcar como resolvido",
+      "markPending": "Marcar como pendente",
+      "created": "Alerta criado com sucesso",
+      "updated": "Alerta atualizado com sucesso",
+      "deleted": "Alerta eliminado com sucesso",
+      "createError": "Erro ao criar alerta",
+      "updateError": "Erro ao atualizar alerta",
+      "deleteError": "Erro ao eliminar alerta"
+    },
     "media": {
       "photos": "Fotos",
       "videos": "Vídeos",
@@ -1099,6 +1132,9 @@
     }
   },
   "shared": {
+    "alerts": {
+      "title": "Alertas Importantes"
+    },
     "packBalance": {
       "exceeded": "Limite de Treinos do Pack Excedido",
       "athleteMessage": "Usou mais {count} treino(s) do que o seu pack inclui. Por favor adquira treinos adicionais.",

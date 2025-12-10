@@ -16,6 +16,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { AnnualAttendanceSummary } from "@/components/coach/AnnualAttendanceSummary";
 import { AthleteChampionshipsTab } from "@/components/athlete/AthleteChampionshipsTab";
 import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
+import AlertsCard from "@/components/shared/AlertsCard";
 import { calculatePackBalance } from "@/utils/packBalance";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -406,10 +407,13 @@ useEffect(() => {
       
       <main className="mobile-container py-6">
         {athlete && (
-          <PackBalanceAlert 
-            athleteId={athlete.athlete_id} 
-            showFor="athlete"
-          />
+          <>
+            <AlertsCard userType="athlete" userId={athlete.athlete_id} />
+            <PackBalanceAlert 
+              athleteId={athlete.athlete_id} 
+              showFor="athlete"
+            />
+          </>
         )}
         
         {/* Athlete Info Header */}
