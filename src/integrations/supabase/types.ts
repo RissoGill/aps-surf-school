@@ -23,7 +23,8 @@ export type Database = {
           message: string
           resolved_at: string | null
           resolved_by: string | null
-          target_id: string | null
+          subject: string | null
+          target_ids: string[] | null
           target_type: string
           updated_at: string
         }
@@ -35,7 +36,8 @@ export type Database = {
           message: string
           resolved_at?: string | null
           resolved_by?: string | null
-          target_id?: string | null
+          subject?: string | null
+          target_ids?: string[] | null
           target_type?: string
           updated_at?: string
         }
@@ -47,7 +49,8 @@ export type Database = {
           message?: string
           resolved_at?: string | null
           resolved_by?: string | null
-          target_id?: string | null
+          subject?: string | null
+          target_ids?: string[] | null
           target_type?: string
           updated_at?: string
         }

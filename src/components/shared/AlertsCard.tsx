@@ -7,9 +7,10 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Alert {
   id: string;
+  subject: string | null;
   message: string;
   target_type: string;
-  target_id: string | null;
+  target_ids: string[] | null;
   is_resolved: boolean;
   created_at: string;
 }
@@ -43,17 +44,17 @@ const AlertsCard = ({ userType, userId, guardianChildrenIds = [] }: AlertsCardPr
           case 'coach':
             // Coaches see alerts for 'coaches' or their specific coach_id
             if (alert.target_type === 'coaches') return true;
-            if (alert.target_type === 'specific_coach' && alert.target_id === userId) return true;
+            if (alert.target_type === 'specific_coach' && alert.target_ids?.includes(userId)) return true;
             break;
           case 'athlete':
             // Athletes see alerts for 'athletes' or their specific athlete_id
             if (alert.target_type === 'athletes') return true;
-            if (alert.target_type === 'specific_athlete' && alert.target_id === userId) return true;
+            if (alert.target_type === 'specific_athlete' && alert.target_ids?.includes(userId)) return true;
             break;
           case 'guardian':
             // Guardians see alerts for 'guardians' or alerts for their children
             if (alert.target_type === 'guardians') return true;
-            if (alert.target_type === 'specific_athlete' && guardianChildrenIds.includes(alert.target_id || '')) return true;
+            if (alert.target_type === 'specific_athlete' && alert.target_ids?.some(id => guardianChildrenIds.includes(id))) return true;
             break;
         }
         return false;
@@ -93,6 +94,9 @@ const AlertsCard = ({ userType, userId, guardianChildrenIds = [] }: AlertsCardPr
             >
               <Bell className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
               <div className="flex-1 min-w-0">
+                {alert.subject && (
+                  <p className="text-sm font-semibold text-foreground">{alert.subject}</p>
+                )}
                 <p className="text-sm text-foreground">{alert.message}</p>
                 <span className="text-xs text-muted-foreground">
                   {new Date(alert.created_at).toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB')}

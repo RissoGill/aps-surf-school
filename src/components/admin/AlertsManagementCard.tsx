@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
-import { Bell, Plus, Check, X, Edit2, Trash2, Users, User, UserCheck } from "lucide-react";
+import { useState } from "react";
+import { Bell, Plus, Check, X, Edit2, Trash2, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -13,9 +16,10 @@ import { toast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
+  subject: string | null;
   message: string;
   target_type: string;
-  target_id: string | null;
+  target_ids: string[] | null;
   is_resolved: boolean;
   resolved_at: string | null;
   resolved_by: string | null;
@@ -46,9 +50,10 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [targetType, setTargetType] = useState("all");
-  const [targetId, setTargetId] = useState<string>("");
+  const [targetIds, setTargetIds] = useState<string[]>([]);
 
   // Fetch alerts
   const { data: alerts = [], isLoading } = useQuery({
@@ -95,13 +100,14 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
 
   // Create alert mutation
   const createMutation = useMutation({
-    mutationFn: async (alertData: { message: string; target_type: string; target_id: string | null }) => {
+    mutationFn: async (alertData: { subject: string; message: string; target_type: string; target_ids: string[] | null }) => {
       const { error } = await supabase
         .from('alerts')
         .insert({
+          subject: alertData.subject,
           message: alertData.message,
           target_type: alertData.target_type,
-          target_id: alertData.target_id,
+          target_ids: alertData.target_ids,
           created_by: currentUser
         });
       
@@ -157,36 +163,44 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
   });
 
   const resetForm = () => {
+    setSubject("");
     setMessage("");
     setTargetType("all");
-    setTargetId("");
+    setTargetIds([]);
     setEditingAlert(null);
     setIsDialogOpen(false);
   };
 
   const handleSubmit = () => {
+    if (!subject.trim()) {
+      toast({ title: t('common.error'), description: t('admin.alerts.subjectRequired'), variant: "destructive" });
+      return;
+    }
     if (!message.trim()) {
       toast({ title: t('common.error'), description: t('admin.alerts.messageRequired'), variant: "destructive" });
       return;
     }
 
-    const finalTargetId = (targetType === 'specific_coach' || targetType === 'specific_athlete') ? targetId || null : null;
+    const finalTargetIds = (targetType === 'specific_coach' || targetType === 'specific_athlete') 
+      ? (targetIds.length > 0 ? targetIds : null) 
+      : null;
 
     if (editingAlert) {
       updateMutation.mutate({
         id: editingAlert.id,
-        data: { message, target_type: targetType, target_id: finalTargetId }
+        data: { subject, message, target_type: targetType, target_ids: finalTargetIds }
       });
     } else {
-      createMutation.mutate({ message, target_type: targetType, target_id: finalTargetId });
+      createMutation.mutate({ subject, message, target_type: targetType, target_ids: finalTargetIds });
     }
   };
 
   const handleEdit = (alert: Alert) => {
     setEditingAlert(alert);
+    setSubject(alert.subject || "");
     setMessage(alert.message);
     setTargetType(alert.target_type);
-    setTargetId(alert.target_id || "");
+    setTargetIds(alert.target_ids || []);
     setIsDialogOpen(true);
   };
 
@@ -201,6 +215,22 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
     });
   };
 
+  const handleToggleCoach = (coachId: string) => {
+    setTargetIds(prev => 
+      prev.includes(coachId) 
+        ? prev.filter(id => id !== coachId)
+        : [...prev, coachId]
+    );
+  };
+
+  const handleToggleAthlete = (athleteId: string) => {
+    setTargetIds(prev => 
+      prev.includes(athleteId) 
+        ? prev.filter(id => id !== athleteId)
+        : [...prev, athleteId]
+    );
+  };
+
   const getTargetLabel = (alert: Alert) => {
     switch (alert.target_type) {
       case 'all':
@@ -212,11 +242,27 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
       case 'guardians':
         return t('admin.alerts.targetGuardians');
       case 'specific_coach':
-        const coach = coaches.find(c => c.coach_id === alert.target_id);
-        return coach ? `${coach.first_name || ''} ${coach.last_name || ''}`.trim() : alert.target_id;
+        if (!alert.target_ids || alert.target_ids.length === 0) return t('admin.alerts.targetSpecificCoach');
+        const coachNames = alert.target_ids
+          .map(id => {
+            const coach = coaches.find(c => c.coach_id === id);
+            return coach ? `${coach.first_name || ''} ${coach.last_name || ''}`.trim() : id;
+          })
+          .filter(Boolean);
+        return coachNames.length > 2 
+          ? `${coachNames.slice(0, 2).join(', ')} +${coachNames.length - 2}` 
+          : coachNames.join(', ');
       case 'specific_athlete':
-        const athlete = athletes.find(a => a.athlete_id === alert.target_id);
-        return athlete ? `${athlete.first_name || ''} ${athlete.last_name || ''}`.trim() : alert.target_id;
+        if (!alert.target_ids || alert.target_ids.length === 0) return t('admin.alerts.targetSpecificAthlete');
+        const athleteNames = alert.target_ids
+          .map(id => {
+            const athlete = athletes.find(a => a.athlete_id === id);
+            return athlete ? `${athlete.first_name || ''} ${athlete.last_name || ''}`.trim() : id;
+          })
+          .filter(Boolean);
+        return athleteNames.length > 2 
+          ? `${athleteNames.slice(0, 2).join(', ')} +${athleteNames.length - 2}` 
+          : athleteNames.join(', ');
       default:
         return alert.target_type;
     }
@@ -245,13 +291,21 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
                   {t('admin.alerts.new')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingAlert ? t('admin.alerts.edit') : t('admin.alerts.new')}
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 mt-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">{t('admin.alerts.subject')}</label>
+                    <Input
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      placeholder={t('admin.alerts.subjectPlaceholder')}
+                    />
+                  </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">{t('admin.alerts.message')}</label>
                     <Textarea
@@ -263,7 +317,7 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">{t('admin.alerts.targetLabel')}</label>
-                    <Select value={targetType} onValueChange={setTargetType}>
+                    <Select value={targetType} onValueChange={(value) => { setTargetType(value); setTargetIds([]); }}>
                       <SelectTrigger className="bg-background">
                         <SelectValue placeholder={t('admin.alerts.selectTarget')} />
                       </SelectTrigger>
@@ -280,37 +334,55 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
 
                   {targetType === 'specific_coach' && (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">{t('admin.alerts.selectCoach')}</label>
-                      <Select value={targetId} onValueChange={setTargetId}>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder={t('admin.alerts.selectCoachPlaceholder')} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50 max-h-60">
+                      <label className="text-sm font-medium mb-2 block">
+                        {t('admin.alerts.selectCoaches')} ({targetIds.length} {t('admin.alerts.selected')})
+                      </label>
+                      <ScrollArea className="h-48 border rounded-md p-3">
+                        <div className="space-y-2">
                           {coaches.map((coach) => (
-                            <SelectItem key={coach.coach_id} value={coach.coach_id}>
-                              {`${coach.first_name || ''} ${coach.last_name || ''}`.trim()} ({coach.coach_id})
-                            </SelectItem>
+                            <div key={coach.coach_id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`coach-${coach.coach_id}`}
+                                checked={targetIds.includes(coach.coach_id)}
+                                onCheckedChange={() => handleToggleCoach(coach.coach_id)}
+                              />
+                              <label
+                                htmlFor={`coach-${coach.coach_id}`}
+                                className="text-sm cursor-pointer flex-1"
+                              >
+                                {`${coach.first_name || ''} ${coach.last_name || ''}`.trim()} ({coach.coach_id})
+                              </label>
+                            </div>
                           ))}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                      </ScrollArea>
                     </div>
                   )}
 
                   {targetType === 'specific_athlete' && (
                     <div>
-                      <label className="text-sm font-medium mb-2 block">{t('admin.alerts.selectAthlete')}</label>
-                      <Select value={targetId} onValueChange={setTargetId}>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder={t('admin.alerts.selectAthletePlaceholder')} />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50 max-h-60">
+                      <label className="text-sm font-medium mb-2 block">
+                        {t('admin.alerts.selectAthletes')} ({targetIds.length} {t('admin.alerts.selected')})
+                      </label>
+                      <ScrollArea className="h-48 border rounded-md p-3">
+                        <div className="space-y-2">
                           {athletes.map((athlete) => (
-                            <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
-                              {`${athlete.first_name || ''} ${athlete.last_name || ''}`.trim()} ({athlete.athlete_id})
-                            </SelectItem>
+                            <div key={athlete.athlete_id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`athlete-${athlete.athlete_id}`}
+                                checked={targetIds.includes(athlete.athlete_id)}
+                                onCheckedChange={() => handleToggleAthlete(athlete.athlete_id)}
+                              />
+                              <label
+                                htmlFor={`athlete-${athlete.athlete_id}`}
+                                className="text-sm cursor-pointer flex-1"
+                              >
+                                {`${athlete.first_name || ''} ${athlete.last_name || ''}`.trim()} ({athlete.athlete_id})
+                              </label>
+                            </div>
                           ))}
-                        </SelectContent>
-                      </Select>
+                        </div>
+                      </ScrollArea>
                     </div>
                   )}
 
@@ -349,6 +421,11 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
+                    {alert.subject && (
+                      <p className={`text-sm font-semibold mb-1 ${alert.is_resolved ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                        {alert.subject}
+                      </p>
+                    )}
                     <p className={`text-sm ${alert.is_resolved ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {alert.message}
                     </p>
