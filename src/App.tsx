@@ -50,8 +50,8 @@ const App = () => {
 
   return (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <LanguageProvider>
+    <LanguageProvider>
+      <BrowserRouter>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -86,11 +86,11 @@ const App = () => {
             <Route path="/manual" element={<UserManual />} />
             
             {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
-      </LanguageProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </LanguageProvider>
   </QueryClientProvider>
   );
 };
