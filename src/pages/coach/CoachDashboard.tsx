@@ -1349,6 +1349,11 @@ const CoachDashboard = () => {
           </p>
         </div>
 
+        {/* Alerts Card - Always First */}
+        {coachData?.coach_id && (
+          <AlertsCard userType="coach" userId={coachData.coach_id} />
+        )}
+
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <Card className="shadow-soft">

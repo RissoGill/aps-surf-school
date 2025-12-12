@@ -1050,6 +1050,15 @@ const GuardianDashboard = () => {
           </Button>
         </div>
 
+        {/* Alerts Card - Always First */}
+        {guardianId && (
+          <AlertsCard 
+            userType="guardian" 
+            userId={guardianId} 
+            guardianChildrenIds={athletes?.map(a => a.athlete_id) || []} 
+          />
+        )}
+
         {/* Family Area - Show all children for family guardians */}
         {guardianRole === 'family' && athletes && athletes.length > 1 && (
           <Card className="shadow-medium mb-6 border-primary/20">
