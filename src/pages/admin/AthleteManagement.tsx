@@ -623,7 +623,7 @@ const AthleteManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="trainings_per_week">Trainings per Week</Label>
+                      <Label htmlFor="trainings_per_week">{t('admin.athleteManagement.trainingsPerWeek')}</Label>
                       {isEditing ? (
                         <Input
                           id="trainings_per_week"
@@ -639,11 +639,11 @@ const AthleteManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="training_days">Training Days</Label>
+                      <Label htmlFor="training_days">{t('admin.athleteManagement.trainingDays')}</Label>
                       {isEditing ? (
                         <Input
                           id="training_days"
-                          placeholder="e.g., Monday, Wednesday, Friday"
+                          placeholder={t('admin.athleteManagement.trainingDaysPlaceholder')}
                           value={editForm.training_days || ""}
                           onChange={(e) => setEditForm({ ...editForm, training_days: e.target.value })}
                         />
@@ -662,14 +662,14 @@ const AthleteManagement = () => {
                           disabled={!isEditing}
                           className="h-4 w-4"
                         />
-                        Requires Transport
+                        {t('admin.athleteManagement.requiresTransport')}
                       </Label>
                     </div>
 
                     {(isEditing ? editForm.transport : selectedAthlete.transport) && (
                       <>
                         <div className="md:col-span-2">
-                          <Label htmlFor="pickup_address">Pickup Address</Label>
+                          <Label htmlFor="pickup_address">{t('admin.athleteManagement.pickupAddress')}</Label>
                           {isEditing ? (
                             <Input
                               id="pickup_address"
@@ -682,7 +682,7 @@ const AthleteManagement = () => {
                         </div>
 
                         <div className="md:col-span-2">
-                          <Label htmlFor="dropoff_address">Dropoff Address</Label>
+                          <Label htmlFor="dropoff_address">{t('admin.athleteManagement.dropoffAddress')}</Label>
                           {isEditing ? (
                             <Input
                               id="dropoff_address"
