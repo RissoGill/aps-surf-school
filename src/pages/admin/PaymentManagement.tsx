@@ -36,6 +36,7 @@ interface Athlete {
   athlete_id: string;
   first_name: string;
   last_name: string;
+  prior_balance: number | null;
 }
 
 // Validation schema for payment edits
@@ -129,7 +130,7 @@ const PaymentManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('atletas')
-        .select('athlete_id, first_name, last_name')
+        .select('athlete_id, first_name, last_name, prior_balance')
         .order('first_name');
       
       if (error) throw error;
@@ -525,8 +526,8 @@ const PaymentManagement = () => {
     }
   };
 
-  // Calculate Outstanding (current + past unpaid months only)
-  const calculateOutstanding = () => {
+  // Calculate current season outstanding (Sep 2025 onwards)
+  const calculateCurrentSeasonOutstanding = () => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1; // 1-12
@@ -572,6 +573,14 @@ const PaymentManagement = () => {
       }, 0);
   };
 
+  // Get prior balance from selected athlete
+  const priorBalance = selectedAthlete?.prior_balance || 0;
+
+  // Calculate total outstanding (prior balance + current season)
+  const calculateTotalOutstanding = () => {
+    return priorBalance + calculateCurrentSeasonOutstanding();
+  };
+
   // Calculate Next Payment (following month)
   const calculateNextPayment = () => {
     const now = new Date();
@@ -612,7 +621,8 @@ const PaymentManagement = () => {
     return nextPayment?.amount_due || 0;
   };
 
-  const outstanding = calculateOutstanding();
+  const currentSeasonOutstanding = calculateCurrentSeasonOutstanding();
+  const totalOutstanding = calculateTotalOutstanding();
   const nextPayment = calculateNextPayment();
 
   return (
@@ -692,19 +702,41 @@ const PaymentManagement = () => {
         {selectedAthlete && (
           <>
             {/* Financial Summary Cards */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {/* Prior Balance */}
+              <Card className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <Clock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                  <p className={`text-lg font-bold ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>€{priorBalance.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.priorBalance')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.priorBalanceDescription')}</p>
+                </CardContent>
+              </Card>
+
+              {/* Current Season Outstanding */}
+              <Card className="shadow-soft">
+                <CardContent className="p-4 text-center">
+                  <CreditCard className="h-6 w-6 text-warning mx-auto mb-2" />
+                  <p className={`text-lg font-bold ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>€{currentSeasonOutstanding.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.currentSeasonDebt')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.currentSeasonDescription')}</p>
+                </CardContent>
+              </Card>
+
+              {/* Total Outstanding */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
                   <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-                  <p className="text-lg font-bold text-destructive">€{outstanding.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.outstanding')}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.outstandingDescription')}</p>
+                  <p className={`text-lg font-bold ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>€{totalOutstanding.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.totalOutstanding')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.totalOutstandingDescription')}</p>
                 </CardContent>
               </Card>
               
+              {/* Next Payment */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <Clock className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <Euro className="h-6 w-6 text-primary mx-auto mb-2" />
                   <p className="text-lg font-bold text-foreground">€{nextPayment.toFixed(2)}</p>
                   <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.nextPayment')}</p>
                   <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.nextPaymentDescription')}</p>

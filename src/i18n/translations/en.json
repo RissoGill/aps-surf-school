@@ -598,6 +598,12 @@
       "searchPlaceholder": "Search athlete by name...",
       "selectedAthlete": "Selected Athlete:",
       "clear": "Clear",
+      "priorBalance": "Prior Balance",
+      "priorBalanceDescription": "Before Sep 2025",
+      "currentSeasonDebt": "Current Season",
+      "currentSeasonDescription": "Sep 2025 - Sep 2026",
+      "totalOutstanding": "Total Outstanding",
+      "totalOutstandingDescription": "Prior balance + current season",
       "outstanding": "Outstanding",
       "outstandingDescription": "Current & past unpaid",
       "nextPayment": "Next Payment",
@@ -876,7 +882,9 @@
       "yes": "Yes",
       "no": "No",
       "pickupAddress": "Pickup Address",
-      "dropoffAddress": "Dropoff Address"
+      "dropoffAddress": "Dropoff Address",
+      "priorBalance": "Prior Balance",
+      "priorBalanceDescription": "Outstanding debt before September 2025"
     },
     "attendanceManagement": {
       "title": "Attendance Management",

@@ -76,6 +76,7 @@ export type Database = {
           phone: string | null
           pickup_address: string | null
           plan_type: string | null
+          prior_balance: number | null
           sql_line: string | null
           surf_level: string | null
           training_days: string | null
@@ -101,6 +102,7 @@ export type Database = {
           phone?: string | null
           pickup_address?: string | null
           plan_type?: string | null
+          prior_balance?: number | null
           sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null
@@ -126,6 +128,7 @@ export type Database = {
           phone?: string | null
           pickup_address?: string | null
           plan_type?: string | null
+          prior_balance?: number | null
           sql_line?: string | null
           surf_level?: string | null
           training_days?: string | null

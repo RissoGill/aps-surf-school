@@ -598,6 +598,12 @@
       "searchPlaceholder": "Procurar atleta por nome...",
       "selectedAthlete": "Atleta Selecionado:",
       "clear": "Limpar",
+      "priorBalance": "Saldo Anterior",
+      "priorBalanceDescription": "Antes de Set 2025",
+      "currentSeasonDebt": "Época Atual",
+      "currentSeasonDescription": "Set 2025 - Set 2026",
+      "totalOutstanding": "Total em Dívida",
+      "totalOutstandingDescription": "Saldo anterior + época atual",
       "outstanding": "Em Dívida",
       "outstandingDescription": "Atual e atrasado",
       "nextPayment": "Próximo Pagamento",
@@ -876,7 +882,9 @@
       "yes": "Sim",
       "no": "Não",
       "pickupAddress": "Morada de Recolha",
-      "dropoffAddress": "Morada de Entrega"
+      "dropoffAddress": "Morada de Entrega",
+      "priorBalance": "Saldo Anterior",
+      "priorBalanceDescription": "Dívida antes de Setembro 2025"
     },
     "attendanceManagement": {
       "title": "Gestão de Presenças",
