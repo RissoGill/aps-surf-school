@@ -39,6 +39,7 @@ interface Athlete {
   guardian_id: string | null;
   plan_type: string | null;
   is_active: boolean | null;
+  prior_balance: number | null;
 }
 
 // Validation schema for athlete edits
@@ -81,7 +82,8 @@ const athleteEditSchema = z.object({
   training_days: z.string().trim().max(100).nullable(),
   transport: z.boolean().nullable(),
   pickup_address: z.string().trim().max(255).nullable(),
-  dropoff_address: z.string().trim().max(255).nullable()
+  dropoff_address: z.string().trim().max(255).nullable(),
+  prior_balance: z.number().min(0).nullable()
 });
 
 const AthleteManagement = () => {
@@ -695,6 +697,30 @@ const AthleteManagement = () => {
                         </div>
                       </>
                     )}
+
+                    {/* Prior Balance Field */}
+                    <div className="md:col-span-2 pt-4 border-t border-border">
+                      <Label htmlFor="prior_balance" className="text-title">{t('admin.athleteManagement.priorBalance')}</Label>
+                      <p className="text-xs text-muted-foreground mb-2">{t('admin.athleteManagement.priorBalanceDescription')}</p>
+                      {isEditing ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">€</span>
+                          <Input
+                            id="prior_balance"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={editForm.prior_balance ?? ""}
+                            onChange={(e) => setEditForm({ ...editForm, prior_balance: e.target.value ? parseFloat(e.target.value) : null })}
+                            className="w-32"
+                          />
+                        </div>
+                      ) : (
+                        <p className={`text-sm mt-1 ${(selectedAthlete.prior_balance || 0) > 0 ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                          €{(selectedAthlete.prior_balance || 0).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </TabsContent>
               </Tabs>
