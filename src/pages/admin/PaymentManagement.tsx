@@ -704,42 +704,66 @@ const PaymentManagement = () => {
             {/* Financial Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {/* Prior Balance */}
-              <Card className="shadow-soft">
-                <CardContent className="p-4 text-center">
-                  <Clock className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-                  <p className={`text-lg font-bold ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>€{priorBalance.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.priorBalance')}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.priorBalanceDescription')}</p>
+              <Card className="shadow-soft min-h-[150px]">
+                <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                  <Clock className="h-8 w-8 text-muted-foreground mb-3" />
+                  <p className={`text-2xl font-bold ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                    €{priorBalance.toFixed(2)}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-2 text-center">
+                    {t('admin.paymentManagement.priorBalance')}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-center leading-tight">
+                    {t('admin.paymentManagement.priorBalanceDescription')}
+                  </p>
                 </CardContent>
               </Card>
 
               {/* Current Season Outstanding */}
-              <Card className="shadow-soft">
-                <CardContent className="p-4 text-center">
-                  <CreditCard className="h-6 w-6 text-warning mx-auto mb-2" />
-                  <p className={`text-lg font-bold ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>€{currentSeasonOutstanding.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.currentSeasonDebt')}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.currentSeasonDescription')}</p>
+              <Card className="shadow-soft min-h-[150px]">
+                <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                  <CreditCard className="h-8 w-8 text-warning mb-3" />
+                  <p className={`text-2xl font-bold ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>
+                    €{currentSeasonOutstanding.toFixed(2)}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-2 text-center">
+                    {t('admin.paymentManagement.currentSeasonDebt')}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-center leading-tight">
+                    {t('admin.paymentManagement.currentSeasonDescription')}
+                  </p>
                 </CardContent>
               </Card>
 
               {/* Total Outstanding */}
-              <Card className="shadow-soft">
-                <CardContent className="p-4 text-center">
-                  <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-                  <p className={`text-lg font-bold ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>€{totalOutstanding.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.totalOutstanding')}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.totalOutstandingDescription')}</p>
+              <Card className="shadow-soft min-h-[150px]">
+                <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                  <AlertCircle className="h-8 w-8 text-destructive mb-3" />
+                  <p className={`text-2xl font-bold ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>
+                    €{totalOutstanding.toFixed(2)}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-2 text-center">
+                    {t('admin.paymentManagement.totalOutstanding')}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-center leading-tight">
+                    {t('admin.paymentManagement.totalOutstandingDescription')}
+                  </p>
                 </CardContent>
               </Card>
               
               {/* Next Payment */}
-              <Card className="shadow-soft">
-                <CardContent className="p-4 text-center">
-                  <Euro className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-lg font-bold text-foreground">€{nextPayment.toFixed(2)}</p>
-                  <p className="text-xs text-muted-foreground">{t('admin.paymentManagement.nextPayment')}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('admin.paymentManagement.nextPaymentDescription')}</p>
+              <Card className="shadow-soft min-h-[150px]">
+                <CardContent className="p-4 flex flex-col items-center justify-center h-full">
+                  <Euro className="h-8 w-8 text-primary mb-3" />
+                  <p className="text-2xl font-bold text-foreground">
+                    €{nextPayment.toFixed(2)}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-2 text-center">
+                    {t('admin.paymentManagement.nextPayment')}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-center leading-tight">
+                    {t('admin.paymentManagement.nextPaymentDescription')}
+                  </p>
                 </CardContent>
               </Card>
             </div>
