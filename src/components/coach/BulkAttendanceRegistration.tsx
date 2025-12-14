@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, CheckSquare, X } from "lucide-react";
+import { Calendar, CheckSquare, X, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -29,6 +30,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [includeSecondCoach, setIncludeSecondCoach] = useState(false);
+  const [secondCoachId, setSecondCoachId] = useState<string>("");
 
   // Fetch all athletes
   const { data: athletes = [] } = useQuery({
@@ -37,6 +40,21 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
       const { data, error } = await supabase
         .from('atletas')
         .select('athlete_id, first_name, last_name, plan_type')
+        .order('first_name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch all coaches
+  const { data: coaches = [] } = useQuery({
+    queryKey: ['coaches-for-bulk'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('coach')
+        .select('coach_id, first_name, last_name')
+        .eq('status', true)
         .order('first_name', { ascending: true });
       
       if (error) throw error;
@@ -91,6 +109,11 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const getAthleteName = (athleteId: string) => {
     const athlete = athletes.find(a => a.athlete_id === athleteId);
     return athlete ? `${athlete.first_name || ''} ${athlete.last_name || ''}`.trim() : athleteId;
+  };
+
+  const getCoachName = (coachIdToFind: string) => {
+    const coach = coaches.find(c => c.coach_id === coachIdToFind);
+    return coach ? `${coach.first_name || ''} ${coach.last_name || ''}`.trim() : coachIdToFind;
   };
 
   const handleMarkAttendance = async () => {
@@ -172,7 +195,9 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           shift: selectedShift,
           coach_id: coachId,
           beach_location: beachLocation || null,
-          notes: notes || null,
+          notes: includeSecondCoach && secondCoachId 
+            ? `${notes || ''}\n[Segundo Treinador: ${getCoachName(secondCoachId)}]`.trim()
+            : notes || null,
           photos: null,
           videos: null,
         };
@@ -301,6 +326,44 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Second Coach Option */}
+        <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="include-second-coach" 
+              checked={includeSecondCoach}
+              onCheckedChange={(checked) => {
+                setIncludeSecondCoach(checked === true);
+                if (!checked) setSecondCoachId("");
+              }}
+            />
+            <Label htmlFor="include-second-coach" className="flex items-center gap-2 cursor-pointer">
+              <UserPlus className="h-4 w-4" />
+              {t('coach.bulkAttendance.includeSecondCoach')}
+            </Label>
+          </div>
+          
+          {includeSecondCoach && (
+            <div className="space-y-2 mt-3">
+              <Label htmlFor="second-coach">{t('coach.bulkAttendance.selectSecondCoach')}</Label>
+              <Select value={secondCoachId} onValueChange={setSecondCoachId}>
+                <SelectTrigger id="second-coach">
+                  <SelectValue placeholder={t('coach.bulkAttendance.selectCoachPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {coaches
+                    .filter(coach => coach.coach_id !== coachId)
+                    .map((coach) => (
+                      <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                        {coach.first_name} {coach.last_name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Athletes Multi-Select */}

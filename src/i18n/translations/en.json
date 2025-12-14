@@ -403,6 +403,9 @@
       "markedFor": "Attendance marked for {count} athlete(s). Skipped: {skipped}",
       "error": "Error",
       "failedToMark": "Failed to mark attendance. Please try again.",
+      "includeSecondCoach": "Include another coach",
+      "selectSecondCoach": "Select Second Coach",
+      "selectCoachPlaceholder": "Choose a coach...",
       "toast": {
         "noAthletesSelected": "No Athletes Selected",
         "pleaseSelectAthletes": "Please select at least one athlete before registering attendance.",
