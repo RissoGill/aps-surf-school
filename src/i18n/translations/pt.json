@@ -403,6 +403,9 @@
       "markedFor": "Presença marcada para {count} atleta(s). Saltados: {skipped}",
       "error": "Erro",
       "failedToMark": "Falha ao marcar presença. Tente novamente.",
+      "includeSecondCoach": "Incluir outro treinador",
+      "selectSecondCoach": "Selecionar Segundo Treinador",
+      "selectCoachPlaceholder": "Escolha um treinador...",
       "toast": {
         "noAthletesSelected": "Nenhum Atleta Selecionado",
         "pleaseSelectAthletes": "Por favor selecione pelo menos um atleta antes de registar presença.",
