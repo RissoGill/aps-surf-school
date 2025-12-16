@@ -704,9 +704,11 @@ const PaymentManagement = () => {
             {/* Financial Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {/* Prior Balance */}
-              <Card className="shadow-soft">
+              <Card className="shadow-soft min-w-0">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-xl font-medium whitespace-nowrap ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                  <p
+                    className={`text-lg lg:text-xl font-medium leading-none tracking-tight tabular-nums whitespace-nowrap ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}
+                  >
                     €{priorBalance.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -716,9 +718,11 @@ const PaymentManagement = () => {
               </Card>
 
               {/* Current Season Outstanding */}
-              <Card className="shadow-soft">
+              <Card className="shadow-soft min-w-0">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-xl font-medium whitespace-nowrap ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>
+                  <p
+                    className={`text-lg lg:text-xl font-medium leading-none tracking-tight tabular-nums whitespace-nowrap ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}
+                  >
                     €{currentSeasonOutstanding.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -728,9 +732,11 @@ const PaymentManagement = () => {
               </Card>
 
               {/* Total Outstanding */}
-              <Card className="shadow-soft">
+              <Card className="shadow-soft min-w-0">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-xl font-medium whitespace-nowrap ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>
+                  <p
+                    className={`text-lg lg:text-xl font-medium leading-none tracking-tight tabular-nums whitespace-nowrap ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}
+                  >
                     €{totalOutstanding.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -740,9 +746,9 @@ const PaymentManagement = () => {
               </Card>
               
               {/* Next Payment */}
-              <Card className="shadow-soft">
+              <Card className="shadow-soft min-w-0">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xl font-medium whitespace-nowrap text-foreground">
+                  <p className="text-lg lg:text-xl font-medium leading-none tracking-tight tabular-nums whitespace-nowrap text-foreground">
                     €{nextPayment.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
