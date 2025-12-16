@@ -706,7 +706,7 @@ const PaymentManagement = () => {
               {/* Prior Balance */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                  <p className={`text-xl font-medium whitespace-nowrap ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
                     €{priorBalance.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -718,7 +718,7 @@ const PaymentManagement = () => {
               {/* Current Season Outstanding */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-medium ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>
+                  <p className={`text-xl font-medium whitespace-nowrap ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>
                     €{currentSeasonOutstanding.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -730,7 +730,7 @@ const PaymentManagement = () => {
               {/* Total Outstanding */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-medium ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>
+                  <p className={`text-xl font-medium whitespace-nowrap ${totalOutstanding > 0 ? 'text-destructive' : 'text-success'}`}>
                     €{totalOutstanding.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -742,7 +742,7 @@ const PaymentManagement = () => {
               {/* Next Payment */}
               <Card className="shadow-soft">
                 <CardContent className="p-4 text-center">
-                  <p className="text-2xl font-medium text-foreground">
+                  <p className="text-xl font-medium whitespace-nowrap text-foreground">
                     €{nextPayment.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
