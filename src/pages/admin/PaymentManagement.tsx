@@ -29,6 +29,8 @@ interface Payment {
   payment_date: string | null;
   plan_type: string | null;
   notes: string | null;
+  invoice_number: string | null;
+  entity: string | null;
   athlete_name?: string;
 }
 
@@ -64,13 +66,17 @@ const PaymentManagement = () => {
     payment_date: string;
     plan_type: string;
     notes: string;
+    invoice_number: string;
+    entity: string;
   }>({
     amount_due: "",
     amount_paid: "",
     status: "",
     payment_date: "",
     plan_type: "",
-    notes: ""
+    notes: "",
+    invoice_number: "",
+    entity: ""
   });
 
   // Session validation on mount - using legacy localStorage auth
@@ -261,7 +267,9 @@ const PaymentManagement = () => {
       status: payment.status,
       payment_date: payment.payment_date || "",
       plan_type: payment.plan_type || "",
-      notes: payment.notes || ""
+      notes: payment.notes || "",
+      invoice_number: payment.invoice_number || "",
+      entity: payment.entity || ""
     });
   };
 
@@ -273,7 +281,9 @@ const PaymentManagement = () => {
       status: "",
       payment_date: "",
       plan_type: "",
-      notes: ""
+      notes: "",
+      invoice_number: "",
+      entity: ""
     });
   };
 
@@ -463,7 +473,9 @@ const PaymentManagement = () => {
           status: calculatedStatus,
           payment_date: validated.payment_date,
           plan_type: validated.plan_type,
-          notes: validated.notes
+          notes: validated.notes,
+          invoice_number: editForm.invoice_number || null,
+          entity: editForm.entity || null
         })
         .eq('payment_id', paymentId);
 
@@ -842,6 +854,12 @@ const PaymentManagement = () => {
                           <TableHead>{t('admin.paymentManagement.amountPaid')}</TableHead>
                           <TableHead>{t('admin.paymentManagement.status')}</TableHead>
                           <TableHead>{t('admin.paymentManagement.date')}</TableHead>
+                          {userRole !== 'reports_viewer' && (
+                            <>
+                              <TableHead>{t('admin.paymentManagement.invoiceNumber')}</TableHead>
+                              <TableHead>{t('admin.paymentManagement.entity')}</TableHead>
+                            </>
+                          )}
                           <TableHead>{t('admin.paymentManagement.notes')}</TableHead>
                           <TableHead>{t('admin.paymentManagement.actions')}</TableHead>
                         </TableRow>
@@ -936,6 +954,38 @@ const PaymentManagement = () => {
                                     : '-'
                                 )}
                               </TableCell>
+                              
+                              {/* Invoice Number - Admin only */}
+                              {userRole !== 'reports_viewer' && (
+                                <TableCell>
+                                  {isEditing ? (
+                                    <Input
+                                      value={editForm.invoice_number}
+                                      onChange={(e) => setEditForm({ ...editForm, invoice_number: e.target.value })}
+                                      placeholder={t('admin.paymentManagement.invoiceNumberPlaceholder')}
+                                      className="w-32"
+                                    />
+                                  ) : (
+                                    payment.invoice_number || '-'
+                                  )}
+                                </TableCell>
+                              )}
+                              
+                              {/* Entity - Admin only */}
+                              {userRole !== 'reports_viewer' && (
+                                <TableCell>
+                                  {isEditing ? (
+                                    <Input
+                                      value={editForm.entity}
+                                      onChange={(e) => setEditForm({ ...editForm, entity: e.target.value })}
+                                      placeholder={t('admin.paymentManagement.entityPlaceholder')}
+                                      className="w-32"
+                                    />
+                                  ) : (
+                                    payment.entity || '-'
+                                  )}
+                                </TableCell>
+                              )}
                               
                                {/* Notes */}
                                <TableCell className="min-w-[260px] max-w-xl align-top">

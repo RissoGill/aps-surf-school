@@ -471,6 +471,8 @@ export type Database = {
           amount_due: number | null
           amount_paid: number | null
           athlete_id: string | null
+          entity: string | null
+          invoice_number: string | null
           month: string | null
           notes: string | null
           payment_date: string | null
@@ -483,6 +485,8 @@ export type Database = {
           amount_due?: number | null
           amount_paid?: number | null
           athlete_id?: string | null
+          entity?: string | null
+          invoice_number?: string | null
           month?: string | null
           notes?: string | null
           payment_date?: string | null
@@ -495,6 +499,8 @@ export type Database = {
           amount_due?: number | null
           amount_paid?: number | null
           athlete_id?: string | null
+          entity?: string | null
+          invoice_number?: string | null
           month?: string | null
           notes?: string | null
           payment_date?: string | null

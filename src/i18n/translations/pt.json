@@ -649,6 +649,10 @@
       "permissionDescription": "Permissões insuficientes para criar registo de pack. Por favor verifique as políticas RLS.",
       "packCreationFailed": "Criação de Pack Falhou",
       "packCreationDescription": "Falha ao criar registo de pack: {error}",
+      "invoiceNumber": "Nº Factura",
+      "invoiceNumberPlaceholder": "Ex: FT2025/001",
+      "entity": "Entidade",
+      "entityPlaceholder": "Ex: APS Surf School",
       "months": {
         "january": "Janeiro",
         "february": "Fevereiro",

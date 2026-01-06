@@ -649,6 +649,10 @@
       "permissionDescription": "Insufficient permissions to create pack record. Please check RLS policies.",
       "packCreationFailed": "Pack Creation Failed",
       "packCreationDescription": "Failed to create pack record: {error}",
+      "invoiceNumber": "Invoice No.",
+      "invoiceNumberPlaceholder": "e.g. INV2025/001",
+      "entity": "Entity",
+      "entityPlaceholder": "e.g. APS Surf School",
       "months": {
         "january": "January",
         "february": "February",
