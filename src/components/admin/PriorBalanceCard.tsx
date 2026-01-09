@@ -201,26 +201,26 @@ const PriorBalanceCard = ({
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header with icon and values */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-muted">
-                <History className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
-                  €{priorBalance.toFixed(2)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t('admin.paymentManagement.priorBalance')}
-                </p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-muted">
+              <History className="h-5 w-5 text-muted-foreground" />
             </div>
+            <div>
+              <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                €{priorBalance.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('admin.paymentManagement.priorBalance')}
+              </p>
+            </div>
+          </div>
 
-            {/* Register Payment Button */}
-            {canEdit && priorBalance > 0 && (
+          {/* Register Payment Button - separate line */}
+          {canEdit && priorBalance > 0 && (
+            <div className="mt-3">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1">
+                  <Button variant="outline" size="sm" className="w-full gap-1">
                     <Plus className="h-4 w-4" />
                     {t('admin.priorBalancePayments.registerPayment')}
                   </Button>
@@ -316,8 +316,8 @@ const PriorBalanceCard = ({
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Total Paid Info */}
           {totalPaidFromPriorBalance > 0 && (
