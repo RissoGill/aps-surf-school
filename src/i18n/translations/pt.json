@@ -685,7 +685,10 @@
       "dateRequired": "A data de pagamento é obrigatória",
       "editPayment": "Editar Pagamento",
       "editPaymentDescription": "Altere os valores do pagamento registado.",
-      "paymentUpdated": "Pagamento actualizado com sucesso"
+      "paymentUpdated": "Pagamento actualizado com sucesso",
+      "deleteConfirmTitle": "Eliminar Pagamento",
+      "deleteConfirmDescription": "Tem a certeza que pretende eliminar este pagamento? O valor será restaurado ao saldo anterior do atleta.",
+      "paymentDeleted": "Pagamento eliminado com sucesso"
     },
     "coachPayments": {
       "title": "Pagamentos a Treinadores",

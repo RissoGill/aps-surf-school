@@ -685,7 +685,10 @@
       "dateRequired": "Payment date is required",
       "editPayment": "Edit Payment",
       "editPaymentDescription": "Modify the registered payment values.",
-      "paymentUpdated": "Payment updated successfully"
+      "paymentUpdated": "Payment updated successfully",
+      "deleteConfirmTitle": "Delete Payment",
+      "deleteConfirmDescription": "Are you sure you want to delete this payment? The amount will be restored to the athlete's prior balance.",
+      "paymentDeleted": "Payment deleted successfully"
     },
     "coachPayments": {
       "title": "Coach Payments",
