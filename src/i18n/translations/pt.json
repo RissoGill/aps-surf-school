@@ -668,6 +668,22 @@
         "december": "Dezembro"
       }
     },
+    "priorBalancePayments": {
+      "registerPayment": "Registar Pagamento",
+      "dialogDescription": "Registar um pagamento total ou parcial do saldo anterior",
+      "amount": "Valor",
+      "payFullAmount": "Pagar Totalidade",
+      "paymentDate": "Data de Pagamento",
+      "notesPlaceholder": "Notas adicionais...",
+      "totalPaid": "Total Pago",
+      "history": "Histórico",
+      "noPaymentsYet": "Sem pagamentos registados",
+      "paymentRegistered": "Pagamento registado com sucesso",
+      "paymentFailed": "Falha ao registar pagamento",
+      "invalidAmount": "O valor deve ser positivo",
+      "amountExceedsBalance": "O valor não pode exceder o saldo disponível",
+      "dateRequired": "A data de pagamento é obrigatória"
+    },
     "coachPayments": {
       "title": "Pagamentos a Treinadores",
       "subtitle": "Gerir e acompanhar registos de pagamentos a treinadores",

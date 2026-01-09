@@ -519,6 +519,42 @@ export type Database = {
           },
         ]
       }
+      prior_balance_payments: {
+        Row: {
+          amount: number
+          athlete_id: string
+          created_at: string | null
+          created_by: string | null
+          entity: string | null
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          payment_date: string
+        }
+        Insert: {
+          amount: number
+          athlete_id: string
+          created_at?: string | null
+          created_by?: string | null
+          entity?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_date: string
+        }
+        Update: {
+          amount?: number
+          athlete_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          entity?: string | null
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_date?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
