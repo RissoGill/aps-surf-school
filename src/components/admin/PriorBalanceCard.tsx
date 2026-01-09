@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { History, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { History, Plus, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,6 +64,18 @@ const PriorBalanceCard = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Edit state for super_admin
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<PriorBalancePayment | null>(null);
+  const [editForm, setEditForm] = useState({
+    amount: "",
+    payment_date: "",
+    invoice_number: "",
+    entity: "",
+    notes: ""
+  });
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+
   // Fetch prior balance payments history
   const { data: priorBalancePayments = [], refetch: refetchPayments } = useQuery({
     queryKey: ['prior-balance-payments', athleteId],
@@ -88,6 +100,9 @@ const PriorBalanceCard = ({
 
   // Check if user can edit (not reports_viewer)
   const canEdit = userRole !== 'reports_viewer';
+  
+  // Check if user can edit payments (super_admin only)
+  const canEditPayments = userRole === 'super_admin';
 
   const handlePayFullAmount = () => {
     setPaymentForm(prev => ({
@@ -184,6 +199,109 @@ const PriorBalanceCard = ({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Start editing a payment
+  const handleStartEdit = (payment: PriorBalancePayment) => {
+    setEditingPayment(payment);
+    setEditForm({
+      amount: payment.amount.toString(),
+      payment_date: payment.payment_date,
+      invoice_number: payment.invoice_number || "",
+      entity: payment.entity || "",
+      notes: payment.notes || ""
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Submit edited payment
+  const handleSubmitEdit = async () => {
+    if (!editingPayment) return;
+
+    const newAmount = parseFloat(editForm.amount);
+    
+    // Validations
+    if (isNaN(newAmount) || newAmount <= 0) {
+      toast({
+        title: t('admin.paymentManagement.validationError'),
+        description: t('admin.priorBalancePayments.invalidAmount'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editForm.payment_date) {
+      toast({
+        title: t('admin.paymentManagement.validationError'),
+        description: t('admin.priorBalancePayments.dateRequired'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsEditSubmitting(true);
+
+    try {
+      const oldAmount = Number(editingPayment.amount);
+      const difference = oldAmount - newAmount;
+
+      // 1. Update payment record
+      const { error: updatePaymentError } = await supabase
+        .from('prior_balance_payments')
+        .update({
+          amount: newAmount,
+          payment_date: editForm.payment_date,
+          notes: editForm.notes || null,
+          invoice_number: editForm.invoice_number || null,
+          entity: editForm.entity || null
+        })
+        .eq('id', editingPayment.id);
+
+      if (updatePaymentError) throw updatePaymentError;
+
+      // 2. Adjust athlete's prior_balance
+      // If new amount is higher, balance decreases (paid more)
+      // If new amount is lower, balance increases (paid less)
+      const newPriorBalance = priorBalance + difference;
+      const { error: updateAthleteError } = await supabase
+        .from('atletas')
+        .update({ prior_balance: newPriorBalance })
+        .eq('athlete_id', athleteId);
+
+      if (updateAthleteError) throw updateAthleteError;
+
+      // 3. Success
+      toast({
+        title: t('admin.paymentManagement.success'),
+        description: t('admin.priorBalancePayments.paymentUpdated'),
+      });
+
+      // 4. Close dialog and reset
+      setIsEditDialogOpen(false);
+      setEditingPayment(null);
+      setEditForm({
+        amount: "",
+        payment_date: "",
+        invoice_number: "",
+        entity: "",
+        notes: ""
+      });
+
+      // 5. Refresh data
+      refetchPayments();
+      queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+      onBalanceUpdated();
+
+    } catch (error: any) {
+      console.error('Error updating prior balance payment:', error);
+      toast({
+        title: t('admin.paymentManagement.error'),
+        description: error.message || t('admin.priorBalancePayments.paymentFailed'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsEditSubmitting(false);
     }
   };
 
@@ -360,9 +478,21 @@ const PriorBalanceCard = ({
                         </p>
                       )}
                     </div>
-                    <span className="font-medium text-success">
-                      €{Number(payment.amount).toFixed(2)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-success">
+                        €{Number(payment.amount).toFixed(2)}
+                      </span>
+                      {canEditPayments && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0"
+                          onClick={() => handleStartEdit(payment)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </CollapsibleContent>
@@ -377,6 +507,88 @@ const PriorBalanceCard = ({
           )}
         </div>
       </CardContent>
+
+      {/* Edit Payment Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t('admin.priorBalancePayments.editPayment')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.priorBalancePayments.editPaymentDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="edit_amount">{t('admin.priorBalancePayments.amount')}</Label>
+              <Input
+                id="edit_amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+                value={editForm.amount}
+                onChange={(e) => setEditForm(prev => ({ ...prev, amount: e.target.value }))}
+              />
+            </div>
+
+            {/* Payment Date */}
+            <div className="space-y-2">
+              <Label htmlFor="edit_payment_date">{t('admin.priorBalancePayments.paymentDate')}</Label>
+              <Input
+                id="edit_payment_date"
+                type="date"
+                value={editForm.payment_date}
+                onChange={(e) => setEditForm(prev => ({ ...prev, payment_date: e.target.value }))}
+              />
+            </div>
+
+            {/* Invoice Number */}
+            <div className="space-y-2">
+              <Label htmlFor="edit_invoice_number">{t('admin.paymentManagement.invoiceNumber')}</Label>
+              <Input
+                id="edit_invoice_number"
+                placeholder={t('admin.paymentManagement.invoiceNumberPlaceholder')}
+                value={editForm.invoice_number}
+                onChange={(e) => setEditForm(prev => ({ ...prev, invoice_number: e.target.value }))}
+              />
+            </div>
+
+            {/* Entity */}
+            <div className="space-y-2">
+              <Label htmlFor="edit_entity">{t('admin.paymentManagement.entity')}</Label>
+              <Input
+                id="edit_entity"
+                placeholder={t('admin.paymentManagement.entityPlaceholder')}
+                value={editForm.entity}
+                onChange={(e) => setEditForm(prev => ({ ...prev, entity: e.target.value }))}
+              />
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="edit_notes">{t('admin.paymentManagement.notes')}</Label>
+              <Textarea
+                id="edit_notes"
+                placeholder={t('admin.priorBalancePayments.notesPlaceholder')}
+                value={editForm.notes}
+                onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleSubmitEdit} disabled={isEditSubmitting}>
+              {isEditSubmitting ? t('common.loading') : t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
