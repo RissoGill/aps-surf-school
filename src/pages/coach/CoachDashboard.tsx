@@ -714,18 +714,19 @@ const CoachDashboard = () => {
     const now = new Date();
     const currentYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    const uniqueDates = new Set<string>();
+    const uniqueSessions = new Set<string>();
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         if (isExcludedDateForCoach(record)) continue;
         if (record.date.slice(0, 7) === currentYm) {
-          uniqueDates.add(record.date);
+          const sessionKey = `${record.date}_${record.shift || 'unknown'}`;
+          uniqueSessions.add(sessionKey);
         }
       }
     }
-    return uniqueDates.size;
+    return uniqueSessions.size;
   }, [athletes, coachData]);
 
   // Calculate training days by month for the logged-in coach only
@@ -770,7 +771,8 @@ const CoachDashboard = () => {
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = new Set();
         }
-        byMonth[yearMonth].add(record.date);
+        const sessionKey = `${record.date}_${record.shift || 'unknown'}`;
+        byMonth[yearMonth].add(sessionKey);
       }
     }
 
@@ -820,7 +822,8 @@ const CoachDashboard = () => {
         if (!byYear[year]) {
           byYear[year] = new Set();
         }
-        byYear[year].add(record.date);
+        const sessionKey = `${record.date}_${record.shift || 'unknown'}`;
+        byYear[year].add(sessionKey);
       }
     }
 
@@ -867,13 +870,14 @@ const CoachDashboard = () => {
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = [];
         }
-        if (!byMonth[yearMonth].includes(record.date)) {
-          byMonth[yearMonth].push(record.date);
+        const sessionKey = `${record.date}_${record.shift || 'unknown'}`;
+        if (!byMonth[yearMonth].includes(sessionKey)) {
+          byMonth[yearMonth].push(sessionKey);
         }
       }
     }
 
-    // Sort dates within each month
+    // Sort sessions within each month (by date then shift)
     Object.keys(byMonth).forEach(ym => {
       byMonth[ym].sort().reverse();
     });
@@ -906,12 +910,13 @@ const CoachDashboard = () => {
       );
     };
 
-    // Group by month -> date -> athletes
+    // Group by month -> sessionKey (date_shift) -> athletes
     const byMonth: Record<string, Record<string, Array<{
       athleteId: string;
       athleteName: string;
       shift?: string;
       beachLocation?: string;
+      date: string;
     }>>> = {};
 
     for (const athlete of athletes) {
@@ -923,28 +928,30 @@ const CoachDashboard = () => {
         if (isExcludedDateForCoach(record)) continue;
         
         const yearMonth = record.date.slice(0, 7);
+        const sessionKey = `${record.date}_${record.shift || 'unknown'}`;
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = {};
         }
-        if (!byMonth[yearMonth][record.date]) {
-          byMonth[yearMonth][record.date] = [];
+        if (!byMonth[yearMonth][sessionKey]) {
+          byMonth[yearMonth][sessionKey] = [];
         }
         
-        byMonth[yearMonth][record.date].push({
+        byMonth[yearMonth][sessionKey].push({
           athleteId: athlete.athlete_id,
           athleteName: athleteName,
           shift: record.shift || undefined,
           beachLocation: record.beach_location || undefined,
+          date: record.date,
         });
       }
     }
 
-    // Sort dates within each month (reverse chronological)
+    // Sort session keys within each month (reverse chronological)
     Object.keys(byMonth).forEach(ym => {
-      const sortedDates = Object.keys(byMonth[ym]).sort().reverse();
+      const sortedKeys = Object.keys(byMonth[ym]).sort().reverse();
       const sortedMonth: Record<string, any> = {};
-      sortedDates.forEach(date => {
-        sortedMonth[date] = byMonth[ym][date];
+      sortedKeys.forEach(key => {
+        sortedMonth[key] = byMonth[ym][key];
       });
       byMonth[ym] = sortedMonth;
     });
@@ -961,7 +968,11 @@ const CoachDashboard = () => {
     Object.entries(trainingSessionsByMonth).forEach(([month, sessions]) => {
       const filteredSessions: Record<string, any[]> = {};
       
-      Object.entries(sessions).forEach(([date, athletesList]) => {
+      Object.entries(sessions).forEach(([sessionKey, athletesList]) => {
+        // Extract date from sessionKey (format: "YYYY-MM-DD_shift")
+        const lastUnderscore = sessionKey.lastIndexOf('_');
+        const date = sessionKey.substring(0, lastUnderscore);
+        
         // Apply date range filter
         if (historyDateRange.start && date < historyDateRange.start) return;
         if (historyDateRange.end && date > historyDateRange.end) return;
@@ -987,7 +998,7 @@ const CoachDashboard = () => {
         });
         
         if (filteredAthletes.length > 0) {
-          filteredSessions[date] = filteredAthletes;
+          filteredSessions[sessionKey] = filteredAthletes;
         }
       });
       
@@ -1878,31 +1889,28 @@ const CoachDashboard = () => {
                           {isExpanded && (
                             <div className="bg-muted/20 px-4 py-4 border-t-2 border-border">
                               <div className="space-y-3">
-                                {Object.entries(sessionsByDate).map(([date, athletesList]) => {
+                                {Object.entries(sessionsByDate).map(([sessionKey, athletesList]) => {
+                                  // sessionKey format: "YYYY-MM-DD_shift"
+                                  const lastUnderscore = sessionKey.lastIndexOf('_');
+                                  const date = sessionKey.substring(0, lastUnderscore);
+                                  const shift = sessionKey.substring(lastUnderscore + 1);
                                   const dateObj = new Date(date);
                                   const dayName = dateObj.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { weekday: 'long' });
                                   const dayNum = dateObj.getDate();
                                   const athleteCount = athletesList.length;
-                                  
-                                  // Group athletes by shift
-                                  const byShift: Record<string, typeof athletesList> = {};
-                                  athletesList.forEach(athlete => {
-                                    const shift = athlete.shift || 'No shift';
-                                    if (!byShift[shift]) byShift[shift] = [];
-                                    byShift[shift].push(athlete);
-                                  });
 
                                   // Shift color mapping
                                   const shiftColors: Record<string, {bg: string, text: string, border: string}> = {
                                     'Morning': {bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800'},
                                     'Afternoon': {bg: 'bg-blue-50 dark:bg-blue-950/30', text: 'text-blue-700 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-800'},
                                     'Evening': {bg: 'bg-purple-50 dark:bg-purple-950/30', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-800'},
-                                    'No shift': {bg: 'bg-muted/50', text: 'text-muted-foreground', border: 'border-border'}
+                                    'unknown': {bg: 'bg-muted/50', text: 'text-muted-foreground', border: 'border-border'}
                                   };
+                                  const colors = shiftColors[shift] || shiftColors['unknown'];
                                   
                                   return (
-                                    <div key={date} className="border-2 border-border/50 rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
-                                      {/* Date Header */}
+                                    <div key={sessionKey} className="border-2 border-border/50 rounded-lg overflow-hidden bg-card hover:shadow-md transition-shadow">
+                                      {/* Date + Shift Header */}
                                       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/10 to-primary/5 border-b-2 border-border/50">
                                         <div className="flex items-center gap-3 min-w-0 flex-1">
                                           <div className="bg-primary/15 p-2 rounded-lg flex-shrink-0">
@@ -1910,7 +1918,13 @@ const CoachDashboard = () => {
                                           </div>
                                           <div className="min-w-0">
                                             <div className="text-base font-semibold text-foreground">{dayName}, {monthName} {dayNum}</div>
-                                            <div className="text-sm text-muted-foreground">{date}</div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                              <span className="text-muted-foreground">{date}</span>
+                                              <Badge className={`${colors.bg} ${colors.text} ${colors.border} border text-xs`}>
+                                                <Clock className="h-3 w-3 mr-1" />
+                                                {shift === 'unknown' ? 'N/A' : shift}
+                                              </Badge>
+                                            </div>
                                           </div>
                                         </div>
                                         <Badge variant="default" className="text-sm font-medium flex-shrink-0">
@@ -1918,45 +1932,32 @@ const CoachDashboard = () => {
                                         </Badge>
                                       </div>
                                       
-                                      {/* Athletes List grouped by shift */}
-                                      <div className="p-4 space-y-3">
-                                        {Object.entries(byShift).map(([shift, shiftAthletes]) => {
-                                          const colors = shiftColors[shift] || shiftColors['No shift'];
-                                          return (
-                                            <div key={shift} className="space-y-2">
-                                              <div className={`text-sm font-bold ${colors.text} flex items-center gap-2 px-2`}>
-                                                <Clock className="h-4 w-4" />
-                                                {shift} - {shiftAthletes.length} {shiftAthletes.length === 1 ? t('coach.athleteProfile.athlete') : t('coach.athleteProfile.athletes')}
+                                      {/* Athletes List */}
+                                      <div className="p-4 space-y-2">
+                                        {athletesList.map((athlete, idx) => (
+                                          <div 
+                                            key={`${athlete.athleteId}-${idx}`}
+                                            className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                                          >
+                                            <div className="flex items-center gap-3 flex-1">
+                                              <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
+                                                <User className="h-4 w-4 text-primary" />
                                               </div>
-                                              <div className="space-y-2 pl-2">
-                                                {shiftAthletes.map((athlete, idx) => (
-                                                  <div 
-                                                    key={`${athlete.athleteId}-${idx}`}
-                                                    className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 py-3 rounded-lg bg-card border-2 border-border hover:border-primary/50 hover:shadow-sm transition-all"
-                                                  >
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                      <div className="bg-primary/15 p-2 rounded-full flex-shrink-0">
-                                                        <User className="h-4 w-4 text-primary" />
-                                                      </div>
-                                                      <span 
-                                                        className="text-xs font-normal text-foreground leading-tight" 
-                                                        title={athlete.athleteName}
-                                                      >
-                                                        {athlete.athleteName}
-                                                      </span>
-                                                    </div>
-                                                    {athlete.beachLocation && (
-                                                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-md max-w-[120px] overflow-hidden">
-                                                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                                                        <span className="font-medium truncate" title={athlete.beachLocation}>{athlete.beachLocation}</span>
-                                                      </div>
-                                                    )}
-                                                  </div>
-                                                ))}
-                                              </div>
+                                              <span 
+                                                className="text-xs font-normal text-foreground leading-tight" 
+                                                title={athlete.athleteName}
+                                              >
+                                                {athlete.athleteName}
+                                              </span>
                                             </div>
-                                          );
-                                        })}
+                                            {athlete.beachLocation && (
+                                              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-md max-w-[120px] overflow-hidden">
+                                                <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                                                <span className="font-medium truncate" title={athlete.beachLocation}>{athlete.beachLocation}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
                                       </div>
                                     </div>
                                   );
