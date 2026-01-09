@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { History, Plus, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { History, Plus, ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,7 +86,10 @@ const PriorBalanceCard = ({
   });
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
-  // Fetch prior balance payments history
+  // Delete state
+  const [deletePaymentId, setDeletePaymentId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const { data: priorBalancePayments = [], refetch: refetchPayments } = useQuery({
     queryKey: ['prior-balance-payments', athleteId],
     queryFn: async () => {
@@ -305,6 +318,58 @@ const PriorBalanceCard = ({
     }
   };
 
+  // Handle delete payment
+  const handleDeletePayment = async () => {
+    if (!deletePaymentId) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      // Find the payment to delete
+      const paymentToDelete = priorBalancePayments.find(p => p.id === deletePaymentId);
+      if (!paymentToDelete) throw new Error("Payment not found");
+      
+      // 1. Delete the payment record
+      const { error: deleteError } = await supabase
+        .from('prior_balance_payments')
+        .delete()
+        .eq('id', deletePaymentId);
+      
+      if (deleteError) throw deleteError;
+      
+      // 2. Restore the amount to the athlete's prior_balance
+      const restoredBalance = priorBalance + Number(paymentToDelete.amount);
+      const { error: updateError } = await supabase
+        .from('atletas')
+        .update({ prior_balance: restoredBalance })
+        .eq('athlete_id', athleteId);
+      
+      if (updateError) throw updateError;
+      
+      // 3. Success
+      toast({
+        title: t('admin.paymentManagement.success'),
+        description: t('admin.priorBalancePayments.paymentDeleted'),
+      });
+      
+      // 4. Refresh data
+      refetchPayments();
+      queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+      onBalanceUpdated();
+      
+    } catch (error: any) {
+      console.error('Error deleting prior balance payment:', error);
+      toast({
+        title: t('admin.paymentManagement.error'),
+        description: error.message || t('admin.priorBalancePayments.paymentFailed'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeletePaymentId(null);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-PT', {
@@ -483,14 +548,24 @@ const PriorBalanceCard = ({
                         €{Number(payment.amount).toFixed(2)}
                       </span>
                       {canEditPayments && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 w-6 p-0"
-                          onClick={() => handleStartEdit(payment)}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 w-6 p-0"
+                            onClick={() => handleStartEdit(payment)}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                            onClick={() => setDeletePaymentId(payment.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -589,6 +664,30 @@ const PriorBalanceCard = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deletePaymentId} onOpenChange={(open) => !open && setDeletePaymentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin.priorBalancePayments.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin.priorBalancePayments.deleteConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeletePayment}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? t('common.loading') : t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
