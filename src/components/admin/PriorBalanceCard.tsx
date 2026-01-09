@@ -158,7 +158,18 @@ const PriorBalanceCard = ({
     setIsSubmitting(true);
 
     try {
-      // 1. Insert payment record
+      // 1. Fetch current prior_balance from database (avoid stale props)
+      const { data: currentAthlete, error: fetchError } = await supabase
+        .from('atletas')
+        .select('prior_balance')
+        .eq('athlete_id', athleteId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const currentBalance = Number(currentAthlete?.prior_balance) || 0;
+
+      // 2. Insert payment record
       const { error: insertError } = await supabase
         .from('prior_balance_payments')
         .insert({
@@ -173,8 +184,8 @@ const PriorBalanceCard = ({
 
       if (insertError) throw insertError;
 
-      // 2. Update athlete's prior_balance
-      const newBalance = priorBalance - amount;
+      // 3. Update athlete's prior_balance using CURRENT value from DB
+      const newBalance = currentBalance - amount;
       const { error: updateError } = await supabase
         .from('atletas')
         .update({ prior_balance: newBalance })
@@ -256,10 +267,21 @@ const PriorBalanceCard = ({
     setIsEditSubmitting(true);
 
     try {
+      // 1. Fetch current prior_balance from database (avoid stale props)
+      const { data: currentAthlete, error: fetchError } = await supabase
+        .from('atletas')
+        .select('prior_balance')
+        .eq('athlete_id', athleteId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const currentBalance = Number(currentAthlete?.prior_balance) || 0;
+
       const oldAmount = Number(editingPayment.amount);
       const difference = oldAmount - newAmount;
 
-      // 1. Update payment record
+      // 2. Update payment record
       const { error: updatePaymentError } = await supabase
         .from('prior_balance_payments')
         .update({
@@ -273,10 +295,10 @@ const PriorBalanceCard = ({
 
       if (updatePaymentError) throw updatePaymentError;
 
-      // 2. Adjust athlete's prior_balance
+      // 3. Adjust athlete's prior_balance using CURRENT value from DB
       // If new amount is higher, balance decreases (paid more)
       // If new amount is lower, balance increases (paid less)
-      const newPriorBalance = priorBalance + difference;
+      const newPriorBalance = currentBalance + difference;
       const { error: updateAthleteError } = await supabase
         .from('atletas')
         .update({ prior_balance: newPriorBalance })
@@ -329,7 +351,18 @@ const PriorBalanceCard = ({
       const paymentToDelete = priorBalancePayments.find(p => p.id === deletePaymentId);
       if (!paymentToDelete) throw new Error("Payment not found");
       
-      // 1. Delete the payment record
+      // 1. Fetch current prior_balance from database (avoid stale props)
+      const { data: currentAthlete, error: fetchError } = await supabase
+        .from('atletas')
+        .select('prior_balance')
+        .eq('athlete_id', athleteId)
+        .single();
+      
+      if (fetchError) throw fetchError;
+      
+      const currentBalance = Number(currentAthlete?.prior_balance) || 0;
+      
+      // 2. Delete the payment record
       const { error: deleteError } = await supabase
         .from('prior_balance_payments')
         .delete()
@@ -337,8 +370,8 @@ const PriorBalanceCard = ({
       
       if (deleteError) throw deleteError;
       
-      // 2. Restore the amount to the athlete's prior_balance
-      const restoredBalance = priorBalance + Number(paymentToDelete.amount);
+      // 3. Restore the amount to the athlete's prior_balance using CURRENT value from DB
+      const restoredBalance = currentBalance + Number(paymentToDelete.amount);
       const { error: updateError } = await supabase
         .from('atletas')
         .update({ prior_balance: restoredBalance })
