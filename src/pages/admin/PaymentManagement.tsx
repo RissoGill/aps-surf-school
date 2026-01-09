@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard, Edit2, Save, X, History, Calendar } from "lucide-react";
+import { Euro, Search, CheckCircle, AlertCircle, Clock, CreditCard, Edit2, Save, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
 import { z } from "zod";
 import { useLanguage } from "@/i18n/LanguageContext";
+import PriorBalanceCard from "@/components/admin/PriorBalanceCard";
 
 interface Payment {
   payment_id: string;
@@ -717,24 +718,16 @@ const PaymentManagement = () => {
             <div className="space-y-4 mb-6">
               {/* Row 1: Prior Balance + Current Season */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Prior Balance */}
-                <Card className="shadow-soft">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-muted">
-                        <History className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
-                          €{priorBalance.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t('admin.paymentManagement.priorBalance')}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                {/* Prior Balance - Now with payment functionality */}
+                <PriorBalanceCard
+                  athleteId={selectedAthlete.athlete_id}
+                  priorBalance={priorBalance}
+                  userRole={userRole}
+                  onBalanceUpdated={() => {
+                    queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+                    queryClient.invalidateQueries({ queryKey: ['athlete-payments', selectedAthlete?.athlete_id] });
+                  }}
+                />
 
                 {/* Current Season Outstanding */}
                 <Card className="shadow-soft">

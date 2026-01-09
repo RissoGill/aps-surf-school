@@ -668,6 +668,22 @@
         "december": "December"
       }
     },
+    "priorBalancePayments": {
+      "registerPayment": "Register Payment",
+      "dialogDescription": "Register a full or partial payment against the prior balance",
+      "amount": "Amount",
+      "payFullAmount": "Pay Full Amount",
+      "paymentDate": "Payment Date",
+      "notesPlaceholder": "Additional notes...",
+      "totalPaid": "Total Paid",
+      "history": "History",
+      "noPaymentsYet": "No payments registered yet",
+      "paymentRegistered": "Payment registered successfully",
+      "paymentFailed": "Failed to register payment",
+      "invalidAmount": "Amount must be positive",
+      "amountExceedsBalance": "Amount cannot exceed available balance",
+      "dateRequired": "Payment date is required"
+    },
     "coachPayments": {
       "title": "Coach Payments",
       "subtitle": "Manage and track coach payment records",
