@@ -116,6 +116,7 @@ const CoachDashboard = () => {
         console.error('Coach profile not found for auth user:', error);
         return false;
       }
+      console.log('[CoachDashboard] Loaded coachData from auth:', data);
       setCoachData(data);
       localStorage.setItem('coach_session', JSON.stringify(data));
       return true;
@@ -138,6 +139,7 @@ const CoachDashboard = () => {
           if (coachSession) {
             try {
               const parsed = JSON.parse(coachSession);
+              console.log('[CoachDashboard] Loaded coachData from localStorage (fallback after auth):', parsed);
               setCoachData(parsed);
               return;
             } catch {}
@@ -152,10 +154,14 @@ const CoachDashboard = () => {
       if (coachSession) {
         try {
           const parsed = JSON.parse(coachSession);
+          console.log('[CoachDashboard] Loaded coachData from localStorage (legacy):', parsed);
           setCoachData(parsed);
           return;
-        } catch {}
+        } catch (e) {
+          console.error('[CoachDashboard] Failed to parse coach_session:', e);
+        }
       }
+      console.log('[CoachDashboard] No session found, redirecting to login');
       navigate('/login/coach');
     });
 
@@ -724,12 +730,15 @@ const CoachDashboard = () => {
 
   // Calculate training days by month for the logged-in coach only
   const trainingDaysByMonth = useMemo(() => {
+    console.log('[CoachDashboard] trainingDaysByMonth - athletes:', athletes?.length, 'coachData:', coachData);
     if (!athletes || !coachData) return {};
 
     const coachId = coachData?.coach_id?.toString().trim().toUpperCase();
     const firstName = coachData?.first_name?.toString().trim().toLowerCase();
     const lastName = coachData?.last_name?.toString().trim().toLowerCase();
     const fullName = [coachData?.first_name, coachData?.last_name].filter(Boolean).join(' ').trim().toLowerCase();
+
+    console.log('[CoachDashboard] Coach matching criteria - coachId:', coachId, 'firstName:', firstName, 'lastName:', lastName);
 
     const coachMatchesCoach = (coachName?: string | null, recordCoachId?: string | null) => {
       if (coachId && recordCoachId) {
@@ -748,11 +757,15 @@ const CoachDashboard = () => {
     };
 
     const byMonth: Record<string, Set<string>> = {};
+    let matchedCount = 0;
+    let totalRecords = 0;
     for (const athlete of athletes) {
       for (const record of athlete.attendance) {
+        totalRecords++;
         if (!record.date) continue;
         if (!coachMatchesCoach(record.coach, record.coach_id)) continue;
         if (isExcludedDateForCoach(record)) continue;
+        matchedCount++;
         const yearMonth = record.date.slice(0, 7);
         if (!byMonth[yearMonth]) {
           byMonth[yearMonth] = new Set();
@@ -761,10 +774,13 @@ const CoachDashboard = () => {
       }
     }
 
+    console.log('[CoachDashboard] trainingDaysByMonth - totalRecords:', totalRecords, 'matchedCount:', matchedCount);
+
     const result: Record<string, number> = {};
     Object.keys(byMonth).sort().reverse().forEach(ym => {
       result[ym] = byMonth[ym].size;
     });
+    console.log('[CoachDashboard] trainingDaysByMonth result:', result);
     return result;
   }, [athletes, coachData]);
 
