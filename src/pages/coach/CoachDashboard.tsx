@@ -321,6 +321,7 @@ const CoachDashboard = () => {
           athlete_id: att?.athlete_id ?? null,
           photos: att?.photos ?? [],
           videos: att?.videos ?? [],
+          shift: att?.shift ?? null,
         });
       });
 
