@@ -682,7 +682,10 @@
       "paymentFailed": "Falha ao registar pagamento",
       "invalidAmount": "O valor deve ser positivo",
       "amountExceedsBalance": "O valor não pode exceder o saldo disponível",
-      "dateRequired": "A data de pagamento é obrigatória"
+      "dateRequired": "A data de pagamento é obrigatória",
+      "editPayment": "Editar Pagamento",
+      "editPaymentDescription": "Altere os valores do pagamento registado.",
+      "paymentUpdated": "Pagamento actualizado com sucesso"
     },
     "coachPayments": {
       "title": "Pagamentos a Treinadores",

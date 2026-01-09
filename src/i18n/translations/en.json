@@ -682,7 +682,10 @@
       "paymentFailed": "Failed to register payment",
       "invalidAmount": "Amount must be positive",
       "amountExceedsBalance": "Amount cannot exceed available balance",
-      "dateRequired": "Payment date is required"
+      "dateRequired": "Payment date is required",
+      "editPayment": "Edit Payment",
+      "editPaymentDescription": "Modify the registered payment values.",
+      "paymentUpdated": "Payment updated successfully"
     },
     "coachPayments": {
       "title": "Coach Payments",
