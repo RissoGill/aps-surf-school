@@ -714,40 +714,18 @@ const PaymentManagement = () => {
         {/* Payment Records - Only show when athlete selected */}
         {selectedAthlete && (
           <>
-            {/* Financial Summary Cards - 2 rows of 2 */}
+            {/* Financial Summary Cards */}
             <div className="space-y-4 mb-6">
-              {/* Row 1: Prior Balance + Current Season */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Prior Balance - Now with payment functionality */}
-                <PriorBalanceCard
-                  athleteId={selectedAthlete.athlete_id}
-                  priorBalance={priorBalance}
-                  userRole={userRole}
-                  onBalanceUpdated={() => {
-                    queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
-                    queryClient.invalidateQueries({ queryKey: ['athlete-payments', selectedAthlete?.athlete_id] });
-                  }}
-                />
-
-                {/* Current Season Outstanding */}
-                <Card className="shadow-soft">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-muted">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <p className={`text-xl font-medium ${currentSeasonOutstanding > 0 ? 'text-warning' : 'text-success'}`}>
-                          €{currentSeasonOutstanding.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t('admin.paymentManagement.currentSeasonDebt')}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Row 1: Prior Balance (full width) */}
+              <PriorBalanceCard
+                athleteId={selectedAthlete.athlete_id}
+                priorBalance={priorBalance}
+                userRole={userRole}
+                onBalanceUpdated={() => {
+                  queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+                  queryClient.invalidateQueries({ queryKey: ['athlete-payments', selectedAthlete?.athlete_id] });
+                }}
+              />
 
               {/* Row 2: Total Outstanding + Next Payment */}
               <div className="grid grid-cols-2 gap-4">
