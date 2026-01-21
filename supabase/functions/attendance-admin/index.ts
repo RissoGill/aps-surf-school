@@ -4,16 +4,48 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 const SUPABASE_URL = "https://bzzzecvzoahauqrhkvds.supabase.co";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-  auth: { persistSession: false },
-});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST,GET,PATCH,DELETE,OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Input validation helpers
+const isValidId = (id: unknown): id is string => 
+  typeof id === 'string' && id.length > 0 && id.length <= 100;
+
+const isValidDate = (date: unknown): date is string =>
+  typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date);
+
+const isValidStatus = (status: unknown): status is string =>
+  typeof status === 'string' && ['Present', 'Absent', 'Justified', 'Late'].includes(status);
+
+const isValidAthleteId = (id: unknown): id is string =>
+  typeof id === 'string' && /^A\d+$/.test(id) && id.length <= 10;
+
+const isValidCoachId = (id: unknown): id is string =>
+  typeof id === 'string' && /^T\d+$/.test(id) && id.length <= 10;
+
+const isValidShift = (shift: unknown): shift is string | null =>
+  shift === null || shift === undefined || (typeof shift === 'string' && shift.length <= 50);
+
+const isValidText = (text: unknown, maxLength = 500): text is string | null =>
+  text === null || text === undefined || (typeof text === 'string' && text.length <= maxLength);
+
+const sanitizeText = (text: string | null | undefined): string | null => {
+  if (!text) return null;
+  // Basic HTML entity encoding to prevent XSS
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .trim()
+    .slice(0, 500);
 };
 
 serve(async (req) => {
@@ -22,27 +54,193 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }), 
+        { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Create client with user's auth token to verify identity
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Validate user authentication using getClaims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error('Auth validation failed:', claimsError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }), 
+        { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Check if user has admin or super_admin role
+    const { data: roles, error: roleError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId);
+
+    if (roleError) {
+      console.error('Role check failed:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Authorization failed' }), 
+        { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const hasAdminRole = roles?.some(r => r.role === 'admin' || r.role === 'super_admin' || r.role === 'coach');
+    if (!hasAdminRole) {
+      console.error('User lacks required role:', userId);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Insufficient permissions' }), 
+        { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Create admin client for operations (after auth verified)
+    const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+      auth: { persistSession: false },
+    });
+
     const url = new URL(req.url);
-    console.log('attendance-admin call', { method: req.method, path: url.pathname });
+    console.log('attendance-admin call', { method: req.method, path: url.pathname, userId });
 
     if (req.method === "PATCH") {
       const { id, updates } = await req.json();
-      if (!id || !updates || typeof updates !== "object") {
-        return new Response(JSON.stringify({ error: "Missing id or updates" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      
+      // Validate id
+      if (!isValidId(id)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid id format" }), 
+          { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+      
+      if (!updates || typeof updates !== "object") {
+        return new Response(
+          JSON.stringify({ error: "Missing updates object" }), 
+          { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
       }
 
-      // Normalize updates: keep only allowed fields
-      const allowed = ["date", "status", "shift", "beach_location", "notes", "coach_id", "photos", "videos", "id", "athlete_id"];
+      // Validate and sanitize updates
       const cleanUpdates: Record<string, unknown> = {};
-      for (const key of allowed) {
-        if (key in updates) cleanUpdates[key] = updates[key];
+      
+      if ('date' in updates) {
+        if (!isValidDate(updates.date)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid date format (YYYY-MM-DD required)" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.date = updates.date;
+      }
+      
+      if ('status' in updates) {
+        if (!isValidStatus(updates.status)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid status value" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.status = updates.status;
+      }
+      
+      if ('athlete_id' in updates) {
+        if (!isValidAthleteId(updates.athlete_id)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid athlete_id format" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.athlete_id = updates.athlete_id;
+      }
+      
+      if ('coach_id' in updates) {
+        if (!isValidCoachId(updates.coach_id)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid coach_id format" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.coach_id = updates.coach_id;
+      }
+      
+      if ('shift' in updates) {
+        if (!isValidShift(updates.shift)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid shift value" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.shift = updates.shift ? String(updates.shift).trim() : null;
+      }
+      
+      if ('beach_location' in updates) {
+        if (!isValidText(updates.beach_location, 200)) {
+          return new Response(
+            JSON.stringify({ error: "beach_location too long" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.beach_location = sanitizeText(updates.beach_location);
+      }
+      
+      if ('notes' in updates) {
+        if (!isValidText(updates.notes, 1000)) {
+          return new Response(
+            JSON.stringify({ error: "notes too long" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.notes = sanitizeText(updates.notes);
+      }
+      
+      if ('photos' in updates) {
+        if (!isValidText(updates.photos, 2000)) {
+          return new Response(
+            JSON.stringify({ error: "photos field too long" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.photos = updates.photos;
+      }
+      
+      if ('videos' in updates) {
+        if (!isValidText(updates.videos, 2000)) {
+          return new Response(
+            JSON.stringify({ error: "videos field too long" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.videos = updates.videos;
       }
 
-      const newId = (cleanUpdates as any).id as string | undefined;
+      // Handle ID change if provided
+      if ('id' in updates && updates.id !== id) {
+        if (!isValidId(updates.id)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid new id format" }), 
+            { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        cleanUpdates.id = updates.id;
+      }
+
+      const newId = cleanUpdates.id as string | undefined;
       const hasIdChange = !!newId && newId !== id;
 
       if (hasIdChange) {
-        const { id: _omitId, ...nonIdUpdates } = cleanUpdates as any;
+        const { id: _omitId, ...nonIdUpdates } = cleanUpdates;
         console.log("Attempting ID change", { from: id, to: newId, nonIdUpdates });
 
         // Check if target ID already exists
@@ -53,12 +251,11 @@ serve(async (req) => {
           .maybeSingle();
         if (selErr) {
           console.error("Select target error:", selErr);
-          return new Response(JSON.stringify({ error: selErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+          return new Response(JSON.stringify({ error: "Database error" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
         }
 
         if (target) {
           // Merge: update existing target row, then delete old row
-          // Fetch source row to preserve fields like coach_id when not explicitly provided
           const { data: source, error: srcErr } = await supabase
             .from("attendance")
             .select("coach_id, athlete_id")
@@ -69,11 +266,9 @@ serve(async (req) => {
           }
 
           const finalUpdates: Record<string, unknown> = { ...nonIdUpdates };
-          // Preserve coach_id from source if not included in updates
           if (!("coach_id" in finalUpdates) && source?.coach_id) {
             finalUpdates.coach_id = source.coach_id;
           }
-          // Ensure athlete_id consistency if not explicitly changed
           if (!("athlete_id" in finalUpdates) && source?.athlete_id) {
             finalUpdates.athlete_id = source.athlete_id;
           }
@@ -84,7 +279,7 @@ serve(async (req) => {
             .eq("id", newId);
           if (updTargetErr) {
             console.error("Update target error:", updTargetErr);
-            return new Response(JSON.stringify({ error: updTargetErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+            return new Response(JSON.stringify({ error: "Update failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
           }
           const { error: delErr } = await supabase
             .from("attendance")
@@ -92,18 +287,17 @@ serve(async (req) => {
             .eq("id", id);
           if (delErr) {
             console.error("Delete old error:", delErr);
-            return new Response(JSON.stringify({ error: delErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+            return new Response(JSON.stringify({ error: "Cleanup failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
           }
           return new Response(JSON.stringify({ success: true, merged: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
         } else {
-          // Safe to update primary key and other fields in place
           const { error: updErr } = await supabase
             .from("attendance")
             .update(cleanUpdates)
             .eq("id", id);
           if (updErr) {
             console.error("Update (id change) error:", updErr);
-            return new Response(JSON.stringify({ error: updErr.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+            return new Response(JSON.stringify({ error: "Update failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
           }
           return new Response(JSON.stringify({ success: true, moved: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
         }
@@ -119,7 +313,6 @@ serve(async (req) => {
         console.error("Update error:", error);
         const errorMsg = error.message || '';
         if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
-          console.log("Duplicate attendance detected in PATCH - returning success=false");
           return new Response(
             JSON.stringify({ 
               success: false, 
@@ -129,7 +322,7 @@ serve(async (req) => {
             { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
           );
         }
-        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+        return new Response(JSON.stringify({ error: "Update failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
@@ -137,10 +330,22 @@ serve(async (req) => {
 
     if (req.method === "POST") {
       const body = await req.json();
-      const required = ["id", "athlete_id", "date", "status", "coach_id"];
-      const missing = required.filter((k) => !(k in body));
-      if (missing.length) {
-        return new Response(JSON.stringify({ error: `Missing fields: ${missing.join(', ')}` }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      
+      // Validate required fields
+      if (!isValidId(body.id)) {
+        return new Response(JSON.stringify({ error: "Invalid id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+      if (!isValidAthleteId(body.athlete_id)) {
+        return new Response(JSON.stringify({ error: "Invalid athlete_id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+      if (!isValidDate(body.date)) {
+        return new Response(JSON.stringify({ error: "Invalid date format (YYYY-MM-DD required)" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+      if (!isValidStatus(body.status)) {
+        return new Response(JSON.stringify({ error: "Invalid status value" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+      if (!isValidCoachId(body.coach_id)) {
+        return new Response(JSON.stringify({ error: "Invalid coach_id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       const insertData: Record<string, unknown> = {
@@ -149,11 +354,11 @@ serve(async (req) => {
         date: body.date,
         status: body.status,
         coach_id: body.coach_id,
-        shift: typeof body.shift === 'string' ? body.shift.trim() : null,
-        beach_location: body.beach_location ?? null,
-        notes: body.notes ?? null,
-        photos: body.photos ?? null,
-        videos: body.videos ?? null,
+        shift: isValidShift(body.shift) ? (body.shift ? String(body.shift).trim() : null) : null,
+        beach_location: isValidText(body.beach_location, 200) ? sanitizeText(body.beach_location) : null,
+        notes: isValidText(body.notes, 1000) ? sanitizeText(body.notes) : null,
+        photos: isValidText(body.photos, 2000) ? body.photos : null,
+        videos: isValidText(body.videos, 2000) ? body.videos : null,
       };
 
       const { error } = await supabase.from("attendance").insert(insertData);
@@ -161,7 +366,6 @@ serve(async (req) => {
         console.error("Insert error:", error);
         const errorMsg = error.message || '';
         if (errorMsg.includes('Attendance for this athlete and shift already exists on this date')) {
-          console.log("Duplicate attendance detected in POST - returning success=false");
           return new Response(
             JSON.stringify({ 
               success: false, 
@@ -171,7 +375,7 @@ serve(async (req) => {
             { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
           );
         }
-        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+        return new Response(JSON.stringify({ error: "Insert failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
@@ -179,14 +383,14 @@ serve(async (req) => {
 
     if (req.method === "DELETE") {
       const { id } = await req.json();
-      if (!id) {
-        return new Response(JSON.stringify({ error: "Missing id" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      if (!isValidId(id)) {
+        return new Response(JSON.stringify({ error: "Invalid id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       const { error } = await supabase.from("attendance").delete().eq("id", id);
       if (error) {
         console.error("Delete error:", error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+        return new Response(JSON.stringify({ error: "Delete failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
