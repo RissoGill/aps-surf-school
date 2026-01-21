@@ -5,6 +5,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation helpers
+const isValidAthleteId = (id: unknown): id is string =>
+  typeof id === 'string' && /^A\d{1,4}$/.test(id);
+
+const isValidPlanType = (planType: unknown): planType is 'pack1' | 'pack5' | 'pack10' =>
+  typeof planType === 'string' && ['pack1', 'pack5', 'pack10'].includes(planType);
+
+const isValidDate = (date: unknown): date is string =>
+  typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date);
+
+const isValidPaymentId = (id: unknown): id is string =>
+  typeof id === 'string' && id.length > 0 && id.length <= 100;
+
 interface CreatePackRequest {
   athleteId: string;
   planType: 'pack1' | 'pack5' | 'pack10';
@@ -21,8 +34,8 @@ Deno.serve(async (req) => {
   try {
     // Get auth header
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      console.error('No authorization header');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('No or invalid authorization header');
       return new Response(
         JSON.stringify({ ok: false, error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -40,50 +53,94 @@ Deno.serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify user is admin
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      console.error('Auth error:', userError);
+    // Validate user authentication using getClaims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error('Auth validation failed:', claimsError);
       return new Response(
         JSON.stringify({ ok: false, error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    const userId = claimsData.claims.sub;
+
+    // Check if user has admin role
     const { data: roles, error: roleError } = await supabaseClient
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (roleError || !roles?.some(r => r.role === 'admin' || r.role === 'super_admin')) {
-      console.error('User not admin:', user.id);
+      console.error('User not admin:', userId);
       return new Response(
         JSON.stringify({ ok: false, error: 'Forbidden: Admin role required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Parse and validate request
-    const body: CreatePackRequest = await req.json();
+    // Parse request body
+    let body: CreatePackRequest;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Invalid JSON body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { athleteId, planType, paymentDate, paymentId } = body;
 
-    if (!athleteId || !planType || !paymentDate || !paymentId) {
+    // Validate all required fields with strict validation
+    if (!isValidAthleteId(athleteId)) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'Missing required fields' }),
+        JSON.stringify({ ok: false, error: 'Invalid athleteId format (must be A followed by 1-4 digits)' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Validate plan type and extract tokens
-    const tokenMatch = planType.match(/pack(\d+)/);
-    if (!tokenMatch) {
+    if (!isValidPlanType(planType)) {
       return new Response(
-        JSON.stringify({ ok: false, error: 'Invalid plan type' }),
+        JSON.stringify({ ok: false, error: 'Invalid planType (must be pack1, pack5, or pack10)' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const totalTokens = tokenMatch[1];
+    if (!isValidDate(paymentDate)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Invalid paymentDate format (must be YYYY-MM-DD)' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!isValidPaymentId(paymentId)) {
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Invalid paymentId' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Verify athlete exists
+    const { data: athlete, error: athleteError } = await supabaseAdmin
+      .from('atletas')
+      .select('athlete_id')
+      .eq('athlete_id', athleteId)
+      .maybeSingle();
+
+    if (athleteError || !athlete) {
+      console.error('Athlete not found:', athleteId);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Athlete not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Extract tokens from validated plan type
+    const tokenMap: Record<string, string> = { pack1: '1', pack5: '5', pack10: '10' };
+    const totalTokens = tokenMap[planType];
 
     // Check for idempotency - if pack already exists with this payment_id, return success
     const { data: existingPackByPayment } = await supabaseAdmin
@@ -174,10 +231,10 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in create-pack function:', error);
     return new Response(
-      JSON.stringify({ ok: false, error: error.message || 'Internal server error' }),
+      JSON.stringify({ ok: false, error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
