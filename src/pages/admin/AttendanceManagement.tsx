@@ -150,9 +150,11 @@ const AttendanceManagement = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      // Get admin ID from localStorage for legacy auth
+      const adminId = localStorage.getItem('adminId') || 'admin';
       const { error } = await supabase.functions.invoke('attendance-admin', {
         method: 'PATCH',
-        body: { id, updates }
+        body: { id, updates, role: 'admin', userId: adminId }
       });
       if (error) {
         throw new Error(error.message || 'Failed to update attendance');
@@ -183,9 +185,11 @@ const AttendanceManagement = () => {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Get admin ID from localStorage for legacy auth
+      const adminId = localStorage.getItem('adminId') || 'admin';
       const { error } = await supabase.functions.invoke('attendance-admin', {
         method: 'DELETE',
-        body: { id }
+        body: { id, role: 'admin', userId: adminId }
       });
       if (error) {
         throw new Error(error.message || 'Failed to delete attendance');
