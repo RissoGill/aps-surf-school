@@ -150,14 +150,12 @@ const AttendanceManagement = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      const res = await fetch('https://bzzzecvzoahauqrhkvds.functions.supabase.co/functions/v1/attendance-admin', {
+      const { error } = await supabase.functions.invoke('attendance-admin', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, updates })
+        body: { id, updates }
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to update attendance');
+      if (error) {
+        throw new Error(error.message || 'Failed to update attendance');
       }
     },
     onSuccess: () => {
@@ -185,14 +183,12 @@ const AttendanceManagement = () => {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch('https://bzzzecvzoahauqrhkvds.functions.supabase.co/functions/v1/attendance-admin', {
+      const { error } = await supabase.functions.invoke('attendance-admin', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: { id }
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to delete attendance');
+      if (error) {
+        throw new Error(error.message || 'Failed to delete attendance');
       }
     },
     onSuccess: () => {
