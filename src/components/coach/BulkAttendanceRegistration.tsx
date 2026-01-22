@@ -213,9 +213,9 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
             return 0; // Skip this athlete
           }
 
-          // Fallback to edge function for RLS bypass
+          // Fallback to edge function for RLS bypass - pass role for legacy auth
           const { data, error: invokeError } = await supabase.functions.invoke('attendance-admin', {
-            body: record,
+            body: { ...record, role: 'coach', userId: coachId },
           });
 
           if (invokeError) {

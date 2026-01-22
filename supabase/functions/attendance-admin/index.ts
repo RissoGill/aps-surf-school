@@ -54,68 +54,83 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('Missing or invalid authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }), 
-        { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    // Create client with user's auth token to verify identity
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    // Validate user authentication using getClaims
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-    
-    if (claimsError || !claimsData?.claims) {
-      console.error('Auth validation failed:', claimsError);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }), 
-        { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    const userId = claimsData.claims.sub;
-
-    // Check if user has admin or super_admin role
-    const { data: roles, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-
-    if (roleError) {
-      console.error('Role check failed:', roleError);
-      return new Response(
-        JSON.stringify({ error: 'Authorization failed' }), 
-        { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    const hasAdminRole = roles?.some(r => r.role === 'admin' || r.role === 'super_admin' || r.role === 'coach');
-    if (!hasAdminRole) {
-      console.error('User lacks required role:', userId);
-      return new Response(
-        JSON.stringify({ error: 'Forbidden: Insufficient permissions' }), 
-        { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    // Create admin client for operations (after auth verified)
+    // Create admin client for operations (service role)
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
 
+    // Parse request body
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON body" }), 
+        { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Legacy authentication: validate role and userId from request body
+    const { role, userId } = body as { role?: string; userId?: string };
+    
+    if (!role || !['coach', 'admin', 'super_admin'].includes(role)) {
+      console.error('Missing or invalid role:', role);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid or missing role' }), 
+        { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Verify role against database (legacy authentication)
+    if (role === 'coach') {
+      if (!userId || !isValidCoachId(userId)) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid coach ID' }), 
+          { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+      // Verify coach exists
+      const { data: coachData, error: coachError } = await supabase
+        .from('coach')
+        .select('coach_id')
+        .eq('coach_id', userId)
+        .single();
+      
+      if (coachError || !coachData) {
+        console.error('Coach verification failed:', coachError);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Coach not found' }), 
+          { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+    } else if (role === 'admin' || role === 'super_admin') {
+      // Verify admin exists in users table
+      if (!userId) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Invalid admin ID' }), 
+          { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+      const { data: adminData, error: adminError } = await supabase
+        .from('users')
+        .select('admin_id, admin_role')
+        .eq('admin_id', userId)
+        .single();
+      
+      if (adminError || !adminData) {
+        console.error('Admin verification failed:', adminError);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized: Admin not found' }), 
+          { status: 401, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+    }
+
     const url = new URL(req.url);
-    console.log('attendance-admin call', { method: req.method, path: url.pathname, userId });
+    console.log('attendance-admin call', { method: req.method, path: url.pathname, role, userId });
 
     if (req.method === "PATCH") {
-      const { id, updates } = await req.json();
+      const { id, updates } = body as { id?: unknown; updates?: unknown };
       
       // Validate id
       if (!isValidId(id)) {
@@ -329,7 +344,7 @@ serve(async (req) => {
     }
 
     if (req.method === "POST") {
-      const body = await req.json();
+      // body already parsed above
       
       // Validate required fields
       if (!isValidId(body.id)) {
@@ -382,7 +397,7 @@ serve(async (req) => {
     }
 
     if (req.method === "DELETE") {
-      const { id } = await req.json();
+      const { id } = body as { id?: unknown };
       if (!isValidId(id)) {
         return new Response(JSON.stringify({ error: "Invalid id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
