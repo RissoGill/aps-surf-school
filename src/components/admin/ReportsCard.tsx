@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import apsLogoImage from "@/assets/aps-logo.png";
 import html2pdf from "html2pdf.js";
+import { escapeHtml } from "@/utils/htmlSanitize";
 
 type ReportType = "financial" | "personal" | "overall" | "attendance" | "coach_payments";
 
@@ -344,7 +345,7 @@ export const ReportsCard = () => {
             <strong>Breakdown by Surf Level:</strong>
             <ul style="margin: 5px 0;">
               ${Object.entries(surfLevelBreakdown).map(([level, stats]: [string, any]) => `
-                <li>${level}: ${stats.count} athletes, €${stats.outstanding.toFixed(2)} outstanding</li>
+                <li>${escapeHtml(level)}: ${stats.count} athletes, €${stats.outstanding.toFixed(2)} outstanding</li>
               `).join('')}
             </ul>
           </div>
@@ -352,18 +353,18 @@ export const ReportsCard = () => {
       `;
       
       tableRows = (data as any[]).map(payment => {
-        const displayDate = payment.payment_date || `${payment.month} ${payment.year}`;
+        const displayDate = escapeHtml(payment.payment_date || `${payment.month} ${payment.year}`);
         const outstanding = (parseFloat(payment.amount_due || 0) - parseFloat(payment.amount_paid || 0)).toFixed(2);
         return `
         <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.athlete_id}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.atletas?.first_name || ""} ${payment.atletas?.last_name || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.atletas?.surf_level || "N/A"}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.athlete_id)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.atletas?.first_name)} ${escapeHtml(payment.atletas?.last_name)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.atletas?.surf_level) || "N/A"}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${displayDate}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_paid || 0}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${payment.amount_due || 0}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${outstanding}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.status || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.status)}</td>
         </tr>
       `}).join("");
     } else if (type === "attendance") {
@@ -372,21 +373,21 @@ export const ReportsCard = () => {
       );
       tableRows = validAttendance.map(att => `
         <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;">${att.date}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${att.atletas?.first_name || ""} ${att.atletas?.last_name || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${att.coach?.first_name || ""} ${att.coach?.last_name || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${att.status || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${att.beach_location || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(att.date)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(att.atletas?.first_name)} ${escapeHtml(att.atletas?.last_name)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(att.coach?.first_name)} ${escapeHtml(att.coach?.last_name)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(att.status)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(att.beach_location)}</td>
         </tr>
       `).join("");
     } else if (type === "personal") {
       tableRows = (data as any[]).map(athlete => `
         <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;">${athlete.athlete_id}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${athlete.first_name || ""} ${athlete.last_name || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${athlete.email || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${athlete.phone || ""}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${athlete.surf_level || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(athlete.athlete_id)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(athlete.first_name)} ${escapeHtml(athlete.last_name)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(athlete.email)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(athlete.phone)}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(athlete.surf_level)}</td>
         </tr>
       `).join("");
     } else if (type === "overall") {
@@ -416,12 +417,12 @@ export const ReportsCard = () => {
       const totalAmount = (data as any[]).reduce((sum, p) => sum + Number(p.amount), 0);
       tableRows = (data as any[]).map(payment => `
         <tr>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.coach?.first_name || ""} ${payment.coach?.last_name || ""}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.coach?.first_name)} ${escapeHtml(payment.coach?.last_name)}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${format(new Date(payment.payment_date), "PPP")}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.payment_month}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.payment_month)}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">${payment.payment_year}</td>
           <td style="border: 1px solid #ddd; padding: 8px;">€${Number(payment.amount).toFixed(2)}</td>
-          <td style="border: 1px solid #ddd; padding: 8px;">${payment.notes || "-"}</td>
+          <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(payment.notes) || "-"}</td>
         </tr>
       `).join("");
       tableRows += `

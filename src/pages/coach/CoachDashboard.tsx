@@ -4,6 +4,7 @@ import { Search, User, Calendar, Plus, MapPin, LogOut, Upload, X, Image as Image
 import html2pdf from "html2pdf.js";
 import { format } from "date-fns";
 import apsLogoImage from "@/assets/aps-logo.png";
+import { escapeHtml } from "@/utils/htmlSanitize";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -1085,11 +1086,11 @@ const CoachDashboard = () => {
   // Generate HTML for PDF export
   const generateTrainingHistoryHTML = (): string => {
     const activeFilters = [];
-    if (historyDateRange.start) activeFilters.push(`${t('coachDashboard.trainingHistory.from')} ${historyDateRange.start}`);
-    if (historyDateRange.end) activeFilters.push(`${t('coachDashboard.trainingHistory.to')} ${historyDateRange.end}`);
-    if (historyAthleteFilter !== 'all') activeFilters.push(`${t('coachDashboard.trainingHistory.athlete')} ${historyAthleteFilter}`);
-    if (historyBeachFilter !== 'all') activeFilters.push(`${t('coachDashboard.beach')}: ${historyBeachFilter}`);
-    if (historySearchQuery) activeFilters.push(`${t('coachDashboard.trainingHistory.searchTerm')} ${historySearchQuery}`);
+    if (historyDateRange.start) activeFilters.push(`${t('coachDashboard.trainingHistory.from')} ${escapeHtml(historyDateRange.start)}`);
+    if (historyDateRange.end) activeFilters.push(`${t('coachDashboard.trainingHistory.to')} ${escapeHtml(historyDateRange.end)}`);
+    if (historyAthleteFilter !== 'all') activeFilters.push(`${t('coachDashboard.trainingHistory.athlete')} ${escapeHtml(historyAthleteFilter)}`);
+    if (historyBeachFilter !== 'all') activeFilters.push(`${t('coachDashboard.beach')}: ${escapeHtml(historyBeachFilter)}`);
+    if (historySearchQuery) activeFilters.push(`${t('coachDashboard.trainingHistory.searchTerm')} ${escapeHtml(historySearchQuery)}`);
 
     return `
       <!DOCTYPE html>
@@ -1201,8 +1202,8 @@ const CoachDashboard = () => {
         <body>
           <div class="header">
             <img src="${apsLogoImage}" alt="APS Logo" />
-            <h1>${t('coachDashboard.trainingHistory.reportTitle')}</h1>
-            <p><strong>${t('coachDashboard.trainingHistory.coach')}</strong> ${coachDisplayName}</p>
+            <h1>${escapeHtml(t('coachDashboard.trainingHistory.reportTitle'))}</h1>
+            <p><strong>${t('coachDashboard.trainingHistory.coach')}</strong> ${escapeHtml(coachDisplayName)}</p>
             <p><strong>${t('coachDashboard.trainingHistory.generated')}</strong> ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
             ${activeFilters.length > 0 ? `<p><strong>${t('coachDashboard.trainingHistory.appliedFilters')}</strong> ${activeFilters.join(' | ')}</p>` : ''}
           </div>
@@ -1217,7 +1218,7 @@ const CoachDashboard = () => {
               <div class="stat-label">${t('coachDashboard.trainingHistory.athletesTrained')}</div>
             </div>
             <div class="stat-box">
-              <div class="stat-value">${summaryStats.mostActiveBeach}</div>
+              <div class="stat-value">${escapeHtml(summaryStats.mostActiveBeach)}</div>
               <div class="stat-label">${t('coachDashboard.trainingHistory.mostActiveBeach')}</div>
             </div>
             <div class="stat-box">
@@ -1239,7 +1240,7 @@ const CoachDashboard = () => {
             <tbody>
               ${Object.entries(filteredTrainingSessionsByMonth).map(([month, sessions]) => `
                 <tr>
-                  <td colspan="5" class="month-header">${month}</td>
+                  <td colspan="5" class="month-header">${escapeHtml(month)}</td>
                 </tr>
                 ${Object.entries(sessions).map(([date, athletesList]) => 
                   athletesList.map(athlete => {
@@ -1247,11 +1248,11 @@ const CoachDashboard = () => {
                     const dayName = dateObj.toLocaleDateString('default', { weekday: 'long' });
                     return `
                       <tr>
-                        <td>${date}</td>
-                        <td>${dayName}</td>
-                        <td>${athlete.athleteName}</td>
-                        <td>${athlete.shift || 'N/A'}</td>
-                        <td>${athlete.beachLocation || 'N/A'}</td>
+                        <td>${escapeHtml(date)}</td>
+                        <td>${escapeHtml(dayName)}</td>
+                        <td>${escapeHtml(athlete.athleteName)}</td>
+                        <td>${escapeHtml(athlete.shift) || 'N/A'}</td>
+                        <td>${escapeHtml(athlete.beachLocation) || 'N/A'}</td>
                       </tr>
                     `;
                   }).join('')
