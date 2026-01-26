@@ -278,7 +278,7 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
                 </Badge>
               )}
               {pendingCount > 0 && unreadCount === 0 && (
-                <Badge variant="secondary">
+                <Badge variant="destructive">
                   {pendingCount} {t('coach.messages.pending')}
                 </Badge>
               )}
@@ -374,7 +374,7 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
                                 {t('coach.messages.unread')}
                               </Badge>
                             )}
-                            <Badge variant={msg.is_resolved ? "outline" : "default"} className="text-xs">
+                            <Badge variant={msg.is_resolved ? "outline" : "destructive"} className="text-xs">
                               {msg.is_resolved ? t('coach.messages.resolved') : t('coach.messages.pending')}
                             </Badge>
                             {replies.length > 0 && (
