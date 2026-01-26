@@ -1,48 +1,49 @@
 
 
-# Plano: Adicionar Ícone Mail ao Botão "Nova Mensagem" no Painel de Administração
+# Plano: Resolver Cache do Navegador - Ícone Mail não Aparece
+
+## Diagnóstico
+
+Após verificação do código, confirmei que as alterações estão **corretas em ambos os ficheiros**:
+
+| Ficheiro | Import Mail | Uso no Botão |
+|----------|-------------|--------------|
+| `CoachMessagesCard.tsx` | ✓ Linha 2 | ✓ Linha 293 |
+| `CoachMessagesManagementCard.tsx` | ✓ Linha 2 | ✓ Linha 345 |
 
 ## Problema Identificado
 
-O botão "Nova Mensagem" no painel de administração (`CoachMessagesManagementCard.tsx`) está a usar o ícone `Send` em vez do ícone `Mail`, criando inconsistência visual com o painel do treinador.
+O navegador está a usar uma versão em **cache** do JavaScript antigo, que não inclui as alterações recentes.
 
-## Alterações Necessárias
+## Solução
 
-### Ficheiro: src/components/admin/CoachMessagesManagementCard.tsx
+### Opção 1: Limpar Cache do Navegador (Recomendado)
 
-**1. Adicionar import do ícone Mail (Linha 2):**
+1. **No computador**: Pressionar `Ctrl + Shift + R` (Windows/Linux) ou `Cmd + Shift + R` (Mac) para fazer um "hard refresh"
 
-```tsx
-// De:
-import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+2. **Alternativa**: Abrir DevTools (F12) → Separador Network → Marcar "Disable cache" → Recarregar a página
 
-// Para:
-import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw, Mail } from "lucide-react";
-```
+### Opção 2: Limpar Dados do Site
 
-**2. Substituir ícone no botão (Linhas 344-347):**
+1. Clicar no cadeado na barra de endereços
+2. Seleccionar "Definições do site"
+3. Clicar em "Limpar dados"
+4. Recarregar a página
 
-```tsx
-// De:
-<Button variant="default" size="sm" onClick={() => setShowNewMessageForm(!showNewMessageForm)}>
-  <Send className="h-4 w-4 mr-1" />
-  {t('admin.coachMessages.newMessage')}
-</Button>
+### Opção 3: Modo Incógnito
 
-// Para:
-<Button variant="default" size="sm" onClick={() => setShowNewMessageForm(!showNewMessageForm)}>
-  <Mail className="h-4 w-4 mr-1" />
-  {t('admin.coachMessages.newMessage')}
-</Button>
-```
+Abrir o site numa janela de navegação privada/incógnito para testar sem cache.
 
-## Resultado Visual
+## Verificação
 
-| Antes | Depois |
-|-------|--------|
-| ➤ Nova Mensagem | 📧 Nova Mensagem |
+Após limpar o cache, o botão "Nova Mensagem" deve aparecer assim:
 
-## Ficheiros a Modificar
+| Painel | Resultado Esperado |
+|--------|-------------------|
+| Treinador | 📧 Nova mensagem |
+| Administração | 📧 Nova Mensagem |
 
-1. **src/components/admin/CoachMessagesManagementCard.tsx** - Linhas 2 e 345
+## Nota Técnica
+
+O código está correto e as alterações foram aplicadas. Este é um problema comum de cache do navegador após actualizações de código.
 
