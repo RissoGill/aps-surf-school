@@ -1,185 +1,315 @@
 
-# Implementation Plan: Daily Plan Type ✅ COMPLETED
+# Plano de Implementação: Sistema de Mensagens Treinador-Administração
 
-## Status: IMPLEMENTED
+## Resumo
 
-Add a new plan type called "daily" where payments are automatically tracked based on each training session attended. Unlike pack plans (pre-paid sessions) or monthly plans (fixed monthly fee), daily plans charge per attendance.
+Criar um sistema de mensagens bidireccional que permite aos treinadores enviar mensagens para a administração, com histórico de conversas, respostas e gestão de estados (resolvido/pendente).
 
-## Current Plan Types
+## Arquitectura Proposta
 
-| Plan Type | Behavior |
-|-----------|----------|
-| **month** | Fixed monthly fee, payments created automatically for Sep-Aug |
-| **pack1/pack5/pack10** | Pre-paid sessions (1, 5, or 10 trainings), tokens decremented on attendance |
-| **daily** (NEW) | Pay per training attended, payment records created per attendance |
+O sistema utilizará uma nova tabela `coach_messages` para armazenar as mensagens e respostas, separada do sistema de alertas existente (que é unidireccional: admin → utilizadores).
 
-## Technical Design
-
-### 1. Database Changes
-
-No new tables needed. The existing `payments` table will store daily payment records with `plan_type = 'daily'`. Each attendance record for a daily-plan athlete will generate a corresponding payment record.
-
-**Daily Payment Pricing:**
-- Need to define a daily training price (suggest adding to athlete record or using a fixed value)
-- For simplicity, use a configurable daily rate (e.g., stored in athlete's notes or a new field)
-
-### 2. Attendance Registration Impact
-
-When attendance is marked for a "daily" plan athlete:
-1. Create attendance record (existing behavior)
-2. Auto-create a payment record in the `payments` table with:
-   - `plan_type`: 'daily'
-   - `month`: Training date formatted or "Daily"
-   - `amount_due`: Daily training price
-   - `status`: 'Unpaid'
-   - `payment_date`: null (until paid)
-
-### 3. Files to Modify
-
-#### Frontend Components
-
-1. **`src/components/coach/BulkAttendanceRegistration.tsx`**
-   - Add logic to create payment record when athlete has `plan_type = 'daily'`
-   - After successful attendance insert, insert corresponding payment record
-
-2. **`src/pages/coach/CoachDashboard.tsx`**
-   - Add similar logic for individual attendance registration
-   - Handle daily payment creation on attendance
-
-3. **`src/pages/admin/PaymentManagement.tsx`**
-   - Add "Daily" option to plan type selector
-   - Update display logic to show daily payment records
-   - Filter/group daily payments appropriately
-
-4. **`src/pages/admin/AthleteManagement.tsx`**
-   - Allow setting `plan_type = 'daily'` for athletes
-   - Optional: Add daily_rate field for per-athlete pricing
-
-5. **`src/pages/guardian/GuardianDashboard.tsx`**
-   - Display daily payment summary
-   - Show total trainings attended vs. paid
-
-6. **`src/pages/athlete/AthleteDashboard.tsx`**
-   - Display daily payment status
-
-#### Edge Functions
-
-7. **`supabase/functions/attendance-admin/index.ts`**
-   - Add logic to create payment record for daily plan athletes when attendance is registered via edge function
-
-#### Utilities
-
-8. **`src/utils/dailyBalance.ts`** (NEW)
-   - Calculate daily training balance (attended vs. paid)
-   - Similar structure to `packBalance.ts`
-
-#### Database
-
-9. **Database Trigger Update**
-   - Modify `handle_new_athlete` to NOT create monthly payment records when `plan_type = 'daily'`
-   - Daily payments are created per-attendance, not upfront
-
-#### Translations
-
-10. **`src/i18n/translations/pt.json`** and **`src/i18n/translations/en.json`**
-    - Add translations for "Daily" plan type
-    - Add daily-specific messages
-
-### 4. Implementation Flow
+### Fluxo de Comunicação
 
 ```text
-+----------------+     +------------------+     +-------------------+
-|   Attendance   | --> | Check plan_type  | --> | plan_type='daily' |
-|   Registered   |     |                  |     +-------------------+
-+----------------+     +------------------+              |
-                              |                          v
-                              |              +-----------------------+
-                              |              | Create payment record |
-                              |              | amount_due = daily_rate|
-                              |              | status = 'Unpaid'     |
-                              |              +-----------------------+
-                              |
-                              v
-                    +------------------+
-                    | plan_type='pack' |
-                    +------------------+
-                              |
-                              v
-                    +---------------------+
-                    | Increment used_tokens|
-                    +---------------------+
++----------------+                    +----------------------+
+|   Treinador    |  Envia mensagem    |   Administração     |
+|   Dashboard    | -----------------> |     Dashboard        |
++----------------+                    +----------------------+
+        ^                                      |
+        |         Responde                     |
+        +--------------------------------------+
+                                               |
+                                    Marca como resolvido
 ```
 
-### 5. Daily Balance Display
+## 1. Alterações na Base de Dados
 
-For athletes with `plan_type = 'daily'`:
-- Show total trainings attended this season
-- Show total amount due (trainings x daily_rate)
-- Show total amount paid
-- Show outstanding balance
+### Nova Tabela: `coach_messages`
 
-## Technical Details
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | uuid | Chave primária |
+| `coach_id` | text | ID do treinador (ex: T01) |
+| `subject` | text | Assunto da mensagem |
+| `message` | text | Conteúdo da mensagem |
+| `is_resolved` | boolean | Estado (resolvido/pendente) |
+| `resolved_at` | timestamp | Data de resolução |
+| `resolved_by` | text | Admin que resolveu |
+| `created_at` | timestamp | Data de criação |
+| `updated_at` | timestamp | Última atualização |
 
-### Daily Payment Record Structure
+### Nova Tabela: `coach_message_replies`
 
-```typescript
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | uuid | Chave primária |
+| `message_id` | uuid | FK para coach_messages |
+| `sender_type` | text | 'coach' ou 'admin' |
+| `sender_id` | text | ID do remetente |
+| `content` | text | Conteúdo da resposta |
+| `created_at` | timestamp | Data de criação |
+
+### Políticas RLS
+
+- Treinadores podem ver/criar mensagens onde `coach_id` = seu ID
+- Treinadores podem criar respostas nas suas mensagens
+- Administradores podem ver/editar todas as mensagens
+- Administradores podem criar respostas em qualquer mensagem
+- Acesso anónimo para compatibilidade com autenticação legacy
+
+## 2. Novos Componentes
+
+### A. Componente do Treinador: `CoachMessagesCard`
+
+**Localização:** `src/components/coach/CoachMessagesCard.tsx`
+
+**Funcionalidades:**
+- Botão para criar nova mensagem
+- Lista de mensagens enviadas com estados (Pendente/Resolvido)
+- Ver histórico de respostas de cada mensagem
+- Responder a mensagens existentes
+- Contador de mensagens pendentes
+
+**Interface:**
+```text
++-----------------------------------------------+
+| 💬 Mensagens para Administração    [+ Nova]   |
++-----------------------------------------------+
+| ⚡ Equipamento danificado           Pendente  |
+|    Enviada: 25/01/2026                        |
+|    [Ver Respostas] [Responder]                |
++-----------------------------------------------+
+| ✓ Férias em Fevereiro              Resolvido  |
+|    Enviada: 20/01/2026                        |
+|    [Ver Respostas]                            |
++-----------------------------------------------+
+```
+
+### B. Componente do Admin: `CoachMessagesManagementCard`
+
+**Localização:** `src/components/admin/CoachMessagesManagementCard.tsx`
+
+**Funcionalidades:**
+- Lista todas as mensagens de todos os treinadores
+- Filtro por estado (Pendente/Resolvido)
+- Filtro por treinador
+- Ver histórico de conversa
+- Responder a mensagens
+- Marcar como resolvido/não resolvido
+- Badge de contagem de mensagens pendentes
+
+**Interface:**
+```text
++----------------------------------------------------------+
+| 💬 Mensagens dos Treinadores                    🔴 3     |
+| Comunicação com os treinadores                           |
++----------------------------------------------------------+
+| Filtros: [Todos ▼] [Pendentes ▼]                         |
++----------------------------------------------------------+
+| T01 - Nuno Telmo                                         |
+| Assunto: Equipamento danificado                 Pendente |
+| "Olá, preciso reportar que..."                           |
+| 25/01/2026                                               |
+| [Ver Conversa] [Responder] [✓ Resolver]                  |
++----------------------------------------------------------+
+```
+
+## 3. Ficheiros a Modificar
+
+| Ficheiro | Alteração |
+|----------|-----------|
+| `src/pages/coach/CoachDashboard.tsx` | Adicionar `CoachMessagesCard` após `AlertsCard` |
+| `src/pages/admin/AdministrationDashboard.tsx` | Adicionar `CoachMessagesManagementCard` após `AlertsManagementCard` |
+| `src/i18n/translations/pt.json` | Adicionar traduções para mensagens |
+| `src/i18n/translations/en.json` | Adicionar traduções para mensagens |
+
+## 4. Ficheiros a Criar
+
+| Ficheiro | Descrição |
+|----------|-----------|
+| `src/components/coach/CoachMessagesCard.tsx` | Cartão de mensagens para treinadores |
+| `src/components/admin/CoachMessagesManagementCard.tsx` | Gestão de mensagens no painel admin |
+
+## 5. Migração de Base de Dados
+
+```sql
+-- Tabela principal de mensagens
+CREATE TABLE public.coach_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  coach_id text NOT NULL,
+  subject text NOT NULL,
+  message text NOT NULL,
+  is_resolved boolean NOT NULL DEFAULT false,
+  resolved_at timestamp with time zone,
+  resolved_by text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- Tabela de respostas
+CREATE TABLE public.coach_message_replies (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  message_id uuid NOT NULL REFERENCES public.coach_messages(id) ON DELETE CASCADE,
+  sender_type text NOT NULL CHECK (sender_type IN ('coach', 'admin')),
+  sender_id text NOT NULL,
+  content text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now()
+);
+
+-- Índices para performance
+CREATE INDEX idx_coach_messages_coach_id ON public.coach_messages(coach_id);
+CREATE INDEX idx_coach_messages_is_resolved ON public.coach_messages(is_resolved);
+CREATE INDEX idx_coach_message_replies_message_id ON public.coach_message_replies(message_id);
+
+-- RLS
+ALTER TABLE public.coach_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.coach_message_replies ENABLE ROW LEVEL SECURITY;
+
+-- Políticas para suportar autenticação legacy (anónima)
+CREATE POLICY "Anyone can view coach messages" ON public.coach_messages FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert coach messages" ON public.coach_messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "Anyone can update coach messages" ON public.coach_messages FOR UPDATE USING (true);
+CREATE POLICY "Anyone can delete coach messages" ON public.coach_messages FOR DELETE USING (true);
+
+CREATE POLICY "Anyone can view coach message replies" ON public.coach_message_replies FOR SELECT USING (true);
+CREATE POLICY "Anyone can insert coach message replies" ON public.coach_message_replies FOR INSERT WITH CHECK (true);
+
+-- Trigger para updated_at
+CREATE OR REPLACE FUNCTION update_coach_message_timestamp()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER update_coach_messages_updated_at
+  BEFORE UPDATE ON public.coach_messages
+  FOR EACH ROW EXECUTE FUNCTION update_coach_message_timestamp();
+```
+
+## 6. Traduções a Adicionar
+
+### Português (pt.json)
+
+```json
 {
-  payment_id: `PAY${sequence}`,
-  athlete_id: athleteId,
-  month: 'Daily',           // or formatted date
-  year: currentYear,
-  amount_due: dailyRate,    // e.g., 35 EUR
-  amount_paid: 0,
-  status: 'Unpaid',
-  payment_date: null,
-  plan_type: 'daily',
-  notes: `Training: ${attendanceDate}` // Reference to specific training
+  "coach": {
+    "messages": {
+      "title": "Mensagens para Administração",
+      "description": "Envie mensagens e comunique com a administração",
+      "new": "Nova Mensagem",
+      "subject": "Assunto",
+      "subjectPlaceholder": "Escreva o assunto...",
+      "message": "Mensagem",
+      "messagePlaceholder": "Escreva a sua mensagem...",
+      "send": "Enviar",
+      "cancel": "Cancelar",
+      "pending": "Pendente",
+      "resolved": "Resolvido",
+      "viewReplies": "Ver Respostas",
+      "reply": "Responder",
+      "replyPlaceholder": "Escreva a sua resposta...",
+      "noMessages": "Nenhuma mensagem enviada",
+      "sent": "Enviada",
+      "conversation": "Conversa",
+      "you": "Você",
+      "admin": "Administração",
+      "messageSent": "Mensagem enviada com sucesso",
+      "replySent": "Resposta enviada com sucesso",
+      "sendError": "Erro ao enviar mensagem"
+    }
+  },
+  "admin": {
+    "coachMessages": {
+      "title": "Mensagens dos Treinadores",
+      "description": "Comunicação com os treinadores",
+      "filterAll": "Todos",
+      "filterPending": "Pendentes",
+      "filterResolved": "Resolvidos",
+      "filterByCoach": "Por Treinador",
+      "allCoaches": "Todos os Treinadores",
+      "noMessages": "Nenhuma mensagem dos treinadores",
+      "viewConversation": "Ver Conversa",
+      "reply": "Responder",
+      "markResolved": "Marcar Resolvido",
+      "markPending": "Reabrir",
+      "replyPlaceholder": "Escreva a sua resposta...",
+      "from": "De",
+      "coach": "Treinador",
+      "replySent": "Resposta enviada",
+      "statusUpdated": "Estado atualizado"
+    }
+  }
 }
 ```
 
-### Daily Rate Configuration
+## 7. Ordem de Implementação
 
-Option A: Fixed rate for all daily athletes (simplest)
-- Add constant: `DAILY_TRAINING_RATE = 35` (EUR)
+1. **Migração de BD** - Criar tabelas e políticas RLS
+2. **Componente Treinador** - `CoachMessagesCard.tsx`
+3. **Integração Treinador** - Adicionar ao `CoachDashboard.tsx`
+4. **Componente Admin** - `CoachMessagesManagementCard.tsx`
+5. **Integração Admin** - Adicionar ao `AdministrationDashboard.tsx`
+6. **Traduções** - Actualizar ficheiros pt.json e en.json
+7. **Testes** - Testar fluxo completo de envio e resposta
 
-Option B: Per-athlete rate (more flexible)
-- Add `daily_rate` column to `atletas` table
-- Admin can set individual rates
+## 8. Detalhes Técnicos
 
-Recommend starting with **Option A** for simplicity, with a default value that admins can override in individual payment records.
+### Validação de Input
 
-### Plan Type Validation Updates
+Todas as mensagens serão validadas com:
+- Assunto: mínimo 3 caracteres, máximo 100
+- Mensagem/Resposta: mínimo 10 caracteres, máximo 2000
+- Sanitização HTML para prevenir XSS
 
-Update all locations that check plan types:
+### Real-time Updates
 
-```typescript
-// Current
-if (planType?.startsWith('pack'))
-if (planType === 'Pack')
+Adicionar subscrições Supabase para:
+- Notificar treinadores de novas respostas
+- Actualizar lista de mensagens no admin quando novas mensagens chegam
 
-// Updated to include daily
-if (planType?.startsWith('pack'))
-if (planType === 'daily')
-if (!planType?.startsWith('pack') && planType !== 'daily') // monthly
+### Compatibilidade Legacy
+
+O sistema mantém compatibilidade com autenticação localStorage:
+- Treinador identificado via `coach_session` do localStorage
+- Admin identificado via `adminSession` do localStorage
+- RLS permite acesso anónimo (segurança ao nível da aplicação)
+
+## Resumo Visual
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    TREINADOR DASHBOARD                       │
+├─────────────────────────────────────────────────────────────┤
+│  AlertsCard (existente - alertas da admin)                  │
+├─────────────────────────────────────────────────────────────┤
+│  CoachMessagesCard (NOVO - mensagens para admin)            │
+│  ├── Lista de mensagens enviadas                            │
+│  ├── Criar nova mensagem                                    │
+│  ├── Ver respostas                                          │
+│  └── Responder                                              │
+├─────────────────────────────────────────────────────────────┤
+│  BulkAttendanceRegistration (existente)                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    ADMIN DASHBOARD                           │
+├─────────────────────────────────────────────────────────────┤
+│  AlertsManagementCard (existente - alertas para users)      │
+├─────────────────────────────────────────────────────────────┤
+│  CoachMessagesManagementCard (NOVO - mensagens de coaches)  │
+│  ├── Lista de todas as mensagens                            │
+│  ├── Filtros (estado, treinador)                            │
+│  ├── Ver conversa completa                                  │
+│  ├── Responder                                              │
+│  └── Marcar como resolvido                                  │
+├─────────────────────────────────────────────────────────────┤
+│  CoachPaymentsCard (existente)                              │
+└─────────────────────────────────────────────────────────────┘
 ```
-
-## Summary of Changes
-
-| File | Change |
-|------|--------|
-| `BulkAttendanceRegistration.tsx` | Add daily payment creation on attendance |
-| `CoachDashboard.tsx` | Add daily payment creation on individual attendance |
-| `PaymentManagement.tsx` | Add "Daily" plan option, display daily payments |
-| `AthleteManagement.tsx` | Allow setting "daily" plan type |
-| `GuardianDashboard.tsx` | Display daily payment summary |
-| `AthleteDashboard.tsx` | Display daily payment status |
-| `attendance-admin/index.ts` | Add daily payment creation logic |
-| `pt.json` / `en.json` | Add daily translations |
-| Database migration | Update trigger, optionally add daily_rate column |
-| `dailyBalance.ts` (new) | Calculate daily training balance |
-
-## Questions for Clarification
-
-1. **Daily Rate**: What is the price per daily training session? (e.g., 35 EUR)
-2. **Per-Athlete Rate**: Should each athlete have their own daily rate, or use a fixed rate for all?
-3. **Payment Grouping**: Should daily payments be shown individually or grouped by month?
