@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Plus, Send, Clock, Check, X, ChevronDown, ChevronUp } from "lucide-react";
+import { MessageSquare, Plus, Send, Clock, Check, X, ChevronDown, ChevronUp, Mail } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -370,7 +370,8 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
                             )}
                             <span className="font-medium">{escapeHtml(msg.subject)}</span>
                             {!msg.read_by_coach && (
-                              <Badge variant="destructive" className="text-xs">
+                              <Badge variant="destructive" className="text-xs flex items-center gap-1">
+                                <Mail className="h-3 w-3" />
                                 {t('coach.messages.unread')}
                               </Badge>
                             )}
