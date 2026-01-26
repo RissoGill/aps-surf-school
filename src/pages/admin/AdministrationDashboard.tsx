@@ -4,6 +4,7 @@ import { ReportsCard } from "@/components/admin/ReportsCard";
 import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
 import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
 import CoachMessagesManagementCard from "@/components/admin/CoachMessagesManagementCard";
+import CoachTrainingManagement from "@/components/admin/CoachTrainingManagement";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -843,96 +844,13 @@ const AdministrationDashboard = () => {
           })}
         </div>
 
-        {/* Coach Attendance Management */}
-        {isLoading ? (
-          <Card className="shadow-soft mt-6">
-            <CardHeader>
-              <Skeleton className="h-6 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-32 w-full" />
-            </CardContent>
-          </Card>
-        ) : Object.keys(trainingDaysByCoachByMonth).length > 0 && (
-          <Card className="shadow-soft mt-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                    <User className="h-6 w-6 text-secondary" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-1">{t('admin.coachAttendance.title')}</h4>
-                    <p className="text-sm text-muted-foreground">{t('admin.coachAttendance.subtitle')}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4">
-                <Select value={selectedCoach} onValueChange={setSelectedCoach}>
-                  <SelectTrigger className="w-full md:w-64 bg-background">
-                    <SelectValue placeholder={t('admin.coachAttendance.selectCoach')} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50">
-                    {Object.keys(trainingDaysByCoachByMonth).sort((a, b) => a.localeCompare(b)).map((coach) => (
-                      <SelectItem key={coach} value={coach}>
-                        {coach}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            {selectedCoach && (
-              <CardContent>
-                <div className="border border-border rounded-lg p-4">
-                  <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    {selectedCoach}
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Monthly breakdown */}
-                    <div>
-                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">{t('admin.coachAttendance.byMonth')}</h5>
-                      {Object.keys(trainingDaysByCoachByMonth[selectedCoach]).length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.coachAttendance.noMonthlyData')}</p>
-                      ) : (
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                          {Object.entries(trainingDaysByCoachByMonth[selectedCoach]).map(([month, count]) => {
-                            const [year, monthNum] = month.split('-');
-                            const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('default', { month: 'short' });
-                            return (
-                              <div key={month} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                                <span className="text-sm font-medium">{monthName} {year}</span>
-                                <Badge variant="secondary">{count} {t('admin.coachAttendance.days')}</Badge>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Yearly breakdown */}
-                    <div>
-                      <h5 className="text-sm font-semibold mb-3 text-muted-foreground">{t('admin.coachAttendance.byYear')}</h5>
-                      {!trainingDaysByCoachByYear[selectedCoach] || Object.keys(trainingDaysByCoachByYear[selectedCoach]).length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">{t('admin.coachAttendance.noYearlyData')}</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {Object.entries(trainingDaysByCoachByYear[selectedCoach]).map(([year, count]) => (
-                            <div key={year} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                              <span className="text-sm font-medium">{year}</span>
-                              <Badge variant="secondary">{count} {t('admin.coachAttendance.days')}</Badge>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        )}
+        {/* Coach Training Management - Enhanced */}
+        <div className="mt-6">
+          <CoachTrainingManagement 
+            userRole={userRole}
+            athletes={athletes || []}
+          />
+        </div>
 
         {/* Alerts Management Card */}
         <div className="mt-6">

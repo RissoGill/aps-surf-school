@@ -442,6 +442,7 @@ serve(async (req) => {
       }
 
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
+    }
 
     if (req.method === "DELETE") {
       const { id } = body as { id?: unknown };
