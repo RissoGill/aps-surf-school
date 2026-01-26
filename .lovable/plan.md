@@ -1,125 +1,74 @@
 
-# Plano: Mensagens Não Lidas a Vermelho
+# Plano: Badge "Pendente" a Vermelho
 
-## Objetivo
-Quando a administração responde a uma mensagem, essa mensagem deve aparecer destacada a vermelho até que o treinador a abra e "leia".
+## Problema Identificado
+
+O badge com o texto "Pendente" aparece a azul no painel de administração quando deveria estar a vermelho para melhor visibilidade. No painel do treinador, o estilo vermelho já foi implementado para mensagens não lidas.
 
 ## Alterações Necessárias
 
-### 1. Base de Dados - Nova Coluna
+### 1. Painel de Administração - CoachMessagesManagementCard.tsx
 
-Adicionar coluna `read_by_coach` à tabela `coach_messages`:
+**Ficheiro:** `src/components/admin/CoachMessagesManagementCard.tsx`
 
-```text
-coach_messages
-└── read_by_coach (boolean, default: true)
-    - true = mensagem lida pelo treinador
-    - false = tem respostas novas da administração por ler
+**Alteração na Linha 488:**
+Mudar o variant do Badge de "default" para "destructive" quando a mensagem está pendente:
+
+```tsx
+// De:
+<Badge variant={msg.is_resolved ? "secondary" : "default"} className="text-xs">
+
+// Para:
+<Badge variant={msg.is_resolved ? "secondary" : "destructive"} className="text-xs">
 ```
 
-**Lógica:**
-- Quando o treinador cria uma mensagem: `read_by_coach = true` (ele próprio criou)
-- Quando a administração responde: `read_by_coach = false` (notificar treinador)
-- Quando o treinador expande a mensagem: `read_by_coach = true` (marcada como lida)
+Isto fará com que:
+- **Pendente** → Badge vermelho (`variant="destructive"`)
+- **Resolvido** → Badge cinzento (`variant="secondary"`)
 
-### 2. Trigger Automático
-
-Criar trigger que automaticamente marca `read_by_coach = false` quando:
-- Uma nova resposta é inserida em `coach_message_replies`
-- E o `sender_type = 'admin'`
-
-### 3. Componente CoachMessagesCard
+### 2. Painel do Treinador - CoachMessagesCard.tsx
 
 **Ficheiro:** `src/components/coach/CoachMessagesCard.tsx`
 
-Alterações visuais para mensagens não lidas:
-- Borda do cartão da mensagem: `border-red-500` em vez de `border`
-- Fundo: `bg-red-50` para destaque suave
-- Badge "Por Ler" a vermelho junto ao assunto
-- Ícone `Clock` em vermelho em vez de âmbar
+O badge "Pendente" na linha 281-284 também deve estar vermelho, não apenas o badge "Por Ler". 
 
-**Função para marcar como lida:**
-- Quando o treinador clica para expandir uma mensagem
-- Chamar mutation para atualizar `read_by_coach = true`
+**Alteração na Linha 280-284:**
+Mudar para usar `variant="destructive"` no badge de mensagens pendentes:
 
-### 4. Contador de Não Lidas
-
-Atualizar o contador no cabeçalho do cartão:
-- Mostrar quantidade de mensagens não lidas (em vez de apenas "pending")
-- Badge a vermelho com texto "X Por Ler"
-
-## Detalhes Técnicos
-
-### Migração SQL
-
-```sql
--- Adicionar coluna
-ALTER TABLE public.coach_messages 
-ADD COLUMN read_by_coach boolean NOT NULL DEFAULT true;
-
--- Trigger para marcar como não lida quando admin responde
-CREATE OR REPLACE FUNCTION public.mark_message_unread_on_admin_reply()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path TO 'public'
-AS $$
-BEGIN
-  IF NEW.sender_type = 'admin' THEN
-    UPDATE public.coach_messages 
-    SET read_by_coach = false 
-    WHERE id = NEW.message_id;
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER on_admin_reply_mark_unread
-  AFTER INSERT ON public.coach_message_replies
-  FOR EACH ROW
-  EXECUTE FUNCTION public.mark_message_unread_on_admin_reply();
-```
-
-### Alterações no Componente
-
-**Interface atualizada:**
-```typescript
-interface CoachMessage {
-  // ... campos existentes
-  read_by_coach: boolean;
-}
-```
-
-**Mutation para marcar como lida:**
-```typescript
-const markAsReadMutation = useMutation({
-  mutationFn: async (messageId: string) => {
-    await supabase
-      .from('coach_messages')
-      .update({ read_by_coach: true })
-      .eq('id', messageId);
-  }
-});
-```
-
-**Estilo condicional:**
 ```tsx
-<div className={`border rounded-lg p-3 ${
-  !msg.read_by_coach 
-    ? 'border-red-500 bg-red-50' 
-    : ''
-}`}>
+// De:
+{pendingCount > 0 && unreadCount === 0 && (
+  <Badge variant="secondary">
+    {pendingCount} {t('coach.messages.pending')}
+  </Badge>
+)}
+
+// Para:
+{pendingCount > 0 && unreadCount === 0 && (
+  <Badge variant="destructive">
+    {pendingCount} {t('coach.messages.pending')}
+  </Badge>
+)}
 ```
 
-### Traduções
+E na lista de mensagens (linha ~374):
+```tsx
+// De:
+<Badge variant={msg.is_resolved ? "outline" : "default"} className="text-xs">
 
-Adicionar aos ficheiros de tradução:
-- `pt.json`: `"unread": "Por Ler"`
-- `en.json`: `"unread": "Unread"`
+// Para:
+<Badge variant={msg.is_resolved ? "outline" : "destructive"} className="text-xs">
+```
+
+## Resumo das Alterações
+
+| Local | Badge | Antes | Depois |
+|-------|-------|-------|--------|
+| Admin - Lista de mensagens | Pendente | Azul (default) | Vermelho (destructive) |
+| Coach - Cabeçalho | X Pendentes | Cinzento (secondary) | Vermelho (destructive) |
+| Coach - Lista de mensagens | Pendente | Azul (default) | Vermelho (destructive) |
 
 ## Ficheiros a Modificar
 
-1. **Nova migração SQL** - Adicionar coluna e trigger
-2. **src/components/coach/CoachMessagesCard.tsx** - Estilo vermelho + marcar como lida
-3. **src/i18n/translations/pt.json** - Nova chave de tradução
-4. **src/i18n/translations/en.json** - Nova chave de tradução
+1. **src/components/admin/CoachMessagesManagementCard.tsx** - Linha 488
+2. **src/components/coach/CoachMessagesCard.tsx** - Linhas 281 e ~374
