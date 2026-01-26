@@ -848,23 +848,24 @@ const PaymentManagement = () => {
                               {/* Plan Type */}
                               <TableCell>
                                 {isEditing ? (
-                                  <Select
-                                    value={editForm.plan_type || ''}
-                                    onValueChange={(value) => setEditForm({ ...editForm, plan_type: value })}
-                                  >
-                                    <SelectTrigger className="w-32">
-                                      <SelectValue placeholder={t('admin.paymentManagement.selectPlan')} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="month">{t('admin.paymentManagement.month')}</SelectItem>
-                                      <SelectItem value="pack1">{t('admin.paymentManagement.pack1')}</SelectItem>
-                                      <SelectItem value="pack5">{t('admin.paymentManagement.pack5')}</SelectItem>
-                                      <SelectItem value="pack10">{t('admin.paymentManagement.pack10')}</SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                                                  <Select
+                                                                    value={editForm.plan_type || ''}
+                                                                    onValueChange={(value) => setEditForm({ ...editForm, plan_type: value })}
+                                                                  >
+                                                                    <SelectTrigger className="w-32">
+                                                                      <SelectValue placeholder={t('admin.paymentManagement.selectPlan')} />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                      <SelectItem value="month">{t('admin.paymentManagement.month')}</SelectItem>
+                                                                      <SelectItem value="pack1">{t('admin.paymentManagement.pack1')}</SelectItem>
+                                                                      <SelectItem value="pack5">{t('admin.paymentManagement.pack5')}</SelectItem>
+                                                                      <SelectItem value="pack10">{t('admin.paymentManagement.pack10')}</SelectItem>
+                                                                      <SelectItem value="daily">{t('admin.paymentManagement.daily')}</SelectItem>
+                                                                    </SelectContent>
+                                                                  </Select>
                                 ) : (
                                   payment.plan_type
-                                    ? (['month', 'pack1', 'pack5', 'pack10'].includes(payment.plan_type)
+                                    ? (['month', 'pack1', 'pack5', 'pack10', 'daily'].includes(payment.plan_type)
                                         ? t(`admin.paymentManagement.${payment.plan_type}`)
                                         : payment.plan_type)
                                     : '-'

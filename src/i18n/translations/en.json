@@ -631,6 +631,7 @@
       "pack1": "Pack 1",
       "pack5": "Pack 5",
       "pack10": "Pack 10",
+      "daily": "Daily",
       "addNotes": "Add notes...",
       "auto": "auto",
       "paid": "Paid",
@@ -913,7 +914,14 @@
       "pickupAddress": "Pickup Address",
       "dropoffAddress": "Dropoff Address",
       "priorBalance": "Prior Balance",
-      "priorBalanceDescription": "Outstanding debt before September 2025"
+      "priorBalanceDescription": "Outstanding debt before September 2025",
+      "selectPlanType": "Select plan type",
+      "planMonth": "Monthly",
+      "planPack1": "Pack 1 Training",
+      "planPack5": "Pack 5 Trainings",
+      "planPack10": "Pack 10 Trainings",
+      "planDaily": "Daily",
+      "dailyRate": "Price per Training"
     },
     "attendanceManagement": {
       "title": "Attendance Management",

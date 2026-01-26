@@ -631,6 +631,7 @@
       "pack1": "Pack 1",
       "pack5": "Pack 5",
       "pack10": "Pack 10",
+      "daily": "Diário",
       "addNotes": "Adicionar notas...",
       "auto": "auto",
       "paid": "Pago",
@@ -913,7 +914,14 @@
       "pickupAddress": "Morada de Recolha",
       "dropoffAddress": "Morada de Entrega",
       "priorBalance": "Saldo Anterior",
-      "priorBalanceDescription": "Dívida antes de Setembro 2025"
+      "priorBalanceDescription": "Dívida antes de Setembro 2025",
+      "selectPlanType": "Selecionar tipo de plano",
+      "planMonth": "Mensal",
+      "planPack1": "Pack 1 Treino",
+      "planPack5": "Pack 5 Treinos",
+      "planPack10": "Pack 10 Treinos",
+      "planDaily": "Diário",
+      "dailyRate": "Preço por Treino"
     },
     "attendanceManagement": {
       "title": "Gestão de Presenças",
