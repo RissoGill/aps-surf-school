@@ -1,48 +1,40 @@
 
-# Plano: Adicionar Ícone ao Badge "Por Ler"
+
+# Plano: Adicionar Ícone Mail ao Botão "Nova Mensagem"
 
 ## Objetivo
-Adicionar um ícone antes do texto no badge "Por Ler" (unread) para melhorar a visibilidade e consistência visual.
+Substituir o ícone `Plus` pelo ícone `Mail` no botão "Nova mensagem" para maior consistência visual com o tema de mensagens.
 
 ## Alteração
 
 ### Ficheiro: src/components/coach/CoachMessagesCard.tsx
 
-**Linhas 372-375** - Adicionar ícone `Mail` ou `MessageSquare` dentro do Badge:
+**Linhas 292-295** - Substituir ícone `Plus` por `Mail`:
 
 ```tsx
 // De:
-{!msg.read_by_coach && (
-  <Badge variant="destructive" className="text-xs">
-    {t('coach.messages.unread')}
-  </Badge>
-)}
+<Button size="sm" className="w-full sm:w-auto gap-1">
+  <Plus className="h-4 w-4" />
+  {t('coach.messages.new')}
+</Button>
 
 // Para:
-{!msg.read_by_coach && (
-  <Badge variant="destructive" className="text-xs flex items-center gap-1">
-    <Mail className="h-3 w-3" />
-    {t('coach.messages.unread')}
-  </Badge>
-)}
+<Button size="sm" className="w-full sm:w-auto gap-1">
+  <Mail className="h-4 w-4" />
+  {t('coach.messages.new')}
+</Button>
 ```
 
-### Import necessário
-
-Adicionar `Mail` à lista de imports do lucide-react (linha 2):
-
-```tsx
-import { MessageSquare, Plus, Send, Clock, Check, X, ChevronDown, ChevronUp, Mail } from "lucide-react";
-```
+### Import
+O ícone `Mail` já está importado do lucide-react (adicionado na alteração anterior).
 
 ## Resultado Visual
 
 | Antes | Depois |
 |-------|--------|
-| `Por Ler` | `📧 Por Ler` |
-
-O ícone `Mail` foi escolhido porque representa uma mensagem nova/não lida, sendo intuitivo para o utilizador.
+| `+ Nova mensagem` | `📧 Nova mensagem` |
 
 ## Ficheiros a Modificar
 
-1. **src/components/coach/CoachMessagesCard.tsx** - Linhas 2 e 372-375
+1. **src/components/coach/CoachMessagesCard.tsx** - Linha 293
+
