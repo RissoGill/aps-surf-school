@@ -34,6 +34,7 @@ import { PackBalanceAlert } from "@/components/shared/PackBalanceAlert";
 import { PaymentsTab } from "@/components/coach/PaymentsTab";
 import AlertsCard from "@/components/shared/AlertsCard";
 import { useLanguage } from "@/i18n/LanguageContext";
+import CoachMessagesCard from "@/components/coach/CoachMessagesCard";
 
 interface AttendanceRecord {
   id: string;
@@ -1381,6 +1382,14 @@ const CoachDashboard = () => {
         {/* Alerts Card - Always First */}
         {coachData?.coach_id && (
           <AlertsCard userType="coach" userId={coachData.coach_id} />
+        )}
+
+        {/* Messages Card - After Alerts */}
+        {coachData?.coach_id && (
+          <CoachMessagesCard 
+            coachId={coachData.coach_id} 
+            coachName={coachDisplayName} 
+          />
         )}
 
         {/* Quick Stats */}

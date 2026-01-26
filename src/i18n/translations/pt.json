@@ -358,6 +358,31 @@
     "justified": "Justificado"
   },
   "coach": {
+    "messages": {
+      "title": "Mensagens para Administração",
+      "description": "Envie mensagens e comunique com a administração",
+      "new": "Nova Mensagem",
+      "subject": "Assunto",
+      "subjectPlaceholder": "Escreva o assunto...",
+      "message": "Mensagem",
+      "messagePlaceholder": "Escreva a sua mensagem...",
+      "send": "Enviar",
+      "cancel": "Cancelar",
+      "pending": "Pendente",
+      "resolved": "Resolvido",
+      "viewReplies": "Ver Respostas",
+      "reply": "Responder",
+      "replyPlaceholder": "Escreva a sua resposta...",
+      "noMessages": "Nenhuma mensagem enviada",
+      "sent": "Enviada",
+      "conversation": "Conversa",
+      "you": "Você",
+      "admin": "Administração",
+      "messageSent": "Mensagem enviada com sucesso",
+      "replySent": "Resposta enviada com sucesso",
+      "sendError": "Erro ao enviar mensagem",
+      "validationError": "Por favor preencha todos os campos correctamente (assunto mín. 3 caracteres, mensagem mín. 10 caracteres)"
+    },
     "bulkAttendance": {
       "title": "Registar Múltiplas Presenças",
       "description": "Poupe tempo registando presenças de vários atletas de uma vez",
@@ -773,6 +798,25 @@
       "createError": "Erro ao criar alerta",
       "updateError": "Erro ao atualizar alerta",
       "deleteError": "Erro ao eliminar alerta"
+    },
+    "coachMessages": {
+      "title": "Mensagens dos Treinadores",
+      "description": "Comunicação com os treinadores",
+      "filterAll": "Todos",
+      "filterPending": "Pendentes",
+      "filterResolved": "Resolvidos",
+      "filterByCoach": "Por Treinador",
+      "allCoaches": "Todos os Treinadores",
+      "noMessages": "Nenhuma mensagem dos treinadores",
+      "viewConversation": "Ver Conversa",
+      "reply": "Responder",
+      "markResolved": "Marcar Resolvido",
+      "markPending": "Reabrir",
+      "replyPlaceholder": "Escreva a sua resposta...",
+      "from": "De",
+      "coach": "Treinador",
+      "replySent": "Resposta enviada",
+      "statusUpdated": "Estado atualizado"
     },
     "media": {
       "photos": "Fotos",

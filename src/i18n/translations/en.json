@@ -358,6 +358,31 @@
     "justified": "Justified"
   },
   "coach": {
+    "messages": {
+      "title": "Messages to Administration",
+      "description": "Send messages and communicate with administration",
+      "new": "New Message",
+      "subject": "Subject",
+      "subjectPlaceholder": "Write the subject...",
+      "message": "Message",
+      "messagePlaceholder": "Write your message...",
+      "send": "Send",
+      "cancel": "Cancel",
+      "pending": "Pending",
+      "resolved": "Resolved",
+      "viewReplies": "View Replies",
+      "reply": "Reply",
+      "replyPlaceholder": "Write your reply...",
+      "noMessages": "No messages sent",
+      "sent": "Sent",
+      "conversation": "Conversation",
+      "you": "You",
+      "admin": "Administration",
+      "messageSent": "Message sent successfully",
+      "replySent": "Reply sent successfully",
+      "sendError": "Error sending message",
+      "validationError": "Please fill all fields correctly (subject min. 3 characters, message min. 10 characters)"
+    },
     "bulkAttendance": {
       "title": "Register Multiple Attendances",
       "description": "Save time by registering multiple athletes at once",
@@ -773,6 +798,25 @@
       "createError": "Failed to create alert",
       "updateError": "Failed to update alert",
       "deleteError": "Failed to delete alert"
+    },
+    "coachMessages": {
+      "title": "Coach Messages",
+      "description": "Communication with coaches",
+      "filterAll": "All",
+      "filterPending": "Pending",
+      "filterResolved": "Resolved",
+      "filterByCoach": "By Coach",
+      "allCoaches": "All Coaches",
+      "noMessages": "No messages from coaches",
+      "viewConversation": "View Conversation",
+      "reply": "Reply",
+      "markResolved": "Mark Resolved",
+      "markPending": "Reopen",
+      "replyPlaceholder": "Write your reply...",
+      "from": "From",
+      "coach": "Coach",
+      "replySent": "Reply sent",
+      "statusUpdated": "Status updated"
     },
     "media": {
       "photos": "Photos",
