@@ -246,19 +246,24 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
   return (
     <Card className="mb-6">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <CardTitle className="text-xl">{t('coach.messages.title')}</CardTitle>
-            {pendingCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {pendingCount} {t('coach.messages.pending')}
-              </Badge>
-            )}
+        <div className="flex items-start gap-4">
+          <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-1" />
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-xl">{t('coach.messages.title')}</CardTitle>
+              {pendingCount > 0 && (
+                <Badge variant="secondary">
+                  {pendingCount} {t('coach.messages.pending')}
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="mt-1">{t('coach.messages.description')}</CardDescription>
           </div>
+        </div>
+        <div className="mt-4 flex justify-end">
           <Dialog open={isNewMessageOpen} onOpenChange={setIsNewMessageOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1">
+              <Button size="sm" className="w-full sm:w-auto gap-1">
                 <Plus className="h-4 w-4" />
                 {t('coach.messages.new')}
               </Button>
@@ -305,7 +310,6 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
             </DialogContent>
           </Dialog>
         </div>
-        <CardDescription>{t('coach.messages.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
