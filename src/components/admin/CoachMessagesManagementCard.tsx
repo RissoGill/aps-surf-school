@@ -485,7 +485,7 @@ export const CoachMessagesManagementCard = () => {
                               {msg.coach_id} - {getCoachName(msg.coach_id)}
                             </Badge>
                             <span className="font-medium">{escapeHtml(msg.subject)}</span>
-                            <Badge variant={msg.is_resolved ? "secondary" : "default"} className="text-xs">
+                            <Badge variant={msg.is_resolved ? "secondary" : "destructive"} className="text-xs">
                               {msg.is_resolved ? t('coach.messages.resolved') : t('coach.messages.pending')}
                             </Badge>
                             {replies.length > 0 && (
