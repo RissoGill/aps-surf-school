@@ -40,6 +40,7 @@ interface Athlete {
   plan_type: string | null;
   is_active: boolean | null;
   prior_balance: number | null;
+  daily_rate: number | null;
 }
 
 // Validation schema for athlete edits
@@ -83,7 +84,9 @@ const athleteEditSchema = z.object({
   transport: z.boolean().nullable(),
   pickup_address: z.string().trim().max(255).nullable(),
   dropoff_address: z.string().trim().max(255).nullable(),
-  prior_balance: z.number().min(0).nullable()
+  prior_balance: z.number().min(0).nullable(),
+  plan_type: z.string().nullable(),
+  daily_rate: z.number().min(0).nullable()
 });
 
 const AthleteManagement = () => {
@@ -600,8 +603,49 @@ const AthleteManagement = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="plan_type" className="text-title">{t('admin.athleteManagement.planType')}</Label>
-                      <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.plan_type || "-"}</p>
+                      {isEditing ? (
+                        <Select
+                          value={editForm.plan_type || ""}
+                          onValueChange={(value) => setEditForm({ ...editForm, plan_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={t('admin.athleteManagement.selectPlanType')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="month">{t('admin.athleteManagement.planMonth')}</SelectItem>
+                            <SelectItem value="pack1">{t('admin.athleteManagement.planPack1')}</SelectItem>
+                            <SelectItem value="pack5">{t('admin.athleteManagement.planPack5')}</SelectItem>
+                            <SelectItem value="pack10">{t('admin.athleteManagement.planPack10')}</SelectItem>
+                            <SelectItem value="daily">{t('admin.athleteManagement.planDaily')}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mt-1">{selectedAthlete.plan_type || "-"}</p>
+                      )}
                     </div>
+
+                    {/* Daily Rate - only show when plan_type is daily */}
+                    {(isEditing ? editForm.plan_type : selectedAthlete.plan_type) === 'daily' && (
+                      <div>
+                        <Label htmlFor="daily_rate" className="text-title">{t('admin.athleteManagement.dailyRate')}</Label>
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">€</span>
+                            <Input
+                              id="daily_rate"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={(editForm as any).daily_rate ?? 35}
+                              onChange={(e) => setEditForm({ ...editForm, daily_rate: e.target.value ? parseFloat(e.target.value) : 35 } as any)}
+                              className="w-24"
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground mt-1">€{((selectedAthlete as any).daily_rate || 35).toFixed(2)}</p>
+                        )}
+                      </div>
+                    )}
 
                     <div>
                       <Label htmlFor="surf_level" className="text-title">{t('admin.athleteManagement.surfLevel')}</Label>

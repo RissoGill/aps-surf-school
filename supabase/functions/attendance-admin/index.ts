@@ -393,8 +393,55 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: "Insert failed" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
+      // Check if athlete has daily plan and create payment if status is Present
+      if (insertData.status === 'Present') {
+        const { data: athleteData } = await supabase
+          .from('atletas')
+          .select('plan_type, daily_rate')
+          .eq('athlete_id', insertData.athlete_id)
+          .single();
+
+        if (athleteData?.plan_type === 'daily') {
+          const dailyRate = Number(athleteData.daily_rate) || 35;
+          
+          // Get next payment ID
+          const { data: maxPayment } = await supabase
+            .from('payments')
+            .select('payment_id')
+            .order('payment_id', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          let nextPaymentNum = 1;
+          if (maxPayment?.payment_id) {
+            const match = maxPayment.payment_id.match(/PAY(\d+)/);
+            if (match) {
+              nextPaymentNum = parseInt(match[1]) + 1;
+            }
+          }
+
+          const paymentId = `PAY${nextPaymentNum}`;
+          const date = new Date(insertData.date as string);
+          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+
+          await supabase.from('payments').insert({
+            payment_id: paymentId,
+            athlete_id: insertData.athlete_id,
+            month: monthNames[date.getMonth()],
+            year: date.getFullYear(),
+            amount_due: dailyRate,
+            amount_paid: 0,
+            status: 'Unpaid',
+            plan_type: 'daily',
+            notes: `Treino: ${insertData.date}`,
+          });
+          
+          console.info('Daily payment created:', { paymentId, athleteId: insertData.athlete_id, dailyRate });
+        }
+      }
+
       return new Response(JSON.stringify({ success: true }), { headers: { "content-type": "application/json", ...corsHeaders } });
-    }
 
     if (req.method === "DELETE") {
       const { id } = body as { id?: unknown };

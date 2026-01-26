@@ -60,6 +60,7 @@ export type Database = {
         Row: {
           address: string | null
           athlete_id: string
+          daily_rate: number | null
           date_of_birth: string | null
           dropoff_address: string | null
           email: string | null
@@ -86,6 +87,7 @@ export type Database = {
         Insert: {
           address?: string | null
           athlete_id: string
+          daily_rate?: number | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null
@@ -112,6 +114,7 @@ export type Database = {
         Update: {
           address?: string | null
           athlete_id?: string
+          daily_rate?: number | null
           date_of_birth?: string | null
           dropoff_address?: string | null
           email?: string | null

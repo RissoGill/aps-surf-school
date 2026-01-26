@@ -33,13 +33,13 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
   const [includeSecondCoach, setIncludeSecondCoach] = useState(false);
   const [secondCoachId, setSecondCoachId] = useState<string>("");
 
-  // Fetch all athletes
+  // Fetch all athletes (including daily_rate for daily plan athletes)
   const { data: athletes = [] } = useQuery({
     queryKey: ['athletes-for-bulk'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('atletas')
-        .select('athlete_id, first_name, last_name, plan_type')
+        .select('athlete_id, first_name, last_name, plan_type, daily_rate')
         .order('first_name', { ascending: true });
       
       if (error) throw error;
@@ -232,8 +232,10 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
           }
         }
 
-        // Increment pack tokens if Pack athlete
+        // Handle plan-specific logic
         const athlete = athletes.find(a => a.athlete_id === athleteId);
+        
+        // Increment pack tokens if Pack athlete
         if (athlete?.plan_type === 'Pack') {
           const { data: packData } = await supabase
             .from('packs')
@@ -251,6 +253,44 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
               .update({ used_tokens: newUsedTokens })
               .eq('id', packData.id);
           }
+        }
+        
+        // Create daily payment if daily plan athlete (only if status is Present)
+        if (athlete?.plan_type === 'daily' && (athleteStatuses[athleteId] || "Present") === "Present") {
+          const dailyRate = Number(athlete.daily_rate) || 35;
+          
+          // Get next payment ID
+          const { data: maxPayment } = await supabase
+            .from('payments')
+            .select('payment_id')
+            .order('payment_id', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          let nextPaymentNum = 1;
+          if (maxPayment?.payment_id) {
+            const match = maxPayment.payment_id.match(/PAY(\d+)/);
+            if (match) {
+              nextPaymentNum = parseInt(match[1]) + 1;
+            }
+          }
+
+          const paymentId = `PAY${nextPaymentNum}`;
+          const date = new Date(selectedDate);
+          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+
+          await supabase.from('payments').insert({
+            payment_id: paymentId,
+            athlete_id: athleteId,
+            month: monthNames[date.getMonth()],
+            year: date.getFullYear(),
+            amount_due: dailyRate,
+            amount_paid: 0,
+            status: 'Unpaid',
+            plan_type: 'daily',
+            notes: `Treino: ${selectedDate}`,
+          });
         }
 
         return 1; // Successfully inserted
