@@ -444,59 +444,56 @@ const CoachTrainingManagement = ({ userRole, athletes }: CoachTrainingManagement
 
                               return (
                                 <Collapsible key={sessionKey} open={isSessionExpanded} onOpenChange={() => toggleSession(sessionKey)}>
-                                  <CollapsibleTrigger className="w-full">
-                                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                                      isMorning 
-                                        ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/20 dark:border-amber-800' 
-                                        : 'bg-blue-50 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/20 dark:border-blue-800'
-                                    }`}>
-                                      <div className="flex items-center gap-3">
-                                        {isSessionExpanded ? (
-                                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                                        ) : (
-                                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                        )}
-                                        {isMorning ? (
-                                          <Sun className="h-4 w-4 text-amber-600" />
-                                        ) : (
-                                          <Moon className="h-4 w-4 text-blue-600" />
-                                        )}
-                                        <span className="font-medium">{formatDate(date)}</span>
-                                        <Badge variant={isMorning ? "default" : "secondary"} className={
-                                          isMorning 
-                                            ? 'bg-amber-500 hover:bg-amber-600' 
-                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
-                                        }>
-                                          {shift === 'Morning' ? t('admin.coachAttendance.morning') : t('admin.coachAttendance.afternoon')}
-                                        </Badge>
-                                        {beachLocation && (
-                                          <span className="text-sm text-muted-foreground flex items-center gap-1">
-                                            <MapPin className="h-3 w-3" />
-                                            {beachLocation}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <CollapsibleTrigger className="flex-1">
+                                      <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                                        isMorning 
+                                          ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/20 dark:border-amber-800' 
+                                          : 'bg-blue-50 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/20 dark:border-blue-800'
+                                      }`}>
+                                        <div className="flex items-center gap-3">
+                                          {isSessionExpanded ? (
+                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                          ) : (
+                                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                          )}
+                                          {isMorning ? (
+                                            <Sun className="h-4 w-4 text-amber-600" />
+                                          ) : (
+                                            <Moon className="h-4 w-4 text-blue-600" />
+                                          )}
+                                          <span className="font-medium">{formatDate(date)}</span>
+                                          <Badge variant={isMorning ? "default" : "secondary"} className={
+                                            isMorning 
+                                              ? 'bg-amber-500 hover:bg-amber-600' 
+                                              : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                          }>
+                                            {shift === 'Morning' ? t('admin.coachAttendance.morning') : t('admin.coachAttendance.afternoon')}
+                                          </Badge>
+                                          {beachLocation && (
+                                            <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                              <MapPin className="h-3 w-3" />
+                                              {beachLocation}
+                                            </span>
+                                          )}
+                                        </div>
                                         <Badge variant="outline" className="flex items-center gap-1">
                                           <Users className="h-3 w-3" />
                                           {records.length}
                                         </Badge>
-                                        {!isReportsViewer && (
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleAddAthlete(date, shift, attendanceData.coachId);
-                                            }}
-                                            className="h-8 px-2"
-                                          >
-                                            <UserPlus className="h-4 w-4" />
-                                          </Button>
-                                        )}
                                       </div>
-                                    </div>
-                                  </CollapsibleTrigger>
+                                    </CollapsibleTrigger>
+                                    {!isReportsViewer && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleAddAthlete(date, shift, attendanceData.coachId)}
+                                        className="h-12 px-3 shrink-0"
+                                      >
+                                        <UserPlus className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
 
                                   <CollapsibleContent>
                                     <div className="ml-8 mt-2 space-y-1">
