@@ -816,7 +816,14 @@
       "from": "De",
       "coach": "Treinador",
       "replySent": "Resposta enviada",
-      "statusUpdated": "Estado atualizado"
+      "statusUpdated": "Estado atualizado",
+      "newMessage": "Nova Mensagem",
+      "newMessageTitle": "Enviar Mensagem para Treinador",
+      "selectCoach": "Selecionar Treinador",
+      "selectCoachPlaceholder": "Escolha um treinador...",
+      "selectCoachError": "Por favor selecione um treinador",
+      "messageToCoachPlaceholder": "Escreva a sua mensagem para o treinador...",
+      "messageSent": "Mensagem enviada com sucesso"
     },
     "media": {
       "photos": "Fotos",

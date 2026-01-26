@@ -816,7 +816,14 @@
       "from": "From",
       "coach": "Coach",
       "replySent": "Reply sent",
-      "statusUpdated": "Status updated"
+      "statusUpdated": "Status updated",
+      "newMessage": "New Message",
+      "newMessageTitle": "Send Message to Coach",
+      "selectCoach": "Select Coach",
+      "selectCoachPlaceholder": "Choose a coach...",
+      "selectCoachError": "Please select a coach",
+      "messageToCoachPlaceholder": "Write your message to the coach...",
+      "messageSent": "Message sent successfully"
     },
     "media": {
       "photos": "Photos",
