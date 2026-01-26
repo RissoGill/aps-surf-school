@@ -381,7 +381,8 @@
       "messageSent": "Message sent successfully",
       "replySent": "Reply sent successfully",
       "sendError": "Error sending message",
-      "validationError": "Please fill all fields correctly (subject min. 3 characters, message min. 10 characters)"
+      "validationError": "Please fill all fields correctly (subject min. 3 characters, message min. 10 characters)",
+      "unread": "Unread"
     },
     "bulkAttendance": {
       "title": "Register Multiple Attendances",

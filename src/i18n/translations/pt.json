@@ -381,7 +381,8 @@
       "messageSent": "Mensagem enviada com sucesso",
       "replySent": "Resposta enviada com sucesso",
       "sendError": "Erro ao enviar mensagem",
-      "validationError": "Por favor preencha todos os campos correctamente (assunto mín. 3 caracteres, mensagem mín. 10 caracteres)"
+      "validationError": "Por favor preencha todos os campos correctamente (assunto mín. 3 caracteres, mensagem mín. 10 caracteres)",
+      "unread": "Por Ler"
     },
     "bulkAttendance": {
       "title": "Registar Múltiplas Presenças",

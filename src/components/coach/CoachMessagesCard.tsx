@@ -25,6 +25,7 @@ interface CoachMessage {
   resolved_by: string | null;
   created_at: string;
   updated_at: string;
+  read_by_coach: boolean;
 }
 
 interface MessageReply {
@@ -52,6 +53,21 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+
+  // Mutation to mark message as read
+  const markAsReadMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      const { error } = await supabase
+        .from('coach_messages')
+        .update({ read_by_coach: true })
+        .eq('id', messageId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['coach-messages', coachId] });
+    }
+  });
 
   // Fetch messages for this coach
   const { data: messages, isLoading } = useQuery({
@@ -216,12 +232,16 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
     createReplyMutation.mutate({ messageId, content: replyContent });
   };
 
-  const toggleExpanded = (messageId: string) => {
+  const toggleExpanded = (messageId: string, isUnread: boolean) => {
     const newExpanded = new Set(expandedMessages);
     if (newExpanded.has(messageId)) {
       newExpanded.delete(messageId);
     } else {
       newExpanded.add(messageId);
+      // Mark as read when expanding an unread message
+      if (isUnread) {
+        markAsReadMutation.mutate(messageId);
+      }
     }
     setExpandedMessages(newExpanded);
   };
@@ -241,6 +261,7 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
     });
   };
 
+  const unreadCount = messages?.filter(m => !m.read_by_coach).length || 0;
   const pendingCount = messages?.filter(m => !m.is_resolved).length || 0;
 
   return (
@@ -251,7 +272,12 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <CardTitle className="text-xl">{t('coach.messages.title')}</CardTitle>
-              {pendingCount > 0 && (
+              {unreadCount > 0 && (
+                <Badge variant="destructive">
+                  {unreadCount} {t('coach.messages.unread')}
+                </Badge>
+              )}
+              {pendingCount > 0 && unreadCount === 0 && (
                 <Badge variant="secondary">
                   {pendingCount} {t('coach.messages.pending')}
                 </Badge>
@@ -329,18 +355,25 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
               const isReplying = replyingTo === msg.id;
               
               return (
-                <Collapsible key={msg.id} open={isExpanded} onOpenChange={() => toggleExpanded(msg.id)}>
-                  <div className="border rounded-lg p-3">
+                <Collapsible key={msg.id} open={isExpanded} onOpenChange={() => toggleExpanded(msg.id, !msg.read_by_coach)}>
+                  <div className={`border rounded-lg p-3 ${!msg.read_by_coach ? 'border-red-500 bg-red-50 dark:bg-red-950/20' : ''}`}>
                     <CollapsibleTrigger asChild>
                       <div className="flex items-start justify-between cursor-pointer hover:bg-muted/50 rounded p-1 -m-1">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                             {msg.is_resolved ? (
                               <Check className="h-4 w-4 text-green-600" />
+                            ) : !msg.read_by_coach ? (
+                              <Clock className="h-4 w-4 text-red-500" />
                             ) : (
                               <Clock className="h-4 w-4 text-amber-500" />
                             )}
                             <span className="font-medium">{escapeHtml(msg.subject)}</span>
+                            {!msg.read_by_coach && (
+                              <Badge variant="destructive" className="text-xs">
+                                {t('coach.messages.unread')}
+                              </Badge>
+                            )}
                             <Badge variant={msg.is_resolved ? "outline" : "default"} className="text-xs">
                               {msg.is_resolved ? t('coach.messages.resolved') : t('coach.messages.pending')}
                             </Badge>
