@@ -1,58 +1,125 @@
 
-# Plano de Correção: Alinhamento do Cartão de Mensagens
+# Plano: Mensagens Não Lidas a Vermelho
 
-## Problema Identificado
+## Objetivo
+Quando a administração responde a uma mensagem, essa mensagem deve aparecer destacada a vermelho até que o treinador a abra e "leia".
 
-O cabeçalho do cartão de mensagens tem problemas de layout quando o conteúdo é largo demais:
-- O título "Messages to Administration" + badge "1 Pending" + botão "New Message" estão todos na mesma linha
-- Em ecrãs mais pequenos ou com texto mais longo, o conteúdo sai do cartão
+## Alterações Necessárias
 
-## Solução
+### 1. Base de Dados - Nova Coluna
 
-Aplicar o padrão de layout já usado noutros cartões (ex: CoachPaymentsCard, AdministrationDashboard cards):
-- Separar o conteúdo (ícone + texto + badge) do botão
-- Colocar o botão numa linha separada em dispositivos móveis
-- Adicionar classes de overflow e min-width para controlar o texto
+Adicionar coluna `read_by_coach` à tabela `coach_messages`:
 
-## Alterações no Ficheiro
+```text
+coach_messages
+└── read_by_coach (boolean, default: true)
+    - true = mensagem lida pelo treinador
+    - false = tem respostas novas da administração por ler
+```
+
+**Lógica:**
+- Quando o treinador cria uma mensagem: `read_by_coach = true` (ele próprio criou)
+- Quando a administração responde: `read_by_coach = false` (notificar treinador)
+- Quando o treinador expande a mensagem: `read_by_coach = true` (marcada como lida)
+
+### 2. Trigger Automático
+
+Criar trigger que automaticamente marca `read_by_coach = false` quando:
+- Uma nova resposta é inserida em `coach_message_replies`
+- E o `sender_type = 'admin'`
+
+### 3. Componente CoachMessagesCard
 
 **Ficheiro:** `src/components/coach/CoachMessagesCard.tsx`
 
-### Estrutura Atual (Linhas 248-308)
+Alterações visuais para mensagens não lidas:
+- Borda do cartão da mensagem: `border-red-500` em vez de `border`
+- Fundo: `bg-red-50` para destaque suave
+- Badge "Por Ler" a vermelho junto ao assunto
+- Ícone `Clock` em vermelho em vez de âmbar
 
-```text
-CardHeader
-└── div (flex items-center justify-between) ← problema: tudo numa linha
-    ├── div (flex items-center gap-2)
-    │   ├── Icon
-    │   ├── CardTitle
-    │   └── Badge
-    └── Dialog (botão)
-```
+**Função para marcar como lida:**
+- Quando o treinador clica para expandir uma mensagem
+- Chamar mutation para atualizar `read_by_coach = true`
 
-### Nova Estrutura
+### 4. Contador de Não Lidas
 
-```text
-CardHeader
-├── div (flex items-start gap-4)         ← conteúdo principal
-│   ├── Icon (shrink-0)
-│   └── div (flex-1 min-w-0)             ← container de texto com overflow control
-│       ├── div (flex flex-wrap gap-2)   ← título + badge com wrap
-│       │   ├── CardTitle
-│       │   └── Badge
-│       └── CardDescription
-└── div (mt-4 flex justify-end)          ← botão em linha separada
-    └── Button (w-full sm:w-auto)        ← responsivo
-```
+Atualizar o contador no cabeçalho do cartão:
+- Mostrar quantidade de mensagens não lidas (em vez de apenas "pending")
+- Badge a vermelho com texto "X Por Ler"
 
 ## Detalhes Técnicos
 
-1. **Adicionar `shrink-0`** ao ícone para não encolher
-2. **Adicionar `flex-1 min-w-0`** ao container de texto para controlar overflow
-3. **Adicionar `flex-wrap`** na linha do título + badge para quebrar em ecrãs pequenos
-4. **Mover o botão** para um container separado abaixo do conteúdo
-5. **Adicionar `w-full sm:w-auto`** ao botão para ser full-width em mobile
+### Migração SQL
 
-## Código a Modificar
+```sql
+-- Adicionar coluna
+ALTER TABLE public.coach_messages 
+ADD COLUMN read_by_coach boolean NOT NULL DEFAULT true;
 
-Substituir linhas 248-309 com a nova estrutura de CardHeader que separa o conteúdo do botão, seguindo o mesmo padrão documentado para outros cartões do sistema.
+-- Trigger para marcar como não lida quando admin responde
+CREATE OR REPLACE FUNCTION public.mark_message_unread_on_admin_reply()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+BEGIN
+  IF NEW.sender_type = 'admin' THEN
+    UPDATE public.coach_messages 
+    SET read_by_coach = false 
+    WHERE id = NEW.message_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER on_admin_reply_mark_unread
+  AFTER INSERT ON public.coach_message_replies
+  FOR EACH ROW
+  EXECUTE FUNCTION public.mark_message_unread_on_admin_reply();
+```
+
+### Alterações no Componente
+
+**Interface atualizada:**
+```typescript
+interface CoachMessage {
+  // ... campos existentes
+  read_by_coach: boolean;
+}
+```
+
+**Mutation para marcar como lida:**
+```typescript
+const markAsReadMutation = useMutation({
+  mutationFn: async (messageId: string) => {
+    await supabase
+      .from('coach_messages')
+      .update({ read_by_coach: true })
+      .eq('id', messageId);
+  }
+});
+```
+
+**Estilo condicional:**
+```tsx
+<div className={`border rounded-lg p-3 ${
+  !msg.read_by_coach 
+    ? 'border-red-500 bg-red-50' 
+    : ''
+}`}>
+```
+
+### Traduções
+
+Adicionar aos ficheiros de tradução:
+- `pt.json`: `"unread": "Por Ler"`
+- `en.json`: `"unread": "Unread"`
+
+## Ficheiros a Modificar
+
+1. **Nova migração SQL** - Adicionar coluna e trigger
+2. **src/components/coach/CoachMessagesCard.tsx** - Estilo vermelho + marcar como lida
+3. **src/i18n/translations/pt.json** - Nova chave de tradução
+4. **src/i18n/translations/en.json** - Nova chave de tradução
