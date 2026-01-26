@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -50,6 +52,12 @@ export const CoachMessagesManagementCard = () => {
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  
+  // New message form state
+  const [showNewMessageForm, setShowNewMessageForm] = useState(false);
+  const [newMessageCoach, setNewMessageCoach] = useState<string>("");
+  const [newMessageSubject, setNewMessageSubject] = useState("");
+  const [newMessageContent, setNewMessageContent] = useState("");
 
   // Fetch all coaches for filter
   const { data: coaches } = useQuery({
@@ -102,6 +110,40 @@ export const CoachMessagesManagementCard = () => {
       
       if (error) throw error;
       return data as MessageReply[];
+    }
+  });
+
+  // Create new message mutation
+  const createMessageMutation = useMutation({
+    mutationFn: async ({ coachId, subject, message }: { coachId: string; subject: string; message: string }) => {
+      const { data, error } = await supabase
+        .from('coach_messages')
+        .insert({
+          coach_id: coachId,
+          subject: subject.trim(),
+          message: message.trim()
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-coach-messages'] });
+      setShowNewMessageForm(false);
+      setNewMessageCoach("");
+      setNewMessageSubject("");
+      setNewMessageContent("");
+      toast({
+        title: t('admin.coachMessages.messageSent'),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t('common.error'),
+        variant: "destructive"
+      });
     }
   });
 
@@ -218,6 +260,38 @@ export const CoachMessagesManagementCard = () => {
     createReplyMutation.mutate({ messageId, content: replyContent });
   };
 
+  const handleSubmitNewMessage = () => {
+    if (!newMessageCoach) {
+      toast({
+        title: t('common.error'),
+        description: t('admin.coachMessages.selectCoachError'),
+        variant: "destructive"
+      });
+      return;
+    }
+    if (newMessageSubject.trim().length < 3) {
+      toast({
+        title: t('common.error'),
+        description: t('coach.messages.subjectMinLength'),
+        variant: "destructive"
+      });
+      return;
+    }
+    if (newMessageContent.trim().length < 10) {
+      toast({
+        title: t('common.error'),
+        description: t('coach.messages.validationError'),
+        variant: "destructive"
+      });
+      return;
+    }
+    createMessageMutation.mutate({
+      coachId: newMessageCoach,
+      subject: newMessageSubject,
+      message: newMessageContent
+    });
+  };
+
   const toggleExpanded = (messageId: string) => {
     const newExpanded = new Set(expandedMessages);
     if (newExpanded.has(messageId)) {
@@ -266,11 +340,88 @@ export const CoachMessagesManagementCard = () => {
               </Badge>
             )}
           </div>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="default" size="sm" onClick={() => setShowNewMessageForm(!showNewMessageForm)}>
+              <Send className="h-4 w-4 mr-1" />
+              {t('admin.coachMessages.newMessage')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         <CardDescription>{t('admin.coachMessages.description')}</CardDescription>
+        
+        {/* New Message Form */}
+        {showNewMessageForm && (
+          <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-3">
+            <h4 className="font-medium">{t('admin.coachMessages.newMessageTitle')}</h4>
+            
+            <div>
+              <Label htmlFor="coach-select" className="text-sm">{t('admin.coachMessages.selectCoach')}</Label>
+              <Select value={newMessageCoach} onValueChange={setNewMessageCoach}>
+                <SelectTrigger id="coach-select" className="mt-1">
+                  <SelectValue placeholder={t('admin.coachMessages.selectCoachPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {coaches?.map(coach => (
+                    <SelectItem key={coach.coach_id} value={coach.coach_id}>
+                      {coach.coach_id} - {[coach.first_name, coach.last_name].filter(Boolean).join(' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="subject-input" className="text-sm">{t('coach.messages.subject')}</Label>
+              <Input
+                id="subject-input"
+                value={newMessageSubject}
+                onChange={(e) => setNewMessageSubject(e.target.value)}
+                placeholder={t('coach.messages.subjectPlaceholder')}
+                maxLength={100}
+                className="mt-1"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="message-input" className="text-sm">{t('coach.messages.message')}</Label>
+              <Textarea
+                id="message-input"
+                value={newMessageContent}
+                onChange={(e) => setNewMessageContent(e.target.value)}
+                placeholder={t('admin.coachMessages.messageToCoachPlaceholder')}
+                rows={4}
+                maxLength={2000}
+                className="mt-1"
+              />
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowNewMessageForm(false);
+                  setNewMessageCoach("");
+                  setNewMessageSubject("");
+                  setNewMessageContent("");
+                }}
+              >
+                {t('coach.messages.cancel')}
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSubmitNewMessage}
+                disabled={createMessageMutation.isPending}
+              >
+                <Send className="h-3 w-3 mr-1" />
+                {t('coach.messages.send')}
+              </Button>
+            </div>
+          </div>
+        )}
         
         {/* Filters */}
         <div className="flex flex-wrap gap-2 mt-3">
