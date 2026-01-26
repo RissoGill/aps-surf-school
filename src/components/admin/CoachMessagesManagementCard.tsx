@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw, Mail } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -342,7 +342,7 @@ export const CoachMessagesManagementCard = () => {
           </div>
           <div className="flex gap-2">
             <Button variant="default" size="sm" onClick={() => setShowNewMessageForm(!showNewMessageForm)}>
-              <Send className="h-4 w-4 mr-1" />
+              <Mail className="h-4 w-4 mr-1" />
               {t('admin.coachMessages.newMessage')}
             </Button>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
