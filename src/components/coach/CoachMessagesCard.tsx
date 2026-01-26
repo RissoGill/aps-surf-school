@@ -289,8 +289,8 @@ export const CoachMessagesCard = ({ coachId, coachName }: CoachMessagesCardProps
         <div className="mt-4 flex justify-end">
           <Dialog open={isNewMessageOpen} onOpenChange={setIsNewMessageOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="w-full sm:w-auto gap-1">
-                <Plus className="h-4 w-4" />
+            <Button size="sm" className="w-full sm:w-auto gap-1">
+              <Mail className="h-4 w-4" />
                 {t('coach.messages.new')}
               </Button>
             </DialogTrigger>
