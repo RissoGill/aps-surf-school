@@ -335,6 +335,7 @@ export type Database = {
           id: string
           is_resolved: boolean
           message: string
+          read_by_coach: boolean
           resolved_at: string | null
           resolved_by: string | null
           subject: string
@@ -346,6 +347,7 @@ export type Database = {
           id?: string
           is_resolved?: boolean
           message: string
+          read_by_coach?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
           subject: string
@@ -357,6 +359,7 @@ export type Database = {
           id?: string
           is_resolved?: boolean
           message?: string
+          read_by_coach?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
           subject?: string
