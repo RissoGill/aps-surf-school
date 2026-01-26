@@ -3,6 +3,7 @@ import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw } from "luci
 import { ReportsCard } from "@/components/admin/ReportsCard";
 import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
 import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
+import CoachMessagesManagementCard from "@/components/admin/CoachMessagesManagementCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -936,6 +937,11 @@ const AdministrationDashboard = () => {
         {/* Alerts Management Card */}
         <div className="mt-6">
           <AlertsManagementCard userRole={userRole} currentUser={currentUser} />
+        </div>
+
+        {/* Coach Messages Management Card */}
+        <div className="mt-6">
+          <CoachMessagesManagementCard />
         </div>
 
         {/* Coach Payments Card */}
