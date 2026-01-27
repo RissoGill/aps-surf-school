@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/WelcomePage";
 import CoachLogin from "./pages/auth/CoachLogin";
 import AthleteLogin from "./pages/auth/AthleteLogin";
@@ -49,45 +49,43 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<WelcomePage />} />
-            
-            {/* Auth Routes */}
-            <Route path="/login/coach" element={<CoachLogin />} />
-            <Route path="/login/athlete" element={<AthleteLogin />} />
-            <Route path="/login/guardian" element={<GuardianLogin />} />
-            <Route path="/login/administration" element={<AdministrationLogin />} />
-            
-            {/* Dashboard Routes */}
-            <Route path="/dashboard/coach" element={<CoachDashboard />} />
-            <Route path="/athlete/:id" element={<AthleteDetails />} />
-            <Route path="/dashboard/athlete" element={<AthleteDashboard />} />
-            <Route path="/dashboard/athlete/:id" element={<AthleteDashboard />} />
-            <Route path="/dashboard/guardian" element={<GuardianDashboard />} />
-            <Route path="/dashboard/administration" element={<AdministrationDashboard />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/athletes" element={<AthleteManagement />} />
-            <Route path="/admin/payments" element={<PaymentManagement />} />
-            <Route path="/admin/attendance" element={<AttendanceManagement />} />
-            
-            {/* Attendance Routes */}
-            <Route path="/attendance/athletes" element={<AthletesList />} />
-            <Route path="/attendance/records" element={<AttendanceRecords />} />
-            
-            {/* User Manual */}
-            <Route path="/manual" element={<UserManual />} />
-            
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
-      </BrowserRouter>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<WelcomePage />} />
+          
+          {/* Auth Routes */}
+          <Route path="/login/coach" element={<CoachLogin />} />
+          <Route path="/login/athlete" element={<AthleteLogin />} />
+          <Route path="/login/guardian" element={<GuardianLogin />} />
+          <Route path="/login/administration" element={<AdministrationLogin />} />
+          
+          {/* Dashboard Routes */}
+          <Route path="/dashboard/coach" element={<CoachDashboard />} />
+          <Route path="/athlete/:id" element={<AthleteDetails />} />
+          <Route path="/dashboard/athlete" element={<AthleteDashboard />} />
+          <Route path="/dashboard/athlete/:id" element={<AthleteDashboard />} />
+          <Route path="/dashboard/guardian" element={<GuardianDashboard />} />
+          <Route path="/dashboard/administration" element={<AdministrationDashboard />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/athletes" element={<AthleteManagement />} />
+          <Route path="/admin/payments" element={<PaymentManagement />} />
+          <Route path="/admin/attendance" element={<AttendanceManagement />} />
+          
+          {/* Attendance Routes */}
+          <Route path="/attendance/athletes" element={<AthletesList />} />
+          <Route path="/attendance/records" element={<AttendanceRecords />} />
+          
+          {/* User Manual */}
+          <Route path="/manual" element={<UserManual />} />
+          
+          {/* Catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 };
