@@ -144,37 +144,37 @@ export type Database = {
         Row: {
           athlete_id: string | null
           beach_location: string | null
-          coach_id: string | null
+          coach_id: string
           date: string | null
           id: string
           notes: string | null
           photos: string | null
-          shift: string | null
-          status: string | null
+          shift: string
+          status: string
           videos: string | null
         }
         Insert: {
           athlete_id?: string | null
           beach_location?: string | null
-          coach_id?: string | null
+          coach_id: string
           date?: string | null
           id: string
           notes?: string | null
           photos?: string | null
-          shift?: string | null
-          status?: string | null
+          shift?: string
+          status?: string
           videos?: string | null
         }
         Update: {
           athlete_id?: string | null
           beach_location?: string | null
-          coach_id?: string | null
+          coach_id?: string
           date?: string | null
           id?: string
           notes?: string | null
           photos?: string | null
-          shift?: string | null
-          status?: string | null
+          shift?: string
+          status?: string
           videos?: string | null
         }
         Relationships: [
