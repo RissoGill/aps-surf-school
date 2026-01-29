@@ -1,151 +1,145 @@
 
-# Plano: Limpeza de Registos de Presença Fantasma
 
-## Parte 1 — Resolver Agora via SQL Editor (Live)
+# Plano: Campos Obrigatórios para Presenças
 
-### Passo 1: Exportar registos antes de apagar
-1. Abre o [SQL Editor do Supabase](https://supabase.com/dashboard/project/bzzzecvzoahauqrhkvds/sql/new)
-2. **No canto inferior esquerdo, muda o ambiente para "Live"** (não "Test")
-3. Cola e executa:
+## Resumo do Problema
 
-```sql
-SELECT id, athlete_id, date
-FROM attendance
-WHERE shift IS NULL 
-  AND status IS NULL 
-  AND coach_id IS NULL
-ORDER BY date, athlete_id;
-```
+Os registos "fantasma" foram criados porque era possível guardar presenças com campos essenciais vazios (`shift`, `status`, `coach_id`). Para evitar isto no futuro, vamos adicionar validação obrigatória em **3 níveis**:
 
-4. Clica no botão **"Download CSV"** para guardar a lista de ~32.455 registos
-
-### Passo 2: Eliminar registos fantasma
-No mesmo SQL Editor (ambiente Live), executa:
-
-```sql
-DELETE FROM attendance
-WHERE shift IS NULL
-  AND status IS NULL
-  AND coach_id IS NULL;
-```
-
-Resultado esperado: `~32.455 rows deleted`
-
-### Passo 3: Corrigir registos antigos (shift = NULL mas com dados)
-Ainda no SQL Editor (ambiente Live), executa:
-
-```sql
-UPDATE attendance a
-SET shift = 'Morning'
-WHERE a.shift IS NULL
-  AND (a.status IS NOT NULL OR a.coach_id IS NOT NULL)
-  AND NOT EXISTS (
-    SELECT 1 FROM attendance b 
-    WHERE b.athlete_id = a.athlete_id 
-      AND b.date = a.date 
-      AND lower(trim(b.shift)) = 'morning' 
-      AND b.id <> a.id
-  );
-```
-
-Resultado esperado: `~312 rows updated`
-
-### Passo 4: Verificar
-Confirma que não restam fantasmas:
-
-```sql
-SELECT COUNT(*) FROM attendance
-WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL;
-```
-
-Deve retornar `0`.
+1. **Base de dados** (última linha de defesa)
+2. **Edge Function** (validação servidor)
+3. **Frontend** (feedback imediato ao utilizador)
 
 ---
 
-## Parte 2 — Criar Botão no Painel de Administração
+## O Que Vai Mudar
 
-### Objectivo
-Permitir aos administradores:
-1. Ver quantos registos fantasma existem
-2. Exportar lista (CSV) com um clique
-3. Eliminar todos os fantasmas com confirmação
-4. Corrigir automaticamente registos antigos sem shift
+### Campos Que Passam a Ser Obrigatórios
 
-### Alterações de Código
-
-#### 1. Novo Componente: `GhostAttendanceCleanupCard.tsx`
-
-Localização: `src/components/admin/GhostAttendanceCleanupCard.tsx`
-
-Funcionalidades:
-- Query para contar registos fantasma em tempo real
-- Botão "Exportar CSV" que faz download dos IDs
-- Botão "Limpar Fantasmas" com confirmação
-- Botão "Corrigir Shift" para registos antigos
-- Feedback visual (loading, sucesso, erro)
-
-#### 2. Nova Edge Function: `cleanup-ghost-attendance`
-
-Localização: `supabase/functions/cleanup-ghost-attendance/index.ts`
-
-Endpoints:
-- `GET /count` — retorna contagem de fantasmas e antigos sem shift
-- `GET /export` — retorna lista de IDs para download
-- `POST /delete` — apaga registos fantasma
-- `POST /fix-shift` — actualiza registos antigos com shift = 'Morning'
-
-Segurança:
-- Usa service role para bypass de RLS
-- Valida role = admin ou super_admin
-- Gera log de auditoria
-
-#### 3. Integrar no Dashboard de Administração
-
-Ficheiro: `src/pages/admin/AdministrationDashboard.tsx`
-
-- Importar e adicionar o `GhostAttendanceCleanupCard` na secção de gestão de presenças
-- Posicionar antes do card de gestão de presenças existente
+| Campo | Descrição |
+|-------|-----------|
+| `athlete_id` | Identificador do atleta |
+| `date` | Data do treino |
+| `shift` | Turno (Morning/Afternoon) |
+| `status` | Estado (Present/Absent/Justified/Late) |
+| `coach_id` | Treinador responsável |
 
 ---
 
-## Resumo Visual
+## Implementação
+
+### 1. Migração de Base de Dados
+
+Criar uma nova migração SQL que:
+
+- Adiciona constraints `NOT NULL` às colunas `shift`, `status`, e `coach_id`
+- Define valores por defeito seguros (ex: `shift = 'Morning'`, `status = 'Present'`)
+- Atualiza o trigger de duplicados para rejeitar registos incompletos
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│  Painel de Administração                                    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  🗑️ Limpeza de Presenças Fantasma                   │    │
-│  │                                                     │    │
-│  │  Fantasmas encontrados: 32.455                      │    │
-│  │  Registos antigos sem turno: 312                    │    │
-│  │                                                     │    │
-│  │  [Exportar CSV]  [Limpar Fantasmas]  [Corrigir]     │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  📅 Gestão de Presenças (existente)                 │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
++-------------------+
+|   attendance      |
++-------------------+
+| athlete_id  [REQ] |
+| date        [REQ] |
+| shift       [REQ] | <- Novo NOT NULL
+| status      [REQ] | <- Novo NOT NULL
+| coach_id    [REQ] | <- Novo NOT NULL
++-------------------+
 ```
 
+### 2. Edge Function (attendance-admin)
+
+Melhorar a validação no `POST` e `PATCH`:
+
+- Rejeitar pedidos sem `shift`, `status` ou `coach_id`
+- Retornar mensagens de erro claras em português
+
+### 3. Frontend (BulkAttendanceRegistration)
+
+Já tem validação para:
+- Pelo menos 1 atleta selecionado
+- Turno obrigatório
+
+Adicionar:
+- Validação visual (asterisco nos campos obrigatórios)
+- Desabilitar botão "Registar" se faltar algum campo
+
 ---
 
-## Ficheiros a Criar/Modificar
+## Secção Técnica
 
-| Ficheiro | Acção |
-|----------|-------|
-| `src/components/admin/GhostAttendanceCleanupCard.tsx` | Criar |
-| `supabase/functions/cleanup-ghost-attendance/index.ts` | Criar |
-| `supabase/config.toml` | Adicionar função |
-| `src/pages/admin/AdministrationDashboard.tsx` | Modificar |
+### Migração SQL
+
+```sql
+-- Primeiro: limpar registos antigos inválidos (os 9 restantes)
+DELETE FROM attendance 
+WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL;
+
+-- Adicionar constraints NOT NULL com defaults
+ALTER TABLE attendance 
+  ALTER COLUMN shift SET NOT NULL,
+  ALTER COLUMN shift SET DEFAULT 'Morning';
+
+ALTER TABLE attendance 
+  ALTER COLUMN status SET NOT NULL,
+  ALTER COLUMN status SET DEFAULT 'Present';
+
+ALTER TABLE attendance 
+  ALTER COLUMN coach_id SET NOT NULL;
+
+-- Adicionar CHECK constraints para valores válidos
+ALTER TABLE attendance 
+  ADD CONSTRAINT chk_shift_values 
+  CHECK (shift IN ('Morning', 'Afternoon'));
+
+ALTER TABLE attendance 
+  ADD CONSTRAINT chk_status_values 
+  CHECK (status IN ('Present', 'Absent', 'Justified', 'Late'));
+```
+
+### Edge Function Updates
+
+```typescript
+// POST - validação reforçada
+if (!body.shift || !['Morning', 'Afternoon'].includes(body.shift)) {
+  return new Response(
+    JSON.stringify({ error: "Turno obrigatório (Morning/Afternoon)" }), 
+    { status: 400 }
+  );
+}
+
+if (!body.status || !['Present', 'Absent', 'Justified', 'Late'].includes(body.status)) {
+  return new Response(
+    JSON.stringify({ error: "Estado obrigatório" }), 
+    { status: 400 }
+  );
+}
+```
+
+### Ficheiros a Modificar
+
+1. **Nova migração SQL** - constraints na base de dados
+2. **`supabase/functions/attendance-admin/index.ts`** - validação servidor
+3. **`src/components/coach/BulkAttendanceRegistration.tsx`** - UX melhorada
+4. **`src/components/admin/CoachTrainingManagement.tsx`** - validação no admin
 
 ---
 
-## Notas Técnicas
+## Impacto
 
-- A Edge Function usa `SUPABASE_SERVICE_ROLE_KEY` para bypass de RLS
-- O frontend usa `supabase.functions.invoke()` conforme padrão de segurança
-- A autenticação segue o modelo legacy (localStorage) já implementado
-- O componente invalida a query cache após operações
-- Export CSV usa Blob API nativa do browser
+| Área | Antes | Depois |
+|------|-------|--------|
+| Registos fantasma | Possível criar | Impossível |
+| Erros do utilizador | Falha silenciosa | Mensagem clara |
+| Integridade dados | Parcial | Garantida |
+
+---
+
+## Riscos e Mitigação
+
+| Risco | Mitigação |
+|-------|-----------|
+| Os 9 registos pendentes | Serão eliminados pela migração (já confirmámos que são duplicados) |
+| Registos antigos sem shift/status | A migração só aplica NOT NULL após limpar os inválidos |
+
