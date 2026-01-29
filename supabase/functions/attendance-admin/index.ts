@@ -29,8 +29,11 @@ const isValidAthleteId = (id: unknown): id is string =>
 const isValidCoachId = (id: unknown): id is string =>
   typeof id === 'string' && /^T\d+$/.test(id) && id.length <= 10;
 
-const isValidShift = (shift: unknown): shift is string | null =>
-  shift === null || shift === undefined || (typeof shift === 'string' && shift.length <= 50);
+const isValidShift = (shift: unknown): shift is string =>
+  typeof shift === 'string' && ['Morning', 'Afternoon'].includes(shift);
+
+const isValidShiftOptional = (shift: unknown): shift is string | null =>
+  shift === null || shift === undefined || (typeof shift === 'string' && ['Morning', 'Afternoon'].includes(shift));
 
 const isValidText = (text: unknown, maxLength = 500): text is string | null =>
   text === null || text === undefined || (typeof text === 'string' && text.length <= maxLength);
@@ -191,9 +194,9 @@ serve(async (req) => {
       }
       
       if ('shift' in updates) {
-        if (!isValidShift(updates.shift)) {
+        if (!isValidShiftOptional(updates.shift)) {
           return new Response(
-            JSON.stringify({ error: "Invalid shift value" }), 
+            JSON.stringify({ error: "Turno inválido (Morning/Afternoon)" }), 
             { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
           );
         }
@@ -357,10 +360,14 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: "Invalid date format (YYYY-MM-DD required)" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
       if (!isValidStatus(body.status)) {
-        return new Response(JSON.stringify({ error: "Invalid status value" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+        return new Response(JSON.stringify({ error: "Estado obrigatório (Present/Absent/Justified/Late)" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
       if (!isValidCoachId(body.coach_id)) {
         return new Response(JSON.stringify({ error: "Invalid coach_id format" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
+      }
+      // Validate shift is required and valid
+      if (!isValidShift(body.shift)) {
+        return new Response(JSON.stringify({ error: "Turno obrigatório (Morning/Afternoon)" }), { status: 400, headers: { "content-type": "application/json", ...corsHeaders } });
       }
 
       const insertData: Record<string, unknown> = {
@@ -369,7 +376,7 @@ serve(async (req) => {
         date: body.date,
         status: body.status,
         coach_id: body.coach_id,
-        shift: isValidShift(body.shift) ? (body.shift ? String(body.shift).trim() : null) : null,
+        shift: body.shift,
         beach_location: isValidText(body.beach_location, 200) ? sanitizeText(body.beach_location) : null,
         notes: isValidText(body.notes, 1000) ? sanitizeText(body.notes) : null,
         photos: isValidText(body.photos, 2000) ? body.photos : null,
