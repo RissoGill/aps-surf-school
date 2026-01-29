@@ -1,97 +1,117 @@
 
-# Plano: Corrigir Botão de Adicionar Atleta a um Treino
+# Plano de Resolução: Registos de Presença Fantasma
 
-## Problema Identificado
+## Resumo do Problema
 
-O botão "Adicionar Atleta" (`UserPlus`) está **dentro** do `CollapsibleTrigger`, que renderiza como um `<button>`. Isto viola as regras do DOM HTML (`<button>` não pode estar dentro de outro `<button>`) e causa:
-- Warning na consola: "validateDOMNesting(...): `<button>` cannot appear as a descendant of `<button>`"
-- Cliques podem não ser registados correctamente
-- Comportamento inconsistente entre navegadores
+Os treinadores não conseguem registar presenças em lote porque existem **32.455 registos "fantasma"** na tabela `attendance` — registos com `shift`, `status` e `coach_id` todos a NULL. O trigger `prevent_duplicate_attendance` bloqueia novos `INSERT` porque já existe um registo para a combinação `(athlete_id, date, NULL shift)`.
 
-## Localização do Problema
+### Origem Provável
+Um script externo pré-criou 90 registos por dia (um por atleta) de **2025-09-01 até 2026-08-29** — incluindo datas futuras impossíveis.
 
-**Ficheiro:** `src/components/admin/CoachTrainingManagement.tsx`
+### Dados Adicionais
+- **~312 registos antigos** têm `shift=NULL` mas já contêm `status` e `coach_id` válidos (dados reais introduzidos antes da obrigatoriedade do campo `shift`).
 
-**Linhas 446-499:** O `CollapsibleTrigger` envolve todo o conteúdo, incluindo o botão de adicionar atleta:
-```tsx
-<Collapsible key={sessionKey} ...>
-  <CollapsibleTrigger className="w-full">  {/* ← É um <button> */}
-    <div className="flex items-center justify-between ...">
-      ...
-      <Button onClick={...}>  {/* ❌ Botão dentro de botão */}
-        <UserPlus className="h-4 w-4" />
-      </Button>
-    </div>
-  </CollapsibleTrigger>
-  ...
-</Collapsible>
+---
+
+## Acções a Implementar
+
+### 1. Exportar os registos vazios (para referência)
+Gerar uma query para exportar/listar todos os IDs afectados antes da eliminação:
+
+```sql
+SELECT id, athlete_id, date
+FROM attendance
+WHERE shift IS NULL 
+  AND status IS NULL 
+  AND coach_id IS NULL
+ORDER BY date, athlete_id;
 ```
 
-## Solução
+O resultado será um CSV com ~32.455 linhas que pode descarregar no SQL Editor do Supabase antes de proceder.
 
-Reestruturar o layout para que o botão "Adicionar Atleta" fique **fora** do `CollapsibleTrigger`:
+---
 
-```tsx
-<Collapsible key={sessionKey} ...>
-  <div className="flex items-center gap-2">
-    <CollapsibleTrigger className="flex-1">
-      <div className="flex items-center justify-between p-3 rounded-lg border ...">
-        <div className="flex items-center gap-3">
-          {/* Conteúdo esquerdo: chevron, ícone, data, badge turno, praia */}
-        </div>
-        <Badge variant="outline">
-          <Users className="h-3 w-3" /> {records.length}
-        </Badge>
-      </div>
-    </CollapsibleTrigger>
-    
-    {/* ✅ Botão FORA do trigger */}
-    {!isReportsViewer && (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleAddAthlete(date, shift, attendanceData.coachId)}
-        className="h-12 px-3"
-      >
-        <UserPlus className="h-4 w-4" />
-      </Button>
-    )}
-  </div>
-  
-  <CollapsibleContent>...</CollapsibleContent>
-</Collapsible>
+### 2. Eliminar todos os registos fantasma
+Executar a seguinte query via SQL Editor:
+
+```sql
+DELETE FROM attendance
+WHERE shift IS NULL
+  AND status IS NULL
+  AND coach_id IS NULL;
 ```
 
-## Alterações Técnicas
+Impacto esperado: **~32.455 linhas eliminadas**. 
 
-### Ficheiro: `src/components/admin/CoachTrainingManagement.tsx`
+Esta acção liberta todas as combinações `(athlete_id, date)` bloqueadas, permitindo os treinadores registar presenças normalmente.
 
-**Linhas 446-499** - Reestruturar o Collapsible:
+---
 
-1. Envolver `CollapsibleTrigger` e o botão num `div` flex
-2. Remover o botão de dentro do `CollapsibleTrigger`
-3. Aplicar estilos apropriados para manter o visual coeso
-4. Remover `e.stopPropagation()` que já não é necessário
+### 3. Corrigir registos antigos sem shift
+Para os ~312 registos que já têm dados (`status` e `coach_id`) mas `shift=NULL`, atribuir o valor `'Morning'` por defeito:
+
+```sql
+UPDATE attendance
+SET shift = 'Morning'
+WHERE shift IS NULL
+  AND (status IS NOT NULL OR coach_id IS NOT NULL);
+```
+
+Impacto esperado: **~312 linhas actualizadas**.
+
+---
+
+### 4. (Opcional) Adicionar constraint NOT NULL ao campo shift
+Depois de limpar os dados, pode ser útil impedir futuros registos sem shift:
+
+```sql
+ALTER TABLE attendance
+ALTER COLUMN shift SET NOT NULL;
+```
+
+Só activar após verificar que não há mais registos com `shift IS NULL`.
+
+---
+
+## Sumário de Comandos SQL
+
+```text
+-- 1. Exportar (copiar resultado antes de eliminar)
+SELECT id, athlete_id, date
+FROM attendance
+WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL
+ORDER BY date, athlete_id;
+
+-- 2. Eliminar fantasmas
+DELETE FROM attendance
+WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL;
+
+-- 3. Corrigir shift nos registos antigos válidos
+UPDATE attendance
+SET shift = 'Morning'
+WHERE shift IS NULL
+  AND (status IS NOT NULL OR coach_id IS NOT NULL);
+
+-- 4. (Opcional) Impedir futuros NULL
+ALTER TABLE attendance ALTER COLUMN shift SET NOT NULL;
+```
+
+---
 
 ## Resultado Esperado
 
-| Antes | Depois |
-|-------|--------|
-| Warning na consola | Sem warnings |
-| Clique no `+` às vezes falha | Clique sempre funciona |
-| Botão dentro de botão | Estrutura HTML válida |
+- **Treinadores conseguem registar presenças em lote** sem erros de duplicado.
+- **Dados históricos preservados** com shift='Morning' atribuído aos registos antigos.
+- **Sem registos fantasma** a ocupar espaço ou bloquear operações.
 
-## Visual Final
+---
 
-```text
-┌──────────────────────────────────────────────────┬─────┐
-│ ▸ ☀ Sáb, 25 Jan  [Manhã]  📍Carcavelos  │3👥│ │ + │
-└──────────────────────────────────────────────────┴─────┘
-         ↑ CollapsibleTrigger (clicável)              ↑ Botão separado
-```
+## Notas Técnicas
 
-## Ficheiros a Modificar
+| Componente | Ficheiro | Alteração |
+|------------|----------|-----------|
+| Tabela `attendance` | N/A | DELETE + UPDATE via SQL Editor |
+| Edge Function `attendance-admin` | `supabase/functions/attendance-admin/index.ts` | Sem alterações necessárias |
+| Frontend `BulkAttendanceRegistration` | `src/components/coach/BulkAttendanceRegistration.tsx` | Sem alterações necessárias |
 
-| Ficheiro | Alteração |
-|----------|-----------|
-| `src/components/admin/CoachTrainingManagement.tsx` | Reestruturar linhas 446-499 para mover botão para fora do CollapsibleTrigger |
+Os comandos SQL devem ser executados manualmente no [SQL Editor do Supabase](https://supabase.com/dashboard/project/bzzzecvzoahauqrhkvds/sql/new).
