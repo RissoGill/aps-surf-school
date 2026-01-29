@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.create-pack]
 verify_jwt = true
+
+[functions.cleanup-ghost-attendance]
+verify_jwt = false
