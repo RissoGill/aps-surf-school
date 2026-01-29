@@ -1,22 +1,12 @@
 
-# Plano de Resolução: Registos de Presença Fantasma
+# Plano: Limpeza de Registos de Presença Fantasma
 
-## Resumo do Problema
+## Parte 1 — Resolver Agora via SQL Editor (Live)
 
-Os treinadores não conseguem registar presenças em lote porque existem **32.455 registos "fantasma"** na tabela `attendance` — registos com `shift`, `status` e `coach_id` todos a NULL. O trigger `prevent_duplicate_attendance` bloqueia novos `INSERT` porque já existe um registo para a combinação `(athlete_id, date, NULL shift)`.
-
-### Origem Provável
-Um script externo pré-criou 90 registos por dia (um por atleta) de **2025-09-01 até 2026-08-29** — incluindo datas futuras impossíveis.
-
-### Dados Adicionais
-- **~312 registos antigos** têm `shift=NULL` mas já contêm `status` e `coach_id` válidos (dados reais introduzidos antes da obrigatoriedade do campo `shift`).
-
----
-
-## Acções a Implementar
-
-### 1. Exportar os registos vazios (para referência)
-Gerar uma query para exportar/listar todos os IDs afectados antes da eliminação:
+### Passo 1: Exportar registos antes de apagar
+1. Abre o [SQL Editor do Supabase](https://supabase.com/dashboard/project/bzzzecvzoahauqrhkvds/sql/new)
+2. **No canto inferior esquerdo, muda o ambiente para "Live"** (não "Test")
+3. Cola e executa:
 
 ```sql
 SELECT id, athlete_id, date
@@ -27,12 +17,10 @@ WHERE shift IS NULL
 ORDER BY date, athlete_id;
 ```
 
-O resultado será um CSV com ~32.455 linhas que pode descarregar no SQL Editor do Supabase antes de proceder.
+4. Clica no botão **"Download CSV"** para guardar a lista de ~32.455 registos
 
----
-
-### 2. Eliminar todos os registos fantasma
-Executar a seguinte query via SQL Editor:
+### Passo 2: Eliminar registos fantasma
+No mesmo SQL Editor (ambiente Live), executa:
 
 ```sql
 DELETE FROM attendance
@@ -41,77 +29,123 @@ WHERE shift IS NULL
   AND coach_id IS NULL;
 ```
 
-Impacto esperado: **~32.455 linhas eliminadas**. 
+Resultado esperado: `~32.455 rows deleted`
 
-Esta acção liberta todas as combinações `(athlete_id, date)` bloqueadas, permitindo os treinadores registar presenças normalmente.
-
----
-
-### 3. Corrigir registos antigos sem shift
-Para os ~312 registos que já têm dados (`status` e `coach_id`) mas `shift=NULL`, atribuir o valor `'Morning'` por defeito:
+### Passo 3: Corrigir registos antigos (shift = NULL mas com dados)
+Ainda no SQL Editor (ambiente Live), executa:
 
 ```sql
-UPDATE attendance
+UPDATE attendance a
 SET shift = 'Morning'
-WHERE shift IS NULL
-  AND (status IS NOT NULL OR coach_id IS NOT NULL);
+WHERE a.shift IS NULL
+  AND (a.status IS NOT NULL OR a.coach_id IS NOT NULL)
+  AND NOT EXISTS (
+    SELECT 1 FROM attendance b 
+    WHERE b.athlete_id = a.athlete_id 
+      AND b.date = a.date 
+      AND lower(trim(b.shift)) = 'morning' 
+      AND b.id <> a.id
+  );
 ```
 
-Impacto esperado: **~312 linhas actualizadas**.
+Resultado esperado: `~312 rows updated`
 
----
-
-### 4. (Opcional) Adicionar constraint NOT NULL ao campo shift
-Depois de limpar os dados, pode ser útil impedir futuros registos sem shift:
+### Passo 4: Verificar
+Confirma que não restam fantasmas:
 
 ```sql
-ALTER TABLE attendance
-ALTER COLUMN shift SET NOT NULL;
+SELECT COUNT(*) FROM attendance
+WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL;
 ```
 
-Só activar após verificar que não há mais registos com `shift IS NULL`.
+Deve retornar `0`.
 
 ---
 
-## Sumário de Comandos SQL
+## Parte 2 — Criar Botão no Painel de Administração
+
+### Objectivo
+Permitir aos administradores:
+1. Ver quantos registos fantasma existem
+2. Exportar lista (CSV) com um clique
+3. Eliminar todos os fantasmas com confirmação
+4. Corrigir automaticamente registos antigos sem shift
+
+### Alterações de Código
+
+#### 1. Novo Componente: `GhostAttendanceCleanupCard.tsx`
+
+Localização: `src/components/admin/GhostAttendanceCleanupCard.tsx`
+
+Funcionalidades:
+- Query para contar registos fantasma em tempo real
+- Botão "Exportar CSV" que faz download dos IDs
+- Botão "Limpar Fantasmas" com confirmação
+- Botão "Corrigir Shift" para registos antigos
+- Feedback visual (loading, sucesso, erro)
+
+#### 2. Nova Edge Function: `cleanup-ghost-attendance`
+
+Localização: `supabase/functions/cleanup-ghost-attendance/index.ts`
+
+Endpoints:
+- `GET /count` — retorna contagem de fantasmas e antigos sem shift
+- `GET /export` — retorna lista de IDs para download
+- `POST /delete` — apaga registos fantasma
+- `POST /fix-shift` — actualiza registos antigos com shift = 'Morning'
+
+Segurança:
+- Usa service role para bypass de RLS
+- Valida role = admin ou super_admin
+- Gera log de auditoria
+
+#### 3. Integrar no Dashboard de Administração
+
+Ficheiro: `src/pages/admin/AdministrationDashboard.tsx`
+
+- Importar e adicionar o `GhostAttendanceCleanupCard` na secção de gestão de presenças
+- Posicionar antes do card de gestão de presenças existente
+
+---
+
+## Resumo Visual
 
 ```text
--- 1. Exportar (copiar resultado antes de eliminar)
-SELECT id, athlete_id, date
-FROM attendance
-WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL
-ORDER BY date, athlete_id;
-
--- 2. Eliminar fantasmas
-DELETE FROM attendance
-WHERE shift IS NULL AND status IS NULL AND coach_id IS NULL;
-
--- 3. Corrigir shift nos registos antigos válidos
-UPDATE attendance
-SET shift = 'Morning'
-WHERE shift IS NULL
-  AND (status IS NOT NULL OR coach_id IS NOT NULL);
-
--- 4. (Opcional) Impedir futuros NULL
-ALTER TABLE attendance ALTER COLUMN shift SET NOT NULL;
+┌─────────────────────────────────────────────────────────────┐
+│  Painel de Administração                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  🗑️ Limpeza de Presenças Fantasma                   │    │
+│  │                                                     │    │
+│  │  Fantasmas encontrados: 32.455                      │    │
+│  │  Registos antigos sem turno: 312                    │    │
+│  │                                                     │    │
+│  │  [Exportar CSV]  [Limpar Fantasmas]  [Corrigir]     │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  📅 Gestão de Presenças (existente)                 │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Resultado Esperado
+## Ficheiros a Criar/Modificar
 
-- **Treinadores conseguem registar presenças em lote** sem erros de duplicado.
-- **Dados históricos preservados** com shift='Morning' atribuído aos registos antigos.
-- **Sem registos fantasma** a ocupar espaço ou bloquear operações.
+| Ficheiro | Acção |
+|----------|-------|
+| `src/components/admin/GhostAttendanceCleanupCard.tsx` | Criar |
+| `supabase/functions/cleanup-ghost-attendance/index.ts` | Criar |
+| `supabase/config.toml` | Adicionar função |
+| `src/pages/admin/AdministrationDashboard.tsx` | Modificar |
 
 ---
 
 ## Notas Técnicas
 
-| Componente | Ficheiro | Alteração |
-|------------|----------|-----------|
-| Tabela `attendance` | N/A | DELETE + UPDATE via SQL Editor |
-| Edge Function `attendance-admin` | `supabase/functions/attendance-admin/index.ts` | Sem alterações necessárias |
-| Frontend `BulkAttendanceRegistration` | `src/components/coach/BulkAttendanceRegistration.tsx` | Sem alterações necessárias |
-
-Os comandos SQL devem ser executados manualmente no [SQL Editor do Supabase](https://supabase.com/dashboard/project/bzzzecvzoahauqrhkvds/sql/new).
+- A Edge Function usa `SUPABASE_SERVICE_ROLE_KEY` para bypass de RLS
+- O frontend usa `supabase.functions.invoke()` conforme padrão de segurança
+- A autenticação segue o modelo legacy (localStorage) já implementado
+- O componente invalida a query cache após operações
+- Export CSV usa Blob API nativa do browser
