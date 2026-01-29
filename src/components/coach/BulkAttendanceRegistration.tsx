@@ -343,19 +343,24 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label htmlFor="training-date">{t('coach.bulkAttendance.trainingDate')}</Label>
+            <Label htmlFor="training-date">
+              {t('coach.bulkAttendance.trainingDate')} <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="training-date"
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="w-full"
+              required
             />
           </div>
 
           {/* Shift Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="training-shift">{t('coach.bulkAttendance.shift')}</Label>
+            <Label htmlFor="training-shift">
+              {t('coach.bulkAttendance.shift')} <span className="text-destructive">*</span>
+            </Label>
             <Select value={selectedShift} onValueChange={setSelectedShift}>
               <SelectTrigger id="training-shift">
                 <SelectValue />
@@ -408,7 +413,9 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
 
         {/* Athletes Multi-Select */}
         <div className="space-y-2">
-          <Label htmlFor="athletes-search">{t('coach.bulkAttendance.selectAthletes')}</Label>
+          <Label htmlFor="athletes-search">
+            {t('coach.bulkAttendance.selectAthletes')} <span className="text-destructive">*</span>
+          </Label>
           <div className="relative">
             <Input
               id="athletes-search"
