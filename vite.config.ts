@@ -40,8 +40,11 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-runtime",
       "react/jsx-dev-runtime",
       "react-router-dom",
+      "react-router",
+      "@remix-run/router",
       "scheduler",
     ],
+    force: true,
   },
   build: {
     rollupOptions: {
