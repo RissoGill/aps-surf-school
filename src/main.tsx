@@ -7,10 +7,10 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <LanguageProvider>
+    <LanguageProvider>
+      <BrowserRouter>
         <App />
-      </LanguageProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </LanguageProvider>
   </React.StrictMode>
 );
