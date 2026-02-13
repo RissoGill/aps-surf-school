@@ -1,64 +1,37 @@
 
 
-# Correção: Pagamento de Saldo Anterior não Atualiza a Dívida
+# Filtrar Atletas Inativos dos Relatórios Financeiros
 
-## Problema Identificado
+## Problema
 
-O pagamento de 911€ do Francisco Queimado (A15) foi **registado com sucesso** na tabela `prior_balance_payments`, mas o `prior_balance` na tabela `atletas` **não foi atualizado** (continua a 0).
-
-### Causa Raiz
-
-As políticas RLS de UPDATE na tabela `atletas` são todas do tipo **RESTRICTIVE** (não permissivas). Isto significa que **todas** devem ser satisfeitas simultaneamente:
-
-1. "Anonymous can update atletas" -- passa (true)
-2. "Authenticated can update atletas" -- passa (true)
-3. **"Admins can update athlete records"** -- FALHA porque `auth.uid()` retorna NULL com autenticação legacy
-
-Como a terceira policy falha, o UPDATE é **silenciosamente bloqueado** pelo Supabase (não gera erro, simplesmente não atualiza nenhuma linha).
-
-### Dados Atuais na Base de Dados
-
-| Campo | Valor |
-|-------|-------|
-| prior_balance (atletas) | 0 (deveria ser -911 após o pagamento) |
-| Pagamento registado | 911€ em 2026-02-09 |
-| Dívida época atual | 2.484€ |
+O relatório financeiro inclui pagamentos de atletas inativos (ex: Manuel Correia), mostrando-os como tendo dívidas pendentes. Os outros relatórios (presenças, pessoal, geral) já filtram corretamente por `is_active = true`, mas o relatório financeiro não.
 
 ## Solução
 
-### Passo 1: Corrigir a Policy RLS (migração SQL)
-
-Alterar a policy "Admins can update athlete records" de RESTRICTIVE para **PERMISSIVE**, ou removê-la completamente já que as policies anónima e autenticada já permitem updates.
-
-A solução mais segura é **remover a policy RESTRICTIVE** do admin, mantendo apenas as permissivas para anónimos e autenticados (que já existem com `true`).
-
-### Passo 2: Corrigir o Saldo do Francisco Queimado
-
-Depois da migração, executar um UPDATE manual ou pedir ao admin para apagar e re-registar o pagamento de 911€, para que o `prior_balance` seja corretamente atualizado.
-
-Alternativamente, corrigir diretamente via SQL: `UPDATE atletas SET prior_balance = -911 WHERE athlete_id = 'A15'`.
+Adicionar filtro de atletas inativos no relatório financeiro, filtrando os resultados após a query para incluir apenas pagamentos de atletas ativos.
 
 ## Secção Técnica
 
-### Migração SQL Necessária
+### Ficheiro: `src/components/admin/ReportsCard.tsx`
 
-```sql
--- Remove the RESTRICTIVE admin update policy that blocks legacy auth
-DROP POLICY IF EXISTS "Admins can update athlete records" ON atletas;
-```
+**Alteração 1**: Na query do relatório financeiro (caso `"financial"`), após obter os pagamentos (linha ~137), adicionar um filtro para excluir atletas inativos. Como a query já faz join com `atletas`, podemos verificar `is_active` nos dados retornados. Contudo, a query atual não seleciona `is_active`, por isso precisamos de:
 
-Esta migração remove a policy restrictiva que bloqueia updates quando `auth.uid()` é NULL (autenticação legacy). As policies "Anonymous can update atletas" e "Authenticated can update atletas" (ambas com `true`) continuam ativas, permitindo os updates.
+1. Atualizar o select da query de pagamentos para incluir `is_active`:
+   ```
+   atletas:athlete_id (first_name, last_name, surf_level, is_active)
+   ```
 
-### Correção Imediata do Saldo
+2. Adicionar filtro in-memory após a query (junto dos filtros existentes de `showOnlyOutstanding` e `selectedSurfLevels`):
+   ```typescript
+   // Filter out inactive athletes
+   filteredPayments = filteredPayments.filter((p: any) => p.atletas?.is_active === true);
+   ```
 
-```sql
-UPDATE atletas SET prior_balance = -911 WHERE athlete_id = 'A15';
-```
+**Alteração 2**: Na query do relatório geral ("overall"), o `paymentsRes` também não filtra por atletas ativos. Adicionar filtro `.in("athlete_id", activeAthleteIds)` à query de pagamentos do relatório geral, tal como já é feito para a query de presenças.
 
-Isto coloca o `prior_balance` no valor correto (0 - 911 = -911), refletindo o pagamento já registado.
+### Resumo
 
-### Resumo das Alterações
+- 1 ficheiro alterado: `src/components/admin/ReportsCard.tsx`
+- 2 alterações: adicionar `is_active` ao select + filtrar atletas inativos nos relatórios financeiro e geral
+- Sem alterações de base de dados
 
-1. **Uma migração SQL** para remover a policy RLS restrictiva na tabela `atletas`
-2. **Uma correção de dados** para atualizar o `prior_balance` do Francisco Queimado
-3. **Sem alterações de código** no frontend (a lógica do PriorBalanceCard está correta)
