@@ -106,7 +106,7 @@ export const ReportsCard = () => {
             .from("payments")
             .select(`
               *,
-              atletas:athlete_id (first_name, last_name, surf_level)
+              atletas:athlete_id (first_name, last_name, surf_level, is_active)
             `);
           
           // Build OR condition: match by payment_date range OR by month/year when payment_date is null
@@ -134,7 +134,7 @@ export const ReportsCard = () => {
           if (paymentsError) throw paymentsError;
           
           // Filter in-memory for outstanding and surf levels
-          let filteredPayments = payments || [];
+          let filteredPayments = (payments || []).filter((p: any) => p.atletas?.is_active === true);
           
           if (showOnlyOutstanding) {
             filteredPayments = filteredPayments.filter((p: any) => {
@@ -214,7 +214,7 @@ export const ReportsCard = () => {
           const activeAthleteIds = (activeAthletes || []).map(a => a.athlete_id);
 
           const [paymentsRes, attendanceRes, athletesRes] = await Promise.all([
-            supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr),
+            supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr).in("athlete_id", activeAthleteIds),
             supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]).in("athlete_id", activeAthleteIds),
             supabase.from("atletas").select("*").eq("is_active", true)
           ]);
