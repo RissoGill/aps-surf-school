@@ -1,88 +1,64 @@
 
 
-# Plano: Correção de Presenças para Treinador T01
+# Correção: Pagamento de Saldo Anterior não Atualiza a Dívida
 
-## Diagnóstico
+## Problema Identificado
 
-O erro "Edge Function returned a non-2xx status code" acontece porque:
+O pagamento de 911€ do Francisco Queimado (A15) foi **registado com sucesso** na tabela `prior_balance_payments`, mas o `prior_balance` na tabela `atletas` **não foi atualizado** (continua a 0).
 
-1. **Políticas RLS atualizadas** - As políticas de INSERT na tabela `attendance` agora exigem `auth.uid()` correspondente ao `auth_uid` do treinador. Mas a autenticação legacy (localStorage) não define `auth.uid()`, que retorna `NULL`.
+### Causa Raiz
 
-2. **Versão publicada desatualizada** - O código do **preview** já envia `role: 'coach', userId: coachId` para a Edge Function (corrigido recentemente). Contudo, o **site publicado** (apsportugal.lovable.app) pode ainda ter uma versão anterior onde este parâmetro não é enviado, causando resposta 401.
+As políticas RLS de UPDATE na tabela `atletas` são todas do tipo **RESTRICTIVE** (não permissivas). Isto significa que **todas** devem ser satisfeitas simultaneamente:
 
-3. **Fluxo atual no site publicado**:
-   ```text
-   Coach tenta marcar presença
-         ↓
-   INSERT direto → Falha (RLS: auth.uid() = NULL)
-         ↓
-   Fallback para Edge Function sem role/userId
-         ↓
-   Edge Function retorna 401 → "non-2xx status code"
-   ```
+1. "Anonymous can update atletas" -- passa (true)
+2. "Authenticated can update atletas" -- passa (true)
+3. **"Admins can update athlete records"** -- FALHA porque `auth.uid()` retorna NULL com autenticação legacy
 
----
+Como a terceira policy falha, o UPDATE é **silenciosamente bloqueado** pelo Supabase (não gera erro, simplesmente não atualiza nenhuma linha).
+
+### Dados Atuais na Base de Dados
+
+| Campo | Valor |
+|-------|-------|
+| prior_balance (atletas) | 0 (deveria ser -911 após o pagamento) |
+| Pagamento registado | 911€ em 2026-02-09 |
+| Dívida época atual | 2.484€ |
 
 ## Solução
 
-### Ação Imediata (Recomendada)
+### Passo 1: Corrigir a Policy RLS (migração SQL)
 
-**Publicar a versão atual do projeto** para que o site apsportugal.lovable.app receba as correções que já funcionam no preview.
+Alterar a policy "Admins can update athlete records" de RESTRICTIVE para **PERMISSIVE**, ou removê-la completamente já que as policies anónima e autenticada já permitem updates.
 
-No Lovable, basta clicar no botão "Publish" no canto superior direito para publicar a versão atual.
+A solução mais segura é **remover a policy RESTRICTIVE** do admin, mantendo apenas as permissivas para anónimos e autenticados (que já existem com `true`).
 
-### Verificação Alternativa
+### Passo 2: Corrigir o Saldo do Francisco Queimado
 
-Se após publicar o problema persistir, será necessário:
+Depois da migração, executar um UPDATE manual ou pedir ao admin para apagar e re-registar o pagamento de 911€, para que o `prior_balance` seja corretamente atualizado.
 
-1. **Adicionar política RLS para inserção anónima** (temporária, menos segura):
-   - Permitir INSERT na tabela `attendance` para utilizadores anónimos
-   - Isto só deve ser feito como último recurso
-
-2. **Forçar uso da Edge Function para todos os INSERTs**:
-   - Modificar o código para sempre usar a Edge Function
-   - Garantir que a autenticação legacy é sempre validada server-side
-
----
+Alternativamente, corrigir diretamente via SQL: `UPDATE atletas SET prior_balance = -911 WHERE athlete_id = 'A15'`.
 
 ## Secção Técnica
 
-### Fluxo Correto (após publicação)
+### Migração SQL Necessária
 
-```text
-Coach tenta marcar presença
-      ↓
-INSERT direto → Falha (RLS esperado)
-      ↓
-Fallback para Edge Function COM role='coach', userId='T01'
-      ↓
-Edge Function valida treinador na BD → Sucesso
+```sql
+-- Remove the RESTRICTIVE admin update policy that blocks legacy auth
+DROP POLICY IF EXISTS "Admins can update athlete records" ON atletas;
 ```
 
-### Código já corrigido no preview
+Esta migração remove a policy restrictiva que bloqueia updates quando `auth.uid()` é NULL (autenticação legacy). As policies "Anonymous can update atletas" e "Authenticated can update atletas" (ambas com `true`) continuam ativas, permitindo os updates.
 
-```typescript
-// BulkAttendanceRegistration.tsx linha 217-218
-const { data, error } = await supabase.functions.invoke('attendance-admin', {
-  body: { ...record, role: 'coach', userId: coachId },
-});
+### Correção Imediata do Saldo
+
+```sql
+UPDATE atletas SET prior_balance = -911 WHERE athlete_id = 'A15';
 ```
 
-### Comparação Preview vs Publicado
+Isto coloca o `prior_balance` no valor correto (0 - 911 = -911), refletindo o pagamento já registado.
 
-| Aspeto | Preview | Publicado |
-|--------|---------|-----------|
-| Payload Edge Function | `{...record, role:'coach', userId:'T01'}` | `{...record}` (sem auth) |
-| INSERT direto | Falha (RLS) | Falha (RLS) |
-| Fallback Edge Function | Sucesso (200) | Falha (401) |
+### Resumo das Alterações
 
----
-
-## Passos para Resolver
-
-1. **Publicar o projeto agora** (botão Publish no Lovable)
-2. O treinador T01 deve atualizar a página (hard refresh: Ctrl+Shift+R ou limpar cache)
-3. Testar novamente o registo de presenças em lote
-
-Se após estes passos o erro persistir, podemos investigar outras causas como cache no browser do treinador.
-
+1. **Uma migração SQL** para remover a policy RLS restrictiva na tabela `atletas`
+2. **Uma correção de dados** para atualizar o `prior_balance` do Francisco Queimado
+3. **Sem alterações de código** no frontend (a lógica do PriorBalanceCard está correta)
