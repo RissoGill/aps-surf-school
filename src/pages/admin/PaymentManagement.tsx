@@ -438,12 +438,19 @@ const PaymentManagement = () => {
     }
   };
 
+  const parseAmount = (value: string): number => {
+    if (!value || value.trim() === "") return 0;
+    const normalized = value.trim().replace(/[^0-9.,]/g, "").replace(",", ".");
+    const parsed = parseFloat(normalized);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   const handleEditSave = async (paymentId: string) => {
     try {
       // Validate input
       const validated = paymentEditSchema.parse({
-        amount_due: parseFloat(editForm.amount_due),
-        amount_paid: parseFloat(editForm.amount_paid),
+        amount_due: parseAmount(editForm.amount_due),
+        amount_paid: parseAmount(editForm.amount_paid),
         payment_date: editForm.payment_date || null,
         plan_type: editForm.plan_type || null,
         notes: editForm.notes || null
