@@ -1,37 +1,66 @@
 
-
-# Filtrar Atletas Inativos dos Relatórios Financeiros
+# Corrigir Erro "Expected number, received nan" na Mensalidade
 
 ## Problema
 
-O relatório financeiro inclui pagamentos de atletas inativos (ex: Manuel Correia), mostrando-os como tendo dívidas pendentes. Os outros relatórios (presenças, pessoal, geral) já filtram corretamente por `is_active = true`, mas o relatório financeiro não.
+Ao editar o valor da mensalidade (amount_due) ou o valor pago (amount_paid) no painel de gestão de pagamentos, o sistema mostra o erro:
+
+> "Erro de Validação: Expected number, received nan"
+
+### Causa Raiz
+
+No ficheiro `src/pages/admin/PaymentManagement.tsx`, linha 444-446, o código converte os valores do formulário usando `parseFloat()` diretamente:
+
+```typescript
+const validated = paymentEditSchema.parse({
+  amount_due: parseFloat(editForm.amount_due),   // ← PROBLEMA
+  amount_paid: parseFloat(editForm.amount_paid), // ← PROBLEMA
+  ...
+});
+```
+
+O `parseFloat()` do JavaScript retorna `NaN` (Not a Number) em dois casos comuns:
+1. **Campo vazio** - `parseFloat("")` retorna `NaN`
+2. **Separador decimal de vírgula** - Em Portugal usa-se vírgula como separador decimal (ex: `"120,50"`), mas `parseFloat("120,50")` só lê `120` e ignora o resto - em casos mais extremos retorna `NaN`
+
+O Zod valida que o valor seja um número válido (`z.number()`), e como recebe `NaN`, mostra o erro "Expected number, received nan".
 
 ## Solução
 
-Adicionar filtro de atletas inativos no relatório financeiro, filtrando os resultados após a query para incluir apenas pagamentos de atletas ativos.
+Substituir o `parseFloat()` puro por uma função de parsing mais robusta que:
+1. Trata campos vazios como `0` (sem erro de validação)
+2. Aceita tanto vírgula como ponto como separador decimal (suporte ao formato português)
+3. Remove símbolos de moeda ou espaços acidentais
 
-## Secção Técnica
+### Ficheiro a Alterar
 
-### Ficheiro: `src/components/admin/ReportsCard.tsx`
+**`src/pages/admin/PaymentManagement.tsx`** - Função `handleEditSave`:
 
-**Alteração 1**: Na query do relatório financeiro (caso `"financial"`), após obter os pagamentos (linha ~137), adicionar um filtro para excluir atletas inativos. Como a query já faz join com `atletas`, podemos verificar `is_active` nos dados retornados. Contudo, a query atual não seleciona `is_active`, por isso precisamos de:
+Adicionar no topo do componente uma função auxiliar:
+```typescript
+const parseAmount = (value: string): number => {
+  if (!value || value.trim() === "") return 0;
+  // Replace comma decimal separator with dot (Portuguese format)
+  const normalized = value.trim().replace(",", ".");
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : parsed;
+};
+```
 
-1. Atualizar o select da query de pagamentos para incluir `is_active`:
-   ```
-   atletas:athlete_id (first_name, last_name, surf_level, is_active)
-   ```
+Atualizar a chamada do `paymentEditSchema.parse()`:
+```typescript
+const validated = paymentEditSchema.parse({
+  amount_due: parseAmount(editForm.amount_due),
+  amount_paid: parseAmount(editForm.amount_paid),
+  payment_date: editForm.payment_date || null,
+  plan_type: editForm.plan_type || null,
+  notes: editForm.notes || null
+});
+```
 
-2. Adicionar filtro in-memory após a query (junto dos filtros existentes de `showOnlyOutstanding` e `selectedSurfLevels`):
-   ```typescript
-   // Filter out inactive athletes
-   filteredPayments = filteredPayments.filter((p: any) => p.atletas?.is_active === true);
-   ```
+## Resumo das Alterações
 
-**Alteração 2**: Na query do relatório geral ("overall"), o `paymentsRes` também não filtra por atletas ativos. Adicionar filtro `.in("athlete_id", activeAthleteIds)` à query de pagamentos do relatório geral, tal como já é feito para a query de presenças.
-
-### Resumo
-
-- 1 ficheiro alterado: `src/components/admin/ReportsCard.tsx`
-- 2 alterações: adicionar `is_active` ao select + filtrar atletas inativos nos relatórios financeiro e geral
-- Sem alterações de base de dados
-
+- 1 ficheiro alterado: `src/pages/admin/PaymentManagement.tsx`
+- Adicionar função `parseAmount` para parsing robusto de valores monetários
+- Substituir `parseFloat()` por `parseAmount()` nas duas linhas problemáticas
+- Sem alterações de base de dados nem de outros ficheiros
