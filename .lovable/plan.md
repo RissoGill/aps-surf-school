@@ -1,39 +1,66 @@
 
-
-# Corrigir UI que não atualiza o saldo anterior após pagamento
+# Corrigir Erro "Expected number, received nan" na Mensalidade
 
 ## Problema
 
-Quando se regista um pagamento de saldo anterior (ex: 150€ para Santiago Carreira), o valor é **corretamente atualizado na base de dados**, mas a interface não reflete a alteração. O valor mostrado permanece o mesmo.
+Ao editar o valor da mensalidade (amount_due) ou o valor pago (amount_paid) no painel de gestão de pagamentos, o sistema mostra o erro:
 
-**Causa raiz**: O `selectedAthlete` é guardado como estado local (`useState`). Quando o `onBalanceUpdated` invalida a query `athletes-search`, os dados da lista de atletas são atualizados, mas o `selectedAthlete` continua com o valor antigo de `prior_balance`. O `priorBalance` é derivado de `selectedAthlete?.prior_balance`, logo nunca muda.
+> "Erro de Validação: Expected number, received nan"
+
+### Causa Raiz
+
+No ficheiro `src/pages/admin/PaymentManagement.tsx`, linha 444-446, o código converte os valores do formulário usando `parseFloat()` diretamente:
+
+```typescript
+const validated = paymentEditSchema.parse({
+  amount_due: parseFloat(editForm.amount_due),   // ← PROBLEMA
+  amount_paid: parseFloat(editForm.amount_paid), // ← PROBLEMA
+  ...
+});
+```
+
+O `parseFloat()` do JavaScript retorna `NaN` (Not a Number) em dois casos comuns:
+1. **Campo vazio** - `parseFloat("")` retorna `NaN`
+2. **Separador decimal de vírgula** - Em Portugal usa-se vírgula como separador decimal (ex: `"120,50"`), mas `parseFloat("120,50")` só lê `120` e ignora o resto - em casos mais extremos retorna `NaN`
+
+O Zod valida que o valor seja um número válido (`z.number()`), e como recebe `NaN`, mostra o erro "Expected number, received nan".
 
 ## Solução
 
-Sincronizar `selectedAthlete` com os dados atualizados da query `athletes-search`. Após invalidar as queries, atualizar o `selectedAthlete` com os dados frescos.
+Substituir o `parseFloat()` puro por uma função de parsing mais robusta que:
+1. Trata campos vazios como `0` (sem erro de validação)
+2. Aceita tanto vírgula como ponto como separador decimal (suporte ao formato português)
+3. Remove símbolos de moeda ou espaços acidentais
 
-## Secção Técnica
+### Ficheiro a Alterar
 
-### Ficheiro: `src/pages/admin/PaymentManagement.tsx`
+**`src/pages/admin/PaymentManagement.tsx`** - Função `handleEditSave`:
 
-**Alteração 1**: Adicionar um `useEffect` que sincronize `selectedAthlete` quando os dados da query `athletes-search` mudam:
-
+Adicionar no topo do componente uma função auxiliar:
 ```typescript
-useEffect(() => {
-  if (selectedAthlete && athletes) {
-    const updated = athletes.find(a => a.athlete_id === selectedAthlete.athlete_id);
-    if (updated && updated.prior_balance !== selectedAthlete.prior_balance) {
-      setSelectedAthlete(updated);
-    }
-  }
-}, [athletes, selectedAthlete]);
+const parseAmount = (value: string): number => {
+  if (!value || value.trim() === "") return 0;
+  // Replace comma decimal separator with dot (Portuguese format)
+  const normalized = value.trim().replace(",", ".");
+  const parsed = parseFloat(normalized);
+  return isNaN(parsed) ? 0 : parsed;
+};
 ```
 
-Isto garante que, quando a query é invalidada e retorna dados novos, o `selectedAthlete` é atualizado com o `prior_balance` correto.
+Atualizar a chamada do `paymentEditSchema.parse()`:
+```typescript
+const validated = paymentEditSchema.parse({
+  amount_due: parseAmount(editForm.amount_due),
+  amount_paid: parseAmount(editForm.amount_paid),
+  payment_date: editForm.payment_date || null,
+  plan_type: editForm.plan_type || null,
+  notes: editForm.notes || null
+});
+```
 
-### Resumo
+## Resumo das Alterações
 
 - 1 ficheiro alterado: `src/pages/admin/PaymentManagement.tsx`
-- Adicionar `useEffect` para sincronizar estado local com dados da query
-- Sem alterações de base de dados (o valor já está correto na DB: 524€)
-
+- Adicionar função `parseAmount` para parsing robusto de valores monetários
+- Substituir `parseFloat()` por `parseAmount()` nas duas linhas problemáticas
+- Sem alterações de base de dados nem de outros ficheiros

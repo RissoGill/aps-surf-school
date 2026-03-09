@@ -145,6 +145,16 @@ const PaymentManagement = () => {
     }
   });
 
+  // Sync selectedAthlete with fresh query data (e.g. after prior_balance update)
+  useEffect(() => {
+    if (selectedAthlete && athletes) {
+      const updated = athletes.find(a => a.athlete_id === selectedAthlete.athlete_id);
+      if (updated && updated.prior_balance !== selectedAthlete.prior_balance) {
+        setSelectedAthlete(updated);
+      }
+    }
+  }, [athletes, selectedAthlete]);
+
   // Fetch payments for selected athlete
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ['athlete-payments', selectedAthlete?.athlete_id],
