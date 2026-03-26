@@ -32,62 +32,43 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Get auth header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('No or invalid authorization header');
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create clients
+    // Create service role client (bypasses RLS)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Validate user authentication using getUser
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-    
-    if (userError || !userData?.user) {
-      console.error('Auth validation failed:', userError);
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const userId = userData.user.id;
-
-    // Check if user has admin role
-    const { data: roles, error: roleError } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
-
-    if (roleError || !roles?.some(r => r.role === 'admin' || r.role === 'super_admin')) {
-      console.error('User not admin:', userId);
-      return new Response(
-        JSON.stringify({ ok: false, error: 'Forbidden: Admin role required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Parse request body
-    let body: CreatePackRequest;
+    let body: CreatePackRequest & { role?: string; userId?: string };
     try {
       body = await req.json();
     } catch {
       return new Response(
         JSON.stringify({ ok: false, error: 'Invalid JSON body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Legacy auth: verify admin credentials against users table
+    const { role, userId } = body;
+    if (!userId || !role) {
+      console.error('Missing userId or role in request body');
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Unauthorized: missing credentials' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: adminData, error: adminError } = await supabaseAdmin
+      .from('users')
+      .select('admin_id, admin_role')
+      .eq('admin_id', userId)
+      .single();
+
+    if (adminError || !adminData || !['admin', 'super_admin'].includes(adminData.admin_role || '')) {
+      console.error('User not admin:', userId);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'Forbidden: Admin role required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
