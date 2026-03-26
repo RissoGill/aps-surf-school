@@ -228,7 +228,7 @@ export const AthleteProfileCard = ({ athlete, athleteId, getLevelColor }: Athlet
                 <div className="text-xs text-muted-foreground">{t('coach.packSummary.sessionsUsed')}</div>
               </div>
               <div className="col-span-2 text-center p-2 bg-muted/50 rounded-md">
-                <div className={`text-xl font-bold ${packBalance.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-xl font-bold ${packBalance.balance > 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {packBalance.balance}
                 </div>
                 <div className="text-xs text-muted-foreground">{t('coach.packSummary.remainingSessions')}</div>

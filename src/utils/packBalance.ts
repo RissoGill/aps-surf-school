@@ -125,6 +125,7 @@ export async function calculatePackBalance(athleteId: string): Promise<PackBalan
     usedTokens: actualUsedTokens,
     balance,
     isNegative: balance < 0,
+    isExhausted: balance === 0,
     packType: athlete.plan_type,
     purchaseDate: pack.purchase_date,
   };

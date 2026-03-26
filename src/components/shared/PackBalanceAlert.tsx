@@ -15,16 +15,37 @@ export function PackBalanceAlert({ athleteId, athleteName, showFor }: PackBalanc
   const { data: balance, isLoading } = useQuery({
     queryKey: ['pack-balance', athleteId],
     queryFn: () => calculatePackBalance(athleteId),
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000,
   });
 
-  if (isLoading || !balance || !balance.isNegative) {
+  if (isLoading || !balance || balance.balance > 0) {
     return null;
   }
 
+  const isExhausted = balance.isExhausted;
   const sessionsOver = Math.abs(balance.balance);
   
+  const getTitle = () => {
+    if (isExhausted) {
+      return t('shared.packBalance.exhausted');
+    }
+    return t('shared.packBalance.exceeded');
+  };
+
   const getMessage = () => {
+    if (isExhausted) {
+      switch (showFor) {
+        case 'athlete':
+          return t('shared.packBalance.athleteExhaustedMessage');
+        case 'guardian':
+          return t('shared.packBalance.guardianExhaustedMessage').replace('{name}', athleteName || 'Athlete');
+        case 'coach':
+          return t('shared.packBalance.coachExhaustedMessage').replace('{name}', athleteName || 'Athlete');
+        default:
+          return '';
+      }
+    }
+
     switch (showFor) {
       case 'athlete':
         return t('shared.packBalance.athleteMessage').replace('{count}', sessionsOver.toString());
@@ -44,7 +65,7 @@ export function PackBalanceAlert({ athleteId, athleteName, showFor }: PackBalanc
   return (
     <Alert variant="destructive" className="mb-4">
       <AlertCircle className="h-4 w-4" />
-      <AlertTitle>{t('shared.packBalance.exceeded')}</AlertTitle>
+      <AlertTitle>{getTitle()}</AlertTitle>
       <AlertDescription>{getMessage()}</AlertDescription>
     </Alert>
   );
