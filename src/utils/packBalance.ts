@@ -6,6 +6,7 @@ export interface PackBalance {
   usedTokens: number;
   balance: number;
   isNegative: boolean;
+  isExhausted: boolean;
   packType: string;
   purchaseDate: string;
 }
