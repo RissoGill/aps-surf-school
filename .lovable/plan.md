@@ -1,66 +1,48 @@
 
-# Corrigir Erro "Expected number, received nan" na Mensalidade
+
+# Mostrar saldo 0 a vermelho e alerta para comprar novo pack
 
 ## Problema
 
-Ao editar o valor da mensalidade (amount_due) ou o valor pago (amount_paid) no painel de gestão de pagamentos, o sistema mostra o erro:
+Quando o atleta gasta todas as sessões do pack (saldo = 0), o número aparece a verde e não há alerta. Deveria aparecer a vermelho e com uma mensagem para comprar novo pack.
 
-> "Erro de Validação: Expected number, received nan"
+## Alterações
 
-### Causa Raiz
+### 1. `src/pages/athlete/AthleteDashboard.tsx` (~linha 785)
 
-No ficheiro `src/pages/admin/PaymentManagement.tsx`, linha 444-446, o código converte os valores do formulário usando `parseFloat()` diretamente:
+Mudar a condição de cor do saldo restante de `< 0` para `<= 0`:
 
 ```typescript
-const validated = paymentEditSchema.parse({
-  amount_due: parseFloat(editForm.amount_due),   // ← PROBLEMA
-  amount_paid: parseFloat(editForm.amount_paid), // ← PROBLEMA
-  ...
-});
+// De:
+packBalance.balance < 0 ? 'text-destructive' : 'text-success'
+// Para:
+packBalance.balance <= 0 ? 'text-destructive' : 'text-success'
 ```
 
-O `parseFloat()` do JavaScript retorna `NaN` (Not a Number) em dois casos comuns:
-1. **Campo vazio** - `parseFloat("")` retorna `NaN`
-2. **Separador decimal de vírgula** - Em Portugal usa-se vírgula como separador decimal (ex: `"120,50"`), mas `parseFloat("120,50")` só lê `120` e ignora o resto - em casos mais extremos retorna `NaN`
+### 2. `src/components/shared/PackBalanceAlert.tsx`
 
-O Zod valida que o valor seja um número válido (`z.number()`), e como recebe `NaN`, mostra o erro "Expected number, received nan".
+Alterar a condição de visibilidade para também mostrar quando o saldo é exatamente 0:
 
-## Solução
-
-Substituir o `parseFloat()` puro por uma função de parsing mais robusta que:
-1. Trata campos vazios como `0` (sem erro de validação)
-2. Aceita tanto vírgula como ponto como separador decimal (suporte ao formato português)
-3. Remove símbolos de moeda ou espaços acidentais
-
-### Ficheiro a Alterar
-
-**`src/pages/admin/PaymentManagement.tsx`** - Função `handleEditSave`:
-
-Adicionar no topo do componente uma função auxiliar:
 ```typescript
-const parseAmount = (value: string): number => {
-  if (!value || value.trim() === "") return 0;
-  // Replace comma decimal separator with dot (Portuguese format)
-  const normalized = value.trim().replace(",", ".");
-  const parsed = parseFloat(normalized);
-  return isNaN(parsed) ? 0 : parsed;
-};
+// De:
+if (isLoading || !balance || !balance.isNegative) return null;
+// Para:
+if (isLoading || !balance || balance.balance > 0) return null;
 ```
 
-Atualizar a chamada do `paymentEditSchema.parse()`:
-```typescript
-const validated = paymentEditSchema.parse({
-  amount_due: parseAmount(editForm.amount_due),
-  amount_paid: parseAmount(editForm.amount_paid),
-  payment_date: editForm.payment_date || null,
-  plan_type: editForm.plan_type || null,
-  notes: editForm.notes || null
-});
-```
+Adicionar mensagem diferenciada para saldo = 0 (pack esgotado) vs saldo negativo (sessões em excesso). Incluir texto a sugerir compra de novo pack.
 
-## Resumo das Alterações
+### 3. `src/utils/packBalance.ts`
 
-- 1 ficheiro alterado: `src/pages/admin/PaymentManagement.tsx`
-- Adicionar função `parseAmount` para parsing robusto de valores monetários
-- Substituir `parseFloat()` por `parseAmount()` nas duas linhas problemáticas
-- Sem alterações de base de dados nem de outros ficheiros
+Adicionar campo `isExhausted` (balance === 0) ao interface `PackBalance` para distinguir pack esgotado de pack negativo.
+
+### 4. Traduções (`src/i18n/translations/pt.json` e `en.json`)
+
+Adicionar chaves para a mensagem de pack esgotado:
+- `shared.packBalance.exhausted` — "Pack Esgotado"
+- `shared.packBalance.athleteExhaustedMessage` — "Utilizaste todas as sessões do teu pack. Contacta a administração para adquirir um novo pack."
+
+### 5. Guardian e Coach views
+
+Aplicar a mesma lógica de cor `<= 0` nos componentes que mostram o saldo do pack no dashboard do Guardian e no perfil do Coach (`AthleteProfileCard.tsx`).
+
