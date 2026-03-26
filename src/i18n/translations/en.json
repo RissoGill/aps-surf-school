@@ -1296,9 +1296,13 @@
     },
     "packBalance": {
       "exceeded": "Pack Training Limit Exceeded",
+      "exhausted": "Pack Exhausted",
       "athleteMessage": "You've used {count} more training(s) than your pack includes. Please purchase additional trainings.",
+      "athleteExhaustedMessage": "You've used all sessions in your pack. Contact administration to purchase a new pack.",
       "guardianMessage": "{name} has exceeded their pack limit by {count} training(s). Additional payment may be required.",
-      "coachMessage": "{name}'s pack balance: -{count} training(s). They can continue training, but guardian should be notified."
+      "guardianExhaustedMessage": "{name} has used all sessions in their pack. Contact administration to purchase a new pack.",
+      "coachMessage": "{name}'s pack balance: -{count} training(s). They can continue training, but guardian should be notified.",
+      "coachExhaustedMessage": "{name} has used all sessions in their pack. Guardian should be notified to purchase a new pack."
     },
     "reports": {
       "title": "Reports",

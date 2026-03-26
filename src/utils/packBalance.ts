@@ -6,6 +6,7 @@ export interface PackBalance {
   usedTokens: number;
   balance: number;
   isNegative: boolean;
+  isExhausted: boolean;
   packType: string;
   purchaseDate: string;
 }
@@ -94,6 +95,7 @@ export async function calculatePackBalance(athleteId: string): Promise<PackBalan
       usedTokens: actualUsedTokens,
       balance,
       isNegative: balance < 0,
+      isExhausted: balance === 0,
       packType: payment.plan_type,
       purchaseDate: payment.payment_date,
     };
@@ -123,6 +125,7 @@ export async function calculatePackBalance(athleteId: string): Promise<PackBalan
     usedTokens: actualUsedTokens,
     balance,
     isNegative: balance < 0,
+    isExhausted: balance === 0,
     packType: athlete.plan_type,
     purchaseDate: pack.purchase_date,
   };
