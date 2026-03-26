@@ -4,7 +4,7 @@ project_id = "bzzzecvzoahauqrhkvds"
 verify_jwt = false
 
 [functions.create-pack]
-verify_jwt = true
+verify_jwt = false
 
 [functions.cleanup-ghost-attendance]
 verify_jwt = false
