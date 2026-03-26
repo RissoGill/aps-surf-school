@@ -1296,13 +1296,13 @@
     },
     "packBalance": {
       "exceeded": "Limite de Treinos do Pack Excedido",
-      "exhausted": "Pack Esgotado",
+      "exhausted": "Pack de Aulas Esgotado",
       "athleteMessage": "Usou mais {count} treino(s) do que o seu pack inclui. Por favor adquira treinos adicionais.",
-      "athleteExhaustedMessage": "Utilizaste todas as sessões do teu pack. Contacta a administração para adquirir um novo pack.",
+      "athleteExhaustedMessage": "Pack de aulas esgotado. Por favor faça o pagamento de um novo pack. Obrigado.",
       "guardianMessage": "{name} excedeu o limite do pack em {count} treino(s). Pode ser necessário pagamento adicional.",
-      "guardianExhaustedMessage": "{name} utilizou todas as sessões do pack. Contacte a administração para adquirir um novo pack.",
+      "guardianExhaustedMessage": "Pack de aulas de {name} esgotado. Por favor faça o pagamento de um novo pack. Obrigado.",
       "coachMessage": "Saldo do pack de {name}: -{count} treino(s). Pode continuar a treinar, mas o encarregado deve ser notificado.",
-      "coachExhaustedMessage": "{name} utilizou todas as sessões do pack. O encarregado deve ser notificado para adquirir um novo pack."
+      "coachExhaustedMessage": "Pack de aulas de {name} esgotado. O encarregado deve ser notificado para efetuar o pagamento de um novo pack."
     },
     "reports": {
       "title": "Relatórios",
