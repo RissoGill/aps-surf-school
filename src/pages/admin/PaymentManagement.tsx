@@ -312,8 +312,13 @@ const PaymentManagement = () => {
   ) => {
     try {
       // Try Edge Function first (bypasses RLS with service role)
+      const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
       const { data: functionResult, error: functionError } = await supabase.functions.invoke('create-pack', {
-        body: { athleteId, planType, paymentDate, paymentId }
+        body: {
+          athleteId, planType, paymentDate, paymentId,
+          role: adminSession.role || 'admin',
+          userId: adminSession.userId || adminSession.adminId
+        }
       });
 
       if (!functionError && functionResult?.ok) {
