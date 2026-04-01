@@ -49,11 +49,11 @@ Deno.serve(async (req) => {
     }
 
     // Legacy auth: verify admin credentials against users table
-    const { role, userId } = body;
-    if (!userId || !role) {
-      console.error('Missing userId or role in request body');
+    const { userId } = body;
+    if (!userId) {
+      console.error('Missing userId in request body');
       return new Response(
-        JSON.stringify({ ok: false, error: 'Unauthorized: missing credentials' }),
+        JSON.stringify({ ok: false, error: 'Unauthorized: missing userId' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
