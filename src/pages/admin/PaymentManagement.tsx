@@ -313,8 +313,10 @@ const PaymentManagement = () => {
     try {
       // Get admin session with correct field mapping
       const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
-      const userId = adminSession.id || adminSession.userId || adminSession.adminId || adminSession.email;
+      console.log('adminSession contents:', JSON.stringify(adminSession));
+      const userId = adminSession.id || adminSession.userId || adminSession.adminId || adminSession.admin_id || adminSession.email;
       const role = adminSession.role || adminSession.admin_role || 'admin';
+      console.log('Resolved userId:', userId, 'role:', role);
 
       if (!userId) {
         toast({
