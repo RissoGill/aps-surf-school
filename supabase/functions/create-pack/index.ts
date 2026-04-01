@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
     let body: CreatePackRequest & { role?: string; userId?: string };
     try {
       body = await req.json();
+      console.log('create-pack received body keys:', Object.keys(body), 'userId:', body.userId, 'role:', body.role);
     } catch {
       return new Response(
         JSON.stringify({ ok: false, error: 'Invalid JSON body' }),
