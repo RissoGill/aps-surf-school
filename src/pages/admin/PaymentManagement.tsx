@@ -311,143 +311,54 @@ const PaymentManagement = () => {
     paymentId: string
   ) => {
     try {
-      // Try Edge Function first (bypasses RLS with service role)
+      // Get admin session with correct field mapping
       const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
-      const { data: functionResult, error: functionError } = await supabase.functions.invoke('create-pack', {
-        body: {
-          athleteId, planType, paymentDate, paymentId,
-          role: adminSession.role || 'admin',
-          userId: adminSession.userId || adminSession.adminId
-        }
-      });
+      const userId = adminSession.id || adminSession.userId || adminSession.adminId || adminSession.email;
+      const role = adminSession.role || adminSession.admin_role || 'admin';
 
-      if (!functionError && functionResult?.ok) {
-        console.info('Pack created via Edge Function:', functionResult.packId);
-        
-        // Invalidate all relevant queries
-        await queryClient.invalidateQueries({ queryKey: ['pack-balance', athleteId] });
-        await queryClient.invalidateQueries({ queryKey: ['athlete-packs', athleteId] });
-        await queryClient.invalidateQueries({ queryKey: ['athlete-payments', athleteId] });
-        await queryClient.invalidateQueries({ queryKey: ['atletas'] });
-        
+      if (!userId) {
         toast({
-          title: t('admin.paymentManagement.success'),
-          description: t('admin.paymentManagement.packCreatedSuccess')
+          title: t('login.sessionExpired'),
+          description: t('login.sessionExpired'),
+          variant: "destructive"
         });
-        
+        navigate("/login/administration");
         return;
       }
 
-      // Log Edge Function error and fall back to direct insert
-      console.warn('Edge Function failed, falling back to direct insert:', functionError);
+      const { data: functionResult, error: functionError } = await supabase.functions.invoke('create-pack', {
+        body: { athleteId, planType, paymentDate, paymentId, role, userId }
+      });
 
-      // Extract total tokens from plan type (pack1 -> 1, pack5 -> 5, pack10 -> 10)
-      const tokenMatch = planType.match(/pack(\d+)/);
-      if (!tokenMatch) return; // Not a pack plan
+      if (functionError || !functionResult?.ok) {
+        const errorMsg = functionResult?.error || functionError?.message || 'Unknown error';
+        console.error('Pack creation via Edge Function failed:', errorMsg);
+        toast({
+          title: t('admin.paymentManagement.packCreationFailed'),
+          description: errorMsg.slice(0, 150),
+          variant: "destructive"
+        });
+        return;
+      }
 
-      const totalTokens = tokenMatch[1];
-
-      // Check for existing active pack and get its balance
-      const { data: existingPack } = await supabase
-        .from('packs')
-        .select('*')
-        .eq('athlete_id', athleteId)
-        .eq('active', true)
-        .order('purchase_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      let carriedOverTokens = 0;
+      console.info('Pack created via Edge Function:', functionResult.packId);
       
-      // Calculate negative balance to carry forward
-      if (existingPack) {
-        const existingTotal = parseInt(existingPack.total_tokens) || 0;
-        const existingUsed = parseInt(existingPack.used_tokens) || 0;
-        const balance = existingTotal - existingUsed;
-        
-        if (balance < 0) {
-          carriedOverTokens = Math.abs(balance);
-          
-          toast({
-            title: t('admin.paymentManagement.negativeBalanceCarried'),
-            description: t('admin.paymentManagement.negativeBalanceDescription').replace('{balance}', Math.abs(balance).toString()),
-            variant: "default"
-          });
-        }
-
-        // Deactivate the old pack
-        await supabase
-          .from('packs')
-          .update({ active: false })
-          .eq('id', existingPack.id);
-      }
-
-      // Insert new pack record with generated ID
-      const packId = generatePackId(athleteId, totalTokens, paymentDate);
-      const { error: insertError } = await supabase
-        .from('packs')
-        .insert({
-          id: packId,
-          athlete_id: athleteId,
-          total_tokens: totalTokens,
-          used_tokens: carriedOverTokens > 0 ? carriedOverTokens.toString() : '0',
-          purchase_date: paymentDate,
-          active: true,
-          payment_id: paymentId
-        });
-
-      if (insertError) {
-        console.error('Pack insert failed:', {
-          error: insertError,
-          code: insertError.code,
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-          athleteId,
-          packId
-        });
-        throw insertError;
-      }
-
-      console.info('Pack created successfully:', { packId, athleteId, totalTokens, paymentId });
-
-      // Update athlete's plan_type to match the pack
-      const { error: updateError } = await supabase
-        .from('atletas')
-        .update({ plan_type: planType })
-        .eq('athlete_id', athleteId);
-
-      if (updateError) {
-        console.error('Athlete plan_type update error:', updateError);
-      }
-
-      // Invalidate all relevant queries for immediate UI update
-      await queryClient.invalidateQueries({ 
-        queryKey: ['pack-balance', athleteId] 
-      });
-      await queryClient.invalidateQueries({ 
-        queryKey: ['athlete-packs', athleteId] 
-      });
-      await queryClient.invalidateQueries({ 
-        queryKey: ['atletas'] 
+      // Invalidate all relevant queries
+      await queryClient.invalidateQueries({ queryKey: ['pack-balance', athleteId] });
+      await queryClient.invalidateQueries({ queryKey: ['athlete-packs', athleteId] });
+      await queryClient.invalidateQueries({ queryKey: ['athlete-payments', athleteId] });
+      await queryClient.invalidateQueries({ queryKey: ['atletas'] });
+      
+      toast({
+        title: t('admin.paymentManagement.success'),
+        description: t('admin.paymentManagement.packCreatedSuccess')
       });
 
     } catch (error: any) {
-      console.error('Pack creation failed:', {
-        error,
-        message: error?.message,
-        code: error?.code,
-        athleteId
-      });
-      
-      const errorMessage = error?.message || 'Unknown error occurred';
-      const isRLSError = error?.code === '42501' || errorMessage.includes('policy');
-      
+      console.error('Pack creation failed:', error);
       toast({
-        title: isRLSError ? t('admin.paymentManagement.permissionError') : t('admin.paymentManagement.packCreationFailed'),
-        description: isRLSError 
-          ? t('admin.paymentManagement.permissionDescription')
-          : t('admin.paymentManagement.packCreationDescription').replace('{error}', errorMessage.slice(0, 100)),
+        title: t('admin.paymentManagement.packCreationFailed'),
+        description: error?.message?.slice(0, 150) || 'Unknown error',
         variant: "destructive"
       });
     }
