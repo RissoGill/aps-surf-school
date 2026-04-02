@@ -42,6 +42,16 @@ interface Athlete {
   prior_balance: number | null;
 }
 
+interface AdminSession {
+  id?: string;
+  userId?: string;
+  adminId?: string;
+  admin_id?: string;
+  email?: string;
+  role?: string;
+  admin_role?: string;
+}
+
 // Validation schema for payment edits
 const paymentEditSchema = z.object({
   amount_due: z.number().min(0, "Amount due must be positive"),
@@ -80,6 +90,45 @@ const PaymentManagement = () => {
     entity: ""
   });
 
+  const getNormalizedAdminSession = (): (AdminSession & { resolvedUserId?: string; resolvedRole: string }) | null => {
+    try {
+      const rawSession = JSON.parse(localStorage.getItem('adminSession') || '{}') as AdminSession | null;
+
+      if (!rawSession || typeof rawSession !== 'object') {
+        return null;
+      }
+
+      const resolvedUserId = [rawSession.id, rawSession.userId, rawSession.adminId, rawSession.admin_id, rawSession.email]
+        .find((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        ?.trim();
+
+      const resolvedRole = [rawSession.role, rawSession.admin_role]
+        .find((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        ?.trim() || 'admin';
+
+      const normalizedSession = {
+        ...rawSession,
+        resolvedUserId,
+        resolvedRole,
+        ...(resolvedUserId ? {
+          id: resolvedUserId,
+          userId: resolvedUserId,
+          adminId: resolvedUserId,
+          admin_id: resolvedUserId,
+          email: rawSession.email || resolvedUserId,
+        } : {}),
+        role: resolvedRole,
+        admin_role: rawSession.admin_role || resolvedRole,
+      };
+
+      localStorage.setItem('adminSession', JSON.stringify(normalizedSession));
+      return normalizedSession;
+    } catch (error) {
+      console.error('Error parsing admin session:', error);
+      return null;
+    }
+  };
+
   // Session validation on mount - using legacy localStorage auth
   useEffect(() => {
     const adminSessionStr = localStorage.getItem('adminSession');
@@ -89,14 +138,14 @@ const PaymentManagement = () => {
       return;
     }
 
-    try {
-      const adminSession = JSON.parse(adminSessionStr);
-      setUserRole(adminSession.role || 'admin');
-    } catch (error) {
-      console.error('Error parsing admin session:', error);
+    const adminSession = getNormalizedAdminSession();
+    if (!adminSession?.resolvedUserId) {
       toast({ title: t('login.sessionExpired'), variant: "destructive" });
       navigate("/login/administration");
+      return;
     }
+
+    setUserRole(adminSession.resolvedRole);
   }, [navigate, t, toast]);
 
   const translateMonth = (month: string): string => {
@@ -311,11 +360,10 @@ const PaymentManagement = () => {
     paymentId: string
   ) => {
     try {
-      // Get admin session with correct field mapping
-      const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
+      const adminSession = getNormalizedAdminSession();
       console.log('adminSession contents:', JSON.stringify(adminSession));
-      const userId = adminSession.id || adminSession.userId || adminSession.adminId || adminSession.admin_id || adminSession.email;
-      const role = adminSession.role || adminSession.admin_role || 'admin';
+      const userId = adminSession?.resolvedUserId || adminSession?.id || adminSession?.userId || adminSession?.adminId || adminSession?.admin_id || adminSession?.email;
+      const role = adminSession?.resolvedRole || adminSession?.role || adminSession?.admin_role || userRole || 'admin';
       console.log('Resolved userId:', userId, 'role:', role);
 
       if (!userId) {

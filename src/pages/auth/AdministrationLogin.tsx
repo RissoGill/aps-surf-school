@@ -45,11 +45,17 @@ const AdministrationLogin = () => {
         return;
       }
 
-      // Store session in localStorage
+      // Store normalized legacy session in localStorage
+      const adminId = userData.admin_id;
+      const adminRole = userData.admin_role || 'admin';
       const adminSession = {
-        id: userData.admin_id,
-        email: userData.admin_id,
-        role: userData.admin_role || 'admin'
+        id: adminId,
+        userId: adminId,
+        adminId,
+        admin_id: adminId,
+        email: adminId,
+        role: adminRole,
+        admin_role: adminRole,
       };
       
       localStorage.setItem('adminSession', JSON.stringify(adminSession));
