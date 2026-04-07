@@ -152,7 +152,8 @@ const ProAccountTab = () => {
     if (!entries) return { totalPrize: 0, totalExpense: 0, balance: 0 };
     const totalPrize = entries.filter((e) => e.type === "prize_money").reduce((s, e) => s + Number(e.amount), 0);
     const totalExpense = entries.filter((e) => e.type === "expense").reduce((s, e) => s + Number(e.amount), 0);
-    return { totalPrize, totalExpense, balance: priorBalance + totalPrize - totalExpense };
+    const totalOther = entries.filter((e) => e.type === "other").reduce((s, e) => s + Number(e.amount), 0);
+    return { totalPrize, totalExpense, totalOther, balance: priorBalance + totalPrize + totalOther - totalExpense };
   }, [entries, priorBalance]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -283,8 +284,8 @@ const ProAccountTab = () => {
                       <Select
                         value={formType}
                         onValueChange={(v) => {
-                          setFormType(v);
-                          setFormCategory(v === "prize_money" ? "prize" : "coaching");
+          setFormType(v);
+                          setFormCategory(v === "prize_money" ? "prize" : v === "other" ? "other" : "coaching");
                         }}
                       >
                         <SelectTrigger>
@@ -293,6 +294,7 @@ const ProAccountTab = () => {
                         <SelectContent>
                           <SelectItem value="prize_money">Prize Money</SelectItem>
                           <SelectItem value="expense">{t("proAccount.expense")}</SelectItem>
+                          <SelectItem value="other">{t("proAccount.other")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -389,14 +391,14 @@ const ProAccountTab = () => {
                         <TableRow key={entry.id}>
                           <TableCell className="whitespace-nowrap">{entry.entry_date}</TableCell>
                           <TableCell>
-                            <Badge variant={entry.type === "prize_money" ? "default" : "destructive"}>
-                              {entry.type === "prize_money" ? "Prize Money" : t("proAccount.expense")}
+                            <Badge variant={entry.type === "expense" ? "destructive" : entry.type === "other" ? "secondary" : "default"}>
+                              {entry.type === "prize_money" ? "Prize Money" : entry.type === "other" ? t("proAccount.other") : t("proAccount.expense")}
                             </Badge>
                           </TableCell>
                           <TableCell>{categoryLabels[entry.category] || entry.category}</TableCell>
                           <TableCell>{entry.description || "-"}</TableCell>
-                          <TableCell className={`text-right font-medium ${entry.type === "prize_money" ? "text-success" : "text-destructive"}`}>
-                            {entry.type === "prize_money" ? "+" : "-"}€{Number(entry.amount).toFixed(2)}
+                          <TableCell className={`text-right font-medium ${entry.type === "expense" ? "text-destructive" : "text-success"}`}>
+                            {entry.type === "expense" ? "-" : "+"}€{Number(entry.amount).toFixed(2)}
                           </TableCell>
                           <TableCell>{entry.invoice_number || "-"}</TableCell>
                           <TableCell>

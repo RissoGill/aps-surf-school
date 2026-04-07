@@ -1533,6 +1533,7 @@
     "stagePlaceholder": "e.g. Peniche WSL Stage",
     "descriptionPlaceholder": "Expense description",
     "expense": "Expense",
+    "other": "Other",
     "save": "Save",
     "cancel": "Cancel",
     "movements": "Movements",
