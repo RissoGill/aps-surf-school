@@ -632,6 +632,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pro_account_entries: {
+        Row: {
+          amount: number
+          athlete_id: string
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          id: string
+          invoice_number: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          athlete_id: string
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entry_date: string
+          id?: string
+          invoice_number?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          athlete_id?: string
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          id?: string
+          invoice_number?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
