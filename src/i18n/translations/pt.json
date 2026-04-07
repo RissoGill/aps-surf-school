@@ -1544,6 +1544,8 @@
     "entryUpdated": "Movimento atualizado",
     "editEntry": "Editar Movimento",
     "update": "Atualizar",
+    "paymentSynced": "Pagamento da mensalidade atualizado automaticamente",
+    "paymentNotFound": "Mensalidade não encontrada para o mês correspondente",
     "errorAdding": "Erro ao adicionar",
     "invalidAmount": "Valor inválido",
     "priorBalance": "Saldo Anterior",

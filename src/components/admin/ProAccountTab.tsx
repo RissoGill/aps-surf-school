@@ -11,7 +11,80 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, TrendingUp, TrendingDown, Wallet, Save, History, Pencil } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+
+// Helper to sync monthly fee with payments table
+const syncMonthlyFeePayment = async (
+  athleteId: string,
+  entryDate: string,
+  amount: number,
+  t: (key: string) => string
+) => {
+  const date = parseISO(entryDate);
+  const monthName = format(date, "MMMM");
+  const year = date.getFullYear();
+
+  const { data: payment, error: fetchError } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("athlete_id", athleteId)
+    .eq("month", monthName)
+    .eq("year", year)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("Error fetching payment:", fetchError);
+    return;
+  }
+
+  if (!payment) {
+    toast({ title: t("proAccount.paymentNotFound"), variant: "default" });
+    return;
+  }
+
+  const amountDue = Number(payment.amount_due ?? 0);
+  const newStatus = amount >= amountDue && amountDue > 0 ? "Paid" : amount > 0 ? "Partial" : "Unpaid";
+
+  const { error: updateError } = await supabase
+    .from("payments")
+    .update({
+      amount_paid: amount,
+      payment_date: entryDate,
+      status: newStatus,
+    })
+    .eq("payment_id", payment.payment_id);
+
+  if (updateError) {
+    console.error("Error updating payment:", updateError);
+    return;
+  }
+
+  toast({ title: t("proAccount.paymentSynced") });
+};
+
+const resetMonthlyFeePayment = async (
+  athleteId: string,
+  entryDate: string
+) => {
+  const date = parseISO(entryDate);
+  const monthName = format(date, "MMMM");
+  const year = date.getFullYear();
+
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("payment_id")
+    .eq("athlete_id", athleteId)
+    .eq("month", monthName)
+    .eq("year", year)
+    .maybeSingle();
+
+  if (payment) {
+    await supabase
+      .from("payments")
+      .update({ amount_paid: 0, payment_date: null, status: "Unpaid" })
+      .eq("payment_id", payment.payment_id);
+  }
+};
 
 const CATEGORIES_PRIZE = ["prize"] as const;
 const CATEGORIES_EXPENSE = ["coaching", "accommodation", "flights", "monthly_fee", "other"] as const;
@@ -118,6 +191,9 @@ const ProAccountTab = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
       toast({ title: t("proAccount.entryAdded") });
+      if (formCategory === "monthly_fee") {
+        syncMonthlyFeePayment(selectedAthleteId, formDate, parseFloat(formAmount), t);
+      }
       resetForm();
     },
     onError: (err: any) => {
@@ -127,9 +203,12 @@ const ProAccountTab = () => {
 
   // Delete entry mutation
   const deleteEntry = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("pro_account_entries").delete().eq("id", id);
+    mutationFn: async (entry: { id: string; category: string; entry_date: string }) => {
+      const { error } = await supabase.from("pro_account_entries").delete().eq("id", entry.id);
       if (error) throw error;
+      if (entry.category === "monthly_fee") {
+        await resetMonthlyFeePayment(selectedAthleteId, entry.entry_date);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
@@ -157,6 +236,9 @@ const ProAccountTab = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
       toast({ title: t("proAccount.entryUpdated") });
+      if (formCategory === "monthly_fee") {
+        syncMonthlyFeePayment(selectedAthleteId, formDate, parseFloat(formAmount), t);
+      }
       resetForm();
     },
     onError: (err: any) => {
@@ -459,7 +541,7 @@ const ProAccountTab = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => deleteEntry.mutate(entry.id)}
+                                onClick={() => deleteEntry.mutate({ id: entry.id, category: entry.category, entry_date: entry.entry_date })}
                                 disabled={deleteEntry.isPending}
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
