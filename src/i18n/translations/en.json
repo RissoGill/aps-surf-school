@@ -1544,6 +1544,8 @@
     "entryUpdated": "Entry updated",
     "editEntry": "Edit Entry",
     "update": "Update",
+    "paymentSynced": "Monthly fee payment automatically updated",
+    "paymentNotFound": "No monthly payment found for the corresponding month",
     "errorAdding": "Error adding entry",
     "invalidAmount": "Invalid amount",
     "priorBalance": "Previous Balance",
