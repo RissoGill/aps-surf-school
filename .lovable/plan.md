@@ -1,76 +1,32 @@
 
 
-# Conta Corrente para Atletas de Competição
+# Adicionar Saldo Anterior à Conta Corrente Pro
 
-## Resumo
+## Objetivo
 
-Nova secção no painel admin para gerir a conta corrente de atletas com `surf_level = 'Competition'`. Regista prize money (crédito) e deduz despesas de acompanhamento, alojamento, avião e mensalidades (débito), mostrando saldo atualizado.
+Permitir definir um saldo anterior (previous balance) por atleta na conta corrente pro, que será incluído no cálculo do saldo total. Funciona como ponto de partida antes dos registos de prize money e despesas.
 
-**Não se adiciona coluna `is_professional`** — usa-se o campo existente `surf_level = 'Competition'` para filtrar os atletas elegíveis.
+## Alterações
 
-## 1. Base de dados — nova tabela `pro_account_entries`
+### 1. Base de dados
+Adicionar coluna `pro_prior_balance` (numeric, default 0) à tabela `atletas`. Este valor representa o saldo inicial da conta corrente pro antes de se começarem a registar movimentos.
 
 ```sql
-CREATE TABLE public.pro_account_entries (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  athlete_id text NOT NULL,
-  entry_date date NOT NULL,
-  type text NOT NULL,          -- 'prize_money' | 'expense'
-  category text NOT NULL,      -- 'prize','coaching','accommodation','flights','monthly_fee','other'
-  description text,            -- etapa/evento ou descrição
-  amount numeric NOT NULL,     -- sempre positivo
-  invoice_number text,         -- nº da factura
-  created_at timestamptz DEFAULT now(),
-  created_by text
-);
-
-ALTER TABLE public.pro_account_entries ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anon full access pro_account_entries"
-  ON public.pro_account_entries FOR ALL TO anon
-  USING (true) WITH CHECK (true);
-
-CREATE POLICY "Authenticated full access pro_account_entries"
-  ON public.pro_account_entries FOR ALL TO authenticated
-  USING (true) WITH CHECK (true);
+ALTER TABLE public.atletas ADD COLUMN pro_prior_balance numeric DEFAULT 0;
 ```
 
-## 2. Frontend — novos ficheiros
+### 2. Frontend — `ProAccountTab.tsx`
 
-### `src/pages/admin/ProAccountManagement.tsx`
-- Página com header, seletor de atleta (Competition apenas), resumo de saldo, tabela de movimentos e formulário de adição.
+- **Buscar `pro_prior_balance`** do atleta selecionado (já temos query de atletas, basta incluir o campo)
+- **Mostrar campo editável** de saldo anterior junto ao seletor de atleta (input numérico com botão guardar)
+- **Incluir no cálculo do saldo**: `balance = pro_prior_balance + totalPrize - totalExpense`
+- **Adicionar card extra** nos summary cards para mostrar o saldo anterior, ou incluí-lo no card de saldo total
 
-### `src/components/admin/ProAccountTab.tsx`
-- Componente principal com:
-  - **Seletor de atleta** filtrado por `surf_level = 'Competition'`
-  - **Cards de resumo**: Total Prize Money (verde), Total Despesas (vermelho), Saldo (azul)
-  - **Tabela de movimentos**: Data, Tipo, Categoria, Descrição/Etapa, Valor, Nº Factura, Ações (editar/eliminar)
-  - **Formulário**: Tipo (Prize Money/Despesa), Data, Categoria (dropdown), Descrição, Valor, Nº Factura
-  - Prize money aparece a verde, despesas a vermelho
+### 3. Traduções
+Adicionar chaves `proAccount.priorBalance`, `proAccount.priorBalanceSaved` em `pt.json` e `en.json`.
 
-## 3. Integração
-
-- **`src/App.tsx`**: adicionar rota `/admin/pro-accounts`
-- **`src/pages/admin/AdministrationDashboard.tsx`**: adicionar card "Conta Corrente Pro" com ícone e navegação
-- **`src/i18n/translations/pt.json`** e **`en.json`**: traduções para títulos, categorias e labels
-
-## 4. Categorias de despesa
-
-| Chave | PT | EN |
-|-------|----|----|
-| prize | Prize Money | Prize Money |
-| coaching | Acompanhamento | Coaching |
-| accommodation | Alojamento | Accommodation |
-| flights | Avião | Flights |
-| monthly_fee | Mensalidade | Monthly Fee |
-| other | Outro | Other |
-
-## Ficheiros a criar/alterar
-
-1. **Migração SQL** — `pro_account_entries` + RLS
-2. **`src/components/admin/ProAccountTab.tsx`** (novo)
-3. **`src/pages/admin/ProAccountManagement.tsx`** (novo)
-4. **`src/App.tsx`** — nova rota
-5. **`src/pages/admin/AdministrationDashboard.tsx`** — card de acesso
-6. **`src/i18n/translations/pt.json`** e **`en.json`** — traduções
+## Ficheiros alterados
+1. **Migração SQL** — `ALTER TABLE atletas ADD COLUMN pro_prior_balance`
+2. **`src/components/admin/ProAccountTab.tsx`** — campo editável + cálculo atualizado
+3. **`src/i18n/translations/pt.json`** e **`en.json`** — traduções
 
