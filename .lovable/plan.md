@@ -1,40 +1,19 @@
 
 
-# Add Pro Account Current Account Report
+# Fix Pro Account report: missing translation and athlete selector
 
-## What changes
-Add a new report type "Pro Account" to the ReportsCard, showing the current account (conta corrente) of competition athletes with all their entries, balance summary, and breakdown by athlete.
+## Problems
+1. **Translation key missing**: `shared.reports.proAccount` doesn't exist in either translation file, so the dropdown shows the raw key text
+2. **Athlete selector**: Need to verify the dropdown works — the `proAthletes` fetch looks correct but the user reports it doesn't let them select an athlete
 
 ## Files to change
 
-### 1. `src/components/admin/ReportsCard.tsx`
-- Add `"pro_account"` to the `ReportType` union type
-- Add a new `SelectItem` for "Pro Account" in the report type dropdown
-- Show the athlete filter when `pro_account` is selected (only competition athletes)
-- In `generateReport`, add a `case "pro_account"` that:
-  - Fetches competition athletes from `atletas` (where `surf_level = 'Competition'` and `is_active = true`)
-  - Fetches `pro_account_entries` for those athletes within the date range
-  - Calculates per-athlete balance: `prior_balance + total_prize + total_other - total_expense`
-  - If a specific athlete is selected, filter to just that athlete
-- In `generateReportHTML`, add the `pro_account` case:
-  - Summary section: total balance across all athletes, number of athletes
-  - Table with columns: Athlete, Date, Type, Category, Description, Amount, Balance
-  - Per-athlete subtotals showing prior balance + credits - debits = balance
-  - Color coding: green for credits (prize/other), red for expenses
-- Add `"pro_account"` to `tableHeaders` mapping
+### 1. `src/i18n/translations/pt.json`
+- Add `"proAccount": "Conta Corrente Pro"` inside the `shared.reports` object (after line 1316, alongside other report types)
 
 ### 2. `src/i18n/translations/en.json`
-- Add `"shared.reports.proAccount": "Pro Current Account"`
-- Update `"shared.reports.description"` to include pro account
+- Add `"proAccount": "Pro Current Account"` inside the `shared.reports` object (after line 1316)
 
-### 3. `src/i18n/translations/pt.json`
-- Add `"shared.reports.proAccount": "Conta Corrente Pro"`
-- Update `"shared.reports.description"` accordingly
-
-## Report layout
-The report will group entries by athlete, showing:
-- Athlete name and prior balance
-- All entries sorted by date (within the selected date range)
-- Running subtotals per athlete
-- Grand total at the bottom
+### 3. `src/components/admin/ReportsCard.tsx`
+- Review and fix the athlete selector for `pro_account` — ensure the `proAthletes` state is populated and the `SelectItem` components render correctly with valid values
 
