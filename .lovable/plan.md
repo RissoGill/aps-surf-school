@@ -1,44 +1,76 @@
 
 
-# Fix: Frontend not sending userId to create-pack
+# Conta Corrente para Atletas de Competição
 
-## Root Cause
+## Resumo
 
-The edge function works correctly when called directly (tested with curl — returned 403 "Admin role required" which means it parsed userId correctly). The logs show "Missing userId in request body", confirming the **frontend is sending an empty/undefined userId**.
+Nova secção no painel admin para gerir a conta corrente de atletas com `surf_level = 'Competition'`. Regista prize money (crédito) e deduz despesas de acompanhamento, alojamento, avião e mensalidades (débito), mostrando saldo atualizado.
 
-This happens because `adminSession.id` resolves to `undefined` — the user's cached localStorage session may not contain the `id` field, or the admin_id value from the database is empty for this user.
+**Não se adiciona coluna `is_professional`** — usa-se o campo existente `surf_level = 'Competition'` para filtrar os atletas elegíveis.
 
-## Fix
+## 1. Base de dados — nova tabela `pro_account_entries`
 
-### 1. Add debug logging to `supabase/functions/create-pack/index.ts`
+```sql
+CREATE TABLE public.pro_account_entries (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  athlete_id text NOT NULL,
+  entry_date date NOT NULL,
+  type text NOT NULL,          -- 'prize_money' | 'expense'
+  category text NOT NULL,      -- 'prize','coaching','accommodation','flights','monthly_fee','other'
+  description text,            -- etapa/evento ou descrição
+  amount numeric NOT NULL,     -- sempre positivo
+  invoice_number text,         -- nº da factura
+  created_at timestamptz DEFAULT now(),
+  created_by text
+);
 
-Log the full received body immediately after parsing so we can see exactly what the frontend sends:
+ALTER TABLE public.pro_account_entries ENABLE ROW LEVEL SECURITY;
 
-```typescript
-body = await req.json();
-console.log('create-pack received body keys:', Object.keys(body), 'userId:', body.userId, 'role:', body.role);
+CREATE POLICY "Anon full access pro_account_entries"
+  ON public.pro_account_entries FOR ALL TO anon
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "Authenticated full access pro_account_entries"
+  ON public.pro_account_entries FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
 ```
 
-### 2. Add debug logging + robust session fallback in `src/pages/admin/PaymentManagement.tsx`
+## 2. Frontend — novos ficheiros
 
-Before invoking the function, log what the session contains. Also add a fallback that reads `admin_id` from the `users` table query stored elsewhere:
+### `src/pages/admin/ProAccountManagement.tsx`
+- Página com header, seletor de atleta (Competition apenas), resumo de saldo, tabela de movimentos e formulário de adição.
 
-```typescript
-const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
-console.log('adminSession contents:', JSON.stringify(adminSession));
-const userId = adminSession.id || adminSession.userId || adminSession.adminId || adminSession.admin_id || adminSession.email;
-console.log('Resolved userId:', userId, 'role:', role);
-```
+### `src/components/admin/ProAccountTab.tsx`
+- Componente principal com:
+  - **Seletor de atleta** filtrado por `surf_level = 'Competition'`
+  - **Cards de resumo**: Total Prize Money (verde), Total Despesas (vermelho), Saldo (azul)
+  - **Tabela de movimentos**: Data, Tipo, Categoria, Descrição/Etapa, Valor, Nº Factura, Ações (editar/eliminar)
+  - **Formulário**: Tipo (Prize Money/Despesa), Data, Categoria (dropdown), Descrição, Valor, Nº Factura
+  - Prize money aparece a verde, despesas a vermelho
 
-Also add `admin_id` as a fallback key (the users table column name).
+## 3. Integração
 
-### 3. Redeploy edge function
+- **`src/App.tsx`**: adicionar rota `/admin/pro-accounts`
+- **`src/pages/admin/AdministrationDashboard.tsx`**: adicionar card "Conta Corrente Pro" com ícone e navegação
+- **`src/i18n/translations/pt.json`** e **`en.json`**: traduções para títulos, categorias e labels
 
-Redeploy `create-pack` after adding the debug log.
+## 4. Categorias de despesa
 
-### Summary
-- 2 files changed
-- Adds debug logging to both frontend and edge function to identify exactly why userId is empty
-- Adds `admin_id` as additional session key fallback
-- After this deploy, the user attempts pack creation again and we check console/logs for the actual values
+| Chave | PT | EN |
+|-------|----|----|
+| prize | Prize Money | Prize Money |
+| coaching | Acompanhamento | Coaching |
+| accommodation | Alojamento | Accommodation |
+| flights | Avião | Flights |
+| monthly_fee | Mensalidade | Monthly Fee |
+| other | Outro | Other |
+
+## Ficheiros a criar/alterar
+
+1. **Migração SQL** — `pro_account_entries` + RLS
+2. **`src/components/admin/ProAccountTab.tsx`** (novo)
+3. **`src/pages/admin/ProAccountManagement.tsx`** (novo)
+4. **`src/App.tsx`** — nova rota
+5. **`src/pages/admin/AdministrationDashboard.tsx`** — card de acesso
+6. **`src/i18n/translations/pt.json`** e **`en.json`** — traduções
 
