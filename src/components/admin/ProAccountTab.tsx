@@ -22,6 +22,7 @@ const ProAccountTab = () => {
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [priorBalanceInput, setPriorBalanceInput] = useState<string>("");
+  const [priorBalanceDateInput, setPriorBalanceDateInput] = useState<string>("");
 
   // Form state
   const [formType, setFormType] = useState<string>("prize_money");
