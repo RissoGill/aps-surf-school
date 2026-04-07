@@ -1543,6 +1543,7 @@
     "errorAdding": "Error adding entry",
     "invalidAmount": "Invalid amount",
     "priorBalance": "Previous Balance",
+    "priorBalanceDate": "Balance Date",
     "priorBalanceSaved": "Previous balance saved",
     "savePriorBalance": "Save",
     "categories": {

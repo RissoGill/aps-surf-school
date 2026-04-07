@@ -1,0 +1,1 @@
+ALTER TABLE public.atletas ADD COLUMN pro_prior_balance_date date;

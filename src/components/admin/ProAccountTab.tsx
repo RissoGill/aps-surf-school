@@ -22,6 +22,7 @@ const ProAccountTab = () => {
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [priorBalanceInput, setPriorBalanceInput] = useState<string>("");
+  const [priorBalanceDateInput, setPriorBalanceDateInput] = useState<string>("");
 
   // Form state
   const [formType, setFormType] = useState<string>("prize_money");
@@ -46,7 +47,7 @@ const ProAccountTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("atletas")
-        .select("athlete_id, first_name, last_name, surf_level, is_active, pro_prior_balance")
+        .select("athlete_id, first_name, last_name, surf_level, is_active, pro_prior_balance, pro_prior_balance_date")
         .ilike("surf_level", "competition");
       if (error) throw error;
       return data || [];
@@ -63,6 +64,7 @@ const ProAccountTab = () => {
     setSelectedAthleteId(id);
     const athlete = athletes?.find((a) => a.athlete_id === id);
     setPriorBalanceInput(String(athlete?.pro_prior_balance ?? 0));
+    setPriorBalanceDateInput((athlete as any)?.pro_prior_balance_date ?? "");
   };
 
   // Fetch entries for selected athlete
@@ -82,10 +84,10 @@ const ProAccountTab = () => {
 
   // Save prior balance mutation
   const savePriorBalance = useMutation({
-    mutationFn: async (amount: number) => {
+    mutationFn: async ({ amount, date }: { amount: number; date: string }) => {
       const { error } = await supabase
         .from("atletas")
-        .update({ pro_prior_balance: amount } as any)
+        .update({ pro_prior_balance: amount, pro_prior_balance_date: date || null } as any)
         .eq("athlete_id", selectedAthleteId);
       if (error) throw error;
     },
@@ -193,37 +195,48 @@ const ProAccountTab = () => {
             <CardContent className="p-4">
               <div className="flex items-end gap-3">
                 <div className="flex-1 space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <History className="h-4 w-4" />
-                    {t("proAccount.priorBalance")}
-                  </Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={priorBalanceInput}
-                    onChange={(e) => setPriorBalanceInput(e.target.value)}
-                    placeholder="0.00"
-                  />
-                </div>
-                <Button
-                  onClick={() => savePriorBalance.mutate(parseFloat(priorBalanceInput) || 0)}
-                  disabled={savePriorBalance.isPending}
-                  size="sm"
-                >
-                  <Save className="h-4 w-4 mr-1" />
-                  {t("proAccount.savePriorBalance")}
-                </Button>
+                   <Label className="flex items-center gap-2">
+                     <History className="h-4 w-4" />
+                     {t("proAccount.priorBalance")}
+                   </Label>
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={priorBalanceInput}
+                     onChange={(e) => setPriorBalanceInput(e.target.value)}
+                     placeholder="0.00"
+                   />
+                 </div>
+                 <div className="flex-1 space-y-2">
+                   <Label>{t("proAccount.priorBalanceDate")}</Label>
+                   <Input
+                     type="date"
+                     value={priorBalanceDateInput}
+                     onChange={(e) => setPriorBalanceDateInput(e.target.value)}
+                   />
+                 </div>
+                 <Button
+                   onClick={() => savePriorBalance.mutate({ amount: parseFloat(priorBalanceInput) || 0, date: priorBalanceDateInput })}
+                   disabled={savePriorBalance.isPending}
+                   size="sm"
+                 >
+                   <Save className="h-4 w-4 mr-1" />
+                   {t("proAccount.savePriorBalance")}
+                 </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-                <p className="text-lg font-bold">€{priorBalance.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">{t("proAccount.priorBalance")}</p>
+             <Card>
+               <CardContent className="p-4 text-center">
+                 <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                 <p className="text-lg font-bold">€{priorBalance.toFixed(2)}</p>
+                 <p className="text-xs text-muted-foreground">{t("proAccount.priorBalance")}</p>
+                 {(selectedAthlete as any)?.pro_prior_balance_date && (
+                   <p className="text-xs text-muted-foreground mt-1">{(selectedAthlete as any).pro_prior_balance_date}</p>
+                 )}
               </CardContent>
             </Card>
             <Card>

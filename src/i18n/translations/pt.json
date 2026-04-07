@@ -1543,6 +1543,7 @@
     "errorAdding": "Erro ao adicionar",
     "invalidAmount": "Valor inválido",
     "priorBalance": "Saldo Anterior",
+    "priorBalanceDate": "Data do Saldo",
     "priorBalanceSaved": "Saldo anterior guardado",
     "savePriorBalance": "Guardar",
     "categories": {
