@@ -316,6 +316,8 @@ const ProAccountTab = () => {
                             ? CATEGORIES_PRIZE.map((c) => (
                                 <SelectItem key={c} value={c}>{categoryLabels[c]}</SelectItem>
                               ))
+                            : formType === "other"
+                            ? <SelectItem value="other">{categoryLabels["other"]}</SelectItem>
                             : CATEGORIES_EXPENSE.map((c) => (
                                 <SelectItem key={c} value={c}>{categoryLabels[c]}</SelectItem>
                               ))}
