@@ -541,7 +541,7 @@ const ProAccountTab = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => deleteEntry.mutate(entry.id)}
+                                onClick={() => deleteEntry.mutate({ id: entry.id, category: entry.category, entry_date: entry.entry_date })}
                                 disabled={deleteEntry.isPending}
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
