@@ -1,32 +1,32 @@
 
 
-# Adicionar Saldo Anterior à Conta Corrente Pro
+# Editar Prior Balance com Data
 
-## Objetivo
-
-Permitir definir um saldo anterior (previous balance) por atleta na conta corrente pro, que será incluído no cálculo do saldo total. Funciona como ponto de partida antes dos registos de prize money e despesas.
+## Problema
+O prior balance atual é apenas um campo numérico sem data associada e sem possibilidade fácil de editar após guardar.
 
 ## Alterações
 
 ### 1. Base de dados
-Adicionar coluna `pro_prior_balance` (numeric, default 0) à tabela `atletas`. Este valor representa o saldo inicial da conta corrente pro antes de se começarem a registar movimentos.
+Adicionar coluna `pro_prior_balance_date` (date) à tabela `atletas` para guardar a data associada ao saldo anterior.
 
 ```sql
-ALTER TABLE public.atletas ADD COLUMN pro_prior_balance numeric DEFAULT 0;
+ALTER TABLE public.atletas ADD COLUMN pro_prior_balance_date date;
 ```
 
 ### 2. Frontend — `ProAccountTab.tsx`
-
-- **Buscar `pro_prior_balance`** do atleta selecionado (já temos query de atletas, basta incluir o campo)
-- **Mostrar campo editável** de saldo anterior junto ao seletor de atleta (input numérico com botão guardar)
-- **Incluir no cálculo do saldo**: `balance = pro_prior_balance + totalPrize - totalExpense`
-- **Adicionar card extra** nos summary cards para mostrar o saldo anterior, ou incluí-lo no card de saldo total
+- Adicionar campo de **data** ao lado do input do prior balance (input type date)
+- Manter o prior balance **sempre editável** (não escondido após guardar) — o admin pode alterar o valor e a data a qualquer momento
+- Ao selecionar um atleta, carregar tanto o valor como a data do prior balance
+- Ao guardar, enviar ambos os campos (`pro_prior_balance` e `pro_prior_balance_date`) para a tabela `atletas`
+- No card de resumo do prior balance, mostrar também a data
 
 ### 3. Traduções
-Adicionar chaves `proAccount.priorBalance`, `proAccount.priorBalanceSaved` em `pt.json` e `en.json`.
+Adicionar chaves para `proAccount.priorBalanceDate` em `pt.json` e `en.json`.
 
 ## Ficheiros alterados
-1. **Migração SQL** — `ALTER TABLE atletas ADD COLUMN pro_prior_balance`
-2. **`src/components/admin/ProAccountTab.tsx`** — campo editável + cálculo atualizado
-3. **`src/i18n/translations/pt.json`** e **`en.json`** — traduções
+1. **Migração SQL** — adicionar `pro_prior_balance_date`
+2. **`src/components/admin/ProAccountTab.tsx`** — campo de data + edição sempre acessível
+3. **`src/i18n/translations/pt.json`** e **`en.json`** — tradução da label de data
+4. **`src/integrations/supabase/types.ts`** — atualizado automaticamente
 
