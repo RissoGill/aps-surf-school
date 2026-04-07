@@ -15,7 +15,7 @@ import apsLogoImage from "@/assets/aps-logo.png";
 import html2pdf from "html2pdf.js";
 import { escapeHtml } from "@/utils/htmlSanitize";
 
-type ReportType = "financial" | "personal" | "overall" | "attendance" | "coach_payments";
+type ReportType = "financial" | "personal" | "overall" | "attendance" | "coach_payments" | "pro_account";
 
 interface ReportData {
   title: string;
@@ -40,6 +40,7 @@ export const ReportsCard = () => {
   const [showOnlyOutstanding, setShowOnlyOutstanding] = useState(false);
   const [filterByCurrentMonth, setFilterByCurrentMonth] = useState(false);
   const [selectedSurfLevels, setSelectedSurfLevels] = useState<string[]>([]);
+  const [proAthletes, setProAthletes] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchAthletes = async () => {
@@ -65,8 +66,22 @@ export const ReportsCard = () => {
       }
     };
     
+    const fetchProAthletes = async () => {
+      const { data, error } = await supabase
+        .from("atletas")
+        .select("athlete_id, first_name, last_name, pro_prior_balance, pro_prior_balance_date")
+        .eq("is_active", true)
+        .eq("surf_level", "Competition")
+        .order("first_name");
+      
+      if (!error && data) {
+        setProAthletes(data);
+      }
+    };
+
     fetchAthletes();
     fetchCoaches();
+    fetchProAthletes();
   }, []);
 
   const generateReport = async () => {
@@ -245,6 +260,40 @@ export const ReportsCard = () => {
           
           if (coachPaymentsError) throw coachPaymentsError;
           data = coachPayments || [];
+          break;
+
+        case "pro_account":
+          // Fetch competition athletes
+          let proAthletesQuery = supabase
+            .from("atletas")
+            .select("athlete_id, first_name, last_name, pro_prior_balance, pro_prior_balance_date")
+            .eq("is_active", true)
+            .eq("surf_level", "Competition");
+          
+          if (selectedAthlete && selectedAthlete !== "all") {
+            proAthletesQuery = proAthletesQuery.eq("athlete_id", selectedAthlete);
+          }
+          
+          const { data: proAthletesData, error: proAthletesError } = await proAthletesQuery.order("first_name");
+          if (proAthletesError) throw proAthletesError;
+          
+          const proAthleteIds = (proAthletesData || []).map(a => a.athlete_id);
+          
+          // Fetch pro account entries within date range
+          const { data: proEntries, error: proEntriesError } = await supabase
+            .from("pro_account_entries")
+            .select("*")
+            .in("athlete_id", proAthleteIds)
+            .gte("entry_date", startStr)
+            .lte("entry_date", endStr)
+            .order("entry_date", { ascending: true });
+          
+          if (proEntriesError) throw proEntriesError;
+          
+          data = [{
+            athletes: proAthletesData || [],
+            entries: proEntries || []
+          }];
           break;
       }
 
@@ -432,6 +481,96 @@ export const ReportsCard = () => {
           <td style="border: 1px solid #ddd; padding: 8px;">-</td>
         </tr>
       `;
+    } else if (type === "pro_account") {
+      const proData = (data as any[])[0] || { athletes: [], entries: [] };
+      const athletesList = proData.athletes || [];
+      const entries = proData.entries || [];
+      
+      let grandTotalBalance = 0;
+      
+      tableRows = "";
+      
+      athletesList.forEach((athlete: any) => {
+        const athleteEntries = entries.filter((e: any) => e.athlete_id === athlete.athlete_id);
+        const priorBalance = Number(athlete.pro_prior_balance || 0);
+        
+        const totalCredits = athleteEntries
+          .filter((e: any) => e.type === "credit")
+          .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+        const totalDebits = athleteEntries
+          .filter((e: any) => e.type === "debit")
+          .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+        const athleteBalance = priorBalance + totalCredits - totalDebits;
+        grandTotalBalance += athleteBalance;
+        
+        // Athlete header row
+        tableRows += `
+          <tr style="background-color: #e8f5f3;">
+            <td colspan="5" style="border: 1px solid #ddd; padding: 10px; font-weight: bold; color: #31A896;">
+              ${escapeHtml(athlete.first_name)} ${escapeHtml(athlete.last_name)} (${escapeHtml(athlete.athlete_id)})
+            </td>
+            <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold; text-align: right;">
+              Prior Balance: €${priorBalance.toFixed(2)}
+            </td>
+          </tr>
+        `;
+        
+        if (athleteEntries.length === 0) {
+          tableRows += `
+            <tr>
+              <td colspan="6" style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #999; font-style: italic;">
+                No entries in this period
+              </td>
+            </tr>
+          `;
+        } else {
+          athleteEntries.forEach((entry: any) => {
+            const isCredit = entry.type === "credit";
+            const amountColor = isCredit ? "color: #16a34a;" : "color: #dc2626;";
+            const sign = isCredit ? "+" : "-";
+            tableRows += `
+              <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.entry_date)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${isCredit ? "Credit" : "Expense"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.category)}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.description) || "-"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.invoice_number) || "-"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px; ${amountColor} font-weight: bold; text-align: right;">
+                  ${sign}€${Number(entry.amount).toFixed(2)}
+                </td>
+              </tr>
+            `;
+          });
+        }
+        
+        // Athlete subtotal row
+        const balanceColor = athleteBalance >= 0 ? "color: #16a34a;" : "color: #dc2626;";
+        tableRows += `
+          <tr style="background-color: #f0f0f0; font-weight: bold;">
+            <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+              Credits: €${totalCredits.toFixed(2)}
+            </td>
+            <td colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+              Expenses: €${totalDebits.toFixed(2)}
+            </td>
+            <td style="border: 1px solid #ddd; padding: 8px; text-align: right; ${balanceColor}">
+              Balance: €${athleteBalance.toFixed(2)}
+            </td>
+          </tr>
+          <tr><td colspan="6" style="border: none; padding: 4px;"></td></tr>
+        `;
+      });
+      
+      // Grand total
+      const grandColor = grandTotalBalance >= 0 ? "color: #16a34a;" : "color: #dc2626;";
+      summarySection = `
+        <div style="background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+          <h2 style="color: #31A896; margin-top: 0;">Summary</h2>
+          <p><strong>Athletes:</strong> ${athletesList.length}</p>
+          <p><strong>Total Entries:</strong> ${entries.length}</p>
+          <p style="${grandColor}"><strong>Grand Total Balance:</strong> €${grandTotalBalance.toFixed(2)}</p>
+        </div>
+      `;
     }
 
     const tableHeaders = 
@@ -439,6 +578,7 @@ export const ReportsCard = () => {
       type === "attendance" ? "<tr><th>Date</th><th>Athlete</th><th>Coach</th><th>Status</th><th>Location</th></tr>" :
       type === "personal" ? "<tr><th>Athlete ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Level</th></tr>" :
       type === "coach_payments" ? "<tr><th>Coach Name</th><th>Payment Date</th><th>Month</th><th>Year</th><th>Amount</th><th>Notes</th></tr>" :
+      type === "pro_account" ? "<tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Invoice</th><th>Amount</th></tr>" :
       "";
 
     return `
@@ -558,6 +698,7 @@ export const ReportsCard = () => {
                 <SelectItem value="overall">{t('shared.reports.overall')}</SelectItem>
                 <SelectItem value="attendance">{t('shared.reports.attendance')}</SelectItem>
                 <SelectItem value="coach_payments">{t('shared.reports.coachPayments')}</SelectItem>
+                <SelectItem value="pro_account">{t('shared.reports.proAccount')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -572,6 +713,25 @@ export const ReportsCard = () => {
                 <SelectContent className="bg-popover z-50 max-h-[300px]">
                   <SelectItem value="all">{t('shared.reports.allAthletes')}</SelectItem>
                   {athletes.map((athlete) => (
+                    <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
+                      {athlete.first_name} {athlete.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {reportType === "pro_account" && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('shared.reports.athlete')} ({t('shared.reports.optional')})</label>
+              <Select value={selectedAthlete} onValueChange={setSelectedAthlete}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder={t('shared.reports.allAthletes')} />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-[300px]">
+                  <SelectItem value="all">{t('shared.reports.allAthletes')}</SelectItem>
+                  {proAthletes.map((athlete) => (
                     <SelectItem key={athlete.athlete_id} value={athlete.athlete_id}>
                       {athlete.first_name} {athlete.last_name}
                     </SelectItem>

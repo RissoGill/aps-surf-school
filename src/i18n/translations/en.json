@@ -1322,7 +1322,7 @@
       "outstandingOnly": "Outstanding Only",
       "currentMonth": "Current Month Only",
       "surfLevel": "Surf Level",
-      "description": "Create financial, personal, overall, attendance, and coach payments reports",
+      "description": "Create financial, personal, overall, attendance, coach payments, and pro account reports",
       "selectReportType": "Select report type",
       "optional": "Optional",
       "allAthletes": "All athletes",
