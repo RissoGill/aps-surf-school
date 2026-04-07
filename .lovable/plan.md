@@ -1,32 +1,13 @@
 
+# Fix: Summary cards content overflowing
 
-# Editar Prior Balance com Data
+## Problem
+The `CardContent` component has default classes `p-6 pt-0`. When the summary cards override with `p-4`, the `pt-0` from the base class still takes precedence via CSS specificity, removing top padding. This causes the content (icon, values, labels) to appear outside/above the card boundary.
 
-## Problema
-O prior balance atual é apenas um campo numérico sem data associada e sem possibilidade fácil de editar após guardar.
+## Fix
+In `ProAccountTab.tsx` lines 232-264, change all four summary card `CardContent` classes from `p-4 text-center` to `p-4 pt-4 text-center` to explicitly set top padding, overriding the base `pt-0`.
 
-## Alterações
+Affected lines: 233, 243, 250, 257 — each `CardContent` in the summary grid.
 
-### 1. Base de dados
-Adicionar coluna `pro_prior_balance_date` (date) à tabela `atletas` para guardar a data associada ao saldo anterior.
-
-```sql
-ALTER TABLE public.atletas ADD COLUMN pro_prior_balance_date date;
-```
-
-### 2. Frontend — `ProAccountTab.tsx`
-- Adicionar campo de **data** ao lado do input do prior balance (input type date)
-- Manter o prior balance **sempre editável** (não escondido após guardar) — o admin pode alterar o valor e a data a qualquer momento
-- Ao selecionar um atleta, carregar tanto o valor como a data do prior balance
-- Ao guardar, enviar ambos os campos (`pro_prior_balance` e `pro_prior_balance_date`) para a tabela `atletas`
-- No card de resumo do prior balance, mostrar também a data
-
-### 3. Traduções
-Adicionar chaves para `proAccount.priorBalanceDate` em `pt.json` e `en.json`.
-
-## Ficheiros alterados
-1. **Migração SQL** — adicionar `pro_prior_balance_date`
-2. **`src/components/admin/ProAccountTab.tsx`** — campo de data + edição sempre acessível
-3. **`src/i18n/translations/pt.json`** e **`en.json`** — tradução da label de data
-4. **`src/integrations/supabase/types.ts`** — atualizado automaticamente
-
+## Files changed
+1. `src/components/admin/ProAccountTab.tsx` — add `pt-4` to all four summary card `CardContent` elements
