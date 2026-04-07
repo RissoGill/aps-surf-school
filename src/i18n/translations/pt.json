@@ -1511,5 +1511,44 @@
       "failedToSave": "Falha ao guardar presença",
       "permissionDenied": "Permissão negada. Por favor faça login via email/palavra-passe ou contacte o administrador."
     }
+  },
+  "proAccount": {
+    "title": "Conta Corrente Pro",
+    "dashboardDesc": "Gerir conta corrente de atletas de competição",
+    "manage": "Gerir Conta",
+    "selectAthlete": "Selecionar Atleta",
+    "chooseAthlete": "Escolha um atleta de competição...",
+    "totalPrize": "Total Prize Money",
+    "totalExpenses": "Total Despesas",
+    "balance": "Saldo",
+    "addEntry": "Adicionar Movimento",
+    "newEntry": "Novo Movimento",
+    "type": "Tipo",
+    "date": "Data",
+    "category": "Categoria",
+    "amount": "Valor",
+    "description": "Descrição",
+    "invoice": "Nº Factura",
+    "invoicePlaceholder": "Ex: FT2025/001",
+    "stagePlaceholder": "Ex: Etapa Peniche WSL",
+    "descriptionPlaceholder": "Descrição da despesa",
+    "expense": "Despesa",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "movements": "Movimentos",
+    "loading": "A carregar...",
+    "noEntries": "Sem movimentos registados",
+    "entryAdded": "Movimento adicionado",
+    "entryDeleted": "Movimento eliminado",
+    "errorAdding": "Erro ao adicionar",
+    "invalidAmount": "Valor inválido",
+    "categories": {
+      "prize": "Prize Money",
+      "coaching": "Acompanhamento",
+      "accommodation": "Alojamento",
+      "flights": "Avião",
+      "monthlyFee": "Mensalidade",
+      "other": "Outro"
+    }
   }
 }

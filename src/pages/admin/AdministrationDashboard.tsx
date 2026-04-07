@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw } from "lucide-react";
+import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw, Landmark } from "lucide-react";
 import { ReportsCard } from "@/components/admin/ReportsCard";
 import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
 import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
@@ -641,6 +641,13 @@ const AdministrationDashboard = () => {
       icon: Calendar,
       color: "secondary",
       action: t('admin.management.manageAttendance')
+    },
+    {
+      title: t('proAccount.title'),
+      description: t('proAccount.dashboardDesc'),
+      icon: Landmark,
+      color: "primary",
+      action: t('proAccount.manage')
     }
   ];
 
@@ -817,6 +824,8 @@ const AdministrationDashboard = () => {
                     navigate("/admin/payments");
                   } else if (action.title === t('admin.management.attendance')) {
                     navigate("/admin/attendance");
+                  } else if (action.title === t('proAccount.title')) {
+                    navigate("/admin/pro-accounts");
                   }
                 }}
               >
