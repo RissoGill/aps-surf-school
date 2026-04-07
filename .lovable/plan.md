@@ -1,35 +1,48 @@
 
-Corrigir o seletor do relatório “Conta Corrente Pro” em `src/components/admin/ReportsCard.tsx`.
+Corrigir o relatório “Conta Corrente Pro” em `src/components/admin/ReportsCard.tsx`.
 
-1. Ajustar a query dos atletas Pro
-- O problema mais provável está no filtro rígido `.eq("surf_level", "Competition")`.
-- Noutras partes do projeto já existe uso de `ilike("surf_level", "competition")`, o que indica que os dados podem não estar sempre guardados exatamente com a mesma capitalização/formato.
-- Vou alinhar o relatório com essa lógica mais tolerante para garantir que a lista de atletas Pro é realmente carregada.
+1. Alinhar a query dos atletas Pro com a lógica que já funciona
+- No `generateReport`, trocar o filtro rígido `.eq("surf_level", "Competition")` por `.ilike("surf_level", "competition")`.
+- Manter também `.eq("is_active", true)`.
+- Isto evita o caso em que o atleta aparece no seletor, mas depois desaparece na geração do relatório por diferença de capitalização/valor guardado.
 
-2. Tornar o dropdown robusto para seleção
-- Rever o `Select` do bloco `reportType === "pro_account"` para garantir que:
-  - recebe uma lista não vazia quando existirem atletas Pro,
-  - usa `athlete_id` válido como `value`,
-  - mantém corretamente o estado `selectedAthlete`,
-  - não fica preso por conflito entre valor vazio `""` e opção `"all"`.
+2. Garantir que a geração usa o atleta selecionado corretamente
+- Confirmar que, quando `selectedAthlete !== "all"`, a query filtra por `athlete_id` sem anular o resultado por causa do filtro de `surf_level`.
+- Tratar o cenário em que a lista de atletas devolvida fica vazia, para não fazer `.in("athlete_id", [])` e parecer que “não foi buscar informação”.
 
-3. Limpar o estado ao trocar de tipo de relatório
-- Garantir que ao mudar para `pro_account`, o valor anterior de atleta não interfere com a nova lista.
-- Se necessário, normalizar o estado para usar `"all"` como valor por defeito em vez de `""`, para ficar consistente com os `SelectItem`.
+3. Corrigir a lógica de totais e linhas do relatório
+- O HTML do relatório está a assumir tipos `credit` e `debit`, mas o módulo `ProAccountTab` grava `prize_money`, `expense` e `other`.
+- Vou atualizar o relatório para:
+  - somar créditos com `prize_money` + `other`
+  - somar débitos com `expense`
+  - calcular saldo como `pro_prior_balance + créditos - débitos`
+  - mostrar o tipo correto em cada linha
 
-4. Validar o impacto na geração do relatório
-- Confirmar que `generateReport` continua a filtrar corretamente:
-  - todos os atletas quando o valor for `"all"`,
-  - apenas um atleta quando houver seleção.
-- Manter o comportamento atual do relatório sem alterar o layout.
+4. Melhorar a apresentação quando não houver movimentos
+- Se o atleta existir mas não tiver entradas no intervalo escolhido, mostrar mensagem clara do tipo “Sem movimentos neste período”.
+- Se houver entradas, listar normalmente os movimentos desse atleta.
 
-5. Pequena melhoria opcional no mesmo ajuste
-- Se a lista vier vazia, mostrar texto claro no seletor ou ajuda visual indicando que não há atletas Pro ativos elegíveis, em vez de parecer que o campo está “avariado”.
+5. Validar o impacto sem alterar o layout geral
+- Manter o dropdown, datas e PDF como estão.
+- Apenas corrigir:
+  - carregamento dos dados
+  - mapeamento dos tipos
+  - cálculo dos totais
+  - estado vazio
 
 Detalhes técnicos
 - Ficheiro principal: `src/components/admin/ReportsCard.tsx`
-- Causa provável identificada no código:
-  - carregamento inicial usa `.eq("surf_level", "Competition")`
-  - no `ProAccountTab` a app usa `.ilike("surf_level", "competition")`
-- Isto explica o cenário em que o dropdown aparece mas não deixa escolher porque a lista pode estar vazia ou inconsistente.
-- As traduções `shared.reports.proAccount` já existem em `pt.json` e `en.json`, por isso agora o foco deve ser só o comportamento do seletor.
+- Causa principal identificada:
+  - seletor usa `ilike("surf_level", "competition")`
+  - geração usa `eq("surf_level", "Competition")`
+- Causa secundária identificada:
+  - relatório interpreta tipos errados (`credit`/`debit`) enquanto os dados reais usam `prize_money` / `expense` / `other`
+- Não são necessárias alterações de base de dados nem migrations.
+
+Validação após implementação
+- Testar com “Francisco Ordonhas” entre `2025-01-01` e `2026-04-30`
+- Confirmar 3 cenários:
+  1. atleta específico com movimentos
+  2. atleta específico sem movimentos
+  3. opção “todos os atletas”
+- Confirmar que o PDF mostra valores e saldos corretos.
