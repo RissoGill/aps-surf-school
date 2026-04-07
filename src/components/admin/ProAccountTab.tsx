@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, TrendingUp, TrendingDown, Wallet, Save, History } from "lucide-react";
+import { Trash2, Plus, TrendingUp, TrendingDown, Wallet, Save, History, Pencil } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ const ProAccountTab = () => {
   const queryClient = useQueryClient();
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [priorBalanceInput, setPriorBalanceInput] = useState<string>("");
   const [priorBalanceDateInput, setPriorBalanceDateInput] = useState<string>("");
 
@@ -136,6 +137,44 @@ const ProAccountTab = () => {
     },
   });
 
+  // Update entry mutation
+  const updateEntry = useMutation({
+    mutationFn: async () => {
+      if (!editingEntryId) return;
+      const { error } = await supabase
+        .from("pro_account_entries")
+        .update({
+          entry_date: formDate,
+          type: formType,
+          category: formCategory,
+          description: formDescription || null,
+          amount: parseFloat(formAmount),
+          invoice_number: formInvoice || null,
+        })
+        .eq("id", editingEntryId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
+      toast({ title: t("proAccount.entryUpdated") });
+      resetForm();
+    },
+    onError: (err: any) => {
+      toast({ title: t("proAccount.errorAdding"), description: err.message, variant: "destructive" });
+    },
+  });
+
+  const handleEdit = (entry: any) => {
+    setFormType(entry.type);
+    setFormDate(entry.entry_date);
+    setFormCategory(entry.category);
+    setFormDescription(entry.description || "");
+    setFormAmount(String(entry.amount));
+    setFormInvoice(entry.invoice_number || "");
+    setEditingEntryId(entry.id);
+    setShowForm(true);
+  };
+
   const resetForm = () => {
     setFormType("prize_money");
     setFormDate(format(new Date(), "yyyy-MM-dd"));
@@ -143,6 +182,7 @@ const ProAccountTab = () => {
     setFormDescription("");
     setFormAmount("");
     setFormInvoice("");
+    setEditingEntryId(null);
     setShowForm(false);
   };
 
@@ -162,7 +202,11 @@ const ProAccountTab = () => {
       toast({ title: t("proAccount.invalidAmount"), variant: "destructive" });
       return;
     }
-    addEntry.mutate();
+    if (editingEntryId) {
+      updateEntry.mutate();
+    } else {
+      addEntry.mutate();
+    }
   };
 
   return (
@@ -274,7 +318,7 @@ const ProAccountTab = () => {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">{t("proAccount.newEntry")}</CardTitle>
+                <CardTitle className="text-lg">{editingEntryId ? t("proAccount.editEntry") : t("proAccount.newEntry")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -352,8 +396,8 @@ const ProAccountTab = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button type="submit" disabled={addEntry.isPending} className="flex-1">
-                      {addEntry.isPending ? "..." : t("proAccount.save")}
+                    <Button type="submit" disabled={addEntry.isPending || updateEntry.isPending} className="flex-1">
+                      {(addEntry.isPending || updateEntry.isPending) ? "..." : editingEntryId ? t("proAccount.update") : t("proAccount.save")}
                     </Button>
                     <Button type="button" variant="outline" onClick={resetForm}>
                       {t("proAccount.cancel")}
@@ -404,14 +448,23 @@ const ProAccountTab = () => {
                           </TableCell>
                           <TableCell>{entry.invoice_number || "-"}</TableCell>
                           <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteEntry.mutate(entry.id)}
-                              disabled={deleteEntry.isPending}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(entry)}
+                              >
+                                <Pencil className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => deleteEntry.mutate(entry.id)}
+                                disabled={deleteEntry.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
