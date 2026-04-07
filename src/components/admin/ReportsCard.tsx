@@ -71,7 +71,7 @@ export const ReportsCard = () => {
         .from("atletas")
         .select("athlete_id, first_name, last_name, pro_prior_balance, pro_prior_balance_date")
         .eq("is_active", true)
-        .eq("surf_level", "Competition")
+        .ilike("surf_level", "competition")
         .order("first_name");
       
       if (!error && data) {
