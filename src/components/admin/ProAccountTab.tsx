@@ -228,38 +228,38 @@ const ProAccountTab = () => {
           </Card>
 
           {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             <Card>
-                <CardContent className="p-4 pt-4 text-center">
-                 <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
-                 <p className="text-lg font-bold">€{priorBalance.toFixed(2)}</p>
-                 <p className="text-xs text-muted-foreground">{t("proAccount.priorBalance")}</p>
-                 {(selectedAthlete as any)?.pro_prior_balance_date && (
-                   <p className="text-xs text-muted-foreground mt-1">{(selectedAthlete as any).pro_prior_balance_date}</p>
-                 )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <Card className="overflow-hidden">
+              <CardContent className="p-4 pt-4 text-center">
+                <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="text-base sm:text-lg font-bold">€{priorBalance.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground leading-tight">{t("proAccount.priorBalance")}</p>
+                {(selectedAthlete as any)?.pro_prior_balance_date && (
+                  <p className="text-[11px] text-muted-foreground mt-1 whitespace-nowrap">{(selectedAthlete as any).pro_prior_balance_date}</p>
+                )}
               </CardContent>
             </Card>
-            <Card>
-               <CardContent className="p-4 pt-4 text-center">
+            <Card className="overflow-hidden">
+              <CardContent className="p-4 pt-4 text-center">
                 <TrendingUp className="h-5 w-5 text-success mx-auto mb-1" />
-                <p className="text-lg font-bold text-success">€{summary.totalPrize.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">{t("proAccount.totalPrize")}</p>
+                <p className="text-base sm:text-lg font-bold text-success">€{summary.totalPrize.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground leading-tight">{t("proAccount.totalPrize")}</p>
               </CardContent>
             </Card>
-            <Card>
-               <CardContent className="p-4 pt-4 text-center">
+            <Card className="overflow-hidden">
+              <CardContent className="p-4 pt-4 text-center">
                 <TrendingDown className="h-5 w-5 text-destructive mx-auto mb-1" />
-                <p className="text-lg font-bold text-destructive">€{summary.totalExpense.toFixed(2)}</p>
-                <p className="text-xs text-muted-foreground">{t("proAccount.totalExpenses")}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive">€{summary.totalExpense.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground leading-tight">{t("proAccount.totalExpenses")}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="overflow-hidden">
               <CardContent className="p-4 pt-4 text-center">
                 <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
-                <p className={`text-lg font-bold ${summary.balance >= 0 ? "text-success" : "text-destructive"}`}>
+                <p className={`text-base sm:text-lg font-bold ${summary.balance >= 0 ? "text-success" : "text-destructive"}`}>
                   €{summary.balance.toFixed(2)}
                 </p>
-                <p className="text-xs text-muted-foreground">{t("proAccount.balance")}</p>
+                <p className="text-xs text-muted-foreground leading-tight">{t("proAccount.balance")}</p>
               </CardContent>
             </Card>
           </div>
