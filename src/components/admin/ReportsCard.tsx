@@ -268,7 +268,7 @@ export const ReportsCard = () => {
             .from("atletas")
             .select("athlete_id, first_name, last_name, pro_prior_balance, pro_prior_balance_date")
             .eq("is_active", true)
-            .eq("surf_level", "Competition");
+            .ilike("surf_level", "competition");
           
           if (selectedAthlete && selectedAthlete !== "all") {
             proAthletesQuery = proAthletesQuery.eq("athlete_id", selectedAthlete);
@@ -279,20 +279,23 @@ export const ReportsCard = () => {
           
           const proAthleteIds = (proAthletesData || []).map(a => a.athlete_id);
           
-          // Fetch pro account entries within date range
-          const { data: proEntries, error: proEntriesError } = await supabase
-            .from("pro_account_entries")
-            .select("*")
-            .in("athlete_id", proAthleteIds)
-            .gte("entry_date", startStr)
-            .lte("entry_date", endStr)
-            .order("entry_date", { ascending: true });
-          
-          if (proEntriesError) throw proEntriesError;
+          let proEntries: any[] = [];
+          if (proAthleteIds.length > 0) {
+            const { data: proEntriesData, error: proEntriesError } = await supabase
+              .from("pro_account_entries")
+              .select("*")
+              .in("athlete_id", proAthleteIds)
+              .gte("entry_date", startStr)
+              .lte("entry_date", endStr)
+              .order("entry_date", { ascending: true });
+            
+            if (proEntriesError) throw proEntriesError;
+            proEntries = proEntriesData || [];
+          }
           
           data = [{
             athletes: proAthletesData || [],
-            entries: proEntries || []
+            entries: proEntries
           }];
           break;
       }
@@ -495,10 +498,10 @@ export const ReportsCard = () => {
         const priorBalance = Number(athlete.pro_prior_balance || 0);
         
         const totalCredits = athleteEntries
-          .filter((e: any) => e.type === "credit")
+          .filter((e: any) => e.type === "prize_money" || e.type === "other")
           .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
         const totalDebits = athleteEntries
-          .filter((e: any) => e.type === "debit")
+          .filter((e: any) => e.type === "expense")
           .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
         const athleteBalance = priorBalance + totalCredits - totalDebits;
         grandTotalBalance += athleteBalance;
@@ -525,7 +528,7 @@ export const ReportsCard = () => {
           `;
         } else {
           athleteEntries.forEach((entry: any) => {
-            const isCredit = entry.type === "credit";
+            const isCredit = entry.type === "prize_money" || entry.type === "other";
             const amountColor = isCredit ? "color: #16a34a;" : "color: #dc2626;";
             const sign = isCredit ? "+" : "-";
             tableRows += `
