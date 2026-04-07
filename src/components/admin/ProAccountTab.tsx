@@ -230,7 +230,7 @@ const ProAccountTab = () => {
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              <Card>
-               <CardContent className="p-4 text-center">
+                <CardContent className="p-4 pt-4 text-center">
                  <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
                  <p className="text-lg font-bold">€{priorBalance.toFixed(2)}</p>
                  <p className="text-xs text-muted-foreground">{t("proAccount.priorBalance")}</p>
@@ -240,21 +240,21 @@ const ProAccountTab = () => {
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4 text-center">
+               <CardContent className="p-4 pt-4 text-center">
                 <TrendingUp className="h-5 w-5 text-success mx-auto mb-1" />
                 <p className="text-lg font-bold text-success">€{summary.totalPrize.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground">{t("proAccount.totalPrize")}</p>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4 text-center">
+               <CardContent className="p-4 pt-4 text-center">
                 <TrendingDown className="h-5 w-5 text-destructive mx-auto mb-1" />
                 <p className="text-lg font-bold text-destructive">€{summary.totalExpense.toFixed(2)}</p>
                 <p className="text-xs text-muted-foreground">{t("proAccount.totalExpenses")}</p>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-4 text-center">
+              <CardContent className="p-4 pt-4 text-center">
                 <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
                 <p className={`text-lg font-bold ${summary.balance >= 0 ? "text-success" : "text-destructive"}`}>
                   €{summary.balance.toFixed(2)}
