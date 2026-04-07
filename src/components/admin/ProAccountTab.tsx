@@ -191,6 +191,9 @@ const ProAccountTab = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
       toast({ title: t("proAccount.entryAdded") });
+      if (formCategory === "monthly_fee") {
+        syncMonthlyFeePayment(selectedAthleteId, formDate, parseFloat(formAmount), t);
+      }
       resetForm();
     },
     onError: (err: any) => {
@@ -200,9 +203,12 @@ const ProAccountTab = () => {
 
   // Delete entry mutation
   const deleteEntry = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("pro_account_entries").delete().eq("id", id);
+    mutationFn: async (entry: { id: string; category: string; entry_date: string }) => {
+      const { error } = await supabase.from("pro_account_entries").delete().eq("id", entry.id);
       if (error) throw error;
+      if (entry.category === "monthly_fee") {
+        await resetMonthlyFeePayment(selectedAthleteId, entry.entry_date);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
@@ -230,6 +236,9 @@ const ProAccountTab = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pro-account-entries", selectedAthleteId] });
       toast({ title: t("proAccount.entryUpdated") });
+      if (formCategory === "monthly_fee") {
+        syncMonthlyFeePayment(selectedAthleteId, formDate, parseFloat(formAmount), t);
+      }
       resetForm();
     },
     onError: (err: any) => {
