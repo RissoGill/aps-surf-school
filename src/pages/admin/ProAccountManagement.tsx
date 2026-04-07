@@ -10,7 +10,7 @@ const ProAccountManagement = () => {
   return (
     <div className="min-h-screen bg-gradient-surface">
       <AppHeader title={t("proAccount.title")} showBack backTo="/dashboard/administration" />
-      <main className="mobile-container py-6">
+      <main className="max-w-6xl mx-auto px-4 py-6">
         <ProAccountTab />
       </main>
       <SponsorBanner />
