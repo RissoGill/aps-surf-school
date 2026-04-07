@@ -1511,5 +1511,44 @@
       "failedToSave": "Failed to save attendance",
       "permissionDenied": "Permission denied. Please log in via email/password or contact admin."
     }
+  },
+  "proAccount": {
+    "title": "Pro Current Account",
+    "dashboardDesc": "Manage competition athletes' current account",
+    "manage": "Manage Account",
+    "selectAthlete": "Select Athlete",
+    "chooseAthlete": "Choose a competition athlete...",
+    "totalPrize": "Total Prize Money",
+    "totalExpenses": "Total Expenses",
+    "balance": "Balance",
+    "addEntry": "Add Entry",
+    "newEntry": "New Entry",
+    "type": "Type",
+    "date": "Date",
+    "category": "Category",
+    "amount": "Amount",
+    "description": "Description",
+    "invoice": "Invoice No.",
+    "invoicePlaceholder": "e.g. INV2025/001",
+    "stagePlaceholder": "e.g. Peniche WSL Stage",
+    "descriptionPlaceholder": "Expense description",
+    "expense": "Expense",
+    "save": "Save",
+    "cancel": "Cancel",
+    "movements": "Movements",
+    "loading": "Loading...",
+    "noEntries": "No entries recorded",
+    "entryAdded": "Entry added",
+    "entryDeleted": "Entry deleted",
+    "errorAdding": "Error adding entry",
+    "invalidAmount": "Invalid amount",
+    "categories": {
+      "prize": "Prize Money",
+      "coaching": "Coaching",
+      "accommodation": "Accommodation",
+      "flights": "Flights",
+      "monthlyFee": "Monthly Fee",
+      "other": "Other"
+    }
   }
 }
