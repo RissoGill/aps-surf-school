@@ -11,7 +11,80 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, TrendingUp, TrendingDown, Wallet, Save, History, Pencil } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+
+// Helper to sync monthly fee with payments table
+const syncMonthlyFeePayment = async (
+  athleteId: string,
+  entryDate: string,
+  amount: number,
+  t: (key: string) => string
+) => {
+  const date = parseISO(entryDate);
+  const monthName = format(date, "MMMM");
+  const year = date.getFullYear();
+
+  const { data: payment, error: fetchError } = await supabase
+    .from("payments")
+    .select("*")
+    .eq("athlete_id", athleteId)
+    .eq("month", monthName)
+    .eq("year", year)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("Error fetching payment:", fetchError);
+    return;
+  }
+
+  if (!payment) {
+    toast({ title: t("proAccount.paymentNotFound"), variant: "default" });
+    return;
+  }
+
+  const amountDue = Number(payment.amount_due ?? 0);
+  const newStatus = amount >= amountDue && amountDue > 0 ? "Paid" : amount > 0 ? "Partial" : "Unpaid";
+
+  const { error: updateError } = await supabase
+    .from("payments")
+    .update({
+      amount_paid: amount,
+      payment_date: entryDate,
+      status: newStatus,
+    })
+    .eq("payment_id", payment.payment_id);
+
+  if (updateError) {
+    console.error("Error updating payment:", updateError);
+    return;
+  }
+
+  toast({ title: t("proAccount.paymentSynced") });
+};
+
+const resetMonthlyFeePayment = async (
+  athleteId: string,
+  entryDate: string
+) => {
+  const date = parseISO(entryDate);
+  const monthName = format(date, "MMMM");
+  const year = date.getFullYear();
+
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("payment_id")
+    .eq("athlete_id", athleteId)
+    .eq("month", monthName)
+    .eq("year", year)
+    .maybeSingle();
+
+  if (payment) {
+    await supabase
+      .from("payments")
+      .update({ amount_paid: 0, payment_date: null, status: "Unpaid" })
+      .eq("payment_id", payment.payment_id);
+  }
+};
 
 const CATEGORIES_PRIZE = ["prize"] as const;
 const CATEGORIES_EXPENSE = ["coaching", "accommodation", "flights", "monthly_fee", "other"] as const;
