@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Trash2, Plus, TrendingUp, TrendingDown, Wallet, Save, History } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ const ProAccountTab = () => {
   const queryClient = useQueryClient();
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
+  const [priorBalanceInput, setPriorBalanceInput] = useState<string>("");
 
   // Form state
   const [formType, setFormType] = useState<string>("prize_money");
@@ -45,12 +46,24 @@ const ProAccountTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("atletas")
-        .select("athlete_id, first_name, last_name, surf_level, is_active")
+        .select("athlete_id, first_name, last_name, surf_level, is_active, pro_prior_balance")
         .ilike("surf_level", "competition");
       if (error) throw error;
       return data || [];
     },
   });
+
+  const selectedAthlete = useMemo(
+    () => athletes?.find((a) => a.athlete_id === selectedAthleteId),
+    [athletes, selectedAthleteId]
+  );
+
+  // Sync prior balance input when athlete changes
+  const handleAthleteChange = (id: string) => {
+    setSelectedAthleteId(id);
+    const athlete = athletes?.find((a) => a.athlete_id === id);
+    setPriorBalanceInput(String(athlete?.pro_prior_balance ?? 0));
+  };
 
   // Fetch entries for selected athlete
   const { data: entries, isLoading: entriesLoading } = useQuery({
@@ -64,6 +77,24 @@ const ProAccountTab = () => {
         .order("entry_date", { ascending: false });
       if (error) throw error;
       return data || [];
+    },
+  });
+
+  // Save prior balance mutation
+  const savePriorBalance = useMutation({
+    mutationFn: async (amount: number) => {
+      const { error } = await supabase
+        .from("atletas")
+        .update({ pro_prior_balance: amount } as any)
+        .eq("athlete_id", selectedAthleteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pro-account-athletes"] });
+      toast({ title: t("proAccount.priorBalanceSaved") });
+    },
+    onError: (err: any) => {
+      toast({ title: t("proAccount.errorAdding"), description: err.message, variant: "destructive" });
     },
   });
 
@@ -114,12 +145,13 @@ const ProAccountTab = () => {
   };
 
   // Summary calculations
+  const priorBalance = Number(selectedAthlete?.pro_prior_balance ?? 0);
   const summary = useMemo(() => {
     if (!entries) return { totalPrize: 0, totalExpense: 0, balance: 0 };
     const totalPrize = entries.filter((e) => e.type === "prize_money").reduce((s, e) => s + Number(e.amount), 0);
     const totalExpense = entries.filter((e) => e.type === "expense").reduce((s, e) => s + Number(e.amount), 0);
-    return { totalPrize, totalExpense, balance: totalPrize - totalExpense };
-  }, [entries]);
+    return { totalPrize, totalExpense, balance: priorBalance + totalPrize - totalExpense };
+  }, [entries, priorBalance]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,7 +170,7 @@ const ProAccountTab = () => {
           <CardTitle>{t("proAccount.selectAthlete")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={selectedAthleteId} onValueChange={setSelectedAthleteId}>
+          <Select value={selectedAthleteId} onValueChange={handleAthleteChange}>
             <SelectTrigger>
               <SelectValue placeholder={t("proAccount.chooseAthlete")} />
             </SelectTrigger>
@@ -156,8 +188,44 @@ const ProAccountTab = () => {
 
       {selectedAthleteId && (
         <>
+          {/* Prior Balance */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-end gap-3">
+                <div className="flex-1 space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    {t("proAccount.priorBalance")}
+                  </Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={priorBalanceInput}
+                    onChange={(e) => setPriorBalanceInput(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <Button
+                  onClick={() => savePriorBalance.mutate(parseFloat(priorBalanceInput) || 0)}
+                  disabled={savePriorBalance.isPending}
+                  size="sm"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  {t("proAccount.savePriorBalance")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Summary cards */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <History className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
+                <p className="text-lg font-bold">€{priorBalance.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">{t("proAccount.priorBalance")}</p>
+              </CardContent>
+            </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <TrendingUp className="h-5 w-5 text-success mx-auto mb-1" />

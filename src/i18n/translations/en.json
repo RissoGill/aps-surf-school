@@ -1542,6 +1542,9 @@
     "entryDeleted": "Entry deleted",
     "errorAdding": "Error adding entry",
     "invalidAmount": "Invalid amount",
+    "priorBalance": "Previous Balance",
+    "priorBalanceSaved": "Previous balance saved",
+    "savePriorBalance": "Save",
     "categories": {
       "prize": "Prize Money",
       "coaching": "Coaching",

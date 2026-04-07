@@ -1542,6 +1542,9 @@
     "entryDeleted": "Movimento eliminado",
     "errorAdding": "Erro ao adicionar",
     "invalidAmount": "Valor inválido",
+    "priorBalance": "Saldo Anterior",
+    "priorBalanceSaved": "Saldo anterior guardado",
+    "savePriorBalance": "Guardar",
     "categories": {
       "prize": "Prize Money",
       "coaching": "Acompanhamento",
