@@ -279,20 +279,23 @@ export const ReportsCard = () => {
           
           const proAthleteIds = (proAthletesData || []).map(a => a.athlete_id);
           
-          // Fetch pro account entries within date range
-          const { data: proEntries, error: proEntriesError } = await supabase
-            .from("pro_account_entries")
-            .select("*")
-            .in("athlete_id", proAthleteIds)
-            .gte("entry_date", startStr)
-            .lte("entry_date", endStr)
-            .order("entry_date", { ascending: true });
-          
-          if (proEntriesError) throw proEntriesError;
+          let proEntries: any[] = [];
+          if (proAthleteIds.length > 0) {
+            const { data: proEntriesData, error: proEntriesError } = await supabase
+              .from("pro_account_entries")
+              .select("*")
+              .in("athlete_id", proAthleteIds)
+              .gte("entry_date", startStr)
+              .lte("entry_date", endStr)
+              .order("entry_date", { ascending: true });
+            
+            if (proEntriesError) throw proEntriesError;
+            proEntries = proEntriesData || [];
+          }
           
           data = [{
             athletes: proAthletesData || [],
-            entries: proEntries || []
+            entries: proEntries
           }];
           break;
       }
