@@ -1,39 +1,40 @@
 
 
-# Auto-register monthly fee payment when adding to Pro Account
+# Add Pro Account Current Account Report
 
-## What it does
-When a Pro Account entry is created (or edited) with category `monthly_fee`, the system automatically finds the matching payment record for that athlete (same month/year as the entry date) and updates it with `amount_paid = entry amount`, `status = Paid`, and `payment_date = entry date`.
-
-## Logic
-1. Parse `formDate` to extract the month name (e.g. "January") and year
-2. Query the `payments` table for a record matching `athlete_id`, `month`, and `year`
-3. If found, update that payment's `amount_paid`, `payment_date`, and auto-calculate `status`
-4. If not found, show a warning toast but still save the Pro Account entry
+## What changes
+Add a new report type "Pro Account" to the ReportsCard, showing the current account (conta corrente) of competition athletes with all their entries, balance summary, and breakdown by athlete.
 
 ## Files to change
 
-### 1. `src/components/admin/ProAccountTab.tsx`
-- Create a helper function `syncMonthlyFeePayment(athleteId, entryDate, amount)` that:
-  - Converts the date to month name (English, matching the payments table format) and year
-  - Queries `payments` where `athlete_id = athleteId AND month = monthName AND year = year`
-  - If found: updates `amount_paid = amount`, `payment_date = entryDate`, auto-calculates status (Paid/Partial/Unpaid)
-  - If not found: shows an info toast warning
-- Call this function in `addEntry.onSuccess` and `updateEntry.onSuccess` when `formCategory === "monthly_fee"`
-- Also handle the reverse on `deleteEntry`: if deleted entry was `monthly_fee`, reset the payment back to unpaid
+### 1. `src/components/admin/ReportsCard.tsx`
+- Add `"pro_account"` to the `ReportType` union type
+- Add a new `SelectItem` for "Pro Account" in the report type dropdown
+- Show the athlete filter when `pro_account` is selected (only competition athletes)
+- In `generateReport`, add a `case "pro_account"` that:
+  - Fetches competition athletes from `atletas` (where `surf_level = 'Competition'` and `is_active = true`)
+  - Fetches `pro_account_entries` for those athletes within the date range
+  - Calculates per-athlete balance: `prior_balance + total_prize + total_other - total_expense`
+  - If a specific athlete is selected, filter to just that athlete
+- In `generateReportHTML`, add the `pro_account` case:
+  - Summary section: total balance across all athletes, number of athletes
+  - Table with columns: Athlete, Date, Type, Category, Description, Amount, Balance
+  - Per-athlete subtotals showing prior balance + credits - debits = balance
+  - Color coding: green for credits (prize/other), red for expenses
+- Add `"pro_account"` to `tableHeaders` mapping
 
-### 2. `src/i18n/translations/pt.json`
-- Add `"proAccount.paymentSynced": "Pagamento da mensalidade atualizado automaticamente"`
-- Add `"proAccount.paymentNotFound": "Mensalidade não encontrada para o mês correspondente"`
+### 2. `src/i18n/translations/en.json`
+- Add `"shared.reports.proAccount": "Pro Current Account"`
+- Update `"shared.reports.description"` to include pro account
 
-### 3. `src/i18n/translations/en.json`
-- Add `"proAccount.paymentSynced": "Monthly fee payment automatically updated"`
-- Add `"proAccount.paymentNotFound": "No monthly payment found for the corresponding month"`
+### 3. `src/i18n/translations/pt.json`
+- Add `"shared.reports.proAccount": "Conta Corrente Pro"`
+- Update `"shared.reports.description"` accordingly
 
-## Month mapping
-The `payments` table uses English month names ("January", "February", etc.). The helper will use `format(parseISO(entryDate), "MMMM")` from date-fns (which outputs English names by default) to match.
-
-## Edge cases
-- Editing an entry that changes from/to `monthly_fee`: sync the new month, optionally reset the old one
-- Deleting a `monthly_fee` entry: reset the corresponding payment to `amount_paid = 0, status = Unpaid`
+## Report layout
+The report will group entries by athlete, showing:
+- Athlete name and prior balance
+- All entries sorted by date (within the selected date range)
+- Running subtotals per athlete
+- Grand total at the bottom
 
