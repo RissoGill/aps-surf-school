@@ -187,7 +187,8 @@ const PaymentManagement = () => {
       const { data, error } = await supabase
         .from('atletas')
         .select('athlete_id, first_name, last_name, prior_balance')
-        .order('first_name');
+        .order('first_name')
+        .limit(10000);
       
       if (error) throw error;
       return data as Athlete[];
