@@ -134,12 +134,12 @@ const AccountingManagement = () => {
         {/* Financial Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {stats.map((stat, idx) => (
-            <Card key={idx} className="shadow-sm">
-              <CardContent className="p-4">
+            <Card key={idx} className="shadow-sm h-full">
+              <CardContent className="p-4 h-full">
                 {isLoading ? (
                   <Skeleton className="h-12 w-full" />
                 ) : (
-                  <div className="flex flex-col items-center text-center">
+                  <div className="flex flex-col items-center text-center h-full justify-between">
                     <div className="flex items-center gap-2 mb-1">
                       <stat.icon className={`h-4 w-4 ${stat.color}`} />
                       <p className="text-xs text-muted-foreground">{stat.label}</p>
