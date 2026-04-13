@@ -1608,6 +1608,8 @@
     "customName": "Name",
     "subSubcategory": "Expense Type",
     "subSubcategoryPlaceholder": "Select type",
-    "championshipDescriptionPlaceholder": "Championship description"
+    "championshipDescriptionPlaceholder": "Championship description",
+    "viewExpenses": "View expenses",
+    "totalCurrentMonth": "Total Current Month"
   }
 }

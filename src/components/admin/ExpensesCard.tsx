@@ -456,56 +456,66 @@ export const ExpensesCard = () => {
         ) : (
           <>
             <div className="mb-3 text-sm font-medium">
-              {t("expenses.total")}: <span className="text-primary">€{totalExpenses.toFixed(2)}</span>
+              {t("expenses.totalCurrentMonth")}: <span className="text-primary">€{totalCurrentMonth.toFixed(2)}</span>
             </div>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                     <TableHead>{t("expenses.name")}</TableHead>
-                    <TableHead>{t("expenses.category")}</TableHead>
-                    <TableHead>{t("expenses.subcategory")}</TableHead>
-                    <TableHead>{t("expenses.subSubcategory")}</TableHead>
-                    <TableHead>{t("expenses.date")}</TableHead>
-                    <TableHead>{t("expenses.amount")}</TableHead>
-                    <TableHead>{t("expenses.invoice")}</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {expenses.map((expense) => (
-                    <TableRow key={expense.id}>
-                      <TableCell className="font-medium">{expense.name}</TableCell>
-                      <TableCell>{expense.category || "—"}</TableCell>
-                      <TableCell>{expense.subcategory || "—"}</TableCell>
-                      <TableCell>{expense.sub_subcategory || "—"}</TableCell>
-                      <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
-                      <TableCell>
-                        {expense.invoice_url ? (
-                          <a href={expense.invoice_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
-                            <ExternalLink className="h-3 w-3" />
-                            {t("expenses.viewInvoice")}
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(expense)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(expense.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <Collapsible open={expensesOpen} onOpenChange={setExpensesOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full flex items-center justify-between mb-2">
+                  <span>{t("expenses.viewExpenses")} ({expenses.length})</span>
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", expensesOpen && "rotate-180")} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                         <TableHead>{t("expenses.name")}</TableHead>
+                        <TableHead>{t("expenses.category")}</TableHead>
+                        <TableHead>{t("expenses.subcategory")}</TableHead>
+                        <TableHead>{t("expenses.subSubcategory")}</TableHead>
+                        <TableHead>{t("expenses.date")}</TableHead>
+                        <TableHead>{t("expenses.amount")}</TableHead>
+                        <TableHead>{t("expenses.invoice")}</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {expenses.map((expense) => (
+                        <TableRow key={expense.id}>
+                          <TableCell className="font-medium">{expense.name}</TableCell>
+                          <TableCell>{expense.category || "—"}</TableCell>
+                          <TableCell>{expense.subcategory || "—"}</TableCell>
+                          <TableCell>{expense.sub_subcategory || "—"}</TableCell>
+                          <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
+                          <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
+                          <TableCell>
+                            {expense.invoice_url ? (
+                              <a href={expense.invoice_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                                <ExternalLink className="h-3 w-3" />
+                                {t("expenses.viewInvoice")}
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => openEditDialog(expense)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(expense.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </>
         )}
       </CardContent>
