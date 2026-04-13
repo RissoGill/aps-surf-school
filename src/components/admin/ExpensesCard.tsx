@@ -319,7 +319,7 @@ export const ExpensesCard = () => {
               </div>
               <div>
                 <Label>{t("expenses.category")}</Label>
-                <Select value={category} onValueChange={setCategory}>
+                <Select value={category} onValueChange={(val) => { setCategory(val); setSubcategory(""); setCustomSubcategory(""); }}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                   </SelectTrigger>
@@ -330,6 +330,24 @@ export const ExpensesCard = () => {
                   </SelectContent>
                 </Select>
               </div>
+              {SUBCATEGORIES[category] && (
+                <div>
+                  <Label>{t("expenses.subcategory")}</Label>
+                  <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBCATEGORIES[category].map((sub) => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {subcategory === "Outro" && (
+                    <Input className="mt-2" value={customSubcategory} onChange={(e) => setCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
+                  )}
+                </div>
+              )}
               <div>
                 <Label>{t("expenses.date")}</Label>
                 <Popover>
