@@ -43,7 +43,7 @@ const AccountingManagement = () => {
       // Expenses since September 2025
       const { data: allExpenses } = await supabase
         .from('expenses')
-        .select('amount, expense_date');
+        .select('amount, expense_date, created_at');
 
       const expensesSinceSept = (allExpenses || []).filter((e: any) => {
         const d = new Date(e.expense_date);
@@ -52,9 +52,10 @@ const AccountingManagement = () => {
 
       const totalExpensesSinceSept = expensesSinceSept.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
 
-      const expensesCurrentMonth = expensesSinceSept.filter((e: any) => {
-        const d = new Date(e.expense_date);
-        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
+      // Expenses entered/created in current month (using created_at)
+      const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
+        const createdAt = new Date(e.created_at);
+        return createdAt.getFullYear() === currentYear && createdAt.getMonth() + 1 === currentMonth;
       });
 
       const totalExpensesCurrentMonth = expensesCurrentMonth.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
