@@ -268,6 +268,7 @@ export const ExpensesCard = () => {
       name: name.trim(),
       category: category || null,
       subcategory: resolvedSubcategory || null,
+      sub_subcategory: subSubcategory || null,
       expense_date: format(date, "yyyy-MM-dd"),
       amount: parseFloat(amount),
       invoice_url: invoiceUrl,
