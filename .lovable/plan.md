@@ -1,28 +1,42 @@
 
 
-# Adicionar Prior Balance aos cartões Outstanding
+# Novo Cartão de Registo de Despesas
 
-## Contexto
-Os dois cartões "Em Dívida Learning/Pré-Comp" e "Em Dívida Competição" no dashboard de administração apenas contabilizam as mensalidades em dívida desde Setembro 2025. O `prior_balance` (saldo anterior) de cada atleta não está incluído.
+## O que será criado
 
-## Alteração
+Um novo cartão no dashboard de administração para registar despesas com os campos: Nome (descrição), Data, Valor e upload de scan da factura. As despesas serão guardadas numa nova tabela na base de dados e os ficheiros no storage bucket existente ou num novo.
 
-### `src/pages/admin/AdministrationDashboard.tsx`
+## Alterações
 
-1. Na query `all-payments-summary`, o código já busca os atletas com `athlete_id, surf_level, is_active`. Alterar para também buscar `prior_balance`:
-   ```
-   .select('athlete_id, surf_level, is_active, prior_balance')
-   ```
+### 1. Nova tabela `expenses` (migração SQL)
+- `id` (uuid, PK)
+- `name` (text, NOT NULL) - descrição da despesa
+- `expense_date` (date, NOT NULL)
+- `amount` (numeric, NOT NULL)
+- `invoice_url` (text) - URL do ficheiro no storage
+- `created_at` (timestamptz, default now())
+- `created_by` (text) - quem registou
+- RLS: anon e authenticated com acesso total (seguindo o padrão do projecto)
 
-2. Após calcular `septemberOnwardsOutstandingLearning` e `septemberOnwardsOutstandingCompetition`, somar o `prior_balance` de cada grupo de atletas ativos:
-   - **Learning/Pre-Comp**: somar `prior_balance` de atletas ativos com `surf_level` = Learning ou Pre-Competition
-   - **Competition**: somar `prior_balance` de atletas ativos com `surf_level` = Competition
+### 2. Novo storage bucket `expense-invoices` (migração SQL)
+- Bucket público para armazenar os scans das facturas
 
-3. Os valores finais passam a ser:
-   ```
-   septemberOnwardsOutstandingLearning = (dívida mensalidades) + (soma prior_balance Learning/Pre-Comp)
-   septemberOnwardsOutstandingCompetition = (dívida mensalidades) + (soma prior_balance Competition)
-   ```
+### 3. Novo componente `src/components/admin/ExpensesCard.tsx`
+- Lista de despesas registadas (tabela com nome, data, valor, link para factura)
+- Botão "Nova Despesa" que abre um dialog
+- Dialog com formulário: Nome (input text), Data (datepicker), Valor (input number), Upload de ficheiro (scan da factura)
+- Possibilidade de eliminar despesas
+- Upload do ficheiro para o bucket `expense-invoices`
 
-O `prior_balance` na tabela `atletas` já é actualizado automaticamente quando se registam pagamentos contra o saldo anterior (via PriorBalanceCard), portanto o valor em BD já reflecte o saldo real em dívida.
+### 4. `src/pages/admin/AdministrationDashboard.tsx`
+- Importar e adicionar o `ExpensesCard` no dashboard (após o CoachPaymentsCard)
+
+### 5. Traduções (`pt.json` e `en.json`)
+- Adicionar chaves para: "Despesas", "Nova Despesa", "Nome", "Data", "Valor", "Factura", "Registar", etc.
+
+## Detalhes Técnicos
+- Upload de ficheiros usa `supabase.storage.from('expense-invoices').upload()`
+- O componente segue o padrão visual dos cartões existentes (CoachPaymentsCard, AlertsManagementCard)
+- Formulário usa react-hook-form + zod para validação
+- Datepicker usa o componente Calendar/Popover existente
 
