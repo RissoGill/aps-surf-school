@@ -147,7 +147,7 @@ export const ExpenseReportsCard = () => {
       supabase.from('payments').select('*')
         .eq('month', monthNameEn)
         .eq('year', viewYear)
-        .in('status', ['paid', 'partial']),
+        .in('status', ['Paid', 'Partial', 'paid', 'partial']),
       supabase.from('atletas').select('athlete_id, first_name, last_name'),
     ]);
 
