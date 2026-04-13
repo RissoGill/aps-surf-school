@@ -59,6 +59,7 @@ export const ExpensesCard = () => {
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [customSubcategory, setCustomSubcategory] = useState("");
+  const [subSubcategory, setSubSubcategory] = useState("");
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
