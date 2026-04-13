@@ -1,28 +1,33 @@
 
 
-# Adicionar campo de Categoria nas Despesas
+# Adicionar Subcategorias nas Despesas
 
 ## Resumo
-Criar um dropdown de categoria a seguir ao campo "Fornecedor" no formulário de despesas, com as opções pedidas.
+Criar um segundo dropdown de subcategoria que aparece condicionalmente consoante a categoria selecionada. Para "Despesas Bancárias" mostra opções específicas bancárias; para "Salários" mostra nomes de colaboradores com opção "Outro" que permite introduzir um nome personalizado.
 
 ## Alterações
 
 ### 1. Migração Supabase
-Adicionar coluna `category` (text, nullable) à tabela `expenses`.
+Adicionar coluna `subcategory` (text, nullable) à tabela `expenses`.
 
 ### 2. `src/components/admin/ExpensesCard.tsx`
-- Adicionar estado `category` e `editCategory` para os formulários de criação e edição
-- Adicionar um `Select` dropdown após o campo Fornecedor com as opções:
-  Despesas Bancárias, Salários, Leasing, Portagens, Carrinhas, Impostos, Comunicações, Contabilidade, Compras Fornecedores, Material Técnico, Seguros, Despesas Legais, Licenças, Devolução Sócios, Custos Campeonatos, Outros
-- Incluir `category` no `createMutation` e `updateMutation`
-- Adicionar coluna "Categoria" na tabela de listagem
-- Atualizar interface `Expense` com `category: string | null`
+
+- Definir mapa de subcategorias:
+  - **Despesas Bancárias**: Manutenção, Imposto de Selo, Avales e Garantias, Juros
+  - **Salários**: Nuno Telmo, David, Danilo, Gustavo, Aaron, Zé Pinho, Outro
+- Adicionar estados `subcategory`, `editSubcategory`, `customSubcategory`, `editCustomSubcategory`
+- Quando a categoria muda, limpar a subcategoria
+- Mostrar o dropdown de subcategoria apenas quando a categoria tem subcategorias definidas
+- Se "Outro" selecionado (em Salários), mostrar input de texto para nome personalizado
+- Incluir `subcategory` nos `createMutation` e `updateMutation` (guardar o nome custom se "Outro")
+- Adicionar coluna "Subcategoria" na tabela de listagem
+- Atualizar interface `Expense` com `subcategory: string | null`
 
 ### 3. Traduções (`pt.json` e `en.json`)
-- `expenses.category`: "Categoria" / "Category"
-- `expenses.categoryPlaceholder`: "Selecionar categoria" / "Select category"
-- Chaves para cada opção do dropdown
+- `expenses.subcategory`: "Subcategoria" / "Subcategory"
+- `expenses.subcategoryPlaceholder`: "Selecionar subcategoria" / "Select subcategory"
+- `expenses.customName`: "Nome" / "Name"
 
 ### 4. Tipos (`types.ts`)
-Regenerados automaticamente com a nova coluna, ou adicionados manualmente.
+Atualizar com a nova coluna `subcategory`.
 
