@@ -123,7 +123,8 @@ export const CoachPaymentsCard = ({ userRole }: CoachPaymentsCardProps) => {
       const { data, error } = await supabase
         .from('coach_payments')
         .select('*')
-        .order('payment_date', { ascending: false });
+        .order('payment_date', { ascending: false })
+        .limit(10000);
       
       if (error) throw error;
       return data as CoachPayment[];

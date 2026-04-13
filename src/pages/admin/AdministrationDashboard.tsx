@@ -348,7 +348,8 @@ const AdministrationDashboard = () => {
       // Fetch all coach payments
       const { data: coachPaymentsRows, error: coachPaymentsError } = await supabase
         .from('coach_payments')
-        .select('amount, payment_date, payment_year, payment_month');
+        .select('amount, payment_date, payment_year, payment_month')
+        .limit(10000);
       
       console.info('Coach payments fetch result:', {
         rowCount: coachPaymentsRows?.length || 0,

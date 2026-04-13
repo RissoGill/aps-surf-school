@@ -44,8 +44,8 @@ const AccountingManagement = () => {
       const currentYear = now.getFullYear();
 
       const [{ data: allExpenses }, { data: allCoachPayments }] = await Promise.all([
-        supabase.from('expenses').select('amount, expense_date, created_at'),
-        supabase.from('coach_payments').select('amount, payment_date'),
+        supabase.from('expenses').select('amount, expense_date, created_at').limit(10000),
+        supabase.from('coach_payments').select('amount, payment_date').limit(10000),
       ]);
 
       // Expenses since September 2025
@@ -134,11 +134,11 @@ const AccountingManagement = () => {
     queryFn: async () => {
       const [{ data: seasonExpenses }, { data: payments2025 }, { data: payments2026 }, { data: coachPayments }] = await Promise.all([
         supabase.from('expenses').select('amount, expense_date')
-          .gte('expense_date', '2025-09-01').lte('expense_date', '2026-08-31'),
+          .gte('expense_date', '2025-09-01').lte('expense_date', '2026-08-31').limit(10000),
         supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2025).limit(10000),
         supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2026).limit(10000),
         supabase.from('coach_payments').select('amount, payment_date')
-          .gte('payment_date', '2025-09-01').lte('payment_date', '2026-08-31'),
+          .gte('payment_date', '2025-09-01').lte('payment_date', '2026-08-31').limit(10000),
       ]);
       return { seasonExpenses: seasonExpenses || [], allPayments: [...(payments2025 || []), ...(payments2026 || [])], coachPayments: coachPayments || [] };
     },
