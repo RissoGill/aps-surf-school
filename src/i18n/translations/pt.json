@@ -1587,6 +1587,9 @@
     "created": "Despesa registada com sucesso",
     "deleted": "Despesa eliminada",
     "error": "Erro ao registar despesa",
-    "uploadError": "Erro ao carregar ficheiro"
+    "uploadError": "Erro ao carregar ficheiro",
+    "scanInvoice": "Tirar Foto",
+    "uploadFile": "Escolher Ficheiro",
+    "fileSelected": "Ficheiro selecionado"
   }
 }

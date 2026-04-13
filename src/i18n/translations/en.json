@@ -1587,6 +1587,9 @@
     "created": "Expense registered successfully",
     "deleted": "Expense deleted",
     "error": "Error registering expense",
-    "uploadError": "Error uploading file"
+    "uploadError": "Error uploading file",
+    "scanInvoice": "Take Photo",
+    "uploadFile": "Choose File",
+    "fileSelected": "File selected"
   }
 }

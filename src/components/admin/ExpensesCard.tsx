@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink } from "lucide-react";
+import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink, Camera, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -35,6 +35,12 @@ export const ExpensesCard = () => {
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const scanInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(e.target.files?.[0] || null);
+  };
 
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses"],
@@ -164,7 +170,36 @@ export const ExpensesCard = () => {
               </div>
               <div>
                 <Label>{t("expenses.invoice")}</Label>
-                <Input type="file" accept="image/*,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    ref={scanInputRef}
+                    onChange={handleFileChange}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => scanInputRef.current?.click()}>
+                    <Camera className="h-4 w-4 mr-1" />
+                    {t("expenses.scanInvoice")}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-1" />
+                    {t("expenses.uploadFile")}
+                  </Button>
+                </div>
+                {file && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("expenses.fileSelected")}: {file.name}
+                  </p>
+                )}
               </div>
               <Button onClick={handleSubmit} disabled={!name.trim() || !date || !amount || uploading || createMutation.isPending} className="w-full">
                 {uploading ? t("expenses.uploading") : t("expenses.register")}
