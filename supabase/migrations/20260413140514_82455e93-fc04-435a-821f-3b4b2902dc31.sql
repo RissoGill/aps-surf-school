@@ -1,0 +1,1 @@
+ALTER TABLE recurring_expenses ADD COLUMN start_date date DEFAULT '2025-09-01';
