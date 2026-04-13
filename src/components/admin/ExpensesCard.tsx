@@ -441,6 +441,7 @@ export const ExpensesCard = () => {
                      <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.subcategory")}</TableHead>
+                    <TableHead>{t("expenses.subSubcategory")}</TableHead>
                     <TableHead>{t("expenses.date")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
                     <TableHead>{t("expenses.invoice")}</TableHead>
@@ -453,6 +454,7 @@ export const ExpensesCard = () => {
                       <TableCell className="font-medium">{expense.name}</TableCell>
                       <TableCell>{expense.category || "—"}</TableCell>
                       <TableCell>{expense.subcategory || "—"}</TableCell>
+                      <TableCell>{expense.sub_subcategory || "—"}</TableCell>
                       <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                       <TableCell>
