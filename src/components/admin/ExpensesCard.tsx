@@ -297,6 +297,7 @@ export const ExpensesCard = () => {
       name: editName.trim(),
       category: editCategory || null,
       subcategory: resolvedEditSubcategory || null,
+      sub_subcategory: editSubSubcategory || null,
       expense_date: format(editDate, "yyyy-MM-dd"),
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
