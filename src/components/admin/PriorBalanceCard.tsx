@@ -793,6 +793,49 @@ const PriorBalanceCard = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Balance Dialog */}
+      <Dialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t('admin.priorBalancePayments.editBalance')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.priorBalancePayments.editBalanceDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="newBalance">{t('admin.priorBalancePayments.newBalanceValue')}</Label>
+              <Input
+                id="newBalance"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                value={editBalanceForm.newBalance}
+                onChange={(e) => setEditBalanceForm(prev => ({ ...prev, newBalance: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reference">{t('admin.priorBalancePayments.reference')}</Label>
+              <Textarea
+                id="reference"
+                placeholder={t('admin.priorBalancePayments.referencePlaceholder')}
+                value={editBalanceForm.reference}
+                onChange={(e) => setEditBalanceForm(prev => ({ ...prev, reference: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditBalanceOpen(false)} disabled={isEditBalanceSubmitting}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleSubmitEditBalance} disabled={isEditBalanceSubmitting}>
+              {isEditBalanceSubmitting ? t('common.loading') : t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
