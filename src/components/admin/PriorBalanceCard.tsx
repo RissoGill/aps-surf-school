@@ -74,6 +74,14 @@ const PriorBalanceCard = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Edit balance state
+  const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
+  const [editBalanceForm, setEditBalanceForm] = useState({
+    newBalance: "",
+    reference: ""
+  });
+  const [isEditBalanceSubmitting, setIsEditBalanceSubmitting] = useState(false);
+
   // Edit state for super_admin
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<PriorBalancePayment | null>(null);
