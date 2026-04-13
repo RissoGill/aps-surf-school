@@ -54,8 +54,8 @@ const AccountingManagement = () => {
 
       // Expenses entered/created in current month (using created_at)
       const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
-        const createdAt = new Date(e.created_at);
-        return createdAt.getFullYear() === currentYear && createdAt.getMonth() + 1 === currentMonth;
+        const d = new Date(e.expense_date);
+        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
       });
 
       const totalExpensesCurrentMonth = expensesCurrentMonth.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
