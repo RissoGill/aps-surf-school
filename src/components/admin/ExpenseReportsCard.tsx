@@ -61,6 +61,7 @@ export const ExpenseReportsCard = () => {
     let query = supabase.from('expenses').select('*')
       .gte('expense_date', startDate)
       .lte('expense_date', endDate)
+      .limit(10000)
       .order('expense_date', { ascending: true });
 
     if (selectedCategory !== "all") {
@@ -143,7 +144,8 @@ export const ExpenseReportsCard = () => {
       supabase.from('expenses').select('*')
         .gte('expense_date', startDate)
         .lte('expense_date', endDate)
-        .order('expense_date', { ascending: true }),
+        .order('expense_date', { ascending: true })
+        .limit(10000),
       supabase.from('payments').select('*')
         .eq('month', monthNameEn)
         .eq('year', viewYear)
@@ -153,6 +155,7 @@ export const ExpenseReportsCard = () => {
       supabase.from('coach_payments').select('*')
         .gte('payment_date', startDate)
         .lte('payment_date', endDate)
+        .limit(10000)
         .order('payment_date', { ascending: true }),
       supabase.from('coach').select('coach_id, first_name, last_name'),
     ]);
