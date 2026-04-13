@@ -762,27 +762,7 @@ const AdministrationDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {quickStats.slice(0, -3).map((stat, index) => {
-            const colorClass = 
-              stat.color === "primary" ? "text-primary" :
-              stat.color === "success" ? "text-success" :
-              stat.color === "destructive" ? "text-destructive" :
-              stat.color === "warning" ? "text-warning" :
-              stat.color === "secondary" ? "text-secondary" :
-              "text-foreground";
-            
-            return (
-              <Card key={index} className="shadow-soft">
-                <CardContent className="p-4 text-center">
-                  <p className={`text-2xl font-medium ${colorClass}`}>{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        {/* Athletes Level Stats */}
 
         {/* Athletes Level Stats - 3 in a row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -874,60 +854,17 @@ const AdministrationDashboard = () => {
           </Card>
         </Collapsible>
 
-        <Collapsible defaultOpen={false}>
-          <Card className="shadow-medium mb-6">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-normal">{t('admin.management.revenueManagement')}</CardTitle>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="space-y-4">
-                {revenueActions.map((action, index) => {
-                  const bgColorClass = 
-                    action.color === "primary" ? "bg-primary/10" :
-                    action.color === "warning" ? "bg-warning/10" :
-                    "bg-primary/10";
-                  const textColorClass = 
-                    action.color === "primary" ? "text-primary" :
-                    action.color === "warning" ? "text-warning" :
-                    "text-primary";
-                  return (
-                    <Card 
-                      key={index} 
-                      className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
-                      onClick={() => {
-                        if (action.title === t('admin.management.payments')) navigate("/admin/payments");
-                        else if (action.title === t('proAccount.title')) navigate("/admin/pro-accounts");
-                      }}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
-                            <action.icon className={`h-6 w-6 ${textColorClass}`} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{action.title}</h4>
-                            <p className="text-sm text-muted-foreground whitespace-normal break-words">{action.description}</p>
-                          </div>
-                        </div>
-                        <div className="mt-4 flex justify-end">
-                          <Button variant="default" size="sm" className="w-full sm:w-auto touch-friendly">
-                            {userRole === 'reports_viewer' ? t('admin.management.view') : action.action}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-                <CoachPaymentsCard userRole={userRole} />
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
+        <Card 
+          className="shadow-medium mb-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate("/admin/revenue")}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-normal">{t('admin.management.revenueManagement')}</CardTitle>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+        </Card>
 
         {/* Expenses Card */}
         <div className="mt-6">
