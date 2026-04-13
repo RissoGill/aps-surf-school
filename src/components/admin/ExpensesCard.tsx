@@ -312,6 +312,19 @@ export const ExpensesCard = () => {
   };
 
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const [expensesOpen, setExpensesOpen] = useState(false);
+
+  const totalCurrentMonth = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    return expenses
+      .filter((e) => {
+        const d = new Date(e.expense_date);
+        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
+      })
+      .reduce((sum, e) => sum + Number(e.amount), 0);
+  }, [expenses]);
 
   return (
     <Card>
