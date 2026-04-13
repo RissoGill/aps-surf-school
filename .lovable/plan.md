@@ -1,26 +1,54 @@
 
 
-# Fix: Relatório Mensal Completo não lê receitas
+# Incluir Salários (Coach Payments) no Gráfico Anual e Relatório Mensal Completo
 
-## Problema
-A query de payments no `generateCompleteReport` filtra por `status IN ('paid', 'partial')` em minúsculas, mas a base de dados guarda `"Paid"` e `"Partial"` com maiúscula. O filtro `.in()` do Supabase é case-sensitive, logo retorna 0 resultados.
+## Contexto
+Os `coach_payments` são os salários dos treinadores. Devem ser incluídos como despesas (categoria "Salários") tanto no gráfico anual como no relatório mensal completo e nos cartões de resumo.
 
-## Correção em `src/components/admin/ExpenseReportsCard.tsx`
+## Alterações
 
-Linha 150 -- alterar o filtro de status:
+### 1. Gráfico Anual e Cartões de Resumo (`AccountingManagement.tsx`)
+
+**Query `annual-chart-data`:** Adicionar fetch de `coach_payments` com `payment_date` entre 2025-09-01 e 2026-08-31. No cálculo mensal de despesas, somar `expenses + coach_payments` (por `payment_date`).
+
+**Query `accounting-stats`:** Incluir `coach_payments` nos totais de `totalExpensesSinceSept` e `totalExpensesCurrentMonth`, atualizando automaticamente o `monthlyBalance`.
+
+### 2. Relatório Mensal Completo (`ExpenseReportsCard.tsx`)
+
+**Na função `generateCompleteReport`:**
+- Buscar `coach_payments` do mês (por `payment_date`) e `coach` para mapear nomes
+- Somar ao `totalExpenses` para o balanço correto
+- Adicionar secção "Salários (Treinadores)" no HTML com tabela: Treinador, Data, Valor, Notas
+- O resumo mostra: Despesas Operacionais + Salários separadamente, e o total combinado
+
+### 3. Secção Técnica
+
 ```tsx
-// De:
-.in('status', ['paid', 'partial'])
+// AccountingManagement.tsx - query adicional no annual-chart-data
+supabase.from('coach_payments').select('amount, payment_date')
+  .gte('payment_date', '2025-09-01').lte('payment_date', '2026-08-31')
 
-// Para:
-.in('status', ['Paid', 'Partial', 'paid', 'partial'])
+// No cálculo por mês do gráfico:
+const coachTotal = coachPayments
+  .filter(cp => { const d = new Date(cp.payment_date); return d.getFullYear() === sm.year && d.getMonth() + 1 === sm.month; })
+  .reduce((s, cp) => s + Number(cp.amount || 0), 0);
+// expenses no gráfico = expTotal + coachTotal
+
+// accounting-stats: mesmo padrão para totalExpensesSinceSept e totalExpensesCurrentMonth
+
+// ExpenseReportsCard.tsx - no generateCompleteReport:
+const [expensesRes, paymentsRes, athletesRes, coachPaymentsRes, coachesRes] = await Promise.all([
+  /* existentes */,
+  supabase.from('coach_payments').select('*').gte('payment_date', startDate).lte('payment_date', endDate),
+  supabase.from('coach').select('coach_id, first_name, last_name'),
+]);
+
+const totalCoachPayments = coachPayments.reduce((s, cp) => s + Number(cp.amount || 0), 0);
+const totalAllExpenses = totalExpenses + totalCoachPayments;
+const balance = totalIncome - totalAllExpenses;
 ```
 
-Isto cobre ambos os formatos e garante compatibilidade. Alternativa: usar a mesma abordagem do dashboard (buscar todos e filtrar no cliente com `.toLowerCase()`), mas incluir ambos os valores no `.in()` é mais simples e eficiente.
-
-Também corrigir o mesmo filtro no gráfico anual em `AccountingManagement.tsx` se aplicável.
-
-## Secção Técnica
-- Ficheiro: `src/components/admin/ExpenseReportsCard.tsx`, linha ~150
-- Verificar também `AccountingManagement.tsx` (gráfico anual) para o mesmo problema
+Ficheiros a alterar:
+- `src/pages/admin/AccountingManagement.tsx`
+- `src/components/admin/ExpenseReportsCard.tsx`
 
