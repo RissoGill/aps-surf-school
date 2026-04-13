@@ -591,7 +591,10 @@
       "totalCompetition": "Total Competition Athletes",
       "totalExpensesSept": "Total Expenses since Sep 2025",
       "expensesCurrentMonth": "Expenses Current Month",
-      "monthlyBalance": "Monthly Balance"
+      "monthlyBalance": "Monthly Balance",
+      "seasonTitle": "Season 2025-2026",
+      "chartRevenue": "Revenue",
+      "chartExpenses": "Expenses"
     },
     "management": {
       "title": "Management Tools",
