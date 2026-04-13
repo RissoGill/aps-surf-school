@@ -433,13 +433,24 @@ export const ExpensesCard = () => {
   const handleAddRecurring = () => {
     if (!recName.trim() || !recAmount) return;
     const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
-    createRecurringMutation.mutate({
-      name: recName.trim(),
-      category: recCategory || null,
-      subcategory: resolvedSub || null,
-      sub_subcategory: recSubSubcategory || null,
-      amount: parseFloat(recAmount),
-    });
+    if (editingRecurringId) {
+      updateRecurringMutation.mutate({
+        id: editingRecurringId,
+        name: recName.trim(),
+        category: recCategory || null,
+        subcategory: resolvedSub || null,
+        sub_subcategory: recSubSubcategory || null,
+        amount: parseFloat(recAmount),
+      });
+    } else {
+      createRecurringMutation.mutate({
+        name: recName.trim(),
+        category: recCategory || null,
+        subcategory: resolvedSub || null,
+        sub_subcategory: recSubSubcategory || null,
+        amount: parseFloat(recAmount),
+      });
+    }
   };
 
   return (
