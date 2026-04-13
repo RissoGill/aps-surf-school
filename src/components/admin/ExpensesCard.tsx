@@ -412,12 +412,12 @@ export const ExpensesCard = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
           <CardTitle className="text-lg">{t("expenses.title")}</CardTitle>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={() => setRecurringDialogOpen(true)}>
             <Settings className="h-4 w-4 mr-1" />
             {t("expenses.manageRecurring")}
