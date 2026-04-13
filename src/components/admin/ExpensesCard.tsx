@@ -21,6 +21,7 @@ interface Expense {
   id: string;
   name: string;
   category: string | null;
+  subcategory: string | null;
   expense_date: string;
   amount: number;
   invoice_url: string | null;
@@ -35,6 +36,11 @@ const EXPENSE_CATEGORIES = [
   "Devolução Sócios", "Custos Campeonatos", "Outros"
 ];
 
+const SUBCATEGORIES: Record<string, string[]> = {
+  "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
+  "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
+};
+
 export const ExpensesCard = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -45,6 +51,8 @@ export const ExpensesCard = () => {
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [category, setCategory] = useState("");
+  const [subcategory, setSubcategory] = useState("");
+  const [customSubcategory, setCustomSubcategory] = useState("");
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -57,6 +65,8 @@ export const ExpensesCard = () => {
   const [editName, setEditName] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(new Date());
   const [editCategory, setEditCategory] = useState("");
+  const [editSubcategory, setEditSubcategory] = useState("");
+  const [editCustomSubcategory, setEditCustomSubcategory] = useState("");
   const [editAmount, setEditAmount] = useState("");
   const [editFile, setEditFile] = useState<File | null>(null);
   const [editUploading, setEditUploading] = useState(false);
