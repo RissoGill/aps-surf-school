@@ -1590,6 +1590,10 @@
     "uploadError": "Erro ao carregar ficheiro",
     "scanInvoice": "Tirar Foto",
     "uploadFile": "Escolher Ficheiro",
-    "fileSelected": "Ficheiro selecionado"
+    "fileSelected": "Ficheiro selecionado",
+    "edit": "Editar Despesa",
+    "updated": "Despesa atualizada",
+    "save": "Guardar",
+    "currentInvoice": "Factura atual"
   }
 }

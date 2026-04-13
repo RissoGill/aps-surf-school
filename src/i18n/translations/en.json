@@ -1590,6 +1590,10 @@
     "uploadError": "Error uploading file",
     "scanInvoice": "Take Photo",
     "uploadFile": "Choose File",
-    "fileSelected": "File selected"
+    "fileSelected": "File selected",
+    "edit": "Edit Expense",
+    "updated": "Expense updated",
+    "save": "Save",
+    "currentInvoice": "Current invoice"
   }
 }
