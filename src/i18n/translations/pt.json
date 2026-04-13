@@ -1601,6 +1601,7 @@
     "subcategoryPlaceholder": "Selecionar subcategoria",
     "customName": "Nome",
     "subSubcategory": "Tipo de Despesa",
-    "subSubcategoryPlaceholder": "Selecionar tipo"
+    "subSubcategoryPlaceholder": "Selecionar tipo",
+    "championshipDescriptionPlaceholder": "Descrição do campeonato"
   }
 }
