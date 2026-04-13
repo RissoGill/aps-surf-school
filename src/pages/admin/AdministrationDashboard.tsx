@@ -746,6 +746,12 @@ const AdministrationDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Alerts Management */}
+        <AlertsManagementCard userRole={userRole} currentUser={currentUser} />
+
+        {/* Coach Messages Management */}
+        <CoachMessagesManagementCard />
+
         {/* Athletes Level Stats */}
 
         {/* Athletes Level Stats - 3 in a row */}
