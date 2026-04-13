@@ -1,20 +1,34 @@
 
 
-# Adicionar Descrição para "Custos Campeonatos"
+# Reorganizar Painel de Administração
 
 ## Resumo
-Quando a categoria "Custos Campeonatos" for selecionada, mostrar um campo de texto livre para o utilizador escrever a descrição do custo. O valor será guardado na coluna `subcategory` já existente.
+Agrupar os cartões existentes em duas secções visuais com títulos:
+1. **Gestão Diária Atletas e Treinadores** - Gerir Utilizadores, Gestão de Atletas, Gestão de Presenças, Gestão de Presenças por Treinador (CoachTrainingManagement)
+2. **Gestão de Receitas** - Administração de Pagamentos, Conta Corrente Pro, Pagamento a Treinadores (CoachPaymentsCard)
+
+Os restantes cartões (Ghost Cleanup, Alerts, Coach Messages, Expenses, Reports) ficam abaixo, fora dos grupos.
 
 ## Alterações
 
-### `src/components/admin/ExpensesCard.tsx`
+### `src/pages/admin/AdministrationDashboard.tsx`
 
-1. Adicionar lógica para mostrar um `Input` de texto livre quando a categoria é "Custos Campeonatos" (sem dropdown, apenas campo de descrição)
-2. Tratar este caso especial: quando `category === "Custos Campeonatos"`, mostrar um campo `Input` em vez de `Select`, guardando o valor em `subcategory`
-3. Aplicar a mesma lógica no formulário de edição
+1. **Separar `adminActions` em dois grupos:**
+   - Grupo 1 (Gestão Diária): Users, Athletes, Attendance
+   - Grupo 2 (Gestão de Receitas): Payments, Pro Account
 
-A abordagem mais simples: definir uma constante `FREETEXT_SUBCATEGORIES` (ex: `["Custos Campeonatos"]`) que indica categorias onde a subcategoria é texto livre em vez de dropdown.
+2. **Reestruturar o JSX (linhas ~806-910):**
+   - Secção "Gestão Diária Atletas e Treinadores" com Card wrapper:
+     - Renderizar cartões de Users, Athletes, Attendance (do adminActions)
+     - Mover `CoachTrainingManagement` para dentro desta secção
+   - Secção "Gestão de Receitas" com Card wrapper:
+     - Renderizar cartões de Payments e Pro Account (do adminActions)
+     - Mover `CoachPaymentsCard` para dentro desta secção
+   - Manter os restantes cartões (Ghost, Alerts, Messages, Expenses, Reports) abaixo
+
+3. **Cada secção terá:** um `Card` container com título (`CardHeader`/`CardTitle`) e os sub-cartões dentro do `CardContent`
 
 ### Traduções (`pt.json` e `en.json`)
-- `expenses.descriptionPlaceholder`: "Descrição do campeonato" / "Championship description"
+- `admin.management.dailyManagement`: "Gestão Diária Atletas e Treinadores" / "Daily Athletes & Coaches Management"
+- `admin.management.revenueManagement`: "Gestão de Receitas" / "Revenue Management"
 
