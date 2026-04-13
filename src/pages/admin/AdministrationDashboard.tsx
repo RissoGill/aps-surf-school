@@ -874,52 +874,60 @@ const AdministrationDashboard = () => {
           </Card>
         </Collapsible>
 
-        {/* Gestão de Receitas */}
-        <Card className="shadow-medium mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl text-center">{t('admin.management.revenueManagement')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {revenueActions.map((action, index) => {
-              const bgColorClass = 
-                action.color === "primary" ? "bg-primary/10" :
-                action.color === "warning" ? "bg-warning/10" :
-                "bg-primary/10";
-              const textColorClass = 
-                action.color === "primary" ? "text-primary" :
-                action.color === "warning" ? "text-warning" :
-                "text-primary";
-              return (
-                <Card 
-                  key={index} 
-                  className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
-                  onClick={() => {
-                    if (action.title === t('admin.management.payments')) navigate("/admin/payments");
-                    else if (action.title === t('proAccount.title')) navigate("/admin/pro-accounts");
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
-                        <action.icon className={`h-6 w-6 ${textColorClass}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{action.title}</h4>
-                        <p className="text-sm text-muted-foreground whitespace-normal break-words">{action.description}</p>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <Button variant="default" size="sm" className="w-full sm:w-auto touch-friendly">
-                        {userRole === 'reports_viewer' ? t('admin.management.view') : action.action}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-            <CoachPaymentsCard userRole={userRole} />
-          </CardContent>
-        </Card>
+        <Collapsible defaultOpen={false}>
+          <Card className="shadow-medium mb-6">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">{t('admin.management.revenueManagement')}</CardTitle>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                {revenueActions.map((action, index) => {
+                  const bgColorClass = 
+                    action.color === "primary" ? "bg-primary/10" :
+                    action.color === "warning" ? "bg-warning/10" :
+                    "bg-primary/10";
+                  const textColorClass = 
+                    action.color === "primary" ? "text-primary" :
+                    action.color === "warning" ? "text-warning" :
+                    "text-primary";
+                  return (
+                    <Card 
+                      key={index} 
+                      className="shadow-soft hover:shadow-medium transition-shadow cursor-pointer"
+                      onClick={() => {
+                        if (action.title === t('admin.management.payments')) navigate("/admin/payments");
+                        else if (action.title === t('proAccount.title')) navigate("/admin/pro-accounts");
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-12 h-12 rounded-full ${bgColorClass} flex items-center justify-center flex-shrink-0`}>
+                            <action.icon className={`h-6 w-6 ${textColorClass}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-foreground mb-1 whitespace-normal break-words">{action.title}</h4>
+                            <p className="text-sm text-muted-foreground whitespace-normal break-words">{action.description}</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex justify-end">
+                          <Button variant="default" size="sm" className="w-full sm:w-auto touch-friendly">
+                            {userRole === 'reports_viewer' ? t('admin.management.view') : action.action}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+                <CoachPaymentsCard userRole={userRole} />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Expenses Card */}
         <div className="mt-6">
