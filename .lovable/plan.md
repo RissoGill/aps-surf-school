@@ -1,58 +1,49 @@
 
 
-# Gráfico Anual Receitas vs Despesas (Setembro 2025 - Agosto 2026)
+# Adicionar Relatório Mensal Completo (Income + Despesas)
 
 ## Resumo
-Adicionar um gráfico de barras entre os 4 cartões de resumo e o ExpensesCard, mostrando receitas (payments) e despesas (expenses) mês a mês para a época 2025-2026.
+Adicionar uma nova opção de tipo de relatório no `ExpenseReportsCard`: além do relatório atual filtrado por categoria, incluir a opção "Relatório Mensal Completo" que mostra receitas (payments) e despesas lado a lado, com resumo e balanço.
 
-## Alterações
+## Alterações em `src/components/admin/ExpenseReportsCard.tsx`
 
-### 1. Nova query `annual-chart-data` em `AccountingManagement.tsx`
-- Buscar todas as `expenses` com `expense_date` entre 2025-09-01 e 2026-08-31
-- Buscar todos os `payments` dos anos 2025 e 2026 com status paid/partial
-- Agrupar por mês: Set, Out, Nov, Dez, Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago
-- Calcular por mês: total receitas, total despesas, balanço
+### 1. Novo estado `reportType`
+- Select com duas opções: "Despesas por Categoria" (atual) e "Relatório Mensal Completo"
+- Quando "Completo" está selecionado, esconder os filtros de categoria/subcategoria
 
-### 2. Componente do gráfico (inline em AccountingManagement ou novo componente)
-- Usar `recharts` (BarChart) com o `ChartContainer` existente do shadcn
-- 2 barras por mês: Receitas (cor primary/#31A896) e Despesas (cor destructive/vermelho)
-- Tooltip com valores em €
-- Legenda
-- Título: "Época 2025-2026"
-- Renderizar entre os stats cards e o ExpensesCard
+### 2. Nova lógica `generateCompleteReport`
+- Buscar `expenses` do mês selecionado (já existe)
+- Buscar `payments` do mês selecionado com `status = 'paid'` ou `'partial'`, filtrando por `month` (nome em inglês) e `year`
+- Mapear mês numérico para nome inglês (January, February...) para corresponder ao campo `month` da tabela payments
 
-### 3. Traduções
-- `admin.chart.seasonTitle`: "Época 2025-2026" / "Season 2025-2026"
-- `admin.chart.revenue`: "Receitas" / "Revenue"  
-- `admin.chart.expenses`: "Despesas" / "Expenses"
+### 3. HTML do relatório completo
+- **Secção Resumo**: Total Receitas, Total Despesas, Balanço (receitas - despesas) com cor verde/vermelho
+- **Tabela Receitas**: Atleta, Mês, Valor Pago, Status
+- **Tabela Despesas**: Data, Fornecedor, Categoria, Valor (reutiliza a existente)
+- Mesmo estilo visual (#31A896, logo APS, footer)
+
+### 4. Traduções
+- `expenses.reports.reportType` / `expenses.reports.expensesByCategory` / `expenses.reports.completeMonthly`
+- `expenses.reports.income` / `expenses.reports.balance`
 
 ## Secção Técnica
 
-**Dados do gráfico:**
 ```tsx
-const seasonMonths = [
-  { month: 9, year: 2025, label: "Set" },
-  { month: 10, year: 2025, label: "Out" },
-  // ... até
-  { month: 8, year: 2026, label: "Ago" },
-];
+// Novo estado
+const [reportType, setReportType] = useState<"expenses" | "complete">("expenses");
 
-// Para cada mês: somar expenses por expense_date e payments por month+year+status
+// Query payments para relatório completo
+const monthNames = ["January", "February", ...];
+const { data: payments } = await supabase
+  .from('payments').select('*')
+  .eq('month', monthNames[viewMonth - 1])
+  .eq('year', viewYear)
+  .in('status', ['paid', 'partial']);
+
+// Resumo no HTML
+const totalIncome = payments.reduce((s, p) => s + Number(p.amount_paid || 0), 0);
+const balance = totalIncome - totalExpenses;
 ```
 
-**Gráfico (recharts + ChartContainer shadcn):**
-```tsx
-<ChartContainer config={chartConfig}>
-  <BarChart data={chartData}>
-    <CartesianGrid vertical={false} />
-    <XAxis dataKey="label" />
-    <YAxis />
-    <ChartTooltip content={<ChartTooltipContent />} />
-    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-    <Bar dataKey="expenses" fill="var(--color-expenses)" radius={4} />
-  </BarChart>
-</ChartContainer>
-```
-
-**Posição:** Entre `</div>` dos stats cards (linha 156) e `<ExpensesCard />` (linha 159).
+O Select de tipo de relatório fica acima dos seletores de mês/ano. Os filtros de categoria só aparecem quando `reportType === "expenses"`.
 
