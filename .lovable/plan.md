@@ -1,18 +1,28 @@
 
 
-# Alterar label "Descrição" para "Fornecedor" nas despesas
+# Adicionar campo de Categoria nas Despesas
 
-## Alteração
+## Resumo
+Criar um dropdown de categoria a seguir ao campo "Fornecedor" no formulário de despesas, com as opções pedidas.
 
-Atualizar as traduções do campo `expenses.name` e `expenses.namePlaceholder`:
+## Alterações
 
-### `src/i18n/translations/pt.json` (linha 1575-1576)
-- `"name"`: "Descrição" → "Fornecedor"
-- `"namePlaceholder"`: "Ex: Material de surf" → "Ex: Decathlon"
+### 1. Migração Supabase
+Adicionar coluna `category` (text, nullable) à tabela `expenses`.
 
-### `src/i18n/translations/en.json` (linha 1575-1576)
-- `"name"`: "Description" → "Supplier"
-- `"namePlaceholder"`: "E.g.: Surf equipment" → "E.g.: Decathlon"
+### 2. `src/components/admin/ExpensesCard.tsx`
+- Adicionar estado `category` e `editCategory` para os formulários de criação e edição
+- Adicionar um `Select` dropdown após o campo Fornecedor com as opções:
+  Despesas Bancárias, Salários, Leasing, Portagens, Carrinhas, Impostos, Comunicações, Contabilidade, Compras Fornecedores, Material Técnico, Seguros, Despesas Legais, Licenças, Devolução Sócios, Custos Campeonatos, Outros
+- Incluir `category` no `createMutation` e `updateMutation`
+- Adicionar coluna "Categoria" na tabela de listagem
+- Atualizar interface `Expense` com `category: string | null`
 
-Também atualizar o header da tabela que usa a mesma chave `expenses.name`.
+### 3. Traduções (`pt.json` e `en.json`)
+- `expenses.category`: "Categoria" / "Category"
+- `expenses.categoryPlaceholder`: "Selecionar categoria" / "Select category"
+- Chaves para cada opção do dropdown
+
+### 4. Tipos (`types.ts`)
+Regenerados automaticamente com a nova coluna, ou adicionados manualmente.
 
