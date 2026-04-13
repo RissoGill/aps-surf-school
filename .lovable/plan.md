@@ -1,34 +1,49 @@
 
 
-# Reorganizar Painel de Administração
+# Simplificar Cartões Principais - Apenas Títulos
 
 ## Resumo
-Agrupar os cartões existentes em duas secções visuais com títulos:
-1. **Gestão Diária Atletas e Treinadores** - Gerir Utilizadores, Gestão de Atletas, Gestão de Presenças, Gestão de Presenças por Treinador (CoachTrainingManagement)
-2. **Gestão de Receitas** - Administração de Pagamentos, Conta Corrente Pro, Pagamento a Treinadores (CoachPaymentsCard)
+Transformar os dois cartões agrupados ("Gestão Diária" e "Gestão de Receitas") em cartões colapsáveis que mostram apenas o título na front page. Ao clicar/expandir, revelam os sub-cartões detalhados. Isto reduz drasticamente a informação visível inicialmente.
 
-Os restantes cartões (Ghost Cleanup, Alerts, Coach Messages, Expenses, Reports) ficam abaixo, fora dos grupos.
+## Abordagem
+Usar o componente `Collapsible` (já existe em `src/components/ui/collapsible.tsx`) para tornar cada secção expansível/colapsável, começando fechada por defeito.
 
 ## Alterações
 
 ### `src/pages/admin/AdministrationDashboard.tsx`
 
-1. **Separar `adminActions` em dois grupos:**
-   - Grupo 1 (Gestão Diária): Users, Athletes, Attendance
-   - Grupo 2 (Gestão de Receitas): Payments, Pro Account
+1. Importar `Collapsible, CollapsibleTrigger, CollapsibleContent` de `@/components/ui/collapsible`
+2. Importar `ChevronDown` do lucide-react
 
-2. **Reestruturar o JSX (linhas ~806-910):**
-   - Secção "Gestão Diária Atletas e Treinadores" com Card wrapper:
-     - Renderizar cartões de Users, Athletes, Attendance (do adminActions)
-     - Mover `CoachTrainingManagement` para dentro desta secção
-   - Secção "Gestão de Receitas" com Card wrapper:
-     - Renderizar cartões de Payments e Pro Account (do adminActions)
-     - Mover `CoachPaymentsCard` para dentro desta secção
-   - Manter os restantes cartões (Ghost, Alerts, Messages, Expenses, Reports) abaixo
+3. Para cada cartão agrupado (Gestão Diária e Gestão de Receitas):
+   - Envolver com `Collapsible` (defaultOpen={false})
+   - O `CardHeader` torna-se `CollapsibleTrigger` clicável com ícone chevron
+   - O `CardContent` fica dentro de `CollapsibleContent`
 
-3. **Cada secção terá:** um `Card` container com título (`CardHeader`/`CardTitle`) e os sub-cartões dentro do `CardContent`
+Estrutura resultante:
+```tsx
+<Collapsible defaultOpen={false}>
+  <Card className="shadow-medium mb-6">
+    <CollapsibleTrigger asChild>
+      <CardHeader className="cursor-pointer">
+        <div className="flex items-center justify-between">
+          <CardTitle>{t('admin.management.dailyManagement')}</CardTitle>
+          <ChevronDown className="h-5 w-5 transition-transform" />
+        </div>
+      </CardHeader>
+    </CollapsibleTrigger>
+    <CollapsibleContent>
+      <CardContent>
+        {/* sub-cartões existentes */}
+      </CardContent>
+    </CollapsibleContent>
+  </Card>
+</Collapsible>
+```
 
-### Traduções (`pt.json` e `en.json`)
-- `admin.management.dailyManagement`: "Gestão Diária Atletas e Treinadores" / "Daily Athletes & Coaches Management"
-- `admin.management.revenueManagement`: "Gestão de Receitas" / "Revenue Management"
+4. Aplicar o mesmo padrão ao cartão "Gestão de Receitas"
+
+### Sem alterações noutros ficheiros
+- O componente `Collapsible` já existe
+- Não são necessárias novas traduções
 
