@@ -252,9 +252,11 @@ export const ExpensesCard = () => {
       }
     }
 
+    const resolvedSubcategory = subcategory === "Outro" ? customSubcategory.trim() : subcategory;
     createMutation.mutate({
       name: name.trim(),
       category: category || null,
+      subcategory: resolvedSubcategory || null,
       expense_date: format(date, "yyyy-MM-dd"),
       amount: parseFloat(amount),
       invoice_url: invoiceUrl,
@@ -277,10 +279,12 @@ export const ExpensesCard = () => {
       invoiceUrl = uploaded;
     }
 
+    const resolvedEditSubcategory = editSubcategory === "Outro" ? editCustomSubcategory.trim() : editSubcategory;
     updateMutation.mutate({
       id: editingExpense.id,
       name: editName.trim(),
       category: editCategory || null,
+      subcategory: resolvedEditSubcategory || null,
       expense_date: format(editDate, "yyyy-MM-dd"),
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
