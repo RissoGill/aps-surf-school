@@ -843,7 +843,9 @@
       "deleted": "Alert deleted successfully",
       "createError": "Failed to create alert",
       "updateError": "Failed to update alert",
-      "deleteError": "Failed to delete alert"
+      "deleteError": "Failed to delete alert",
+      "showHistory": "Show History",
+      "hideHistory": "Hide History"
     },
     "coachMessages": {
       "title": "Coach Messages",
@@ -869,7 +871,9 @@
       "selectCoachPlaceholder": "Choose a coach...",
       "selectCoachError": "Please select a coach",
       "messageToCoachPlaceholder": "Write your message to the coach...",
-      "messageSent": "Message sent successfully"
+      "messageSent": "Message sent successfully",
+      "showHistory": "Show History",
+      "hideHistory": "Hide History"
     },
     "media": {
       "photos": "Photos",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Plus, Check, X, Edit2, Trash2, Users } from "lucide-react";
+import { Bell, Plus, Check, X, Edit2, Trash2, Users, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +49,7 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -284,7 +285,17 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
               <CardDescription>{t('admin.alerts.description')}</CardDescription>
             </div>
           </div>
-          {canEdit && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showHistory ? "secondary" : "outline"}
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="h-4 w-4" />
+              {showHistory ? t('admin.alerts.hideHistory') : t('admin.alerts.showHistory')}
+            </Button>
+            {canEdit && (
             <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setIsDialogOpen(open); }}>
               <DialogTrigger asChild>
                 <Button size="sm" className="gap-2">
@@ -399,6 +410,7 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
               </DialogContent>
             </Dialog>
           )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -411,7 +423,7 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
           </div>
         ) : (
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {alerts.map((alert) => (
+            {alerts.filter(a => showHistory || !a.is_resolved).map((alert) => (
               <div
                 key={alert.id}
                 className={`p-4 rounded-lg border ${

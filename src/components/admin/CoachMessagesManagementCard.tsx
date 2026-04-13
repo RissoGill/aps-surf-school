@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw, Mail } from "lucide-react";
+import { MessageSquare, Send, Clock, Check, Filter, ChevronDown, ChevronUp, RefreshCw, Mail, History } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +47,8 @@ export const CoachMessagesManagementCard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showHistory, setShowHistory] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [coachFilter, setCoachFilter] = useState<string>("all");
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -342,6 +343,21 @@ export const CoachMessagesManagementCard = () => {
             )}
           </div>
           <div className="flex gap-2">
+            <Button
+              variant={showHistory ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => {
+                setShowHistory(!showHistory);
+                if (!showHistory) {
+                  setStatusFilter("all");
+                } else {
+                  setStatusFilter("pending");
+                }
+              }}
+            >
+              <History className="h-4 w-4 mr-1" />
+              {showHistory ? t('admin.coachMessages.hideHistory') : t('admin.coachMessages.showHistory')}
+            </Button>
             <Button variant="default" size="sm" onClick={() => setShowNewMessageForm(!showNewMessageForm)}>
               <Mail className="h-4 w-4 mr-1" />
               {t('admin.coachMessages.newMessage')}
@@ -426,17 +442,19 @@ export const CoachMessagesManagementCard = () => {
         
         {/* Filters */}
         <div className="flex flex-wrap gap-2 mt-3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
-              <Filter className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('admin.coachMessages.filterAll')}</SelectItem>
-              <SelectItem value="pending">{t('admin.coachMessages.filterPending')}</SelectItem>
-              <SelectItem value="resolved">{t('admin.coachMessages.filterResolved')}</SelectItem>
-            </SelectContent>
-          </Select>
+          {showHistory && (
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('admin.coachMessages.filterAll')}</SelectItem>
+                <SelectItem value="pending">{t('admin.coachMessages.filterPending')}</SelectItem>
+                <SelectItem value="resolved">{t('admin.coachMessages.filterResolved')}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           
           <Select value={coachFilter} onValueChange={setCoachFilter}>
             <SelectTrigger className="w-[200px]">

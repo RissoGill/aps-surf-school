@@ -843,7 +843,9 @@
       "deleted": "Alerta eliminado com sucesso",
       "createError": "Erro ao criar alerta",
       "updateError": "Erro ao atualizar alerta",
-      "deleteError": "Erro ao eliminar alerta"
+      "deleteError": "Erro ao eliminar alerta",
+      "showHistory": "Ver Histórico",
+      "hideHistory": "Ocultar Histórico"
     },
     "coachMessages": {
       "title": "Mensagens dos Treinadores",
@@ -869,7 +871,9 @@
       "selectCoachPlaceholder": "Escolha um treinador...",
       "selectCoachError": "Por favor selecione um treinador",
       "messageToCoachPlaceholder": "Escreva a sua mensagem para o treinador...",
-      "messageSent": "Mensagem enviada com sucesso"
+      "messageSent": "Mensagem enviada com sucesso",
+      "showHistory": "Ver Histórico",
+      "hideHistory": "Ocultar Histórico"
     },
     "media": {
       "photos": "Fotos",
