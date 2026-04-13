@@ -1599,6 +1599,8 @@
     "categoryPlaceholder": "Select category",
     "subcategory": "Subcategory",
     "subcategoryPlaceholder": "Select subcategory",
-    "customName": "Name"
+    "customName": "Name",
+    "subSubcategory": "Expense Type",
+    "subSubcategoryPlaceholder": "Select type"
   }
 }
