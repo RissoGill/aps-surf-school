@@ -588,7 +588,10 @@
       "coachPaymentsMonth": "Pagamentos a Treinadores Este Mês",
       "totalLearning": "Total Atletas Learning",
       "totalPreCompetition": "Total Atletas Pré-Competição",
-      "totalCompetition": "Total Atletas Competição"
+      "totalCompetition": "Total Atletas Competição",
+      "totalExpensesSept": "Total Despesas desde Set 2025",
+      "expensesCurrentMonth": "Despesas Mês Corrente",
+      "monthlyBalance": "Balanço Mensal"
     },
     "management": {
       "title": "Ferramentas de Gestão",
