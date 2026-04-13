@@ -1,28 +1,32 @@
 
 
-# Converter foto capturada para PDF antes de upload
+# Adicionar edição de despesas existentes
 
 ## Contexto
-Quando o utilizador usa "Tirar Foto" (câmara), a imagem capturada é enviada tal como está. O pedido é converter essa imagem para PDF antes de fazer upload.
+Atualmente as despesas só podem ser criadas e eliminadas. O utilizador quer poder editar todos os campos (nome, data, valor, factura).
 
 ## Alteração
 
 ### `src/components/admin/ExpensesCard.tsx`
 
-1. Criar uma função `convertImageToPdf(imageFile: File): Promise<File>` que:
-   - Lê a imagem capturada como Data URL
-   - Cria um canvas, desenha a imagem
-   - Usa `canvas.toBlob()` para obter os dados
-   - Gera um PDF com a biblioteca `jspdf` (já disponível ou a instalar) contendo a imagem em página inteira
-   - Retorna um novo `File` com extensão `.pdf`
+1. Adicionar estado `editingExpense` para a despesa em edição e estados de formulário de edição (`editName`, `editDate`, `editAmount`, `editFile`)
 
-2. Alterar o `handleFileChange` do input de scan (câmara) para um handler separado `handleScanChange` que:
-   - Recebe o ficheiro de imagem
-   - Chama `convertImageToPdf()` 
-   - Faz `setFile()` com o PDF resultante
+2. Adicionar um botão de edição (ícone Pencil) em cada linha da tabela, ao lado do botão de eliminar
 
-3. O input de upload normal (`fileInputRef`) mantém o comportamento atual.
+3. Criar um novo `Dialog` de edição (semelhante ao de criação) com:
+   - Campo Nome (input text, pré-preenchido)
+   - Campo Data (datepicker, pré-preenchido)
+   - Campo Valor (input number, pré-preenchido)
+   - Opção de substituir factura (scan ou upload, igual ao formulário de criação)
+   - Se já existe factura, mostrar link para a atual
 
-### Dependência
-- Instalar `jspdf` (`npm install jspdf`) — biblioteca leve para gerar PDFs no browser. Versão fixada em 2.5.2 (segura).
+4. Criar `updateMutation` que faz `supabase.from("expenses").update({...}).eq("id", id)`:
+   - Se um novo ficheiro foi escolhido, faz upload ao storage e actualiza `invoice_url`
+   - Se não, mantém o `invoice_url` existente
+
+### Traduções (`pt.json` e `en.json`)
+- `"expenses.edit"`: "Editar Despesa" / "Edit Expense"
+- `"expenses.updated"`: "Despesa atualizada" / "Expense updated"
+- `"expenses.save"`: "Guardar" / "Save"
+- `"expenses.currentInvoice"`: "Factura atual" / "Current invoice"
 
