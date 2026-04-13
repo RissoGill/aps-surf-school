@@ -205,6 +205,7 @@ export const ExpensesCard = () => {
     setEditCategory("");
     setEditSubcategory("");
     setEditCustomSubcategory("");
+    setEditSubSubcategory("");
     setEditAmount("");
     setEditFile(null);
     setEditDialogOpen(false);
