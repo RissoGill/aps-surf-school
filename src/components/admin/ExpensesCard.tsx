@@ -540,6 +540,7 @@ export const ExpensesCard = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
