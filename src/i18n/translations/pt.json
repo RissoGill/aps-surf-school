@@ -588,7 +588,10 @@
       "coachPaymentsMonth": "Pagamentos a Treinadores Este Mês",
       "totalLearning": "Total Atletas Learning",
       "totalPreCompetition": "Total Atletas Pré-Competição",
-      "totalCompetition": "Total Atletas Competição"
+      "totalCompetition": "Total Atletas Competição",
+      "totalExpensesSept": "Total Despesas desde Set 2025",
+      "expensesCurrentMonth": "Despesas Mês Corrente",
+      "monthlyBalance": "Balanço Mensal"
     },
     "management": {
       "title": "Ferramentas de Gestão",
@@ -606,7 +609,8 @@
       "paymentSettings": "Configurações de Pagamento",
       "manageAttendance": "Gerir Presenças",
       "dailyManagement": "Gestão Diária Atletas e Treinadores",
-      "revenueManagement": "Gestão de Receitas"
+      "revenueManagement": "Gestão de Receitas",
+      "accounting": "Contabilidade"
     },
     "coachAttendance": {
       "title": "Gestão de Presenças por Treinador",

@@ -588,7 +588,10 @@
       "coachPaymentsMonth": "Coach Payments This Month",
       "totalLearning": "Total Learning Athletes",
       "totalPreCompetition": "Total Pre-Competition Athletes",
-      "totalCompetition": "Total Competition Athletes"
+      "totalCompetition": "Total Competition Athletes",
+      "totalExpensesSept": "Total Expenses since Sep 2025",
+      "expensesCurrentMonth": "Expenses Current Month",
+      "monthlyBalance": "Monthly Balance"
     },
     "management": {
       "title": "Management Tools",
@@ -606,7 +609,8 @@
       "paymentSettings": "Payment Settings",
       "manageAttendance": "Manage Attendance",
       "dailyManagement": "Daily Athletes & Coaches Management",
-      "revenueManagement": "Revenue Management"
+      "revenueManagement": "Revenue Management",
+      "accounting": "Accounting"
     },
     "coachAttendance": {
       "title": "Coach Attendance Management",
