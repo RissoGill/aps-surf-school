@@ -332,7 +332,7 @@ export const ExpensesCard = () => {
               </div>
               <div>
                 <Label>{t("expenses.category")}</Label>
-                <Select value={category} onValueChange={(val) => { setCategory(val); setSubcategory(""); setCustomSubcategory(""); }}>
+                <Select value={category} onValueChange={(val) => { setCategory(val); setSubcategory(""); setCustomSubcategory(""); setSubSubcategory(""); }}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                   </SelectTrigger>
