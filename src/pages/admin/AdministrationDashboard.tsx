@@ -656,22 +656,6 @@ const AdministrationDashboard = () => {
     }
   ];
 
-  const revenueActions = [
-    {
-      title: t('admin.management.payments'),
-      description: t('admin.management.paymentsDesc'),
-      icon: Euro,
-      color: "warning",
-      action: t('admin.management.paymentSettings')
-    },
-    {
-      title: t('proAccount.title'),
-      description: t('proAccount.dashboardDesc'),
-      icon: Landmark,
-      color: "primary",
-      action: t('proAccount.manage')
-    }
-  ];
 
   const fmt = (n: number | undefined) => (typeof n === 'number' && isFinite(n) ? n.toFixed(2) : '0.00');
 
