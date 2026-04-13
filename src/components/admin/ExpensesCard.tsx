@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,12 +20,20 @@ import { cn } from "@/lib/utils";
 interface Expense {
   id: string;
   name: string;
+  category: string | null;
   expense_date: string;
   amount: number;
   invoice_url: string | null;
   created_at: string;
   created_by: string | null;
 }
+
+const EXPENSE_CATEGORIES = [
+  "Despesas Bancárias", "Salários", "Leasing", "Portagens", "Carrinhas",
+  "Impostos", "Comunicações", "Contabilidade", "Compras Fornecedores",
+  "Material Técnico", "Seguros", "Despesas Legais", "Licenças",
+  "Devolução Sócios", "Custos Campeonatos", "Outros"
+];
 
 export const ExpensesCard = () => {
   const { t } = useLanguage();
@@ -35,6 +44,7 @@ export const ExpensesCard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -46,6 +56,7 @@ export const ExpensesCard = () => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editName, setEditName] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editCategory, setEditCategory] = useState("");
   const [editAmount, setEditAmount] = useState("");
   const [editFile, setEditFile] = useState<File | null>(null);
   const [editUploading, setEditUploading] = useState(false);
@@ -116,7 +127,7 @@ export const ExpensesCard = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (expense: { name: string; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { error } = await supabase.from("expenses").insert(expense);
       if (error) throw error;
     },
@@ -131,7 +142,7 @@ export const ExpensesCard = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (expense: { id: string; name: string; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { id: string; name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { id, ...rest } = expense;
       const { error } = await supabase.from("expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -160,6 +171,7 @@ export const ExpensesCard = () => {
   const resetForm = () => {
     setName("");
     setDate(new Date());
+    setCategory("");
     setAmount("");
     setFile(null);
     setDialogOpen(false);
@@ -169,6 +181,7 @@ export const ExpensesCard = () => {
     setEditingExpense(null);
     setEditName("");
     setEditDate(new Date());
+    setEditCategory("");
     setEditAmount("");
     setEditFile(null);
     setEditDialogOpen(false);
@@ -178,6 +191,7 @@ export const ExpensesCard = () => {
     setEditingExpense(expense);
     setEditName(expense.name);
     setEditDate(new Date(expense.expense_date));
+    setEditCategory(expense.category || "");
     setEditAmount(String(expense.amount));
     setEditFile(null);
     setEditDialogOpen(true);
@@ -217,6 +231,7 @@ export const ExpensesCard = () => {
 
     createMutation.mutate({
       name: name.trim(),
+      category: category || null,
       expense_date: format(date, "yyyy-MM-dd"),
       amount: parseFloat(amount),
       invoice_url: invoiceUrl,
@@ -242,6 +257,7 @@ export const ExpensesCard = () => {
     updateMutation.mutate({
       id: editingExpense.id,
       name: editName.trim(),
+      category: editCategory || null,
       expense_date: format(editDate, "yyyy-MM-dd"),
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
@@ -273,6 +289,19 @@ export const ExpensesCard = () => {
               <div>
                 <Label>{t("expenses.name")}</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("expenses.namePlaceholder")} />
+              </div>
+              <div>
+                <Label>{t("expenses.category")}</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPENSE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>{t("expenses.date")}</Label>
@@ -336,7 +365,8 @@ export const ExpensesCard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("expenses.name")}</TableHead>
+                     <TableHead>{t("expenses.name")}</TableHead>
+                    <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.date")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
                     <TableHead>{t("expenses.invoice")}</TableHead>
@@ -347,6 +377,7 @@ export const ExpensesCard = () => {
                   {expenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.name}</TableCell>
+                      <TableCell>{expense.category || "—"}</TableCell>
                       <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                       <TableCell>
@@ -402,6 +433,19 @@ export const ExpensesCard = () => {
                   <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
+            </div>
+            <div>
+              <Label>{t("expenses.category")}</Label>
+              <Select value={editCategory} onValueChange={setEditCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXPENSE_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>{t("expenses.amount")}</Label>
