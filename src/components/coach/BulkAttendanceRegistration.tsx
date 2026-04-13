@@ -144,7 +144,8 @@ export const BulkAttendanceRegistration = ({ coachId }: BulkAttendanceRegistrati
         .from('attendance')
         .select('athlete_id, shift')
         .in('athlete_id', selectedAthletes)
-        .eq('date', selectedDate);
+        .eq('date', selectedDate)
+        .limit(10000);
 
       if (duplicateCheckError) {
         console.error('Error checking duplicates:', duplicateCheckError);

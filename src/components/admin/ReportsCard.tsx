@@ -230,7 +230,7 @@ export const ReportsCard = () => {
 
           const [paymentsRes, attendanceRes, athletesRes] = await Promise.all([
             supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr).in("athlete_id", activeAthleteIds),
-            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]).in("athlete_id", activeAthleteIds),
+            supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]).in("athlete_id", activeAthleteIds).limit(10000),
             supabase.from("atletas").select("*").eq("is_active", true)
           ]);
 

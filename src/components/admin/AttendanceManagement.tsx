@@ -42,7 +42,7 @@ export const AttendanceManagement = () => {
     queryKey: ['admin-attendance-records'],
     queryFn: async () => {
       const [attendanceRes, athletesRes, coachesRes] = await Promise.all([
-        supabase.from('attendance').select('*').order('date', { ascending: false }),
+        supabase.from('attendance').select('*').order('date', { ascending: false }).limit(10000),
         supabase.from('atletas').select('athlete_id, first_name, last_name'),
         supabase.from('coach').select('coach_id, first_name, last_name')
       ]);

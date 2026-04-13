@@ -40,7 +40,8 @@ const AttendanceRecords = () => {
             notes,
             athlete_id
           `)
-          .order("date", { ascending: false }),
+          .order("date", { ascending: false })
+          .limit(10000),
         supabase
           .from("atletas")
           .select("athlete_id, first_name, last_name"),
