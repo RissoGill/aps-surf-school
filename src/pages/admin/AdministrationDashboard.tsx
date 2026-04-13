@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw, ChevronDown, ArrowRight } from "lucide-react";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw, ArrowRight } from "lucide-react";
 import { ReportsCard } from "@/components/admin/ReportsCard";
 
 import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
 import CoachMessagesManagementCard from "@/components/admin/CoachMessagesManagementCard";
-import CoachTrainingManagement from "@/components/admin/CoachTrainingManagement";
+
 import GhostAttendanceCleanupCard from "@/components/admin/GhostAttendanceCleanupCard";
 import { ExpensesCard } from "@/components/admin/ExpensesCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
