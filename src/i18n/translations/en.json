@@ -1596,6 +1596,9 @@
     "save": "Save",
     "currentInvoice": "Current invoice",
     "category": "Category",
-    "categoryPlaceholder": "Select category"
+    "categoryPlaceholder": "Select category",
+    "subcategory": "Subcategory",
+    "subcategoryPlaceholder": "Select subcategory",
+    "customName": "Name"
   }
 }
