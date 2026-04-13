@@ -138,7 +138,7 @@ const AccountingManagement = () => {
                 {isLoading ? (
                   <Skeleton className="h-12 w-full" />
                 ) : (
-                  <>
+                  <div className="flex flex-col items-center text-center">
                     <div className="flex items-center gap-2 mb-1">
                       <stat.icon className={`h-4 w-4 ${stat.color}`} />
                       <p className="text-xs text-muted-foreground">{stat.label}</p>
@@ -146,7 +146,7 @@ const AccountingManagement = () => {
                     <p className={`text-lg font-bold ${stat.color}`}>
                       €{stat.value.toFixed(2)}
                     </p>
-                  </>
+                  </div>
                 )}
               </CardContent>
             </Card>
