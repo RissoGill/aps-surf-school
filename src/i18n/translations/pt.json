@@ -591,7 +591,10 @@
       "totalCompetition": "Total Atletas Competição",
       "totalExpensesSept": "Total Despesas desde Set 2025",
       "expensesCurrentMonth": "Despesas Mês Corrente",
-      "monthlyBalance": "Balanço Mensal"
+      "monthlyBalance": "Balanço Mensal",
+      "seasonTitle": "Época 2025-2026",
+      "chartRevenue": "Receitas",
+      "chartExpenses": "Despesas"
     },
     "management": {
       "title": "Ferramentas de Gestão",
