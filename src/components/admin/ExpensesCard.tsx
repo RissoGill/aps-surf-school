@@ -412,6 +412,7 @@ export const ExpensesCard = () => {
                   <TableRow>
                      <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
+                    <TableHead>{t("expenses.subcategory")}</TableHead>
                     <TableHead>{t("expenses.date")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
                     <TableHead>{t("expenses.invoice")}</TableHead>
@@ -423,6 +424,7 @@ export const ExpensesCard = () => {
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.name}</TableCell>
                       <TableCell>{expense.category || "—"}</TableCell>
+                      <TableCell>{expense.subcategory || "—"}</TableCell>
                       <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                       <TableCell>
@@ -481,7 +483,7 @@ export const ExpensesCard = () => {
             </div>
             <div>
               <Label>{t("expenses.category")}</Label>
-              <Select value={editCategory} onValueChange={setEditCategory}>
+              <Select value={editCategory} onValueChange={(val) => { setEditCategory(val); setEditSubcategory(""); setEditCustomSubcategory(""); }}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                 </SelectTrigger>
@@ -492,6 +494,24 @@ export const ExpensesCard = () => {
                 </SelectContent>
               </Select>
             </div>
+            {SUBCATEGORIES[editCategory] && (
+              <div>
+                <Label>{t("expenses.subcategory")}</Label>
+                <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUBCATEGORIES[editCategory].map((sub) => (
+                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {editSubcategory === "Outro" && (
+                  <Input className="mt-2" value={editCustomSubcategory} onChange={(e) => setEditCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
+                )}
+              </div>
+            )
             <div>
               <Label>{t("expenses.amount")}</Label>
               <div className="relative">
