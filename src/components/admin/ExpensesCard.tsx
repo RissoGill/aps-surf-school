@@ -732,6 +732,129 @@ export const ExpensesCard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Recurring Expenses Dialog */}
+      <Dialog open={recurringDialogOpen} onOpenChange={setRecurringDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t("expenses.recurring")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Add new recurring */}
+            <div className="border rounded-lg p-4 space-y-3">
+              <h4 className="text-sm font-medium">{t("expenses.addRecurring")}</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label>{t("expenses.name")}</Label>
+                  <Input value={recName} onChange={(e) => setRecName(e.target.value)} placeholder={t("expenses.namePlaceholder")} />
+                </div>
+                <div>
+                  <Label>{t("expenses.amount")}</Label>
+                  <div className="relative">
+                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input type="number" step="0.01" min="0" value={recAmount} onChange={(e) => setRecAmount(e.target.value)} className="pl-9" placeholder="0.00" />
+                  </div>
+                </div>
+                <div>
+                  <Label>{t("expenses.category")}</Label>
+                  <Select value={recCategory} onValueChange={(val) => { setRecCategory(val); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EXPENSE_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {FREETEXT_SUBCATEGORIES.includes(recCategory) ? (
+                  <div>
+                    <Label>{t("expenses.subcategory")}</Label>
+                    <Input value={recSubcategory} onChange={(e) => setRecSubcategory(e.target.value)} placeholder={t("expenses.championshipDescriptionPlaceholder")} />
+                  </div>
+                ) : SUBCATEGORIES[recCategory] ? (
+                  <div>
+                    <Label>{t("expenses.subcategory")}</Label>
+                    <Select value={recSubcategory} onValueChange={(val) => { setRecSubcategory(val); if (val !== "Outro") setRecCustomSubcategory(""); setRecSubSubcategory(""); }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUBCATEGORIES[recCategory].map((sub) => (
+                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {recSubcategory === "Outro" && (
+                      <Input className="mt-2" value={recCustomSubcategory} onChange={(e) => setRecCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
+                    )}
+                  </div>
+                ) : null}
+                {SUB_SUBCATEGORIES[recCategory] && recSubcategory && recSubcategory !== "Outro" && (
+                  <div>
+                    <Label>{t("expenses.subSubcategory")}</Label>
+                    <Select value={recSubSubcategory} onValueChange={setRecSubSubcategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUB_SUBCATEGORIES[recCategory].map((sub) => (
+                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending}>
+                <Plus className="h-4 w-4 mr-1" />
+                {t("expenses.addRecurring")}
+              </Button>
+            </div>
+
+            {/* List of recurring expenses */}
+            {recurringExpenses.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">{t("expenses.noRecurring")}</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("expenses.name")}</TableHead>
+                    <TableHead>{t("expenses.category")}</TableHead>
+                    <TableHead>{t("expenses.amount")}</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recurringExpenses.map((rec) => (
+                    <TableRow key={rec.id}>
+                      <TableCell className="font-medium">{rec.name}</TableCell>
+                      <TableCell>{[rec.category, rec.subcategory, rec.sub_subcategory].filter(Boolean).join(" → ") || "—"}</TableCell>
+                      <TableCell>€{Number(rec.amount).toFixed(2)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={rec.is_active}
+                            onCheckedChange={(checked) => toggleRecurringMutation.mutate({ id: rec.id, is_active: checked })}
+                          />
+                          <span className="text-xs">{rec.is_active ? t("expenses.recurringActive") : t("expenses.recurringInactive")}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => deleteRecurringMutation.mutate(rec.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
