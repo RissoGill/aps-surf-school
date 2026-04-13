@@ -1,37 +1,20 @@
 
 
-# Adicionar Subcategorias para Impostos, Seguros e Licenças
+# Adicionar Descrição para "Custos Campeonatos"
 
 ## Resumo
-Adicionar subcategorias específicas às categorias "Impostos", "Seguros" e "Licenças" no mapa `SUBCATEGORIES` do ExpensesCard.
+Quando a categoria "Custos Campeonatos" for selecionada, mostrar um campo de texto livre para o utilizador escrever a descrição do custo. O valor será guardado na coluna `subcategory` já existente.
 
 ## Alterações
 
-### 1. `src/components/admin/ExpensesCard.tsx`
+### `src/components/admin/ExpensesCard.tsx`
 
-Atualizar o mapa `SUBCATEGORIES` (linhas 40-44) para incluir:
+1. Adicionar lógica para mostrar um `Input` de texto livre quando a categoria é "Custos Campeonatos" (sem dropdown, apenas campo de descrição)
+2. Tratar este caso especial: quando `category === "Custos Campeonatos"`, mostrar um campo `Input` em vez de `Select`, guardando o valor em `subcategory`
+3. Aplicar a mesma lógica no formulário de edição
 
-```
-"Impostos": ["IVA", "IRS", "IRC"]
-"Seguros": ["Cascos Marítimos", "Acidentes Pessoais"]
-"Licenças": ["CMC", "Capitania", "Federação", "RNNAT"]
-```
+A abordagem mais simples: definir uma constante `FREETEXT_SUBCATEGORIES` (ex: `["Custos Campeonatos"]`) que indica categorias onde a subcategoria é texto livre em vez de dropdown.
 
-**Código resultante:**
-```typescript
-const SUBCATEGORIES: Record<string, string[]> = {
-  "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
-  "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
-  "Carrinhas": ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"],
-  "Impostos": ["IVA", "IRS", "IRC"],
-  "Seguros": ["Cascos Marítimos", "Acidentes Pessoais"],
-  "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
-};
-```
-
-## Notas
-
-- Não requer alterações à base de dados (a coluna `subcategory` já existe).
-- O UI já suporta dinamicamente qualquer categoria no mapa `SUBCATEGORIES`.
-- Quando selecionares uma destas categorias, o dropdown de subcategoria aparecerá automaticamente.
+### Traduções (`pt.json` e `en.json`)
+- `expenses.descriptionPlaceholder`: "Descrição do campeonato" / "Championship description"
 
