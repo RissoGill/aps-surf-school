@@ -1623,6 +1623,7 @@
     "recurringGenerated": "Recurring expenses generated successfully",
     "recurringGenerateError": "Error generating recurring expenses",
     "noRecurring": "No recurring expenses",
+    "startDate": "Start Date",
     "recurringAmount": "Monthly amount",
     "editRecurring": "Edit Recurring",
     "saveRecurring": "Save",
