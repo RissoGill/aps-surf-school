@@ -1610,6 +1610,19 @@
     "subSubcategoryPlaceholder": "Selecionar tipo",
     "championshipDescriptionPlaceholder": "Descrição do campeonato",
     "viewExpenses": "Ver despesas",
-    "totalCurrentMonth": "Total Mês Corrente"
+    "totalCurrentMonth": "Total Mês Corrente",
+    "recurring": "Despesas Recorrentes",
+    "manageRecurring": "Gerir Recorrentes",
+    "generateNow": "Gerar Agora",
+    "addRecurring": "Adicionar Recorrente",
+    "recurringActive": "Ativa",
+    "recurringInactive": "Inativa",
+    "recurringCreated": "Despesa recorrente criada",
+    "recurringDeleted": "Despesa recorrente eliminada",
+    "recurringUpdated": "Despesa recorrente atualizada",
+    "recurringGenerated": "Despesas geradas com sucesso",
+    "recurringGenerateError": "Erro ao gerar despesas recorrentes",
+    "noRecurring": "Sem despesas recorrentes",
+    "recurringAmount": "Valor mensal"
   }
 }

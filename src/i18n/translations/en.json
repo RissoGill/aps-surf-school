@@ -1610,6 +1610,19 @@
     "subSubcategoryPlaceholder": "Select type",
     "championshipDescriptionPlaceholder": "Championship description",
     "viewExpenses": "View expenses",
-    "totalCurrentMonth": "Total Current Month"
+    "totalCurrentMonth": "Total Current Month",
+    "recurring": "Recurring Expenses",
+    "manageRecurring": "Manage Recurring",
+    "generateNow": "Generate Now",
+    "addRecurring": "Add Recurring",
+    "recurringActive": "Active",
+    "recurringInactive": "Inactive",
+    "recurringCreated": "Recurring expense created",
+    "recurringDeleted": "Recurring expense deleted",
+    "recurringUpdated": "Recurring expense updated",
+    "recurringGenerated": "Recurring expenses generated successfully",
+    "recurringGenerateError": "Error generating recurring expenses",
+    "noRecurring": "No recurring expenses",
+    "recurringAmount": "Monthly amount"
   }
 }
