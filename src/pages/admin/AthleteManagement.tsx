@@ -126,7 +126,8 @@ const AthleteManagement = () => {
       const { data, error } = await supabase
         .from('atletas')
         .select('*')
-        .order('first_name');
+        .order('first_name')
+        .limit(10000);
       
       if (error) throw error;
       return data as Athlete[];

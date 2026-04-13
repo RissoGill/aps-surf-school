@@ -150,7 +150,8 @@ const ProAccountTab = () => {
         .from("pro_account_entries")
         .select("*")
         .eq("athlete_id", selectedAthleteId)
-        .order("entry_date", { ascending: false });
+        .order("entry_date", { ascending: false })
+        .limit(10000);
       if (error) throw error;
       return data || [];
     },

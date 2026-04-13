@@ -92,7 +92,7 @@ export const CoachMessagesManagementCard = () => {
         query = query.eq('coach_id', coachFilter);
       }
       
-      const { data, error } = await query;
+      const { data, error } = await query.limit(10000);
       
       if (error) throw error;
       return data as CoachMessage[];
@@ -106,7 +106,8 @@ export const CoachMessagesManagementCard = () => {
       const { data, error } = await supabase
         .from('coach_message_replies')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .limit(10000);
       
       if (error) throw error;
       return data as MessageReply[];

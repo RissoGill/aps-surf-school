@@ -109,7 +109,8 @@ export const CoachPaymentsCard = ({ userRole }: CoachPaymentsCardProps) => {
       const { data, error } = await supabase
         .from('coach')
         .select('coach_id, first_name, last_name, email, status')
-        .order('first_name');
+        .order('first_name')
+        .limit(10000);
       
       if (error) throw error;
       return data as Coach[];

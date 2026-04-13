@@ -33,7 +33,7 @@ const DailyManagement = () => {
   const { data: athletes } = useQuery({
     queryKey: ['admin-athletes'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('atletas').select('*');
+      const { data, error } = await supabase.from('atletas').select('*').limit(10000);
       if (error) throw error;
       return data;
     },

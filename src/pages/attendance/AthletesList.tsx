@@ -26,7 +26,8 @@ const AthletesList = () => {
       const { data, error } = await supabase
         .from('atletas')
         .select('*')
-        .order('first_name', { ascending: true });
+        .order('first_name', { ascending: true })
+        .limit(10000);
       
       if (error) throw error;
       return data as Athlete[];
