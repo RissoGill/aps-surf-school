@@ -1,52 +1,58 @@
 
 
-# Adicionar Cartão de Relatórios de Despesas na Contabilidade
+# Gráfico Anual Receitas vs Despesas (Setembro 2025 - Agosto 2026)
 
 ## Resumo
-Criar um novo componente `ExpenseReportsCard` na página de Contabilidade com filtros por mês/ano, categoria e subcategoria, e opções de ver PDF e download -- seguindo exatamente o padrão visual e técnico do `ReportsCard` existente.
+Adicionar um gráfico de barras entre os 4 cartões de resumo e o ExpensesCard, mostrando receitas (payments) e despesas (expenses) mês a mês para a época 2025-2026.
 
 ## Alterações
 
-### 1. Novo componente `src/components/admin/ExpenseReportsCard.tsx`
-- Cartão com o mesmo estilo do `ReportsCard` (ícone FileText, círculo `bg-primary/10`, título e descrição)
-- **Filtros:**
-  - Mês (Select com Janeiro-Dezembro, default mês atual) + Ano (Select 2025/2026)
-  - Categoria (Select com todas as categorias de despesas + opção "Todas")
-  - Subcategoria (Select dinâmico, aparece só quando a categoria selecionada tem subcategorias)
-- **Botão "Gerar Relatório"** que consulta a tabela `expenses` com os filtros aplicados
-- **Botões "Ver PDF" e "Download PDF"** que aparecem após geração, idênticos ao `ReportsCard`
-- **HTML do relatório** usa as mesmas cores (#31A896 headers, tabela com bordas, summary section, logo APS, footer)
-- Colunas da tabela: Data, Fornecedor, Categoria, Subcategoria, Sub-subcategoria, Valor
-- Summary section: total de despesas, número de registos, breakdown por categoria
-- Usa `html2pdf.js` para download e `window.open` + `document.write` para visualização
+### 1. Nova query `annual-chart-data` em `AccountingManagement.tsx`
+- Buscar todas as `expenses` com `expense_date` entre 2025-09-01 e 2026-08-31
+- Buscar todos os `payments` dos anos 2025 e 2026 com status paid/partial
+- Agrupar por mês: Set, Out, Nov, Dez, Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago
+- Calcular por mês: total receitas, total despesas, balanço
 
-### 2. Atualizar `src/pages/admin/AccountingManagement.tsx`
-- Importar e renderizar `ExpenseReportsCard` abaixo do `ExpensesCard`
+### 2. Componente do gráfico (inline em AccountingManagement ou novo componente)
+- Usar `recharts` (BarChart) com o `ChartContainer` existente do shadcn
+- 2 barras por mês: Receitas (cor primary/#31A896) e Despesas (cor destructive/vermelho)
+- Tooltip com valores em €
+- Legenda
+- Título: "Época 2025-2026"
+- Renderizar entre os stats cards e o ExpensesCard
 
-### 3. Traduções (`en.json` e `pt.json`)
-- `expenses.reports.title`: "Relatórios de Despesas" / "Expense Reports"
-- `expenses.reports.description`: "Gerar relatórios por mês, categoria ou subcategoria" / "Generate reports by month, category or subcategory"
-- `expenses.reports.allCategories`: "Todas as Categorias" / "All Categories"
-- `expenses.reports.allSubcategories`: "Todas as Subcategorias" / "All Subcategories"
-- `expenses.reports.generate`: "Gerar Relatório" / "Generate Report"
+### 3. Traduções
+- `admin.chart.seasonTitle`: "Época 2025-2026" / "Season 2025-2026"
+- `admin.chart.revenue`: "Receitas" / "Revenue"  
+- `admin.chart.expenses`: "Despesas" / "Expenses"
 
 ## Secção Técnica
 
-**Query de dados:**
+**Dados do gráfico:**
 ```tsx
-let query = supabase.from('expenses').select('*');
-// Filtrar por mês/ano usando expense_date
-// Filtrar por categoria/subcategoria se selecionados
+const seasonMonths = [
+  { month: 9, year: 2025, label: "Set" },
+  { month: 10, year: 2025, label: "Out" },
+  // ... até
+  { month: 8, year: 2026, label: "Ago" },
+];
+
+// Para cada mês: somar expenses por expense_date e payments por month+year+status
 ```
 
-**HTML do relatório** segue o template de `generateReportHTML` do `ReportsCard`:
-- Header com logo APS e cor `#31A896`
-- `th { background-color: #31A896; color: white; }`
-- Summary box com `background-color: #f5f5f5`
-- Footer com copyright
-- Linha de total com `background-color: #f0f0f0; font-weight: bold`
+**Gráfico (recharts + ChartContainer shadcn):**
+```tsx
+<ChartContainer config={chartConfig}>
+  <BarChart data={chartData}>
+    <CartesianGrid vertical={false} />
+    <XAxis dataKey="label" />
+    <YAxis />
+    <ChartTooltip content={<ChartTooltipContent />} />
+    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+    <Bar dataKey="expenses" fill="var(--color-expenses)" radius={4} />
+  </BarChart>
+</ChartContainer>
+```
 
-**View/Download** reutiliza o mesmo padrão:
-- `viewReport`: `window.open('', '_blank')` + `document.write(html)`
-- `downloadReport`: `html2pdf().from(element).set(opt).save()`
+**Posição:** Entre `</div>` dos stats cards (linha 156) e `<ExpensesCard />` (linha 159).
 
