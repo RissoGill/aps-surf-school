@@ -41,7 +41,8 @@ const RevenueManagement = () => {
     queryFn: async () => {
       const { data: paymentsRaw, error: paymentsError } = await supabase
         .from('payments')
-        .select('amount_paid, amount_due, payment_date, status, month, year, athlete_id');
+        .select('amount_paid, amount_due, payment_date, status, month, year, athlete_id')
+        .limit(10000);
       if (paymentsError) throw paymentsError;
 
       const { data: atletasRows } = await supabase
@@ -81,7 +82,8 @@ const RevenueManagement = () => {
       const { data: monthRows } = await supabase
         .from('payments')
         .select('amount_paid, amount_due, status, month, year, athlete_id')
-        .eq('year', currentYear);
+        .eq('year', currentYear)
+        .limit(10000);
 
       const currentMonthPayments = (monthRows || []).filter((p: any) => {
         const monthNum = monthNameToNumber[normalizeMonth(p.month)] || 0;
@@ -125,7 +127,8 @@ const RevenueManagement = () => {
       const { data: sept2025OnwardsRows } = await supabase
         .from('payments')
         .select('amount_paid, amount_due, month, year, athlete_id')
-        .gte('year', 2025);
+        .gte('year', 2025)
+        .limit(10000);
 
       const currentMonthSerial = currentYear * 12 + currentMonthNumber;
 
