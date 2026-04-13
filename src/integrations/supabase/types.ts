@@ -484,6 +484,7 @@ export type Database = {
           id: string
           invoice_url: string | null
           name: string
+          subcategory: string | null
         }
         Insert: {
           amount: number
@@ -494,6 +495,7 @@ export type Database = {
           id?: string
           invoice_url?: string | null
           name: string
+          subcategory?: string | null
         }
         Update: {
           amount?: number
@@ -504,6 +506,7 @@ export type Database = {
           id?: string
           invoice_url?: string | null
           name?: string
+          subcategory?: string | null
         }
         Relationships: []
       }
