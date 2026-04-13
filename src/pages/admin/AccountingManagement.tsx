@@ -91,7 +91,8 @@ const AccountingManagement = () => {
       const { data: monthPayments } = await supabase
         .from('payments')
         .select('amount_paid, status, month, year')
-        .eq('year', currentYear);
+        .eq('year', currentYear)
+        .limit(10000);
 
       const totalReceivedThisMonth = (monthPayments || [])
         .filter((p: any) => {
@@ -134,8 +135,8 @@ const AccountingManagement = () => {
       const [{ data: seasonExpenses }, { data: payments2025 }, { data: payments2026 }, { data: coachPayments }] = await Promise.all([
         supabase.from('expenses').select('amount, expense_date')
           .gte('expense_date', '2025-09-01').lte('expense_date', '2026-08-31'),
-        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2025),
-        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2026),
+        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2025).limit(10000),
+        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2026).limit(10000),
         supabase.from('coach_payments').select('amount, payment_date')
           .gte('payment_date', '2025-09-01').lte('payment_date', '2026-08-31'),
       ]);
