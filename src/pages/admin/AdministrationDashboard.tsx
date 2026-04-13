@@ -103,7 +103,7 @@ const AdministrationDashboard = () => {
       // Fetch surf levels and active status separately (no FK defined between payments and atletas)
       const { data: atletasRows } = await supabase
         .from('atletas')
-        .select('athlete_id, surf_level, is_active');
+        .select('athlete_id, surf_level, is_active, prior_balance');
       
       const levelByAthleteId: Record<string, string | null> = {};
       const isActiveByAthleteId: Record<string, boolean> = {};
