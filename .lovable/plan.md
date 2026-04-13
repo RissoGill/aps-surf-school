@@ -1,33 +1,37 @@
 
 
-# Adicionar Sub-subcategoria para "Carrinhas"
+# Adicionar Subcategorias para Impostos, Seguros e Licenças
 
 ## Resumo
-Para a categoria "Carrinhas", o primeiro dropdown de subcategoria mostrará as matrículas dos veículos (85-QD-72, 85-QD-73, 21-XA-53, 21-XA-61, 26-DB-02). Depois, aparecerá um segundo dropdown (sub-subcategoria) com os tipos de despesa: Gasóleo, Oficinas, AdBlue, Leasing, IUC, Seguros, Multas.
+Adicionar subcategorias específicas às categorias "Impostos", "Seguros" e "Licenças" no mapa `SUBCATEGORIES` do ExpensesCard.
 
 ## Alterações
 
-### 1. Migração Supabase
-Adicionar coluna `sub_subcategory` (text, nullable) à tabela `expenses`.
+### 1. `src/components/admin/ExpensesCard.tsx`
 
-### 2. `src/components/admin/ExpensesCard.tsx`
+Atualizar o mapa `SUBCATEGORIES` (linhas 40-44) para incluir:
 
-- Adicionar "Carrinhas" ao mapa `SUBCATEGORIES` com as matrículas: `["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"]`
-- Criar novo mapa `SUB_SUBCATEGORIES` para categorias que têm um terceiro nível:
-  ```
-  "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"]
-  ```
-- Adicionar estados `subSubcategory` e `editSubSubcategory`
-- No formulário de criação e edição, após o dropdown de subcategoria, mostrar condicionalmente o terceiro dropdown quando `SUB_SUBCATEGORIES[category]` existe e uma subcategoria está selecionada
-- Incluir `sub_subcategory` nos mutations de criação e atualização
-- Adicionar coluna "Sub-subcategoria" na tabela de listagem
-- Atualizar interface `Expense` com `sub_subcategory: string | null`
-- Limpar `subSubcategory` quando a subcategoria muda
+```
+"Impostos": ["IVA", "IRS", "IRC"]
+"Seguros": ["Cascos Marítimos", "Acidentes Pessoais"]
+"Licenças": ["CMC", "Capitania", "Federação", "RNNAT"]
+```
 
-### 3. Traduções (`pt.json` e `en.json`)
-- `expenses.subSubcategory`: "Tipo de Despesa" / "Expense Type"
-- `expenses.subSubcategoryPlaceholder`: "Selecionar tipo" / "Select type"
+**Código resultante:**
+```typescript
+const SUBCATEGORIES: Record<string, string[]> = {
+  "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
+  "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
+  "Carrinhas": ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"],
+  "Impostos": ["IVA", "IRS", "IRC"],
+  "Seguros": ["Cascos Marítimos", "Acidentes Pessoais"],
+  "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
+};
+```
 
-### 4. Tipos (`types.ts`)
-Atualizar automaticamente com a nova coluna.
+## Notas
+
+- Não requer alterações à base de dados (a coluna `subcategory` já existe).
+- O UI já suporta dinamicamente qualquer categoria no mapa `SUBCATEGORIES`.
+- Quando selecionares uma destas categorias, o dropdown de subcategoria aparecerá automaticamente.
 
