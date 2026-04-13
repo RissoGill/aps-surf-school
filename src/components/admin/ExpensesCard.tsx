@@ -338,6 +338,7 @@ export const ExpensesCard = () => {
   const [recCustomSubcategory, setRecCustomSubcategory] = useState("");
   const [recSubSubcategory, setRecSubSubcategory] = useState("");
   const [recAmount, setRecAmount] = useState("");
+  const [recStartDate, setRecStartDate] = useState<Date>(new Date(2025, 8, 1));
   const [generatingRecurring, setGeneratingRecurring] = useState(false);
   const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null);
 
@@ -354,7 +355,7 @@ export const ExpensesCard = () => {
   });
 
   const createRecurringMutation = useMutation({
-    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number }) => {
+    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
       const { error } = await supabase.from("recurring_expenses").insert(rec);
       if (error) throw error;
     },
@@ -389,7 +390,7 @@ export const ExpensesCard = () => {
   });
 
   const updateRecurringMutation = useMutation({
-    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number }) => {
+    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
       const { id, ...rest } = rec;
       const { error } = await supabase.from("recurring_expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -404,6 +405,7 @@ export const ExpensesCard = () => {
 
   const resetRecurringForm = () => {
     setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
+    setRecStartDate(new Date(2025, 8, 1));
     setEditingRecurringId(null);
   };
 
@@ -414,6 +416,7 @@ export const ExpensesCard = () => {
     setRecSubcategory(rec.subcategory || "");
     setRecSubSubcategory(rec.sub_subcategory || "");
     setRecAmount(String(rec.amount));
+    setRecStartDate(rec.start_date ? new Date(rec.start_date + "T00:00:00") : new Date(2025, 8, 1));
   };
 
   const handleGenerateRecurring = async () => {
@@ -421,7 +424,7 @@ export const ExpensesCard = () => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", {
         method: "POST",
-        body: { from_date: "2025-09-01" },
+        body: {},
       });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
@@ -437,6 +440,7 @@ export const ExpensesCard = () => {
   const handleAddRecurring = () => {
     if (!recName.trim() || !recAmount) return;
     const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
+    const startDateStr = format(recStartDate, "yyyy-MM-dd");
     if (editingRecurringId) {
       updateRecurringMutation.mutate({
         id: editingRecurringId,
@@ -445,6 +449,7 @@ export const ExpensesCard = () => {
         subcategory: resolvedSub || null,
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
+        start_date: startDateStr,
       });
     } else {
       createRecurringMutation.mutate({
@@ -453,6 +458,7 @@ export const ExpensesCard = () => {
         subcategory: resolvedSub || null,
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
+        start_date: startDateStr,
       });
     }
   };
@@ -861,6 +867,20 @@ export const ExpensesCard = () => {
                   </div>
                 )}
               </div>
+              <div>
+                <Label>{t("expenses.startDate")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(recStartDate, "dd/MM/yyyy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={recStartDate} onSelect={(d) => d && setRecStartDate(d)} initialFocus className="p-3 pointer-events-auto" />
+                  </PopoverContent>
+                </Popover>
+              </div>
               <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
                 {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
                 {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
@@ -874,9 +894,10 @@ export const ExpensesCard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("expenses.name")}</TableHead>
+                     <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
+                    <TableHead>{t("expenses.startDate")}</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
@@ -887,6 +908,7 @@ export const ExpensesCard = () => {
                       <TableCell className="font-medium">{rec.name}</TableCell>
                       <TableCell>{[rec.category, rec.subcategory, rec.sub_subcategory].filter(Boolean).join(" → ") || "—"}</TableCell>
                       <TableCell>€{Number(rec.amount).toFixed(2)}</TableCell>
+                      <TableCell>{rec.start_date ? format(new Date(rec.start_date + "T00:00:00"), "dd/MM/yyyy") : "01/09/2025"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch

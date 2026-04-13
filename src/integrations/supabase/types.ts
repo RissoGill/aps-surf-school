@@ -724,6 +724,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          start_date: string | null
           sub_subcategory: string | null
           subcategory: string | null
         }
@@ -734,6 +735,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          start_date?: string | null
           sub_subcategory?: string | null
           subcategory?: string | null
         }
@@ -744,6 +746,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          start_date?: string | null
           sub_subcategory?: string | null
           subcategory?: string | null
         }
