@@ -1,31 +1,30 @@
 
 
-# Despesas Recorrentes: Retroativo desde Set 2025 + Editar/Eliminar
+# Fix: Current Month Expenses card counting retroactive entries
 
-## Resumo
-Modificar o botão "Gerar Agora" para gerar despesas recorrentes retroativamente desde Setembro 2025 até ao mês atual (em vez de apenas o mês corrente). Adicionar botão de editar nas despesas recorrentes existentes.
+## Problem
+The "Despesas Mês Corrente" summary card in `AccountingManagement.tsx` filters expenses by `created_at` (line 56-58). When recurring expenses were generated retroactively (all created today but with `expense_date` ranging from Sept 2025 to April 2026), all 16 entries count as "current month expenses" — inflating the total.
 
-## Alterações
+## Solution
+Change the "Current Month Expenses" card to use `expense_date` instead of `created_at` for filtering. This way only expenses with `expense_date` in April 2026 are counted.
 
-### 1. Edge Function `generate-recurring-expenses/index.ts`
-- Aceitar parâmetro opcional `from_date` no body do request (default: mês atual)
-- Quando chamado com `from_date: "2025-09-01"`, iterar por todos os meses desde Set 2025 até ao mês atual, gerando uma entrada por mês para cada template ativo (com verificação de duplicados)
+### Change in `src/pages/admin/AccountingManagement.tsx` (lines 55-59)
 
-### 2. UI - Botão "Gerar Agora" (`ExpensesCard.tsx`)
-- Passar `{ from_date: "2025-09-01" }` no body da invocação da Edge Function, para que gere retroativamente todos os meses em falta
+Replace:
+```tsx
+const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
+  const createdAt = new Date(e.created_at);
+  return createdAt.getFullYear() === currentYear && createdAt.getMonth() + 1 === currentMonth;
+});
+```
 
-### 3. UI - Editar Despesa Recorrente (`ExpensesCard.tsx`)
-- Adicionar botão de edição (ícone Pencil) ao lado do botão de eliminar na tabela de recorrentes
-- Ao clicar, preencher o formulário "Adicionar Recorrente" com os valores existentes e mudar o botão para "Guardar"
-- Criar mutation `updateRecurringMutation` que faz `supabase.from("recurring_expenses").update(...)` 
-- A eliminação já existe (botão Trash2 na linha 846)
+With:
+```tsx
+const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
+  const d = new Date(e.expense_date);
+  return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
+});
+```
 
-### 4. Traduções (`pt.json` / `en.json`)
-- `expenses.editRecurring`: "Editar Recorrente" / "Edit Recurring"
-- `expenses.saveRecurring`: "Guardar" / "Save"
-
-## Secção Técnica
-- A Edge Function itera meses: loop de Set 2025 até `now()`, incrementando mês a mês
-- Para cada mês + cada template, verifica duplicado antes de inserir
-- O estado de edição usa um `editingRecurringId` para distinguir entre criar e atualizar
+This aligns the summary card with the same logic used in the ExpensesCard header, and correctly shows only April 2026 expenses (€15.60) instead of all retroactively-created entries.
 
