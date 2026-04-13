@@ -1,33 +1,33 @@
 
 
-# Adicionar Subcategorias nas Despesas
+# Adicionar Sub-subcategoria para "Carrinhas"
 
 ## Resumo
-Criar um segundo dropdown de subcategoria que aparece condicionalmente consoante a categoria selecionada. Para "Despesas Bancárias" mostra opções específicas bancárias; para "Salários" mostra nomes de colaboradores com opção "Outro" que permite introduzir um nome personalizado.
+Para a categoria "Carrinhas", o primeiro dropdown de subcategoria mostrará as matrículas dos veículos (85-QD-72, 85-QD-73, 21-XA-53, 21-XA-61, 26-DB-02). Depois, aparecerá um segundo dropdown (sub-subcategoria) com os tipos de despesa: Gasóleo, Oficinas, AdBlue, Leasing, IUC, Seguros, Multas.
 
 ## Alterações
 
 ### 1. Migração Supabase
-Adicionar coluna `subcategory` (text, nullable) à tabela `expenses`.
+Adicionar coluna `sub_subcategory` (text, nullable) à tabela `expenses`.
 
 ### 2. `src/components/admin/ExpensesCard.tsx`
 
-- Definir mapa de subcategorias:
-  - **Despesas Bancárias**: Manutenção, Imposto de Selo, Avales e Garantias, Juros
-  - **Salários**: Nuno Telmo, David, Danilo, Gustavo, Aaron, Zé Pinho, Outro
-- Adicionar estados `subcategory`, `editSubcategory`, `customSubcategory`, `editCustomSubcategory`
-- Quando a categoria muda, limpar a subcategoria
-- Mostrar o dropdown de subcategoria apenas quando a categoria tem subcategorias definidas
-- Se "Outro" selecionado (em Salários), mostrar input de texto para nome personalizado
-- Incluir `subcategory` nos `createMutation` e `updateMutation` (guardar o nome custom se "Outro")
-- Adicionar coluna "Subcategoria" na tabela de listagem
-- Atualizar interface `Expense` com `subcategory: string | null`
+- Adicionar "Carrinhas" ao mapa `SUBCATEGORIES` com as matrículas: `["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"]`
+- Criar novo mapa `SUB_SUBCATEGORIES` para categorias que têm um terceiro nível:
+  ```
+  "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"]
+  ```
+- Adicionar estados `subSubcategory` e `editSubSubcategory`
+- No formulário de criação e edição, após o dropdown de subcategoria, mostrar condicionalmente o terceiro dropdown quando `SUB_SUBCATEGORIES[category]` existe e uma subcategoria está selecionada
+- Incluir `sub_subcategory` nos mutations de criação e atualização
+- Adicionar coluna "Sub-subcategoria" na tabela de listagem
+- Atualizar interface `Expense` com `sub_subcategory: string | null`
+- Limpar `subSubcategory` quando a subcategoria muda
 
 ### 3. Traduções (`pt.json` e `en.json`)
-- `expenses.subcategory`: "Subcategoria" / "Subcategory"
-- `expenses.subcategoryPlaceholder`: "Selecionar subcategoria" / "Select subcategory"
-- `expenses.customName`: "Nome" / "Name"
+- `expenses.subSubcategory`: "Tipo de Despesa" / "Expense Type"
+- `expenses.subSubcategoryPlaceholder`: "Selecionar tipo" / "Select type"
 
 ### 4. Tipos (`types.ts`)
-Atualizar com a nova coluna `subcategory`.
+Atualizar automaticamente com a nova coluna.
 
