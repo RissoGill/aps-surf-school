@@ -318,17 +318,24 @@ export const ExpensesCard = () => {
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const [expensesOpen, setExpensesOpen] = useState(false);
 
-  const totalCurrentMonth = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    return expenses
-      .filter((e) => {
-        const d = new Date(e.expense_date);
-        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
-      })
-      .reduce((sum, e) => sum + Number(e.amount), 0);
-  }, [expenses]);
+  // Month/year filter for viewing expenses
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1);
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
+
+  const filteredExpenses = useMemo(() =>
+    expenses.filter((e) => {
+      const d = new Date(e.expense_date);
+      return d.getFullYear() === viewYear && d.getMonth() + 1 === viewMonth;
+    }), [expenses, viewMonth, viewYear]);
+
+  const totalSelectedMonth = useMemo(() =>
+    filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0),
+    [filteredExpenses]);
+
+  const MONTH_NAMES = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
 
   // Recurring expenses state
   const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
@@ -602,17 +609,39 @@ export const ExpensesCard = () => {
           <p className="text-sm text-muted-foreground">{t("expenses.empty")}</p>
         ) : (
           <>
-            <div className="mb-3 text-sm font-medium">
-              {t("expenses.totalCurrentMonth")}: <span className="text-primary">€{totalCurrentMonth.toFixed(2)}</span>
-            </div>
-            <Collapsible open={expensesOpen} onOpenChange={setExpensesOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full flex items-center justify-between mb-2">
-                  <span>{t("expenses.viewExpenses")} ({expenses.length})</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", expensesOpen && "rotate-180")} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+             <div className="mb-3 text-sm font-medium">
+               {MONTH_NAMES[viewMonth - 1]} {viewYear}: <span className="text-primary">€{totalSelectedMonth.toFixed(2)}</span>
+             </div>
+             <Collapsible open={expensesOpen} onOpenChange={setExpensesOpen}>
+               <CollapsibleTrigger asChild>
+                 <Button variant="ghost" size="sm" className="w-full flex items-center justify-between mb-2">
+                   <span>{t("expenses.viewExpenses")} ({filteredExpenses.length})</span>
+                   <ChevronDown className={cn("h-4 w-4 transition-transform", expensesOpen && "rotate-180")} />
+                 </Button>
+               </CollapsibleTrigger>
+               <CollapsibleContent>
+                 <div className="flex gap-2 mb-3">
+                   <Select value={String(viewMonth)} onValueChange={(v) => setViewMonth(Number(v))}>
+                     <SelectTrigger className="w-[140px]">
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {MONTH_NAMES.map((m, i) => (
+                         <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                   <Select value={String(viewYear)} onValueChange={(v) => setViewYear(Number(v))}>
+                     <SelectTrigger className="w-[100px]">
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       {[2025, 2026, 2027].map((y) => (
+                         <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 </div>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -628,7 +657,7 @@ export const ExpensesCard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {expenses.map((expense) => (
+                      {filteredExpenses.map((expense) => (
                         <TableRow key={expense.id}>
                           <TableCell className="font-medium">{expense.name}</TableCell>
                           <TableCell>{expense.category || "—"}</TableCell>
