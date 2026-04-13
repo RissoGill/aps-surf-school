@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
+import jsPDF from "jspdf";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +41,38 @@ export const ExpensesCard = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null);
+  };
+
+  const convertImageToPdf = useCallback(async (imageFile: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const orientation = img.width > img.height ? "landscape" : "portrait";
+          const pdf = new jsPDF({ orientation, unit: "px", format: [img.width, img.height] });
+          pdf.addImage(e.target?.result as string, "JPEG", 0, 0, img.width, img.height);
+          const blob = pdf.output("blob");
+          const pdfFile = new File([blob], "scan.pdf", { type: "application/pdf" });
+          resolve(pdfFile);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(imageFile);
+    });
+  }, []);
+
+  const handleScanChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const captured = e.target.files?.[0];
+    if (!captured) return;
+    try {
+      const pdfFile = await convertImageToPdf(captured);
+      setFile(pdfFile);
+    } catch {
+      toast({ title: t("expenses.error"), variant: "destructive" });
+    }
   };
 
   const { data: expenses = [], isLoading } = useQuery({
@@ -177,7 +210,7 @@ export const ExpensesCard = () => {
                     capture="environment"
                     className="hidden"
                     ref={scanInputRef}
-                    onChange={handleFileChange}
+                    onChange={handleScanChange}
                   />
                   <input
                     type="file"
