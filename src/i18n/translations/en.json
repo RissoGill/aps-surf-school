@@ -604,7 +604,9 @@
       "viewUsers": "View Users",
       "manageAthletes": "Manage Athletes",
       "paymentSettings": "Payment Settings",
-      "manageAttendance": "Manage Attendance"
+      "manageAttendance": "Manage Attendance",
+      "dailyManagement": "Daily Athletes & Coaches Management",
+      "revenueManagement": "Revenue Management"
     },
     "coachAttendance": {
       "title": "Coach Attendance Management",
