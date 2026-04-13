@@ -1623,6 +1623,9 @@
     "recurringGenerated": "Despesas geradas com sucesso",
     "recurringGenerateError": "Erro ao gerar despesas recorrentes",
     "noRecurring": "Sem despesas recorrentes",
-    "recurringAmount": "Valor mensal"
+    "recurringAmount": "Valor mensal",
+    "editRecurring": "Editar Recorrente",
+    "saveRecurring": "Guardar",
+    "cancelEdit": "Cancelar"
   }
 }
