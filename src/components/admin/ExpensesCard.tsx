@@ -225,6 +225,7 @@ export const ExpensesCard = () => {
       setEditSubcategory(sub);
       setEditCustomSubcategory("");
     }
+    setEditSubSubcategory(expense.sub_subcategory || "");
     setEditAmount(String(expense.amount));
     setEditFile(null);
     setEditDialogOpen(true);
