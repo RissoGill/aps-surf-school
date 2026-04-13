@@ -1,42 +1,28 @@
 
 
-# Novo Cartão de Registo de Despesas
+# Adicionar opção de scan (câmara) no upload da factura
 
-## O que será criado
+## Contexto
+Atualmente o campo de factura no formulário de despesas só aceita upload de ficheiro (`<input type="file">`). O utilizador quer também poder usar a câmara do dispositivo para fazer scan direto.
 
-Um novo cartão no dashboard de administração para registar despesas com os campos: Nome (descrição), Data, Valor e upload de scan da factura. As despesas serão guardadas numa nova tabela na base de dados e os ficheiros no storage bucket existente ou num novo.
+## Alteração
 
-## Alterações
+### `src/components/admin/ExpensesCard.tsx` (linhas 165-168)
 
-### 1. Nova tabela `expenses` (migração SQL)
-- `id` (uuid, PK)
-- `name` (text, NOT NULL) - descrição da despesa
-- `expense_date` (date, NOT NULL)
-- `amount` (numeric, NOT NULL)
-- `invoice_url` (text) - URL do ficheiro no storage
-- `created_at` (timestamptz, default now())
-- `created_by` (text) - quem registou
-- RLS: anon e authenticated com acesso total (seguindo o padrão do projecto)
+Substituir o input de ficheiro simples por dois botões lado a lado:
 
-### 2. Novo storage bucket `expense-invoices` (migração SQL)
-- Bucket público para armazenar os scans das facturas
+1. **Botão "Tirar Foto / Scan"** - usa `<input type="file" accept="image/*" capture="environment">` que abre a câmara traseira do dispositivo (em mobile) para fazer scan direto da factura
+2. **Botão "Escolher Ficheiro"** - mantém o input atual `<input type="file" accept="image/*,.pdf">` para upload de ficheiro do dispositivo
 
-### 3. Novo componente `src/components/admin/ExpensesCard.tsx`
-- Lista de despesas registadas (tabela com nome, data, valor, link para factura)
-- Botão "Nova Despesa" que abre um dialog
-- Dialog com formulário: Nome (input text), Data (datepicker), Valor (input number), Upload de ficheiro (scan da factura)
-- Possibilidade de eliminar despesas
-- Upload do ficheiro para o bucket `expense-invoices`
+Ambos os inputs ficam escondidos (`hidden`) e são acionados por botões estilizados com ícones (Camera e Upload). Quando um ficheiro é selecionado por qualquer via, mostra o nome do ficheiro selecionado.
 
-### 4. `src/pages/admin/AdministrationDashboard.tsx`
-- Importar e adicionar o `ExpensesCard` no dashboard (após o CoachPaymentsCard)
+### Traduções (`pt.json` e `en.json`)
+- `"expenses.scanInvoice"`: "Tirar Foto" / "Take Photo"
+- `"expenses.uploadFile"`: "Escolher Ficheiro" / "Choose File"
+- `"expenses.fileSelected"`: "Ficheiro selecionado" / "File selected"
 
-### 5. Traduções (`pt.json` e `en.json`)
-- Adicionar chaves para: "Despesas", "Nova Despesa", "Nome", "Data", "Valor", "Factura", "Registar", etc.
-
-## Detalhes Técnicos
-- Upload de ficheiros usa `supabase.storage.from('expense-invoices').upload()`
-- O componente segue o padrão visual dos cartões existentes (CoachPaymentsCard, AlertsManagementCard)
-- Formulário usa react-hook-form + zod para validação
-- Datepicker usa o componente Calendar/Popover existente
+## Detalhe técnico
+- O atributo HTML `capture="environment"` instrui o browser mobile a abrir a câmara traseira
+- Em desktop, o botão de scan simplesmente abre o seletor de ficheiros (comportamento do browser)
+- Dois `<input>` hidden referenciados via `useRef`, acionados pelo `onClick` dos botões
 
