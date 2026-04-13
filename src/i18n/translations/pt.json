@@ -1640,7 +1640,15 @@
       "allSubcategories": "Todas as Subcategorias",
       "generate": "Gerar Relatório",
       "category": "Categoria",
-      "subcategory": "Subcategoria"
+      "subcategory": "Subcategoria",
+      "reportType": "Tipo de Relatório",
+      "expensesByCategory": "Despesas por Categoria",
+      "completeMonthly": "Relatório Mensal Completo",
+      "income": "Receitas",
+      "balance": "Balanço",
+      "athlete": "Atleta",
+      "amountPaid": "Valor Pago",
+      "status": "Estado"
     }
   }
 }

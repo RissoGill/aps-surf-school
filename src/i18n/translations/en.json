@@ -1640,7 +1640,15 @@
       "allSubcategories": "All Subcategories",
       "generate": "Generate Report",
       "category": "Category",
-      "subcategory": "Subcategory"
+      "subcategory": "Subcategory",
+      "reportType": "Report Type",
+      "expensesByCategory": "Expenses by Category",
+      "completeMonthly": "Complete Monthly Report",
+      "income": "Income",
+      "balance": "Balance",
+      "athlete": "Athlete",
+      "amountPaid": "Amount Paid",
+      "status": "Status"
     }
   }
 }
