@@ -785,7 +785,14 @@ export const ExpensesCard = () => {
           <div className="space-y-4">
             {/* Add new recurring */}
             <div className="border rounded-lg p-4 space-y-3">
-              <h4 className="text-sm font-medium">{t("expenses.addRecurring")}</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium">{editingRecurringId ? t("expenses.editRecurring") : t("expenses.addRecurring")}</h4>
+                {editingRecurringId && (
+                  <Button variant="ghost" size="sm" onClick={resetRecurringForm}>
+                    {t("expenses.cancelEdit")}
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>{t("expenses.name")}</Label>
@@ -850,9 +857,9 @@ export const ExpensesCard = () => {
                   </div>
                 )}
               </div>
-              <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t("expenses.addRecurring")}
+              <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
+                {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
+                {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
               </Button>
             </div>
 
@@ -886,9 +893,14 @@ export const ExpensesCard = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => deleteRecurringMutation.mutate(rec.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditRecurring(rec)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteRecurringMutation.mutate(rec.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
