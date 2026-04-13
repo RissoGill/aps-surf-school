@@ -1568,5 +1568,25 @@
       "monthlyFee": "Monthly Fee",
       "other": "Other"
     }
+  },
+  "expenses": {
+    "title": "Expenses",
+    "new": "New Expense",
+    "name": "Description",
+    "namePlaceholder": "E.g.: Surf equipment",
+    "date": "Date",
+    "pickDate": "Pick a date",
+    "amount": "Amount",
+    "invoice": "Invoice",
+    "register": "Register",
+    "uploading": "Uploading...",
+    "loading": "Loading expenses...",
+    "empty": "No expenses registered",
+    "total": "Total Expenses",
+    "viewInvoice": "View",
+    "created": "Expense registered successfully",
+    "deleted": "Expense deleted",
+    "error": "Error registering expense",
+    "uploadError": "Error uploading file"
   }
 }

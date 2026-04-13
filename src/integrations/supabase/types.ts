@@ -474,6 +474,36 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          invoice_url: string | null
+          name: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          expense_date: string
+          id?: string
+          invoice_url?: string | null
+          name: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          invoice_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       guardians: {
         Row: {
           auth_uid: string
