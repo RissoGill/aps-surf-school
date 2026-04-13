@@ -1,30 +1,45 @@
 
+Objetivo: corrigir o cartão para deixar de mostrar €31,20 quando na base de dados Abril já só tem €15,60.
 
-# Fix: Current Month Expenses card counting retroactive entries
+Diagnóstico
+- Verifiquei os registos reais de Abril 2026 na tabela `expenses`.
+- Neste momento só existem 2 despesas em Abril:
+  - Manutenção de Conta — €15,00
+  - Imposto de Selo — €0,60
+- Ou seja, a base de dados está correta e não há duplicado real em Abril.
+- O problema está no frontend: o cartão de resumo está a mostrar valor antigo em cache.
 
-## Problem
-The "Despesas Mês Corrente" summary card in `AccountingManagement.tsx` filters expenses by `created_at` (line 56-58). When recurring expenses were generated retroactively (all created today but with `expense_date` ranging from Sept 2025 to April 2026), all 16 entries count as "current month expenses" — inflating the total.
+Causa provável
+- `AccountingManagement.tsx` usa uma query própria com a key `['accounting-stats']`.
+- `ExpensesCard.tsx` ao apagar/editar/criar despesas só invalida `['expenses']`.
+- Resultado: a lista atualiza, mas os cartões de topo podem ficar com valor antigo até refresh manual.
 
-## Solution
-Change the "Current Month Expenses" card to use `expense_date` instead of `created_at` for filtering. This way only expenses with `expense_date` in April 2026 are counted.
+Plano de correção
+1. Atualizar `src/components/admin/ExpensesCard.tsx`
+- Em todas as mutations que alteram despesas, invalidar também:
+  - `['accounting-stats']`
+- Isto aplica-se a:
+  - criar despesa
+  - editar despesa
+  - eliminar despesa
+  - gerar recorrentes manualmente
 
-### Change in `src/pages/admin/AccountingManagement.tsx` (lines 55-59)
+2. Garantir consistência da dashboard
+- Manter o cálculo do mês corrente em `AccountingManagement.tsx` por `expense_date` (já está certo).
+- Não alterar a lógica de soma, porque os dados reais de Abril já confirmam €15,60.
 
-Replace:
+3. Validar comportamento esperado
+- Após eliminar uma despesa de Abril, o cartão “Despesas Mês Corrente” deve passar imediatamente para €15,60 sem precisar de refresh.
+- O total “desde Setembro 2025” também deve refrescar logo.
+
+Secção técnica
+- Ficheiro principal: `src/components/admin/ExpensesCard.tsx`
+- Ajuste esperado nos `onSuccess`:
 ```tsx
-const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
-  const createdAt = new Date(e.created_at);
-  return createdAt.getFullYear() === currentYear && createdAt.getMonth() + 1 === currentMonth;
-});
+queryClient.invalidateQueries({ queryKey: ["expenses"] });
+queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
 ```
 
-With:
-```tsx
-const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
-  const d = new Date(e.expense_date);
-  return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
-});
-```
-
-This aligns the summary card with the same logic used in the ExpensesCard header, and correctly shows only April 2026 expenses (€15.60) instead of all retroactively-created entries.
-
+Resultado esperado
+- O cartão deixa de mostrar o valor antigo em cache.
+- A página de Contabilidade fica sincronizada com a tabela de despesas em tempo real.
