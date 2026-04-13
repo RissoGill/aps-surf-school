@@ -6,7 +6,7 @@ import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
 import CoachMessagesManagementCard from "@/components/admin/CoachMessagesManagementCard";
 
 import GhostAttendanceCleanupCard from "@/components/admin/GhostAttendanceCleanupCard";
-import { ExpensesCard } from "@/components/admin/ExpensesCard";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -793,10 +793,18 @@ const AdministrationDashboard = () => {
           </CardHeader>
         </Card>
 
-        {/* Expenses Card */}
-        <div className="mt-6">
-          <ExpensesCard />
-        </div>
+        {/* Accounting Card */}
+        <Card 
+          className="shadow-medium mb-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate("/admin/accounting")}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-normal">{t('admin.management.accounting')}</CardTitle>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+        </Card>
 
         {/* Reports Card */}
         <div className="mt-6">

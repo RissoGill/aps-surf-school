@@ -606,7 +606,8 @@
       "paymentSettings": "Payment Settings",
       "manageAttendance": "Manage Attendance",
       "dailyManagement": "Daily Athletes & Coaches Management",
-      "revenueManagement": "Revenue Management"
+      "revenueManagement": "Revenue Management",
+      "accounting": "Accounting"
     },
     "coachAttendance": {
       "title": "Coach Attendance Management",
