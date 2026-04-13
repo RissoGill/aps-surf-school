@@ -420,7 +420,56 @@ const PriorBalanceCard = ({
     });
   };
 
-  return (
+  const handleOpenEditBalance = () => {
+    setEditBalanceForm({
+      newBalance: priorBalance.toFixed(2),
+      reference: ""
+    });
+    setIsEditBalanceOpen(true);
+  };
+
+  const handleSubmitEditBalance = async () => {
+    const newBalance = parseFloat(editBalanceForm.newBalance);
+    
+    if (isNaN(newBalance) || newBalance < 0) {
+      toast({
+        title: t('admin.paymentManagement.validationError'),
+        description: t('admin.priorBalancePayments.invalidAmount'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsEditBalanceSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('atletas')
+        .update({ prior_balance: newBalance })
+        .eq('athlete_id', athleteId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('admin.paymentManagement.success'),
+        description: t('admin.priorBalancePayments.balanceUpdated'),
+      });
+
+      setIsEditBalanceOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+      onBalanceUpdated();
+
+    } catch (error: any) {
+      console.error('Error updating prior balance:', error);
+      toast({
+        title: t('admin.paymentManagement.error'),
+        description: error.message || t('admin.priorBalancePayments.balanceUpdateFailed'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsEditBalanceSubmitting(false);
+    }
+  };
     <Card className="shadow-soft">
       <CardContent className="p-4">
         <div className="space-y-3">
