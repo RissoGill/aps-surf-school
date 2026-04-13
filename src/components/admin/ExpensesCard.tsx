@@ -210,7 +210,7 @@ export const ExpensesCard = () => {
                     capture="environment"
                     className="hidden"
                     ref={scanInputRef}
-                    onChange={handleFileChange}
+                    onChange={handleScanChange}
                   />
                   <input
                     type="file"
