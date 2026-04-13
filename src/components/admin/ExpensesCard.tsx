@@ -346,7 +346,7 @@ export const ExpensesCard = () => {
               {SUBCATEGORIES[category] && (
                 <div>
                   <Label>{t("expenses.subcategory")}</Label>
-                  <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); }}>
+                  <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); setSubSubcategory(""); }}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
                     </SelectTrigger>
@@ -359,6 +359,21 @@ export const ExpensesCard = () => {
                   {subcategory === "Outro" && (
                     <Input className="mt-2" value={customSubcategory} onChange={(e) => setCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                   )}
+                </div>
+              )}
+              {SUB_SUBCATEGORIES[category] && subcategory && subcategory !== "Outro" && (
+                <div>
+                  <Label>{t("expenses.subSubcategory")}</Label>
+                  <Select value={subSubcategory} onValueChange={setSubSubcategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUB_SUBCATEGORIES[category].map((sub) => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
               <div>
