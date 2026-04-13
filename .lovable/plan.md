@@ -1,22 +1,37 @@
 
+# Adicionar .limit(10000) às queries de attendance sem paginação
 
-# Adicionar .limit(10000) às queries de payments em RevenueManagement e PaymentManagement
+## Contexto
+`CoachDashboard` e `AdministrationDashboard` já usam paginação manual (`.range()`) -- estão protegidos. Mas várias outras queries de attendance não têm limite e podem ser truncadas a 1000 rows.
 
-## Alterações
+## Queries a proteger (6 queries em 5 ficheiros)
 
-### 1. `src/pages/admin/RevenueManagement.tsx` — 3 queries
+### 1. `src/pages/attendance/AttendanceRecords.tsx` (linha ~43)
+Query geral de attendance sem limite -- adicionar `.limit(10000)` após `.order()`
 
-- **Linha 42-44**: query geral de payments (sem filtro de ano) → adicionar `.limit(10000)`
-- **Linha 81-84**: query de `monthRows` filtrada por `currentYear` → adicionar `.limit(10000)`
-- **Linha 125-128**: query de `sept2025OnwardsRows` com `.gte('year', 2025)` → adicionar `.limit(10000)`
+### 2. `src/components/admin/AttendanceManagementCard.tsx` (linha 48)
+`supabase.from('attendance').select('*').order(...)` -- adicionar `.limit(10000)`
 
-### 2. `src/pages/admin/PaymentManagement.tsx` — 1 query SELECT
+### 3. `src/components/admin/AttendanceManagement.tsx` (linha 45)
+Mesmo padrão -- adicionar `.limit(10000)`
 
-- **Linha 213-218**: query de payments por `athlete_id` → adicionar `.limit(10000)` (volume por atleta é pequeno, mas por consistência)
+### 4. `src/components/admin/AdminAttendanceManagement.tsx` (linha 39)
+Mesmo padrão -- adicionar `.limit(10000)`
 
-A query de `.update()` (linha 452) não precisa de `.limit()`.
+### 5. `src/components/admin/ReportsCard.tsx` (linha 233)
+Query de attendance filtrada por data e status -- adicionar `.limit(10000)`
 
-## Secção Técnica
+### 6. `src/components/coach/BulkAttendanceRegistration.tsx` (linha ~144)
+Query de duplicate check por data -- volume pequeno por dia, mas por consistência adicionar `.limit(10000)`
 
-Adicionar `.limit(10000)` no final de cada cadeia de query SELECT, antes do `;`. Padrão idêntico ao já aplicado em `AccountingManagement.tsx` e `ExpenseReportsCard.tsx`.
+## Ficheiros que NÃO precisam de alteração
+- `CoachDashboard.tsx` -- já usa paginação com `.range()`
+- `AdministrationDashboard.tsx` -- já usa paginação com `.range()`
+- `AthleteDetails.tsx` -- filtrado por atleta individual (volume baixo)
+- `AthleteDashboard.tsx` -- filtrado por atleta individual
+- `GuardianDashboard.tsx` -- filtrado por atleta individual
+- `CoachTrainingManagement.tsx` -- filtrado por coach individual
+- `packBalance.ts` -- filtrado por atleta individual
 
+## Secção técnica
+Adicionar `.limit(10000)` no final de cada cadeia SELECT, antes do `;` ou `,`. Padrão idêntico ao já aplicado nas queries de payments/expenses.
