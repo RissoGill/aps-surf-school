@@ -631,7 +631,7 @@ const AdministrationDashboard = () => {
     });
   };
 
-  const adminActions = [
+  const dailyActions = [
     {
       title: t('admin.management.users'),
       description: t('admin.management.usersDesc'),
@@ -647,18 +647,21 @@ const AdministrationDashboard = () => {
       action: t('admin.management.manageAthletes')
     },
     {
-      title: t('admin.management.payments'),
-      description: t('admin.management.paymentsDesc'),
-      icon: Euro,
-      color: "warning",
-      action: t('admin.management.paymentSettings')
-    },
-    {
       title: t('admin.management.attendance'),
       description: t('admin.management.attendanceDesc'),
       icon: Calendar,
       color: "secondary",
       action: t('admin.management.manageAttendance')
+    }
+  ];
+
+  const revenueActions = [
+    {
+      title: t('admin.management.payments'),
+      description: t('admin.management.paymentsDesc'),
+      icon: Euro,
+      color: "warning",
+      action: t('admin.management.paymentSettings')
     },
     {
       title: t('proAccount.title'),
