@@ -20,6 +20,7 @@ import PaymentManagement from "./pages/admin/PaymentManagement";
 import AttendanceManagement from "./pages/admin/AttendanceManagement";
 import ProAccountManagement from "./pages/admin/ProAccountManagement";
 import RevenueManagement from "./pages/admin/RevenueManagement";
+import DailyManagement from "./pages/admin/DailyManagement";
 import AthletesList from "./pages/attendance/AthletesList";
 import AttendanceRecords from "./pages/attendance/AttendanceRecords";
 import UserManual from "./pages/UserManual";
