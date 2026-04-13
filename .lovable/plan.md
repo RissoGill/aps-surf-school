@@ -1,48 +1,25 @@
 
-Corrigir o relatório “Conta Corrente Pro” em `src/components/admin/ReportsCard.tsx`.
 
-1. Alinhar a query dos atletas Pro com a lógica que já funciona
-- No `generateReport`, trocar o filtro rígido `.eq("surf_level", "Competition")` por `.ilike("surf_level", "competition")`.
-- Manter também `.eq("is_active", true)`.
-- Isto evita o caso em que o atleta aparece no seletor, mas depois desaparece na geração do relatório por diferença de capitalização/valor guardado.
+# Tornar o Saldo Anterior editável e adicionar campo de referência
 
-2. Garantir que a geração usa o atleta selecionado corretamente
-- Confirmar que, quando `selectedAthlete !== "all"`, a query filtra por `athlete_id` sem anular o resultado por causa do filtro de `surf_level`.
-- Tratar o cenário em que a lista de atletas devolvida fica vazia, para não fazer `.in("athlete_id", [])` e parecer que “não foi buscar informação”.
+## O que muda
+No cartão "Saldo Anterior" (PriorBalanceCard) dentro da página de pagamentos dos atletas:
+1. Adicionar um botão de edição para alterar diretamente o valor do saldo anterior
+2. Adicionar um campo "Referência" para indicar ao que se refere o saldo
 
-3. Corrigir a lógica de totais e linhas do relatório
-- O HTML do relatório está a assumir tipos `credit` e `debit`, mas o módulo `ProAccountTab` grava `prize_money`, `expense` e `other`.
-- Vou atualizar o relatório para:
-  - somar créditos com `prize_money` + `other`
-  - somar débitos com `expense`
-  - calcular saldo como `pro_prior_balance + créditos - débitos`
-  - mostrar o tipo correto em cada linha
+## Ficheiros a alterar
 
-4. Melhorar a apresentação quando não houver movimentos
-- Se o atleta existir mas não tiver entradas no intervalo escolhido, mostrar mensagem clara do tipo “Sem movimentos neste período”.
-- Se houver entradas, listar normalmente os movimentos desse atleta.
+### 1. `src/components/admin/PriorBalanceCard.tsx`
+- Adicionar estado e dialog para editar o valor do `prior_balance` diretamente (com botão de lápis/editar junto ao valor)
+- O dialog terá: campo para o novo valor do saldo, campo de texto "Referência" para descrever ao que se refere
+- Ao guardar, atualiza o `prior_balance` na tabela `atletas` e chama `onBalanceUpdated()`
+- Apenas admins podem editar (não `reports_viewer`)
 
-5. Validar o impacto sem alterar o layout geral
-- Manter o dropdown, datas e PDF como estão.
-- Apenas corrigir:
-  - carregamento dos dados
-  - mapeamento dos tipos
-  - cálculo dos totais
-  - estado vazio
+### 2. Traduções (`src/i18n/translations/pt.json` e `en.json`)
+- Adicionar chaves para: "Editar saldo" / "Edit balance", "Referência" / "Reference", "Ao que se refere" / "What it refers to"
 
-Detalhes técnicos
-- Ficheiro principal: `src/components/admin/ReportsCard.tsx`
-- Causa principal identificada:
-  - seletor usa `ilike("surf_level", "competition")`
-  - geração usa `eq("surf_level", "Competition")`
-- Causa secundária identificada:
-  - relatório interpreta tipos errados (`credit`/`debit`) enquanto os dados reais usam `prize_money` / `expense` / `other`
-- Não são necessárias alterações de base de dados nem migrations.
+## Notas
+- O campo "referência" do saldo será guardado como nota/descrição - não requer nova coluna na base de dados, pode usar o campo `notes` já existente no registo de pagamento, ou alternativamente podemos adicionar um campo visual apenas no dialog de edição
+- A edição direta do saldo funciona como já funciona no AthleteManagement, mas agora acessível diretamente no cartão de pagamentos
+- Mantém o padrão de segurança existente: buscar sempre o valor atual da BD antes de atualizar
 
-Validação após implementação
-- Testar com “Francisco Ordonhas” entre `2025-01-01` e `2026-04-30`
-- Confirmar 3 cenários:
-  1. atleta específico com movimentos
-  2. atleta específico sem movimentos
-  3. opção “todos os atletas”
-- Confirmar que o PDF mostra valores e saldos corretos.
