@@ -51,6 +51,7 @@
     "glob": "10.5.0",
     "html2pdf.js": "0.14.0",
     "input-otp": "^1.4.2",
+    "jspdf": "2.5.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
