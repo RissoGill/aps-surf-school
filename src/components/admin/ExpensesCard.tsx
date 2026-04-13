@@ -137,7 +137,7 @@ export const ExpensesCard = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (expense: { name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { error } = await supabase.from("expenses").insert(expense);
       if (error) throw error;
     },
@@ -152,7 +152,7 @@ export const ExpensesCard = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (expense: { id: string; name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { id: string; name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { id, ...rest } = expense;
       const { error } = await supabase.from("expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -182,6 +182,8 @@ export const ExpensesCard = () => {
     setName("");
     setDate(new Date());
     setCategory("");
+    setSubcategory("");
+    setCustomSubcategory("");
     setAmount("");
     setFile(null);
     setDialogOpen(false);
@@ -192,6 +194,8 @@ export const ExpensesCard = () => {
     setEditName("");
     setEditDate(new Date());
     setEditCategory("");
+    setEditSubcategory("");
+    setEditCustomSubcategory("");
     setEditAmount("");
     setEditFile(null);
     setEditDialogOpen(false);
@@ -202,6 +206,15 @@ export const ExpensesCard = () => {
     setEditName(expense.name);
     setEditDate(new Date(expense.expense_date));
     setEditCategory(expense.category || "");
+    const sub = expense.subcategory || "";
+    const categorySubs = SUBCATEGORIES[expense.category || ""] || [];
+    if (sub && !categorySubs.includes(sub) && categorySubs.length > 0) {
+      setEditSubcategory("Outro");
+      setEditCustomSubcategory(sub);
+    } else {
+      setEditSubcategory(sub);
+      setEditCustomSubcategory("");
+    }
     setEditAmount(String(expense.amount));
     setEditFile(null);
     setEditDialogOpen(true);
