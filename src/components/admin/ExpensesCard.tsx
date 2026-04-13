@@ -46,6 +46,8 @@ const SUBCATEGORIES: Record<string, string[]> = {
   "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
 };
 
+const FREETEXT_SUBCATEGORIES = ["Custos Campeonatos"];
+
 const SUB_SUBCATEGORIES: Record<string, string[]> = {
   "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"],
 };
