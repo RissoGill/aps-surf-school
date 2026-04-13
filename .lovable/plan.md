@@ -1,28 +1,28 @@
 
 
-# Adicionar opção de scan (câmara) no upload da factura
+# Converter foto capturada para PDF antes de upload
 
 ## Contexto
-Atualmente o campo de factura no formulário de despesas só aceita upload de ficheiro (`<input type="file">`). O utilizador quer também poder usar a câmara do dispositivo para fazer scan direto.
+Quando o utilizador usa "Tirar Foto" (câmara), a imagem capturada é enviada tal como está. O pedido é converter essa imagem para PDF antes de fazer upload.
 
 ## Alteração
 
-### `src/components/admin/ExpensesCard.tsx` (linhas 165-168)
+### `src/components/admin/ExpensesCard.tsx`
 
-Substituir o input de ficheiro simples por dois botões lado a lado:
+1. Criar uma função `convertImageToPdf(imageFile: File): Promise<File>` que:
+   - Lê a imagem capturada como Data URL
+   - Cria um canvas, desenha a imagem
+   - Usa `canvas.toBlob()` para obter os dados
+   - Gera um PDF com a biblioteca `jspdf` (já disponível ou a instalar) contendo a imagem em página inteira
+   - Retorna um novo `File` com extensão `.pdf`
 
-1. **Botão "Tirar Foto / Scan"** - usa `<input type="file" accept="image/*" capture="environment">` que abre a câmara traseira do dispositivo (em mobile) para fazer scan direto da factura
-2. **Botão "Escolher Ficheiro"** - mantém o input atual `<input type="file" accept="image/*,.pdf">` para upload de ficheiro do dispositivo
+2. Alterar o `handleFileChange` do input de scan (câmara) para um handler separado `handleScanChange` que:
+   - Recebe o ficheiro de imagem
+   - Chama `convertImageToPdf()` 
+   - Faz `setFile()` com o PDF resultante
 
-Ambos os inputs ficam escondidos (`hidden`) e são acionados por botões estilizados com ícones (Camera e Upload). Quando um ficheiro é selecionado por qualquer via, mostra o nome do ficheiro selecionado.
+3. O input de upload normal (`fileInputRef`) mantém o comportamento atual.
 
-### Traduções (`pt.json` e `en.json`)
-- `"expenses.scanInvoice"`: "Tirar Foto" / "Take Photo"
-- `"expenses.uploadFile"`: "Escolher Ficheiro" / "Choose File"
-- `"expenses.fileSelected"`: "Ficheiro selecionado" / "File selected"
-
-## Detalhe técnico
-- O atributo HTML `capture="environment"` instrui o browser mobile a abrir a câmara traseira
-- Em desktop, o botão de scan simplesmente abre o seletor de ficheiros (comportamento do browser)
-- Dois `<input>` hidden referenciados via `useRef`, acionados pelo `onClick` dos botões
+### Dependência
+- Instalar `jspdf` (`npm install jspdf`) — biblioteca leve para gerar PDFs no browser. Versão fixada em 2.5.2 (segura).
 
