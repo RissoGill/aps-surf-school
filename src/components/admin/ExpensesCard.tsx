@@ -511,7 +511,7 @@ export const ExpensesCard = () => {
                   <Input className="mt-2" value={editCustomSubcategory} onChange={(e) => setEditCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                 )}
               </div>
-            )
+            )}
             <div>
               <Label>{t("expenses.amount")}</Label>
               <div className="relative">
