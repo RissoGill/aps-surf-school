@@ -291,6 +291,19 @@ export const ExpensesCard = () => {
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("expenses.namePlaceholder")} />
               </div>
               <div>
+                <Label>{t("expenses.category")}</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPENSE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label>{t("expenses.date")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -352,7 +365,8 @@ export const ExpensesCard = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t("expenses.name")}</TableHead>
+                     <TableHead>{t("expenses.name")}</TableHead>
+                    <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.date")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
                     <TableHead>{t("expenses.invoice")}</TableHead>
@@ -363,6 +377,7 @@ export const ExpensesCard = () => {
                   {expenses.map((expense) => (
                     <TableRow key={expense.id}>
                       <TableCell className="font-medium">{expense.name}</TableCell>
+                      <TableCell>{expense.category || "—"}</TableCell>
                       <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                       <TableCell>
@@ -418,6 +433,19 @@ export const ExpensesCard = () => {
                   <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
+            </div>
+            <div>
+              <Label>{t("expenses.category")}</Label>
+              <Select value={editCategory} onValueChange={setEditCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXPENSE_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>{t("expenses.amount")}</Label>
