@@ -192,6 +192,7 @@ export const ExpensesCard = () => {
     setCategory("");
     setSubcategory("");
     setCustomSubcategory("");
+    setSubSubcategory("");
     setAmount("");
     setFile(null);
     setDialogOpen(false);
