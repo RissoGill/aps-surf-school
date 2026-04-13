@@ -1,9 +1,16 @@
 
-Atualizar o rótulo "Total Recebido desde Setembro" para incluir o ano 2025 nas traduções.
 
-**Alterações:**
-- **pt.json** (linha 581): `"totalReceived": "Total Recebido desde Setembro 2025"`
-- **en.json** (linha 581): `"totalReceived": "Total Received from September 2025"`
+## Alteração: Remover "Sept+" / "Set+" dos 2 cartões Outstanding
 
-**Resultado:**
-O cartão no dashboard da administração passará a mostrar "Total Recebido desde Setembro 2025" (PT) ou "Total Received from September 2025" (EN) em vez de apenas "desde Setembro".
+**Ficheiros a alterar:**
+
+### `src/i18n/translations/pt.json` (linhas 585-586)
+- `"outstandingLearningSept"`: de `"Em Dívida Learning/Pré-Comp (Set+)"` para `"Em Dívida Learning/Pré-Comp"`
+- `"outstandingCompetitionSept"`: de `"Em Dívida Competição (Set+)"` para `"Em Dívida Competição"`
+
+### `src/i18n/translations/en.json` (linhas 585-586)
+- `"outstandingLearningSept"`: de `"Outstanding Learning/Pre-Comp (Sept+)"` para `"Outstanding Learning/Pre-Comp"`
+- `"outstandingCompetitionSept"`: de `"Outstanding Competition (Sept+)"` para `"Outstanding Competition"`
+
+Apenas texto visual — sem alteração de lógica.
+
