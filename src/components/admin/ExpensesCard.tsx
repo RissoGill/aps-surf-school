@@ -513,7 +513,7 @@ export const ExpensesCard = () => {
             </div>
             <div>
               <Label>{t("expenses.category")}</Label>
-              <Select value={editCategory} onValueChange={(val) => { setEditCategory(val); setEditSubcategory(""); setEditCustomSubcategory(""); }}>
+              <Select value={editCategory} onValueChange={(val) => { setEditCategory(val); setEditSubcategory(""); setEditCustomSubcategory(""); setEditSubSubcategory(""); }}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                 </SelectTrigger>
@@ -527,7 +527,7 @@ export const ExpensesCard = () => {
             {SUBCATEGORIES[editCategory] && (
               <div>
                 <Label>{t("expenses.subcategory")}</Label>
-                <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); }}>
+                <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); setEditSubSubcategory(""); }}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
                   </SelectTrigger>
@@ -540,6 +540,21 @@ export const ExpensesCard = () => {
                 {editSubcategory === "Outro" && (
                   <Input className="mt-2" value={editCustomSubcategory} onChange={(e) => setEditCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                 )}
+              </div>
+            )}
+            {SUB_SUBCATEGORIES[editCategory] && editSubcategory && editSubcategory !== "Outro" && (
+              <div>
+                <Label>{t("expenses.subSubcategory")}</Label>
+                <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUB_SUBCATEGORIES[editCategory].map((sub) => (
+                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
             <div>
