@@ -1,14 +1,34 @@
 
 
-# Corrigir Cálculo de Despesas do Mês Corrente
+# Despesas com Total do Mês e Lista Colapsável
 
-## Problema
-O cartão "Despesas Mês Corrente" está a calcular com base na `expense_date` (data da despesa), mas o utilizador quer que some todas as despesas que foram **registadas/entradas** no mês atual (usando `created_at`).
+## Resumo
+Modificar o `ExpensesCard` para mostrar o total de despesas do mês corrente no cabeçalho do cartão e tornar a tabela de despesas colapsável (fechada por defeito), para que com muitas despesas a página fique limpa.
 
-## Alteração
+## Layout
 
-### `src/pages/admin/AccountingManagement.tsx`
-1. Adicionar `created_at` à query de despesas (linha 46)
-2. Alterar o filtro das despesas do mês corrente para usar `created_at` em vez de `expense_date` (linhas 55-58)
-3. Usar `(allExpenses || [])` como base do filtro em vez de `expensesSinceSept` para incluir todas as despesas registadas no mês, independentemente da data da despesa
+```text
+┌────────────────────────────────────┐
+│ 📄 Registo de Despesas    [+ Nova] │
+│ Total Mês Corrente: €XXX.XX        │
+│ ▶ Ver despesas (colapsável)        │
+│   ┌──────────────────────────────┐ │
+│   │ Tabela de despesas           │ │
+│   └──────────────────────────────┘ │
+└────────────────────────────────────┘
+```
+
+## Alterações
+
+### 1. Editar `src/components/admin/ExpensesCard.tsx`
+- Calcular `totalCurrentMonth` filtrando despesas pelo mês/ano corrente (usando `expense_date`)
+- Substituir o total geral existente (linha 444-446) pelo total do mês corrente
+- Envolver a tabela de despesas num `Collapsible` (importar de `@/components/ui/collapsible`)
+- `CollapsibleTrigger` com texto "Ver despesas" / ícone ChevronDown
+- `CollapsibleContent` contém a tabela existente
+- Estado `open` começa `false` (colapsado por defeito)
+
+### 2. Traduções (`en.json` e `pt.json`)
+- Adicionar chave `expenses.viewExpenses`: "Ver despesas" / "View expenses"
+- Adicionar chave `expenses.totalCurrentMonth`: "Total Mês Corrente" / "Total Current Month"
 
