@@ -145,7 +145,7 @@ export const ExpensesCard = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (expense: { name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { error } = await supabase.from("expenses").insert(expense);
       if (error) throw error;
     },
