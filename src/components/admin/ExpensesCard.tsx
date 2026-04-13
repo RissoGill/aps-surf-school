@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink, Camera, Upload } from "lucide-react";
+import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink, Camera, Upload, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -30,6 +30,8 @@ export const ExpensesCard = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Create dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -39,8 +41,23 @@ export const ExpensesCard = () => {
   const scanInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(new Date());
+  const [editAmount, setEditAmount] = useState("");
+  const [editFile, setEditFile] = useState<File | null>(null);
+  const [editUploading, setEditUploading] = useState(false);
+  const editScanInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null);
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditFile(e.target.files?.[0] || null);
   };
 
   const convertImageToPdf = useCallback(async (imageFile: File): Promise<File> => {
@@ -75,6 +92,17 @@ export const ExpensesCard = () => {
     }
   };
 
+  const handleEditScanChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const captured = e.target.files?.[0];
+    if (!captured) return;
+    try {
+      const pdfFile = await convertImageToPdf(captured);
+      setEditFile(pdfFile);
+    } catch {
+      toast({ title: t("expenses.error"), variant: "destructive" });
+    }
+  };
+
   const { data: expenses = [], isLoading } = useQuery({
     queryKey: ["expenses"],
     queryFn: async () => {
@@ -102,6 +130,22 @@ export const ExpensesCard = () => {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (expense: { id: string; name: string; expense_date: string; amount: number; invoice_url: string | null }) => {
+      const { id, ...rest } = expense;
+      const { error } = await supabase.from("expenses").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast({ title: t("expenses.updated") });
+      resetEditForm();
+    },
+    onError: () => {
+      toast({ title: t("expenses.error"), variant: "destructive" });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
@@ -121,6 +165,42 @@ export const ExpensesCard = () => {
     setDialogOpen(false);
   };
 
+  const resetEditForm = () => {
+    setEditingExpense(null);
+    setEditName("");
+    setEditDate(new Date());
+    setEditAmount("");
+    setEditFile(null);
+    setEditDialogOpen(false);
+  };
+
+  const openEditDialog = (expense: Expense) => {
+    setEditingExpense(expense);
+    setEditName(expense.name);
+    setEditDate(new Date(expense.expense_date));
+    setEditAmount(String(expense.amount));
+    setEditFile(null);
+    setEditDialogOpen(true);
+  };
+
+  const uploadFile = async (fileToUpload: File): Promise<string | null> => {
+    const fileExt = fileToUpload.name.split(".").pop();
+    const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const { error: uploadError } = await supabase.storage
+      .from("expense-invoices")
+      .upload(filePath, fileToUpload);
+
+    if (uploadError) {
+      toast({ title: t("expenses.uploadError"), variant: "destructive" });
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("expense-invoices")
+      .getPublicUrl(filePath);
+    return urlData.publicUrl;
+  };
+
   const handleSubmit = async () => {
     if (!name.trim() || !date || !amount) return;
 
@@ -128,22 +208,11 @@ export const ExpensesCard = () => {
     let invoiceUrl: string | null = null;
 
     if (file) {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from("expense-invoices")
-        .upload(filePath, file);
-
-      if (uploadError) {
-        toast({ title: t("expenses.uploadError"), variant: "destructive" });
+      invoiceUrl = await uploadFile(file);
+      if (file && !invoiceUrl) {
         setUploading(false);
         return;
       }
-
-      const { data: urlData } = supabase.storage
-        .from("expense-invoices")
-        .getPublicUrl(filePath);
-      invoiceUrl = urlData.publicUrl;
     }
 
     createMutation.mutate({
@@ -153,6 +222,31 @@ export const ExpensesCard = () => {
       invoice_url: invoiceUrl,
     });
     setUploading(false);
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingExpense || !editName.trim() || !editDate || !editAmount) return;
+
+    setEditUploading(true);
+    let invoiceUrl: string | null = editingExpense.invoice_url;
+
+    if (editFile) {
+      const uploaded = await uploadFile(editFile);
+      if (!uploaded) {
+        setEditUploading(false);
+        return;
+      }
+      invoiceUrl = uploaded;
+    }
+
+    updateMutation.mutate({
+      id: editingExpense.id,
+      name: editName.trim(),
+      expense_date: format(editDate, "yyyy-MM-dd"),
+      amount: parseFloat(editAmount),
+      invoice_url: invoiceUrl,
+    });
+    setEditUploading(false);
   };
 
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
@@ -204,21 +298,8 @@ export const ExpensesCard = () => {
               <div>
                 <Label>{t("expenses.invoice")}</Label>
                 <div className="flex gap-2 mt-1">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    ref={scanInputRef}
-                    onChange={handleScanChange}
-                  />
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="hidden"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                  />
+                  <input type="file" accept="image/*" capture="environment" className="hidden" ref={scanInputRef} onChange={handleScanChange} />
+                  <input type="file" accept="image/*,.pdf" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
                   <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => scanInputRef.current?.click()}>
                     <Camera className="h-4 w-4 mr-1" />
                     {t("expenses.scanInvoice")}
@@ -279,9 +360,14 @@ export const ExpensesCard = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(expense.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(expense)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(expense.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -291,6 +377,74 @@ export const ExpensesCard = () => {
           </>
         )}
       </CardContent>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) resetEditForm(); else setEditDialogOpen(true); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("expenses.edit")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>{t("expenses.name")}</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={t("expenses.namePlaceholder")} />
+            </div>
+            <div>
+              <Label>{t("expenses.date")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !editDate && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editDate ? format(editDate, "PPP") : t("expenses.pickDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={editDate} onSelect={setEditDate} initialFocus className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div>
+              <Label>{t("expenses.amount")}</Label>
+              <div className="relative">
+                <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input type="number" step="0.01" min="0" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="pl-9" placeholder="0.00" />
+              </div>
+            </div>
+            <div>
+              <Label>{t("expenses.invoice")}</Label>
+              {editingExpense?.invoice_url && !editFile && (
+                <p className="text-xs text-muted-foreground mt-1 mb-1">
+                  {t("expenses.currentInvoice")}:{" "}
+                  <a href={editingExpense.invoice_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" />
+                    {t("expenses.viewInvoice")}
+                  </a>
+                </p>
+              )}
+              <div className="flex gap-2 mt-1">
+                <input type="file" accept="image/*" capture="environment" className="hidden" ref={editScanInputRef} onChange={handleEditScanChange} />
+                <input type="file" accept="image/*,.pdf" className="hidden" ref={editFileInputRef} onChange={handleEditFileChange} />
+                <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => editScanInputRef.current?.click()}>
+                  <Camera className="h-4 w-4 mr-1" />
+                  {t("expenses.scanInvoice")}
+                </Button>
+                <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => editFileInputRef.current?.click()}>
+                  <Upload className="h-4 w-4 mr-1" />
+                  {t("expenses.uploadFile")}
+                </Button>
+              </div>
+              {editFile && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t("expenses.fileSelected")}: {editFile.name}
+                </p>
+              )}
+            </div>
+            <Button onClick={handleEditSubmit} disabled={!editName.trim() || !editDate || !editAmount || editUploading || updateMutation.isPending} className="w-full">
+              {editUploading ? t("expenses.uploading") : t("expenses.save")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
