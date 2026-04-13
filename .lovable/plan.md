@@ -1,45 +1,51 @@
 
-Objetivo: corrigir o cartão para deixar de mostrar €31,20 quando na base de dados Abril já só tem €15,60.
 
-Diagnóstico
-- Verifiquei os registos reais de Abril 2026 na tabela `expenses`.
-- Neste momento só existem 2 despesas em Abril:
-  - Manutenção de Conta — €15,00
-  - Imposto de Selo — €0,60
-- Ou seja, a base de dados está correta e não há duplicado real em Abril.
-- O problema está no frontend: o cartão de resumo está a mostrar valor antigo em cache.
+# Adicionar Data de Início às Despesas Recorrentes
 
-Causa provável
-- `AccountingManagement.tsx` usa uma query própria com a key `['accounting-stats']`.
-- `ExpensesCard.tsx` ao apagar/editar/criar despesas só invalida `['expenses']`.
-- Resultado: a lista atualiza, mas os cartões de topo podem ficar com valor antigo até refresh manual.
+## Problema
+Atualmente todas as despesas recorrentes são geradas desde Setembro 2025, independentemente de quando devem começar. O utilizador quer escolher uma data específica por cada template recorrente, para que só gere a partir desse mês e com o dia correto.
 
-Plano de correção
-1. Atualizar `src/components/admin/ExpensesCard.tsx`
-- Em todas as mutations que alteram despesas, invalidar também:
-  - `['accounting-stats']`
-- Isto aplica-se a:
-  - criar despesa
-  - editar despesa
-  - eliminar despesa
-  - gerar recorrentes manualmente
+## Alterações
 
-2. Garantir consistência da dashboard
-- Manter o cálculo do mês corrente em `AccountingManagement.tsx` por `expense_date` (já está certo).
-- Não alterar a lógica de soma, porque os dados reais de Abril já confirmam €15,60.
+### 1. Migração — Nova coluna `start_date` na tabela `recurring_expenses`
+- Adicionar coluna `start_date` (type `date`, nullable, default `'2025-09-01'`)
+- As entradas existentes ficam com `2025-09-01` por defeito
 
-3. Validar comportamento esperado
-- Após eliminar uma despesa de Abril, o cartão “Despesas Mês Corrente” deve passar imediatamente para €15,60 sem precisar de refresh.
-- O total “desde Setembro 2025” também deve refrescar logo.
+### 2. UI — Date picker no formulário de recorrentes (`ExpensesCard.tsx`)
+- Adicionar estado `recStartDate` (Date)
+- Adicionar um date picker (Popover + Calendar) no formulário "Adicionar/Editar Recorrente"
+- Passar `start_date` nas mutations de criar e editar
+- Mostrar a data na tabela de recorrentes (nova coluna "Início")
+- Preencher o campo ao editar (`handleEditRecurring`)
 
-Secção técnica
-- Ficheiro principal: `src/components/admin/ExpensesCard.tsx`
-- Ajuste esperado nos `onSuccess`:
-```tsx
-queryClient.invalidateQueries({ queryKey: ["expenses"] });
-queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
+### 3. Edge Function — Usar `start_date` de cada template
+- Em vez de usar o `from_date` global do request para todos os templates, usar `rec.start_date` de cada template individual
+- Para cada template, gerar entradas apenas a partir do seu `start_date` até ao mês atual
+- Manter o `from_date` do request como fallback (se `start_date` não existir, usa `from_date` ou `2025-09-01`)
+- O dia do `expense_date` gerado será o dia do `start_date` (ex: se start_date é `2025-09-15`, gera no dia 15 de cada mês)
+
+### 4. Traduções
+- `expenses.startDate`: "Data Início" / "Start Date"
+
+## Secção Técnica
+
+**Migração SQL:**
+```sql
+ALTER TABLE recurring_expenses 
+ADD COLUMN start_date date DEFAULT '2025-09-01';
 ```
 
-Resultado esperado
-- O cartão deixa de mostrar o valor antigo em cache.
-- A página de Contabilidade fica sincronizada com a tabela de despesas em tempo real.
+**Edge Function — lógica por template:**
+```typescript
+for (const rec of recurring) {
+  const startDate = rec.start_date || fromDate || "2025-09-01";
+  const [sY, sM, sD] = startDate.split("-").map(Number);
+  // Iterar meses desde sY/sM até agora
+  // Usar sD como dia do expense_date (com clamp ao último dia do mês)
+}
+```
+
+**UI — DatePicker no formulário:**
+- Usa Popover + Calendar (padrão Shadcn) com `pointer-events-auto`
+- Label: "Data Início"
+
