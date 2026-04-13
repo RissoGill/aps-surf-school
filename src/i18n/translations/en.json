@@ -1594,6 +1594,8 @@
     "edit": "Edit Expense",
     "updated": "Expense updated",
     "save": "Save",
-    "currentInvoice": "Current invoice"
+    "currentInvoice": "Current invoice",
+    "category": "Category",
+    "categoryPlaceholder": "Select category"
   }
 }

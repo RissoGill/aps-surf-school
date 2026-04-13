@@ -1594,6 +1594,8 @@
     "edit": "Editar Despesa",
     "updated": "Despesa atualizada",
     "save": "Guardar",
-    "currentInvoice": "Factura atual"
+    "currentInvoice": "Factura atual",
+    "category": "Categoria",
+    "categoryPlaceholder": "Selecionar categoria"
   }
 }
