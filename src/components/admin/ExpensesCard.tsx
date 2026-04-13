@@ -318,17 +318,24 @@ export const ExpensesCard = () => {
   const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const [expensesOpen, setExpensesOpen] = useState(false);
 
-  const totalCurrentMonth = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
-    return expenses
-      .filter((e) => {
-        const d = new Date(e.expense_date);
-        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
-      })
-      .reduce((sum, e) => sum + Number(e.amount), 0);
-  }, [expenses]);
+  // Month/year filter for viewing expenses
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1);
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
+
+  const filteredExpenses = useMemo(() =>
+    expenses.filter((e) => {
+      const d = new Date(e.expense_date);
+      return d.getFullYear() === viewYear && d.getMonth() + 1 === viewMonth;
+    }), [expenses, viewMonth, viewYear]);
+
+  const totalSelectedMonth = useMemo(() =>
+    filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0),
+    [filteredExpenses]);
+
+  const MONTH_NAMES = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
 
   // Recurring expenses state
   const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
