@@ -47,7 +47,8 @@ const RevenueManagement = () => {
 
       const { data: atletasRows } = await supabase
         .from('atletas')
-        .select('athlete_id, surf_level, is_active, prior_balance');
+        .select('athlete_id, surf_level, is_active, prior_balance')
+        .limit(10000);
 
       const levelByAthleteId: Record<string, string | null> = {};
       const isActiveByAthleteId: Record<string, boolean> = {};

@@ -48,7 +48,8 @@ export const ReportsCard = () => {
         .from("atletas")
         .select("athlete_id, first_name, last_name")
         .eq("is_active", true)
-        .order("first_name");
+        .order("first_name")
+        .limit(10000);
       
       if (!error && data) {
         setAthletes(data);
@@ -59,7 +60,8 @@ export const ReportsCard = () => {
       const { data, error } = await supabase
         .from("coach")
         .select("coach_id, first_name, last_name")
-        .order("first_name");
+        .order("first_name")
+        .limit(10000);
       
       if (!error && data) {
         setCoaches(data);
@@ -72,7 +74,8 @@ export const ReportsCard = () => {
         .select("athlete_id, first_name, last_name, pro_prior_balance, pro_prior_balance_date")
         .eq("is_active", true)
         .ilike("surf_level", "competition")
-        .order("first_name");
+        .order("first_name")
+        .limit(10000);
       
       if (!error && data) {
         setProAthletes(data);
@@ -144,7 +147,7 @@ export const ReportsCard = () => {
             paymentsQuery = paymentsQuery.eq("athlete_id", selectedAthlete);
           }
           
-          const { data: payments, error: paymentsError } = await paymentsQuery;
+          const { data: payments, error: paymentsError } = await paymentsQuery.limit(10000);
           
           if (paymentsError) throw paymentsError;
           
@@ -213,7 +216,7 @@ export const ReportsCard = () => {
             athletesQuery = athletesQuery.eq("athlete_id", selectedAthlete);
           }
           
-          const { data: athletes, error: athletesError } = await athletesQuery;
+          const { data: athletes, error: athletesError } = await athletesQuery.limit(10000);
           
           if (athletesError) throw athletesError;
           data = athletes || [];
@@ -224,14 +227,15 @@ export const ReportsCard = () => {
           const { data: activeAthletes } = await supabase
             .from("atletas")
             .select("athlete_id")
-            .eq("is_active", true);
+            .eq("is_active", true)
+            .limit(10000);
           
           const activeAthleteIds = (activeAthletes || []).map(a => a.athlete_id);
 
           const [paymentsRes, attendanceRes, athletesRes] = await Promise.all([
-            supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr).in("athlete_id", activeAthleteIds),
+            supabase.from("payments").select("*").gte("payment_date", startStr).lte("payment_date", endStr).in("athlete_id", activeAthleteIds).limit(10000),
             supabase.from("attendance").select("*").gte("date", startStr).lte("date", endStr).in("status", ["Present", "Present ", "Absent", "Justified"]).in("athlete_id", activeAthleteIds).limit(10000),
-            supabase.from("atletas").select("*").eq("is_active", true)
+            supabase.from("atletas").select("*").eq("is_active", true).limit(10000)
           ]);
 
           data = [{
@@ -256,7 +260,7 @@ export const ReportsCard = () => {
           }
           
           const { data: coachPayments, error: coachPaymentsError } = 
-            await coachPaymentsQuery.order("payment_date", { ascending: false });
+            await coachPaymentsQuery.order("payment_date", { ascending: false }).limit(10000);
           
           if (coachPaymentsError) throw coachPaymentsError;
           data = coachPayments || [];
@@ -274,7 +278,7 @@ export const ReportsCard = () => {
             proAthletesQuery = proAthletesQuery.eq("athlete_id", selectedAthlete);
           }
           
-          const { data: proAthletesData, error: proAthletesError } = await proAthletesQuery.order("first_name");
+          const { data: proAthletesData, error: proAthletesError } = await proAthletesQuery.order("first_name").limit(10000);
           if (proAthletesError) throw proAthletesError;
           
           const proAthleteIds = (proAthletesData || []).map(a => a.athlete_id);
@@ -287,7 +291,8 @@ export const ReportsCard = () => {
               .in("athlete_id", proAthleteIds)
               .gte("entry_date", startStr)
               .lte("entry_date", endStr)
-              .order("entry_date", { ascending: true });
+              .order("entry_date", { ascending: true })
+              .limit(10000);
             
             if (proEntriesError) throw proEntriesError;
             proEntries = proEntriesData || [];

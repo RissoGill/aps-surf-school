@@ -469,8 +469,8 @@ const AdministrationDashboard = () => {
     enabled: sessionValid,
     queryFn: async () => {
       const [athletesRes, coachesRes] = await Promise.all([
-        supabase.from('atletas').select('*'),
-        supabase.from('coach').select('coach_id, first_name, last_name')
+        supabase.from('atletas').select('*').limit(10000),
+        supabase.from('coach').select('coach_id, first_name, last_name').limit(10000)
       ]);
 
       if (athletesRes.error) throw athletesRes.error;

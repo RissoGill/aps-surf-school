@@ -81,7 +81,8 @@ const AttendanceManagement = () => {
       const { data, error } = await supabase
         .from('atletas')
         .select('athlete_id, first_name, last_name')
-        .order('first_name');
+        .order('first_name')
+        .limit(10000);
       
       if (error) throw error;
       return data as Athlete[];
@@ -95,7 +96,8 @@ const AttendanceManagement = () => {
       const { data, error } = await supabase
         .from('coach')
         .select('coach_id, first_name, last_name')
-        .order('first_name');
+        .order('first_name')
+        .limit(10000);
       
       if (error) throw error;
       return data;
@@ -113,10 +115,12 @@ const AttendanceManagement = () => {
           .from('attendance')
           .select('*')
           .eq('athlete_id', selectedAthlete.athlete_id)
-          .order('date', { ascending: false }),
+          .order('date', { ascending: false })
+          .limit(10000),
         supabase
           .from('coach')
           .select('coach_id, first_name, last_name')
+          .limit(10000)
       ]);
 
       if (attendanceRes.error) throw attendanceRes.error;
