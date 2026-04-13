@@ -424,7 +424,7 @@ export const ExpensesCard = () => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", {
         method: "POST",
-        body: { from_date: "2025-09-01" },
+        body: {},
       });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
