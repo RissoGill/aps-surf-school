@@ -97,14 +97,16 @@ const AdministrationDashboard = () => {
           month,
           year,
           athlete_id
-        `);
+        `)
+        .limit(10000);
       
       if (paymentsError) throw paymentsError;
       
       // Fetch surf levels and active status separately (no FK defined between payments and atletas)
       const { data: atletasRows } = await supabase
         .from('atletas')
-        .select('athlete_id, surf_level, is_active, prior_balance');
+        .select('athlete_id, surf_level, is_active, prior_balance')
+        .limit(10000);
       
       const levelByAthleteId: Record<string, string | null> = {};
       const isActiveByAthleteId: Record<string, boolean> = {};
@@ -134,7 +136,8 @@ const AdministrationDashboard = () => {
       const { data: monthRows, error: monthErr } = await supabase
         .from('payments')
         .select('amount_paid, amount_due, status, month, year, athlete_id')
-        .eq('year', currentYear);
+        .eq('year', currentYear)
+        .limit(10000);
       
       if (monthErr) {
         console.error('Month query error:', monthErr);
@@ -245,7 +248,8 @@ const AdministrationDashboard = () => {
       const { data: sept2025OnwardsRows } = await supabase
         .from('payments')
         .select('amount_paid, amount_due, month, year, athlete_id')
-        .gte('year', 2025);
+        .gte('year', 2025)
+        .limit(10000);
       
       // Note: currentMonthSerial will be defined on line 209, so we calculate it here
       const currentMonthSerial = currentYear * 12 + currentMonthNumber;

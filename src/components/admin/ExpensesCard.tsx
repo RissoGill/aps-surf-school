@@ -145,7 +145,8 @@ export const ExpensesCard = () => {
       const { data, error } = await supabase
         .from("expenses")
         .select("*")
-        .order("expense_date", { ascending: false });
+        .order("expense_date", { ascending: false })
+        .limit(10000);
       if (error) throw error;
       return data as Expense[];
     },
@@ -355,7 +356,8 @@ export const ExpensesCard = () => {
       const { data, error } = await supabase
         .from("recurring_expenses")
         .select("*")
-        .order("name");
+        .order("name")
+        .limit(10000);
       if (error) throw error;
       return data;
     },

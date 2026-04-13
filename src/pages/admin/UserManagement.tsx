@@ -117,11 +117,11 @@ const UserManagement = () => {
   const fetchAllUsers = async () => {
     setLoading(true);
     try {
-      const { data: coachesData, error: coachError } = await supabase.from('coach').select('*').order('first_name');
+      const { data: coachesData, error: coachError } = await supabase.from('coach').select('*').order('first_name').limit(10000);
       if (coachError) throw coachError;
       setCoaches(coachesData || []);
 
-      const { data: athletesData, error: athleteError } = await supabase.from('atletas').select('*').order('first_name');
+      const { data: athletesData, error: athleteError } = await supabase.from('atletas').select('*').order('first_name').limit(10000);
       if (athleteError) throw athleteError;
       setAthletes(athletesData || []);
 
