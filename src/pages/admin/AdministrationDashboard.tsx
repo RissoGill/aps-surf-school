@@ -812,7 +812,7 @@ const AdministrationDashboard = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{t('admin.management.dailyManagement')}</CardTitle>
+                  <span className="text-xl font-normal">{t('admin.management.dailyManagement')}</span>
                   <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
                 </div>
               </CardHeader>
@@ -879,7 +879,7 @@ const AdministrationDashboard = () => {
             <CollapsibleTrigger asChild>
               <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{t('admin.management.revenueManagement')}</CardTitle>
+                  <span className="text-xl font-normal">{t('admin.management.revenueManagement')}</span>
                   <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
                 </div>
               </CardHeader>
