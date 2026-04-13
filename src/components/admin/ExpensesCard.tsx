@@ -22,6 +22,7 @@ interface Expense {
   name: string;
   category: string | null;
   subcategory: string | null;
+  sub_subcategory: string | null;
   expense_date: string;
   amount: number;
   invoice_url: string | null;
