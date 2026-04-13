@@ -215,7 +215,8 @@ const PaymentManagement = () => {
         .select('*')
         .eq('athlete_id', selectedAthlete.athlete_id)
         .order('year', { ascending: false })
-        .order('month', { ascending: false });
+        .order('month', { ascending: false })
+        .limit(10000);
 
       if (error) throw error;
 
