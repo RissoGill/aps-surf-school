@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AppHeader from "@/components/shared/AppHeader";
 import AppFooter from "@/components/shared/AppFooter";
 import { ExpensesCard } from "@/components/admin/ExpensesCard";
+import { ExpenseReportsCard } from "@/components/admin/ExpenseReportsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -156,6 +157,9 @@ const AccountingManagement = () => {
 
         {/* Expenses Management */}
         <ExpensesCard />
+
+        {/* Expense Reports */}
+        <ExpenseReportsCard />
       </main>
 
       <AppFooter />

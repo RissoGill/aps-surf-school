@@ -1627,6 +1627,17 @@
     "recurringAmount": "Valor mensal",
     "editRecurring": "Editar Recorrente",
     "saveRecurring": "Guardar",
-    "cancelEdit": "Cancelar"
+    "cancelEdit": "Cancelar",
+    "selectMonth": "Mês",
+    "selectYear": "Ano",
+    "reports": {
+      "title": "Relatórios de Despesas",
+      "description": "Gerar relatórios por mês, categoria ou subcategoria",
+      "allCategories": "Todas as Categorias",
+      "allSubcategories": "Todas as Subcategorias",
+      "generate": "Gerar Relatório",
+      "category": "Categoria",
+      "subcategory": "Subcategoria"
+    }
   }
 }
