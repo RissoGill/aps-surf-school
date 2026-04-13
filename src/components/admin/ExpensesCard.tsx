@@ -358,7 +358,7 @@ export const ExpensesCard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
       toast({ title: t("expenses.recurringCreated") });
-      setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
+      resetRecurringForm();
     },
     onError: () => toast({ title: t("expenses.error"), variant: "destructive" }),
   });
