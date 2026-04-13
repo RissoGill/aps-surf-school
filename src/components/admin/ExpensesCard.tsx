@@ -262,7 +262,6 @@ export const ExpensesCard = () => {
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
     });
-    });
     setEditUploading(false);
   };
 
