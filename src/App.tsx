@@ -79,6 +79,8 @@ const App = () => {
           <Route path="/admin/attendance" element={<AttendanceManagement />} />
             <Route path="/admin/pro-accounts" element={<ProAccountManagement />} />
             <Route path="/admin/revenue" element={<RevenueManagement />} />
+            <Route path="/admin/daily-management" element={<DailyManagement />} />
+            <Route path="/admin/revenue" element={<RevenueManagement />} />
           
           {/* Attendance Routes */}
           <Route path="/attendance/athletes" element={<AthletesList />} />
