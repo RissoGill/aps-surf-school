@@ -231,6 +231,7 @@ export const ExpensesCard = () => {
 
     createMutation.mutate({
       name: name.trim(),
+      category: category || null,
       expense_date: format(date, "yyyy-MM-dd"),
       amount: parseFloat(amount),
       invoice_url: invoiceUrl,
@@ -256,9 +257,11 @@ export const ExpensesCard = () => {
     updateMutation.mutate({
       id: editingExpense.id,
       name: editName.trim(),
+      category: editCategory || null,
       expense_date: format(editDate, "yyyy-MM-dd"),
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
+    });
     });
     setEditUploading(false);
   };
