@@ -327,6 +327,89 @@ export const ExpensesCard = () => {
       .reduce((sum, e) => sum + Number(e.amount), 0);
   }, [expenses]);
 
+  // Recurring expenses state
+  const [recurringDialogOpen, setRecurringDialogOpen] = useState(false);
+  const [recName, setRecName] = useState("");
+  const [recCategory, setRecCategory] = useState("");
+  const [recSubcategory, setRecSubcategory] = useState("");
+  const [recCustomSubcategory, setRecCustomSubcategory] = useState("");
+  const [recSubSubcategory, setRecSubSubcategory] = useState("");
+  const [recAmount, setRecAmount] = useState("");
+  const [generatingRecurring, setGeneratingRecurring] = useState(false);
+
+  const { data: recurringExpenses = [] } = useQuery({
+    queryKey: ["recurring_expenses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("recurring_expenses")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const createRecurringMutation = useMutation({
+    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number }) => {
+      const { error } = await supabase.from("recurring_expenses").insert(rec);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
+      toast({ title: t("expenses.recurringCreated") });
+      setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
+    },
+    onError: () => toast({ title: t("expenses.error"), variant: "destructive" }),
+  });
+
+  const toggleRecurringMutation = useMutation({
+    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+      const { error } = await supabase.from("recurring_expenses").update({ is_active }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
+      toast({ title: t("expenses.recurringUpdated") });
+    },
+  });
+
+  const deleteRecurringMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("recurring_expenses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
+      toast({ title: t("expenses.recurringDeleted") });
+    },
+  });
+
+  const handleGenerateRecurring = async () => {
+    setGeneratingRecurring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", { method: "POST" });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      toast({ title: `${t("expenses.recurringGenerated")} (${data?.created || 0})` });
+    } catch {
+      toast({ title: t("expenses.recurringGenerateError"), variant: "destructive" });
+    } finally {
+      setGeneratingRecurring(false);
+    }
+  };
+
+  const handleAddRecurring = () => {
+    if (!recName.trim() || !recAmount) return;
+    const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
+    createRecurringMutation.mutate({
+      name: recName.trim(),
+      category: recCategory || null,
+      subcategory: resolvedSub || null,
+      sub_subcategory: recSubSubcategory || null,
+      amount: parseFloat(recAmount),
+    });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
