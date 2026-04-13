@@ -657,7 +657,7 @@ export const ExpensesCard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {expenses.map((expense) => (
+                      {filteredExpenses.map((expense) => (
                         <TableRow key={expense.id}>
                           <TableCell className="font-medium">{expense.name}</TableCell>
                           <TableCell>{expense.category || "—"}</TableCell>
