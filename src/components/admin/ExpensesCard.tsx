@@ -46,6 +46,8 @@ const SUBCATEGORIES: Record<string, string[]> = {
   "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
 };
 
+const FREETEXT_SUBCATEGORIES = ["Custos Campeonatos"];
+
 const SUB_SUBCATEGORIES: Record<string, string[]> = {
   "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"],
 };
@@ -346,7 +348,12 @@ export const ExpensesCard = () => {
                   </SelectContent>
                 </Select>
               </div>
-              {SUBCATEGORIES[category] && (
+              {FREETEXT_SUBCATEGORIES.includes(category) ? (
+                <div>
+                  <Label>{t("expenses.subcategory")}</Label>
+                  <Input value={subcategory} onChange={(e) => setSubcategory(e.target.value)} placeholder={t("expenses.championshipDescriptionPlaceholder")} />
+                </div>
+              ) : SUBCATEGORIES[category] ? (
                 <div>
                   <Label>{t("expenses.subcategory")}</Label>
                   <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); setSubSubcategory(""); }}>
@@ -363,7 +370,7 @@ export const ExpensesCard = () => {
                     <Input className="mt-2" value={customSubcategory} onChange={(e) => setCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                   )}
                 </div>
-              )}
+              ) : null}
               {SUB_SUBCATEGORIES[category] && subcategory && subcategory !== "Outro" && (
                 <div>
                   <Label>{t("expenses.subSubcategory")}</Label>
@@ -527,7 +534,12 @@ export const ExpensesCard = () => {
                 </SelectContent>
               </Select>
             </div>
-            {SUBCATEGORIES[editCategory] && (
+            {FREETEXT_SUBCATEGORIES.includes(editCategory) ? (
+              <div>
+                <Label>{t("expenses.subcategory")}</Label>
+                <Input value={editSubcategory} onChange={(e) => setEditSubcategory(e.target.value)} placeholder={t("expenses.championshipDescriptionPlaceholder")} />
+              </div>
+            ) : SUBCATEGORIES[editCategory] ? (
               <div>
                 <Label>{t("expenses.subcategory")}</Label>
                 <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); setEditSubSubcategory(""); }}>
@@ -544,7 +556,7 @@ export const ExpensesCard = () => {
                   <Input className="mt-2" value={editCustomSubcategory} onChange={(e) => setEditCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                 )}
               </div>
-            )}
+            ) : null}
             {SUB_SUBCATEGORIES[editCategory] && editSubcategory && editSubcategory !== "Outro" && (
               <div>
                 <Label>{t("expenses.subSubcategory")}</Label>
