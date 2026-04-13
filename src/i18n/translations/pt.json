@@ -1596,6 +1596,9 @@
     "save": "Guardar",
     "currentInvoice": "Factura atual",
     "category": "Categoria",
-    "categoryPlaceholder": "Selecionar categoria"
+    "categoryPlaceholder": "Selecionar categoria",
+    "subcategory": "Subcategoria",
+    "subcategoryPlaceholder": "Selecionar subcategoria",
+    "customName": "Nome"
   }
 }
