@@ -1608,6 +1608,8 @@
     "customName": "Nome",
     "subSubcategory": "Tipo de Despesa",
     "subSubcategoryPlaceholder": "Selecionar tipo",
-    "championshipDescriptionPlaceholder": "Descrição do campeonato"
+    "championshipDescriptionPlaceholder": "Descrição do campeonato",
+    "viewExpenses": "Ver despesas",
+    "totalCurrentMonth": "Total Mês Corrente"
   }
 }
