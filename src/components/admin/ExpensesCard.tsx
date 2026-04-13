@@ -761,7 +761,7 @@ export const ExpensesCard = () => {
                     <SelectTrigger>
                       <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto">
                       {EXPENSE_CATEGORIES.map((cat) => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
@@ -780,7 +780,7 @@ export const ExpensesCard = () => {
                       <SelectTrigger>
                         <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto">
                         {SUBCATEGORIES[recCategory].map((sub) => (
                           <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                         ))}
@@ -798,7 +798,7 @@ export const ExpensesCard = () => {
                       <SelectTrigger>
                         <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto">
                         {SUB_SUBCATEGORIES[recCategory].map((sub) => (
                           <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                         ))}
