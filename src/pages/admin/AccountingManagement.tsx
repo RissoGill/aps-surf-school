@@ -13,8 +13,6 @@ import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import { toast } from "@/hooks/use-toast";
-import { useLanguage } from "@/i18n/LanguageContext";
 
 const AccountingManagement = () => {
   const navigate = useNavigate();
