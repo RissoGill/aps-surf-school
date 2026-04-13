@@ -470,6 +470,8 @@ const PriorBalanceCard = ({
       setIsEditBalanceSubmitting(false);
     }
   };
+
+  return (
     <Card className="shadow-soft">
       <CardContent className="p-4">
         <div className="space-y-3">
@@ -478,10 +480,23 @@ const PriorBalanceCard = ({
             <div className="p-2 rounded-full bg-muted">
               <History className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div>
-              <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
-                €{priorBalance.toFixed(2)}
-              </p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                  €{priorBalance.toFixed(2)}
+                </p>
+                {canEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={handleOpenEditBalance}
+                    title={t('admin.priorBalancePayments.editBalance')}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {t('admin.paymentManagement.priorBalance')}
               </p>
