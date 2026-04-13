@@ -127,7 +127,7 @@ export const ExpensesCard = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (expense: { name: string; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { error } = await supabase.from("expenses").insert(expense);
       if (error) throw error;
     },
@@ -142,7 +142,7 @@ export const ExpensesCard = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (expense: { id: string; name: string; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { id: string; name: string; category: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { id, ...rest } = expense;
       const { error } = await supabase.from("expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -171,6 +171,7 @@ export const ExpensesCard = () => {
   const resetForm = () => {
     setName("");
     setDate(new Date());
+    setCategory("");
     setAmount("");
     setFile(null);
     setDialogOpen(false);
@@ -180,6 +181,7 @@ export const ExpensesCard = () => {
     setEditingExpense(null);
     setEditName("");
     setEditDate(new Date());
+    setEditCategory("");
     setEditAmount("");
     setEditFile(null);
     setEditDialogOpen(false);
@@ -189,6 +191,7 @@ export const ExpensesCard = () => {
     setEditingExpense(expense);
     setEditName(expense.name);
     setEditDate(new Date(expense.expense_date));
+    setEditCategory(expense.category || "");
     setEditAmount(String(expense.amount));
     setEditFile(null);
     setEditDialogOpen(true);
