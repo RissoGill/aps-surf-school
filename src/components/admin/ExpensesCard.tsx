@@ -158,6 +158,7 @@ export const ExpensesCard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
       toast({ title: t("expenses.created") });
       resetForm();
     },
@@ -174,6 +175,7 @@ export const ExpensesCard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
       toast({ title: t("expenses.updated") });
       resetEditForm();
     },
@@ -189,6 +191,7 @@ export const ExpensesCard = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
       toast({ title: t("expenses.deleted") });
     },
   });
@@ -422,6 +425,7 @@ export const ExpensesCard = () => {
       });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-stats"] });
       toast({ title: `${t("expenses.recurringGenerated")} (${data?.created || 0})` });
     } catch {
       toast({ title: t("expenses.recurringGenerateError"), variant: "destructive" });
