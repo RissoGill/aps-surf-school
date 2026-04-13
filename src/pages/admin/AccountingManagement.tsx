@@ -100,6 +100,72 @@ const AccountingManagement = () => {
     },
   });
 
+  // Annual chart data query
+  const monthNameToNumber: Record<string, number> = {
+    'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+    'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6, 'july': 7, 'jul': 7,
+    'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'sept': 9, 'october': 10, 'oct': 10,
+    'november': 11, 'nov': 11, 'december': 12, 'dec': 12,
+    'janeiro': 1, 'fevereiro': 2, 'fev': 2, 'marco': 3, 'março': 3,
+    'abril': 4, 'abr': 4, 'maio': 5, 'junho': 6, 'julho': 7,
+    'agosto': 8, 'ago': 8, 'setembro': 9, 'set': 9, 'outubro': 10, 'out': 10,
+    'novembro': 11, 'dezembro': 12, 'dez': 12,
+  };
+
+  const { data: chartQueryData, isLoading: chartLoading } = useQuery({
+    queryKey: ['annual-chart-data'],
+    enabled: sessionValid,
+    queryFn: async () => {
+      const [{ data: seasonExpenses }, { data: payments2025 }, { data: payments2026 }] = await Promise.all([
+        supabase.from('expenses').select('amount, expense_date')
+          .gte('expense_date', '2025-09-01').lte('expense_date', '2026-08-31'),
+        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2025),
+        supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2026),
+      ]);
+      return { seasonExpenses: seasonExpenses || [], allPayments: [...(payments2025 || []), ...(payments2026 || [])] };
+    },
+  });
+
+  const seasonMonths = [
+    { month: 9, year: 2025, label: "Set" },
+    { month: 10, year: 2025, label: "Out" },
+    { month: 11, year: 2025, label: "Nov" },
+    { month: 12, year: 2025, label: "Dez" },
+    { month: 1, year: 2026, label: "Jan" },
+    { month: 2, year: 2026, label: "Fev" },
+    { month: 3, year: 2026, label: "Mar" },
+    { month: 4, year: 2026, label: "Abr" },
+    { month: 5, year: 2026, label: "Mai" },
+    { month: 6, year: 2026, label: "Jun" },
+    { month: 7, year: 2026, label: "Jul" },
+    { month: 8, year: 2026, label: "Ago" },
+  ];
+
+  const chartData = useMemo(() => {
+    if (!chartQueryData) return [];
+    return seasonMonths.map(sm => {
+      const expTotal = chartQueryData.seasonExpenses
+        .filter((e: any) => { const d = new Date(e.expense_date); return d.getFullYear() === sm.year && d.getMonth() + 1 === sm.month; })
+        .reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+
+      const revTotal = chartQueryData.allPayments
+        .filter((p: any) => {
+          const mn = monthNameToNumber[(p.month || '').trim().toLowerCase()] || 0;
+          if (mn !== sm.month || p.year !== sm.year) return false;
+          const st = (p.status || '').toLowerCase().trim();
+          return st.startsWith('paid') || st.startsWith('partial');
+        })
+        .reduce((s: number, p: any) => s + Number(p.amount_paid || 0), 0);
+
+      return { label: sm.label, revenue: revTotal, expenses: expTotal };
+    });
+  }, [chartQueryData]);
+
+  const chartConfig = {
+    revenue: { label: t('admin.stats.chartRevenue'), color: "hsl(var(--primary))" },
+    expenses: { label: t('admin.stats.chartExpenses'), color: "hsl(var(--destructive))" },
+  };
+
   if (!sessionValid) return null;
 
   const stats = [
@@ -156,6 +222,30 @@ const AccountingManagement = () => {
             </Card>
           ))}
         </div>
+
+        {/* Annual Season Chart */}
+        <Card className="shadow-sm mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">{t('admin.stats.seasonTitle')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {chartLoading ? (
+              <Skeleton className="h-[250px] w-full" />
+            ) : (
+              <ChartContainer config={chartConfig} className="h-[250px] w-full">
+                <BarChart data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="label" tickLine={false} axisLine={false} />
+                  <YAxis tickFormatter={(v) => `€${v}`} tickLine={false} axisLine={false} width={60} />
+                  <ChartTooltip content={<ChartTooltipContent formatter={(value) => `€${Number(value).toFixed(2)}`} />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expenses" fill="var(--color-expenses)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Expenses Management */}
         <ExpensesCard />
