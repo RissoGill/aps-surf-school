@@ -103,7 +103,7 @@ const AdministrationDashboard = () => {
       // Fetch surf levels and active status separately (no FK defined between payments and atletas)
       const { data: atletasRows } = await supabase
         .from('atletas')
-        .select('athlete_id, surf_level, is_active');
+        .select('athlete_id, surf_level, is_active, prior_balance');
       
       const levelByAthleteId: Record<string, string | null> = {};
       const isActiveByAthleteId: Record<string, boolean> = {};
@@ -270,6 +270,23 @@ const AdministrationDashboard = () => {
       // Outstanding from September 2025 onwards for Learning/Pre-Competition (only past/current months)
       // Note: currentMonthSerial is now defined above
       
+      // Calculate prior_balance sums per group
+      let priorBalanceLearning = 0;
+      let priorBalanceCompetition = 0;
+      (atletasRows || []).forEach((a: any) => {
+        const key = String(a.athlete_id || '').trim().toLowerCase();
+        const isActive = a?.is_active !== false;
+        if (!isActive) return;
+        const balance = Number(a.prior_balance || 0);
+        if (balance <= 0) return;
+        const level = (a?.surf_level || '').toLowerCase();
+        if (level === 'learning' || level === 'pre-competition') {
+          priorBalanceLearning += balance;
+        } else if (level === 'competition') {
+          priorBalanceCompetition += balance;
+        }
+      });
+
       const septemberOnwardsOutstandingLearning = (sept2025OnwardsRows || [])
         .filter((p: any) => {
           // Only include September 2025 onwards
@@ -296,7 +313,7 @@ const AdministrationDashboard = () => {
         .reduce((sum: number, p: any) => {
           const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
           return sum + (remaining > 0 ? remaining : 0);
-        }, 0);
+        }, 0) + priorBalanceLearning;
       
       // Outstanding from September 2025 onwards for Competition (only past/current months)
       const septemberOnwardsOutstandingCompetition = (sept2025OnwardsRows || [])
@@ -325,7 +342,7 @@ const AdministrationDashboard = () => {
         .reduce((sum: number, p: any) => {
           const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
           return sum + (remaining > 0 ? remaining : 0);
-        }, 0);
+        }, 0) + priorBalanceCompetition;
       
       // Fetch all coach payments
       const { data: coachPaymentsRows, error: coachPaymentsError } = await supabase
