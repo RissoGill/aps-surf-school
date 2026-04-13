@@ -43,25 +43,38 @@ const AccountingManagement = () => {
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
 
-      // Expenses since September 2025
-      const { data: allExpenses } = await supabase
-        .from('expenses')
-        .select('amount, expense_date, created_at');
+      const [{ data: allExpenses }, { data: allCoachPayments }] = await Promise.all([
+        supabase.from('expenses').select('amount, expense_date, created_at'),
+        supabase.from('coach_payments').select('amount, payment_date'),
+      ]);
 
+      // Expenses since September 2025
       const expensesSinceSept = (allExpenses || []).filter((e: any) => {
         const d = new Date(e.expense_date);
         return (d.getFullYear() > 2025) || (d.getFullYear() === 2025 && d.getMonth() + 1 >= 9);
       });
-
       const totalExpensesSinceSept = expensesSinceSept.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
 
-      // Expenses entered/created in current month (using created_at)
+      // Coach payments (salaries) since September 2025
+      const coachSinceSept = (allCoachPayments || []).filter((cp: any) => {
+        const d = new Date(cp.payment_date);
+        return (d.getFullYear() > 2025) || (d.getFullYear() === 2025 && d.getMonth() + 1 >= 9);
+      });
+      const totalCoachSinceSept = coachSinceSept.reduce((sum: number, cp: any) => sum + Number(cp.amount || 0), 0);
+
+      // Expenses current month
       const expensesCurrentMonth = (allExpenses || []).filter((e: any) => {
         const d = new Date(e.expense_date);
         return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
       });
-
       const totalExpensesCurrentMonth = expensesCurrentMonth.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
+
+      // Coach payments current month
+      const coachCurrentMonth = (allCoachPayments || []).filter((cp: any) => {
+        const d = new Date(cp.payment_date);
+        return d.getFullYear() === currentYear && d.getMonth() + 1 === currentMonth;
+      });
+      const totalCoachCurrentMonth = coachCurrentMonth.reduce((sum: number, cp: any) => sum + Number(cp.amount || 0), 0);
 
       // Revenue this month (from payments)
       const monthNameToNumber: Record<string, number> = {
@@ -89,11 +102,13 @@ const AccountingManagement = () => {
         })
         .reduce((sum: number, p: any) => sum + Number(p.amount_paid || 0), 0);
 
-      const monthlyBalance = totalReceivedThisMonth - totalExpensesCurrentMonth;
+      const combinedExpensesSinceSept = totalExpensesSinceSept + totalCoachSinceSept;
+      const combinedExpensesCurrentMonth = totalExpensesCurrentMonth + totalCoachCurrentMonth;
+      const monthlyBalance = totalReceivedThisMonth - combinedExpensesCurrentMonth;
 
       return {
-        totalExpensesSinceSept,
-        totalExpensesCurrentMonth,
+        totalExpensesSinceSept: combinedExpensesSinceSept,
+        totalExpensesCurrentMonth: combinedExpensesCurrentMonth,
         totalReceivedThisMonth,
         monthlyBalance,
       };
@@ -116,13 +131,15 @@ const AccountingManagement = () => {
     queryKey: ['annual-chart-data'],
     enabled: sessionValid,
     queryFn: async () => {
-      const [{ data: seasonExpenses }, { data: payments2025 }, { data: payments2026 }] = await Promise.all([
+      const [{ data: seasonExpenses }, { data: payments2025 }, { data: payments2026 }, { data: coachPayments }] = await Promise.all([
         supabase.from('expenses').select('amount, expense_date')
           .gte('expense_date', '2025-09-01').lte('expense_date', '2026-08-31'),
         supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2025),
         supabase.from('payments').select('amount_paid, status, month, year').eq('year', 2026),
+        supabase.from('coach_payments').select('amount, payment_date')
+          .gte('payment_date', '2025-09-01').lte('payment_date', '2026-08-31'),
       ]);
-      return { seasonExpenses: seasonExpenses || [], allPayments: [...(payments2025 || []), ...(payments2026 || [])] };
+      return { seasonExpenses: seasonExpenses || [], allPayments: [...(payments2025 || []), ...(payments2026 || [])], coachPayments: coachPayments || [] };
     },
   });
 
@@ -148,6 +165,10 @@ const AccountingManagement = () => {
         .filter((e: any) => { const d = new Date(e.expense_date); return d.getFullYear() === sm.year && d.getMonth() + 1 === sm.month; })
         .reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
 
+      const coachTotal = chartQueryData.coachPayments
+        .filter((cp: any) => { const d = new Date(cp.payment_date); return d.getFullYear() === sm.year && d.getMonth() + 1 === sm.month; })
+        .reduce((s: number, cp: any) => s + Number(cp.amount || 0), 0);
+
       const revTotal = chartQueryData.allPayments
         .filter((p: any) => {
           const mn = monthNameToNumber[(p.month || '').trim().toLowerCase()] || 0;
@@ -157,7 +178,7 @@ const AccountingManagement = () => {
         })
         .reduce((s: number, p: any) => s + Number(p.amount_paid || 0), 0);
 
-      return { label: sm.label, revenue: revTotal, expenses: expTotal };
+      return { label: sm.label, revenue: revTotal, expenses: expTotal + coachTotal };
     });
   }, [chartQueryData]);
 

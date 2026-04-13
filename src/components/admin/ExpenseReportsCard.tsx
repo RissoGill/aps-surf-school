@@ -139,7 +139,7 @@ export const ExpenseReportsCard = () => {
 
     const monthNameEn = MONTH_NAMES_EN[viewMonth - 1];
 
-    const [expensesRes, paymentsRes, athletesRes] = await Promise.all([
+    const [expensesRes, paymentsRes, athletesRes, coachPaymentsRes, coachesRes] = await Promise.all([
       supabase.from('expenses').select('*')
         .gte('expense_date', startDate)
         .lte('expense_date', endDate)
@@ -149,6 +149,11 @@ export const ExpenseReportsCard = () => {
         .eq('year', viewYear)
         .in('status', ['Paid', 'Partial', 'paid', 'partial']),
       supabase.from('atletas').select('athlete_id, first_name, last_name'),
+      supabase.from('coach_payments').select('*')
+        .gte('payment_date', startDate)
+        .lte('payment_date', endDate)
+        .order('payment_date', { ascending: true }),
+      supabase.from('coach').select('coach_id, first_name, last_name'),
     ]);
 
     if (expensesRes.error) throw expensesRes.error;
@@ -157,15 +162,24 @@ export const ExpenseReportsCard = () => {
     const expenses = expensesRes.data || [];
     const payments = paymentsRes.data || [];
     const athletes = athletesRes.data || [];
+    const coachPayments = coachPaymentsRes.data || [];
+    const coaches = coachesRes.data || [];
 
     const athleteMap: Record<string, string> = {};
     athletes.forEach(a => {
       athleteMap[a.athlete_id] = `${a.first_name || ''} ${a.last_name || ''}`.trim() || a.athlete_id;
     });
 
+    const coachMap: Record<string, string> = {};
+    coaches.forEach(c => {
+      coachMap[c.coach_id] = `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.coach_id;
+    });
+
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+    const totalCoachPayments = coachPayments.reduce((sum, cp) => sum + Number(cp.amount || 0), 0);
+    const totalAllExpenses = totalExpenses + totalCoachPayments;
     const totalIncome = payments.reduce((sum, p) => sum + Number(p.amount_paid || 0), 0);
-    const balance = totalIncome - totalExpenses;
+    const balance = totalIncome - totalAllExpenses;
 
     const monthLabel = MONTH_NAMES_PT[viewMonth - 1];
     const title = `Relatório Mensal Completo - ${monthLabel} ${viewYear}`;
@@ -181,8 +195,9 @@ export const ExpenseReportsCard = () => {
             <p style="margin: 5px 0;"><strong>Nº Pagamentos:</strong> ${payments.length}</p>
           </div>
           <div>
-            <p style="margin: 5px 0;"><strong>Total Despesas:</strong> <span style="color: #e74c3c;">€${totalExpenses.toFixed(2)}</span></p>
-            <p style="margin: 5px 0;"><strong>Nº Registos:</strong> ${expenses.length}</p>
+            <p style="margin: 5px 0;"><strong>Despesas Operacionais:</strong> <span style="color: #e74c3c;">€${totalExpenses.toFixed(2)}</span></p>
+            <p style="margin: 5px 0;"><strong>Salários (Treinadores):</strong> <span style="color: #e74c3c;">€${totalCoachPayments.toFixed(2)}</span></p>
+            <p style="margin: 5px 0;"><strong>Total Despesas + Salários:</strong> <span style="color: #e74c3c; font-weight: bold;">€${totalAllExpenses.toFixed(2)}</span></p>
           </div>
           <div>
             <p style="margin: 5px 0;"><strong>Balanço:</strong> <span style="color: ${balanceColor}; font-size: 18px; font-weight: bold;">€${balance.toFixed(2)}</span></p>
@@ -224,6 +239,23 @@ export const ExpenseReportsCard = () => {
       </tr>
     `;
 
+    const coachPaymentRows = coachPayments.map(cp => `
+      <tr>
+        <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(coachMap[cp.coach_id] || cp.coach_id)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(cp.payment_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">€${Number(cp.amount).toFixed(2)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(cp.notes || '-')}</td>
+      </tr>
+    `).join("");
+
+    const coachPaymentTotalRow = `
+      <tr style="background-color: #f0f0f0; font-weight: bold;">
+        <td colspan="2" style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total:</td>
+        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">€${totalCoachPayments.toFixed(2)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;"></td>
+      </tr>
+    `;
+
     const body = `
       ${summarySection}
       <h2 style="color: #31A896; margin-top: 30px;">Receitas</h2>
@@ -232,12 +264,20 @@ export const ExpenseReportsCard = () => {
         ${incomeRows}
         ${incomeTotalRow}
       </table>
-      <h2 style="color: #31A896; margin-top: 30px;">Despesas</h2>
+      <h2 style="color: #31A896; margin-top: 30px;">Despesas Operacionais</h2>
       <table>
         <tr><th>Data</th><th>Fornecedor</th><th>Categoria</th><th>Valor</th></tr>
         ${expenseRows}
         ${expenseTotalRow}
       </table>
+      ${coachPayments.length > 0 ? `
+        <h2 style="color: #31A896; margin-top: 30px;">Salários (Treinadores)</h2>
+        <table>
+          <tr><th>Treinador</th><th>Data</th><th>Valor</th><th>Notas</th></tr>
+          ${coachPaymentRows}
+          ${coachPaymentTotalRow}
+        </table>
+      ` : ''}
     `;
 
     return buildHtmlWrapper(title, monthLabel, body);
