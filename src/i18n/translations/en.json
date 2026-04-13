@@ -1627,6 +1627,17 @@
     "recurringAmount": "Monthly amount",
     "editRecurring": "Edit Recurring",
     "saveRecurring": "Save",
-    "cancelEdit": "Cancel"
+    "cancelEdit": "Cancel",
+    "selectMonth": "Month",
+    "selectYear": "Year",
+    "reports": {
+      "title": "Expense Reports",
+      "description": "Generate reports by month, category or subcategory",
+      "allCategories": "All Categories",
+      "allSubcategories": "All Subcategories",
+      "generate": "Generate Report",
+      "category": "Category",
+      "subcategory": "Subcategory"
+    }
   }
 }
