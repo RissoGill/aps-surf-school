@@ -417,13 +417,22 @@ export const ExpensesCard = () => {
           <FileText className="h-5 w-5" />
           <CardTitle className="text-lg">{t("expenses.title")}</CardTitle>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-1" />
-              {t("expenses.new")}
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setRecurringDialogOpen(true)}>
+            <Settings className="h-4 w-4 mr-1" />
+            {t("expenses.manageRecurring")}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleGenerateRecurring} disabled={generatingRecurring}>
+            <RefreshCw className={cn("h-4 w-4 mr-1", generatingRecurring && "animate-spin")} />
+            {t("expenses.generateNow")}
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-1" />
+                {t("expenses.new")}
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t("expenses.new")}</DialogTitle>
