@@ -1,28 +1,16 @@
 
 
-# Fix ExpensesCard Header Layout
+# Fix Recurring Expenses Category Dropdown Overflow
 
 ## Problem
-The header buttons ("Manage Recurring", "Generate Now", "New Expense") overflow outside the card on smaller screens because they're all in a single row with `flex-row items-center justify-between`.
+The category `SelectContent` dropdown in the "Add Recurring" form overflows the dialog because there are many categories and no scroll constraint.
 
 ## Solution
-Restructure the `CardHeader` to stack the title and buttons vertically, with buttons wrapping on smaller screens.
+Add `className="max-h-60 overflow-y-auto"` to the `SelectContent` components in the recurring expenses form section (lines 764, 783, 801). This limits the dropdown height to ~240px and enables scrolling.
 
 ### Changes to `src/components/admin/ExpensesCard.tsx`
 
-**Lines 415-419**: Change the CardHeader layout from a single horizontal row to a vertical stack with the buttons wrapping below the title:
-
-```tsx
-<CardHeader className="flex flex-col gap-3">
-  <div className="flex items-center gap-2">
-    <FileText className="h-5 w-5" />
-    <CardTitle className="text-lg">{t("expenses.title")}</CardTitle>
-  </div>
-  <div className="flex flex-wrap gap-2">
-    {/* existing buttons unchanged */}
-  </div>
-</CardHeader>
-```
-
-This ensures all buttons stay within the card boundaries and wrap naturally on narrow screens.
+- **Line 764**: `<SelectContent className="max-h-60 overflow-y-auto">`
+- **Line 783**: `<SelectContent className="max-h-60 overflow-y-auto">`
+- **Line 801**: `<SelectContent className="max-h-60 overflow-y-auto">`
 
