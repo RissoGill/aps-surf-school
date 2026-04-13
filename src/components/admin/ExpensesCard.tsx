@@ -30,7 +30,7 @@ interface Expense {
 }
 
 const EXPENSE_CATEGORIES = [
-  "Despesas Bancárias", "Salários", "Leasing", "Portagens", "Carrinhas",
+  "Despesas Bancárias", "Salários", "Portagens", "Carrinhas",
   "Impostos", "Comunicações", "Contabilidade", "Compras Fornecedores",
   "Material Técnico", "Seguros", "Despesas Legais", "Licenças",
   "Devolução Sócios", "Custos Campeonatos", "Outros"
