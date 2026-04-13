@@ -1,0 +1,1 @@
+ALTER TABLE public.expenses ADD COLUMN sub_subcategory text;

@@ -22,6 +22,7 @@ interface Expense {
   name: string;
   category: string | null;
   subcategory: string | null;
+  sub_subcategory: string | null;
   expense_date: string;
   amount: number;
   invoice_url: string | null;
@@ -39,6 +40,11 @@ const EXPENSE_CATEGORIES = [
 const SUBCATEGORIES: Record<string, string[]> = {
   "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
   "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
+  "Carrinhas": ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"],
+};
+
+const SUB_SUBCATEGORIES: Record<string, string[]> = {
+  "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"],
 };
 
 export const ExpensesCard = () => {
@@ -53,6 +59,7 @@ export const ExpensesCard = () => {
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [customSubcategory, setCustomSubcategory] = useState("");
+  const [subSubcategory, setSubSubcategory] = useState("");
   const [amount, setAmount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -67,6 +74,7 @@ export const ExpensesCard = () => {
   const [editCategory, setEditCategory] = useState("");
   const [editSubcategory, setEditSubcategory] = useState("");
   const [editCustomSubcategory, setEditCustomSubcategory] = useState("");
+  const [editSubSubcategory, setEditSubSubcategory] = useState("");
   const [editAmount, setEditAmount] = useState("");
   const [editFile, setEditFile] = useState<File | null>(null);
   const [editUploading, setEditUploading] = useState(false);
@@ -137,7 +145,7 @@ export const ExpensesCard = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (expense: { name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { error } = await supabase.from("expenses").insert(expense);
       if (error) throw error;
     },
@@ -152,7 +160,7 @@ export const ExpensesCard = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (expense: { id: string; name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { id, ...rest } = expense;
       const { error } = await supabase.from("expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -184,6 +192,7 @@ export const ExpensesCard = () => {
     setCategory("");
     setSubcategory("");
     setCustomSubcategory("");
+    setSubSubcategory("");
     setAmount("");
     setFile(null);
     setDialogOpen(false);
@@ -196,6 +205,7 @@ export const ExpensesCard = () => {
     setEditCategory("");
     setEditSubcategory("");
     setEditCustomSubcategory("");
+    setEditSubSubcategory("");
     setEditAmount("");
     setEditFile(null);
     setEditDialogOpen(false);
@@ -215,6 +225,7 @@ export const ExpensesCard = () => {
       setEditSubcategory(sub);
       setEditCustomSubcategory("");
     }
+    setEditSubSubcategory(expense.sub_subcategory || "");
     setEditAmount(String(expense.amount));
     setEditFile(null);
     setEditDialogOpen(true);
@@ -257,6 +268,7 @@ export const ExpensesCard = () => {
       name: name.trim(),
       category: category || null,
       subcategory: resolvedSubcategory || null,
+      sub_subcategory: subSubcategory || null,
       expense_date: format(date, "yyyy-MM-dd"),
       amount: parseFloat(amount),
       invoice_url: invoiceUrl,
@@ -285,6 +297,7 @@ export const ExpensesCard = () => {
       name: editName.trim(),
       category: editCategory || null,
       subcategory: resolvedEditSubcategory || null,
+      sub_subcategory: editSubSubcategory || null,
       expense_date: format(editDate, "yyyy-MM-dd"),
       amount: parseFloat(editAmount),
       invoice_url: invoiceUrl,
@@ -319,7 +332,7 @@ export const ExpensesCard = () => {
               </div>
               <div>
                 <Label>{t("expenses.category")}</Label>
-                <Select value={category} onValueChange={(val) => { setCategory(val); setSubcategory(""); setCustomSubcategory(""); }}>
+                <Select value={category} onValueChange={(val) => { setCategory(val); setSubcategory(""); setCustomSubcategory(""); setSubSubcategory(""); }}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                   </SelectTrigger>
@@ -333,7 +346,7 @@ export const ExpensesCard = () => {
               {SUBCATEGORIES[category] && (
                 <div>
                   <Label>{t("expenses.subcategory")}</Label>
-                  <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); }}>
+                  <Select value={subcategory} onValueChange={(val) => { setSubcategory(val); if (val !== "Outro") setCustomSubcategory(""); setSubSubcategory(""); }}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
                     </SelectTrigger>
@@ -346,6 +359,21 @@ export const ExpensesCard = () => {
                   {subcategory === "Outro" && (
                     <Input className="mt-2" value={customSubcategory} onChange={(e) => setCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                   )}
+                </div>
+              )}
+              {SUB_SUBCATEGORIES[category] && subcategory && subcategory !== "Outro" && (
+                <div>
+                  <Label>{t("expenses.subSubcategory")}</Label>
+                  <Select value={subSubcategory} onValueChange={setSubSubcategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUB_SUBCATEGORIES[category].map((sub) => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
               <div>
@@ -413,6 +441,7 @@ export const ExpensesCard = () => {
                      <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.subcategory")}</TableHead>
+                    <TableHead>{t("expenses.subSubcategory")}</TableHead>
                     <TableHead>{t("expenses.date")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
                     <TableHead>{t("expenses.invoice")}</TableHead>
@@ -425,6 +454,7 @@ export const ExpensesCard = () => {
                       <TableCell className="font-medium">{expense.name}</TableCell>
                       <TableCell>{expense.category || "—"}</TableCell>
                       <TableCell>{expense.subcategory || "—"}</TableCell>
+                      <TableCell>{expense.sub_subcategory || "—"}</TableCell>
                       <TableCell>{format(new Date(expense.expense_date), "dd/MM/yyyy")}</TableCell>
                       <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                       <TableCell>
@@ -483,7 +513,7 @@ export const ExpensesCard = () => {
             </div>
             <div>
               <Label>{t("expenses.category")}</Label>
-              <Select value={editCategory} onValueChange={(val) => { setEditCategory(val); setEditSubcategory(""); setEditCustomSubcategory(""); }}>
+              <Select value={editCategory} onValueChange={(val) => { setEditCategory(val); setEditSubcategory(""); setEditCustomSubcategory(""); setEditSubSubcategory(""); }}>
                 <SelectTrigger>
                   <SelectValue placeholder={t("expenses.categoryPlaceholder")} />
                 </SelectTrigger>
@@ -497,7 +527,7 @@ export const ExpensesCard = () => {
             {SUBCATEGORIES[editCategory] && (
               <div>
                 <Label>{t("expenses.subcategory")}</Label>
-                <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); }}>
+                <Select value={editSubcategory} onValueChange={(val) => { setEditSubcategory(val); if (val !== "Outro") setEditCustomSubcategory(""); setEditSubSubcategory(""); }}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("expenses.subcategoryPlaceholder")} />
                   </SelectTrigger>
@@ -510,6 +540,21 @@ export const ExpensesCard = () => {
                 {editSubcategory === "Outro" && (
                   <Input className="mt-2" value={editCustomSubcategory} onChange={(e) => setEditCustomSubcategory(e.target.value)} placeholder={t("expenses.customName")} />
                 )}
+              </div>
+            )}
+            {SUB_SUBCATEGORIES[editCategory] && editSubcategory && editSubcategory !== "Outro" && (
+              <div>
+                <Label>{t("expenses.subSubcategory")}</Label>
+                <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUB_SUBCATEGORIES[editCategory].map((sub) => (
+                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
             <div>

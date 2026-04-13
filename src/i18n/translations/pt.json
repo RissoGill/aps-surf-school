@@ -1599,6 +1599,8 @@
     "categoryPlaceholder": "Selecionar categoria",
     "subcategory": "Subcategoria",
     "subcategoryPlaceholder": "Selecionar subcategoria",
-    "customName": "Nome"
+    "customName": "Nome",
+    "subSubcategory": "Tipo de Despesa",
+    "subSubcategoryPlaceholder": "Selecionar tipo"
   }
 }
