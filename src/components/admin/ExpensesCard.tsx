@@ -160,7 +160,7 @@ export const ExpensesCard = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (expense: { id: string; name: string; category: string | null; subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
+    mutationFn: async (expense: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; expense_date: string; amount: number; invoice_url: string | null }) => {
       const { id, ...rest } = expense;
       const { error } = await supabase.from("expenses").update(rest).eq("id", id);
       if (error) throw error;
