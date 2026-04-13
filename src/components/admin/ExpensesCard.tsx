@@ -387,7 +387,10 @@ export const ExpensesCard = () => {
   const handleGenerateRecurring = async () => {
     setGeneratingRecurring(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", { method: "POST" });
+      const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", {
+        method: "POST",
+        body: { from_date: "2025-09-01" },
+      });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({ title: `${t("expenses.recurringGenerated")} (${data?.created || 0})` });
