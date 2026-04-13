@@ -1,32 +1,18 @@
 
 
-# Adicionar edição de despesas existentes
-
-## Contexto
-Atualmente as despesas só podem ser criadas e eliminadas. O utilizador quer poder editar todos os campos (nome, data, valor, factura).
+# Alterar label "Descrição" para "Fornecedor" nas despesas
 
 ## Alteração
 
-### `src/components/admin/ExpensesCard.tsx`
+Atualizar as traduções do campo `expenses.name` e `expenses.namePlaceholder`:
 
-1. Adicionar estado `editingExpense` para a despesa em edição e estados de formulário de edição (`editName`, `editDate`, `editAmount`, `editFile`)
+### `src/i18n/translations/pt.json` (linha 1575-1576)
+- `"name"`: "Descrição" → "Fornecedor"
+- `"namePlaceholder"`: "Ex: Material de surf" → "Ex: Decathlon"
 
-2. Adicionar um botão de edição (ícone Pencil) em cada linha da tabela, ao lado do botão de eliminar
+### `src/i18n/translations/en.json` (linha 1575-1576)
+- `"name"`: "Description" → "Supplier"
+- `"namePlaceholder"`: "E.g.: Surf equipment" → "E.g.: Decathlon"
 
-3. Criar um novo `Dialog` de edição (semelhante ao de criação) com:
-   - Campo Nome (input text, pré-preenchido)
-   - Campo Data (datepicker, pré-preenchido)
-   - Campo Valor (input number, pré-preenchido)
-   - Opção de substituir factura (scan ou upload, igual ao formulário de criação)
-   - Se já existe factura, mostrar link para a atual
-
-4. Criar `updateMutation` que faz `supabase.from("expenses").update({...}).eq("id", id)`:
-   - Se um novo ficheiro foi escolhido, faz upload ao storage e actualiza `invoice_url`
-   - Se não, mantém o `invoice_url` existente
-
-### Traduções (`pt.json` e `en.json`)
-- `"expenses.edit"`: "Editar Despesa" / "Edit Expense"
-- `"expenses.updated"`: "Despesa atualizada" / "Expense updated"
-- `"expenses.save"`: "Guardar" / "Save"
-- `"expenses.currentInvoice"`: "Factura atual" / "Current invoice"
+Também atualizar o header da tabela que usa a mesma chave `expenses.name`.
 
