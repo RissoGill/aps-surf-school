@@ -134,8 +134,8 @@ const AccountingManagement = () => {
         {/* Financial Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {stats.map((stat, idx) => (
-            <Card key={idx} className="shadow-sm">
-              <CardContent className="p-4">
+            <Card key={idx} className="shadow-sm h-full">
+              <CardContent className="p-4 h-full">
                 {isLoading ? (
                   <Skeleton className="h-12 w-full" />
                 ) : (
