@@ -336,6 +336,7 @@ export const ExpensesCard = () => {
   const [recSubSubcategory, setRecSubSubcategory] = useState("");
   const [recAmount, setRecAmount] = useState("");
   const [generatingRecurring, setGeneratingRecurring] = useState(false);
+  const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null);
 
   const { data: recurringExpenses = [] } = useQuery({
     queryKey: ["recurring_expenses"],
@@ -357,7 +358,7 @@ export const ExpensesCard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
       toast({ title: t("expenses.recurringCreated") });
-      setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
+      resetRecurringForm();
     },
     onError: () => toast({ title: t("expenses.error"), variant: "destructive" }),
   });
@@ -384,10 +385,41 @@ export const ExpensesCard = () => {
     },
   });
 
+  const updateRecurringMutation = useMutation({
+    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number }) => {
+      const { id, ...rest } = rec;
+      const { error } = await supabase.from("recurring_expenses").update(rest).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring_expenses"] });
+      toast({ title: t("expenses.recurringUpdated") });
+      resetRecurringForm();
+    },
+    onError: () => toast({ title: t("expenses.error"), variant: "destructive" }),
+  });
+
+  const resetRecurringForm = () => {
+    setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
+    setEditingRecurringId(null);
+  };
+
+  const handleEditRecurring = (rec: any) => {
+    setEditingRecurringId(rec.id);
+    setRecName(rec.name);
+    setRecCategory(rec.category || "");
+    setRecSubcategory(rec.subcategory || "");
+    setRecSubSubcategory(rec.sub_subcategory || "");
+    setRecAmount(String(rec.amount));
+  };
+
   const handleGenerateRecurring = async () => {
     setGeneratingRecurring(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", { method: "POST" });
+      const { data, error } = await supabase.functions.invoke("generate-recurring-expenses", {
+        method: "POST",
+        body: { from_date: "2025-09-01" },
+      });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       toast({ title: `${t("expenses.recurringGenerated")} (${data?.created || 0})` });
@@ -401,13 +433,24 @@ export const ExpensesCard = () => {
   const handleAddRecurring = () => {
     if (!recName.trim() || !recAmount) return;
     const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
-    createRecurringMutation.mutate({
-      name: recName.trim(),
-      category: recCategory || null,
-      subcategory: resolvedSub || null,
-      sub_subcategory: recSubSubcategory || null,
-      amount: parseFloat(recAmount),
-    });
+    if (editingRecurringId) {
+      updateRecurringMutation.mutate({
+        id: editingRecurringId,
+        name: recName.trim(),
+        category: recCategory || null,
+        subcategory: resolvedSub || null,
+        sub_subcategory: recSubSubcategory || null,
+        amount: parseFloat(recAmount),
+      });
+    } else {
+      createRecurringMutation.mutate({
+        name: recName.trim(),
+        category: recCategory || null,
+        subcategory: resolvedSub || null,
+        sub_subcategory: recSubSubcategory || null,
+        amount: parseFloat(recAmount),
+      });
+    }
   };
 
   return (
@@ -742,7 +785,14 @@ export const ExpensesCard = () => {
           <div className="space-y-4">
             {/* Add new recurring */}
             <div className="border rounded-lg p-4 space-y-3">
-              <h4 className="text-sm font-medium">{t("expenses.addRecurring")}</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium">{editingRecurringId ? t("expenses.editRecurring") : t("expenses.addRecurring")}</h4>
+                {editingRecurringId && (
+                  <Button variant="ghost" size="sm" onClick={resetRecurringForm}>
+                    {t("expenses.cancelEdit")}
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>{t("expenses.name")}</Label>
@@ -807,9 +857,9 @@ export const ExpensesCard = () => {
                   </div>
                 )}
               </div>
-              <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t("expenses.addRecurring")}
+              <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
+                {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
+                {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
               </Button>
             </div>
 
@@ -843,9 +893,14 @@ export const ExpensesCard = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => deleteRecurringMutation.mutate(rec.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => handleEditRecurring(rec)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteRecurringMutation.mutate(rec.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

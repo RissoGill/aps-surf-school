@@ -1623,6 +1623,9 @@
     "recurringGenerated": "Recurring expenses generated successfully",
     "recurringGenerateError": "Error generating recurring expenses",
     "noRecurring": "No recurring expenses",
-    "recurringAmount": "Monthly amount"
+    "recurringAmount": "Monthly amount",
+    "editRecurring": "Edit Recurring",
+    "saveRecurring": "Save",
+    "cancelEdit": "Cancel"
   }
 }
