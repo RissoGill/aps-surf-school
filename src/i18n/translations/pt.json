@@ -1568,5 +1568,25 @@
       "monthlyFee": "Mensalidade",
       "other": "Outro"
     }
+  },
+  "expenses": {
+    "title": "Despesas",
+    "new": "Nova Despesa",
+    "name": "Descrição",
+    "namePlaceholder": "Ex: Material de surf",
+    "date": "Data",
+    "pickDate": "Selecionar data",
+    "amount": "Valor",
+    "invoice": "Factura",
+    "register": "Registar",
+    "uploading": "A carregar...",
+    "loading": "A carregar despesas...",
+    "empty": "Sem despesas registadas",
+    "total": "Total de Despesas",
+    "viewInvoice": "Ver",
+    "created": "Despesa registada com sucesso",
+    "deleted": "Despesa eliminada",
+    "error": "Erro ao registar despesa",
+    "uploadError": "Erro ao carregar ficheiro"
   }
 }
