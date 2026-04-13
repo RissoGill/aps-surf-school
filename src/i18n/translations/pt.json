@@ -1572,8 +1572,8 @@
   "expenses": {
     "title": "Despesas",
     "new": "Nova Despesa",
-    "name": "Descrição",
-    "namePlaceholder": "Ex: Material de surf",
+    "name": "Fornecedor",
+    "namePlaceholder": "Ex: Decathlon",
     "date": "Data",
     "pickDate": "Selecionar data",
     "amount": "Valor",

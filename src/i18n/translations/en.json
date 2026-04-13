@@ -1572,8 +1572,8 @@
   "expenses": {
     "title": "Expenses",
     "new": "New Expense",
-    "name": "Description",
-    "namePlaceholder": "E.g.: Surf equipment",
+    "name": "Supplier",
+    "namePlaceholder": "E.g.: Decathlon",
     "date": "Date",
     "pickDate": "Pick a date",
     "amount": "Amount",
