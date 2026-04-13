@@ -604,7 +604,9 @@
       "viewUsers": "Ver Utilizadores",
       "manageAthletes": "Gerir Atletas",
       "paymentSettings": "Configurações de Pagamento",
-      "manageAttendance": "Gerir Presenças"
+      "manageAttendance": "Gerir Presenças",
+      "dailyManagement": "Gestão Diária Atletas e Treinadores",
+      "revenueManagement": "Gestão de Receitas"
     },
     "coachAttendance": {
       "title": "Gestão de Presenças por Treinador",
