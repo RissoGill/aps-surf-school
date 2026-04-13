@@ -744,7 +744,14 @@
       "paymentUpdated": "Pagamento actualizado com sucesso",
       "deleteConfirmTitle": "Eliminar Pagamento",
       "deleteConfirmDescription": "Tem a certeza que pretende eliminar este pagamento? O valor será restaurado ao saldo anterior do atleta.",
-      "paymentDeleted": "Pagamento eliminado com sucesso"
+      "paymentDeleted": "Pagamento eliminado com sucesso",
+      "editBalance": "Editar Saldo",
+      "editBalanceDescription": "Altere o valor do saldo anterior e indique a referência.",
+      "newBalanceValue": "Novo valor do saldo",
+      "reference": "Referência",
+      "referencePlaceholder": "Ao que se refere este saldo...",
+      "balanceUpdated": "Saldo anterior atualizado com sucesso",
+      "balanceUpdateFailed": "Falha ao atualizar o saldo"
     },
     "coachPayments": {
       "title": "Pagamentos a Treinadores",

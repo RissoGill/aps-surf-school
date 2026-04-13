@@ -74,6 +74,14 @@ const PriorBalanceCard = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Edit balance state
+  const [isEditBalanceOpen, setIsEditBalanceOpen] = useState(false);
+  const [editBalanceForm, setEditBalanceForm] = useState({
+    newBalance: "",
+    reference: ""
+  });
+  const [isEditBalanceSubmitting, setIsEditBalanceSubmitting] = useState(false);
+
   // Edit state for super_admin
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<PriorBalancePayment | null>(null);
@@ -412,6 +420,57 @@ const PriorBalanceCard = ({
     });
   };
 
+  const handleOpenEditBalance = () => {
+    setEditBalanceForm({
+      newBalance: priorBalance.toFixed(2),
+      reference: ""
+    });
+    setIsEditBalanceOpen(true);
+  };
+
+  const handleSubmitEditBalance = async () => {
+    const newBalance = parseFloat(editBalanceForm.newBalance);
+    
+    if (isNaN(newBalance) || newBalance < 0) {
+      toast({
+        title: t('admin.paymentManagement.validationError'),
+        description: t('admin.priorBalancePayments.invalidAmount'),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsEditBalanceSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('atletas')
+        .update({ prior_balance: newBalance })
+        .eq('athlete_id', athleteId);
+
+      if (error) throw error;
+
+      toast({
+        title: t('admin.paymentManagement.success'),
+        description: t('admin.priorBalancePayments.balanceUpdated'),
+      });
+
+      setIsEditBalanceOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
+      onBalanceUpdated();
+
+    } catch (error: any) {
+      console.error('Error updating prior balance:', error);
+      toast({
+        title: t('admin.paymentManagement.error'),
+        description: error.message || t('admin.priorBalancePayments.balanceUpdateFailed'),
+        variant: "destructive"
+      });
+    } finally {
+      setIsEditBalanceSubmitting(false);
+    }
+  };
+
   return (
     <Card className="shadow-soft">
       <CardContent className="p-4">
@@ -421,10 +480,23 @@ const PriorBalanceCard = ({
             <div className="p-2 rounded-full bg-muted">
               <History className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div>
-              <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
-                €{priorBalance.toFixed(2)}
-              </p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                  €{priorBalance.toFixed(2)}
+                </p>
+                {canEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={handleOpenEditBalance}
+                    title={t('admin.priorBalancePayments.editBalance')}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {t('admin.paymentManagement.priorBalance')}
               </p>
@@ -721,6 +793,49 @@ const PriorBalanceCard = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Balance Dialog */}
+      <Dialog open={isEditBalanceOpen} onOpenChange={setIsEditBalanceOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{t('admin.priorBalancePayments.editBalance')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.priorBalancePayments.editBalanceDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="newBalance">{t('admin.priorBalancePayments.newBalanceValue')}</Label>
+              <Input
+                id="newBalance"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                value={editBalanceForm.newBalance}
+                onChange={(e) => setEditBalanceForm(prev => ({ ...prev, newBalance: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reference">{t('admin.priorBalancePayments.reference')}</Label>
+              <Textarea
+                id="reference"
+                placeholder={t('admin.priorBalancePayments.referencePlaceholder')}
+                value={editBalanceForm.reference}
+                onChange={(e) => setEditBalanceForm(prev => ({ ...prev, reference: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditBalanceOpen(false)} disabled={isEditBalanceSubmitting}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleSubmitEditBalance} disabled={isEditBalanceSubmitting}>
+              {isEditBalanceSubmitting ? t('common.loading') : t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

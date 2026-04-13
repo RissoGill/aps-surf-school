@@ -744,7 +744,14 @@
       "paymentUpdated": "Payment updated successfully",
       "deleteConfirmTitle": "Delete Payment",
       "deleteConfirmDescription": "Are you sure you want to delete this payment? The amount will be restored to the athlete's prior balance.",
-      "paymentDeleted": "Payment deleted successfully"
+      "paymentDeleted": "Payment deleted successfully",
+      "editBalance": "Edit Balance",
+      "editBalanceDescription": "Change the prior balance value and indicate the reference.",
+      "newBalanceValue": "New balance value",
+      "reference": "Reference",
+      "referencePlaceholder": "What this balance refers to...",
+      "balanceUpdated": "Prior balance updated successfully",
+      "balanceUpdateFailed": "Failed to update balance"
     },
     "coachPayments": {
       "title": "Coach Payments",
