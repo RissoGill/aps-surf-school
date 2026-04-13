@@ -1,59 +1,34 @@
 
 
-# Adicionar .limit(10000) a todas as queries SELECT restantes sem proteção
+# Adicionar opção de ver histórico nos Alertas e Mensagens dos Treinadores
 
-## Contexto
-Já protegemos `payments`, `attendance`, `expenses` e `coach_payments` nos ficheiros principais. Faltam queries de tabelas que podem crescer ou por consistência devem ser protegidas.
+## Problema
+Atualmente, ambos os cartões mostram todos os registos (ativos + resolvidos) misturados. O utilizador quer poder ver apenas os ativos por defeito e ter um botão/toggle para ver o histórico (resolvidos).
 
-## Queries a proteger (16 queries em 10 ficheiros)
+## Solução
 
-### 1. `src/pages/admin/AdministrationDashboard.tsx`
-- **Linha 90**: `payments` SELECT sem limit → `.limit(10000)`
-- **Linha 105**: `atletas` SELECT sem limit → `.limit(10000)`
-- **Linha 134**: `payments` por year sem limit → `.limit(10000)`
-- **Linha 245**: `payments` gte year sem limit → `.limit(10000)`
+### 1. `AlertsManagementCard.tsx`
+- Adicionar estado `showHistory` (default: `false`)
+- Por defeito, filtrar apenas alertas com `is_resolved === false` (ativos/pendentes)
+- Adicionar botão "Ver Histórico" / "Ocultar Histórico" no header do cartão
+- Quando `showHistory === true`, mostrar todos os alertas (incluindo resolvidos)
+- Atualizar texto "Sem alertas ativos" para refletir o contexto
 
-### 2. `src/components/admin/ExpensesCard.tsx`
-- **Linha 145**: `expenses` SELECT sem limit → `.limit(10000)`
-- **Linha 355**: `recurring_expenses` SELECT sem limit → `.limit(10000)`
+### 2. `CoachMessagesManagementCard.tsx`
+- O filtro de status já existe (`all`/`pending`/`resolved`), mas o default é `all`
+- Mudar o default de `statusFilter` de `"all"` para `"pending"`
+- Adicionar botão "Ver Histórico" que alterna para mostrar todos/resolvidos
+- Ou simplesmente: adicionar um botão toggle que alterna entre mostrar apenas pendentes e mostrar tudo (incluindo resolvidos)
 
-### 3. `src/components/admin/CoachPaymentsCard.tsx`
-- **Linha 109**: `coach` SELECT sem limit (volume baixo, por consistência) → `.limit(10000)`
+### 3. Traduções (`pt.json` e `en.json`)
+- Adicionar chaves: `admin.alerts.showHistory`, `admin.alerts.hideHistory`
+- Adicionar chaves: `admin.coachMessages.showHistory`, `admin.coachMessages.hideHistory`
 
-### 4. `src/components/admin/AlertsManagementCard.tsx`
-- **Linha 62**: `alerts` SELECT sem limit → `.limit(10000)`
+## Detalhe técnico
 
-### 5. `src/components/admin/CoachMessagesManagementCard.tsx`
-- **Linha 80**: `coach_messages` SELECT sem limit → `.limit(10000)`
-- **Linha 106**: `coach_message_replies` SELECT sem limit → `.limit(10000)`
+**AlertsManagementCard**: Novo estado `showHistory`. Filtrar `alerts` com `.filter(a => showHistory || !a.is_resolved)` antes de renderizar. Botão com ícone `History` do lucide-react.
 
-### 6. `src/components/admin/ProAccountTab.tsx`
-- **Linha 149**: `pro_account_entries` SELECT sem limit → `.limit(10000)`
+**CoachMessagesManagementCard**: Novo estado `showHistory` (default false). Quando false, forçar `statusFilter` a "pending". Quando true, mostrar o filtro existente com todas as opções. Botão toggle com ícone `History`.
 
-### 7. `src/pages/admin/UserManagement.tsx`
-- **Linha 120**: `coach` SELECT sem limit → `.limit(10000)`
-- **Linha 124**: `atletas` SELECT sem limit → `.limit(10000)`
-
-### 8. `src/pages/admin/DailyManagement.tsx`
-- **Linha 36**: `atletas` SELECT sem limit → `.limit(10000)`
-
-### 9. `src/pages/admin/AthleteManagement.tsx`
-- **Linha 126**: `atletas` SELECT sem limit → `.limit(10000)`
-
-### 10. `src/pages/attendance/AthletesList.tsx`
-- **Linha 27**: `atletas` SELECT sem limit → `.limit(10000)`
-
-## Ficheiros que NÃO precisam de alteração
-- `CoachDashboard.tsx` — attendance já usa `.range()`, atletas/coach têm volume controlado mas serão cobertos acima noutros ficheiros
-- `AthleteDetails.tsx` — queries filtradas por ID individual
-- `AthleteDashboard.tsx`, `GuardianDashboard.tsx` — filtradas por atleta
-- `CoachMessagesCard.tsx` — filtrada por coach_id
-- `PriorBalanceCard.tsx` — filtrada por athlete_id
-- `ChampionshipsTab.tsx`, `EstagiosTab.tsx` — tabelas de referência com volume muito baixo
-- `BulkAttendanceRegistration.tsx` — attendance já tem `.limit(10000)`
-- `AlertsCard.tsx` (shared) — filtrada por `is_resolved = false`, volume baixo
-- `PaymentsTab.tsx` (coach) — filtrada por coach_id
-
-## Secção técnica
-Adicionar `.limit(10000)` no final de cada cadeia SELECT, antes do `;` ou da atribuição. Padrão idêntico ao já aplicado nos ficheiros anteriores. Total: 16 alterações em 10 ficheiros.
+4 ficheiros a editar: `AlertsManagementCard.tsx`, `CoachMessagesManagementCard.tsx`, `pt.json`, `en.json`.
 
