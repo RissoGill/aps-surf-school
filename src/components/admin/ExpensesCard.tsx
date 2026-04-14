@@ -973,7 +973,11 @@ export const ExpensesCard = () => {
                       <TableCell className="font-medium">{rec.name}</TableCell>
                       <TableCell>{[rec.category, rec.subcategory, rec.sub_subcategory].filter(Boolean).join(" → ") || "—"}</TableCell>
                       <TableCell>€{Number(rec.amount).toFixed(2)}</TableCell>
-                      <TableCell>{rec.start_date ? format(new Date(rec.start_date + "T00:00:00"), "dd/MM/yyyy") : "01/09/2025"}</TableCell>
+                      <TableCell>
+                        {rec.start_date ? format(new Date(rec.start_date + "T00:00:00"), "MMM yyyy") : "Set 2025"}
+                        {" → "}
+                        {rec.end_date ? format(new Date(rec.end_date + "T00:00:00"), "MMM yyyy") : "∞"}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch
