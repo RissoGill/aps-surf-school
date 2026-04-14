@@ -43,7 +43,19 @@ Deno.serve(async (req) => {
       let y = sY;
       let m = sM;
 
-      while (y < currentYear || (y === currentYear && m <= currentMonth)) {
+      // Determine end boundary from end_date if set
+      let endYear = currentYear;
+      let endMonth = currentMonth;
+      if (rec.end_date) {
+        const [eY, eM] = rec.end_date.split("-").map(Number);
+        // Use the earlier of end_date or current month
+        if (eY < currentYear || (eY === currentYear && eM < currentMonth)) {
+          endYear = eY;
+          endMonth = eM;
+        }
+      }
+
+      while (y < endYear || (y === endYear && m <= endMonth)) {
         // Clamp day to last day of month
         const lastDayOfMonth = new Date(y, m, 0).getDate();
         const day = Math.min(sD, lastDayOfMonth);
