@@ -945,7 +945,7 @@ export const ExpensesCard = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-              )
+              )}
               <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
                 {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
                 {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
