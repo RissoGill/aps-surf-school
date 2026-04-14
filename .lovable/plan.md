@@ -1,32 +1,40 @@
 
-# Corrigir texto sobreposto no cartão de Mensagens dos Treinadores
 
-## Problema
-No `CoachMessagesManagementCard.tsx`, o `CardDescription` está colocado após o div dos botões (linha 368), e o layout do header não segue o padrão correto com `flex-1 min-w-0` para o texto, causando sobreposição.
+# Adicionar Data de Fim às Despesas Recorrentes
 
-## Solução
+## Objetivo
+Permitir definir um intervalo de meses (de X a Y) para cada despesa recorrente, em vez de gerar indefinidamente até ao mês atual.
 
-**`src/components/admin/CoachMessagesManagementCard.tsx`** — Reestruturar o CardHeader (linhas 334-368) para seguir o mesmo padrão do AlertsManagementCard corrigido:
+## Alterações
 
-```tsx
-<CardHeader>
-  <div className="flex items-start gap-3">
-    <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-1" />
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2">
-        <CardTitle className="text-xl">{t('admin.coachMessages.title')}</CardTitle>
-        {pendingCount > 0 && (
-          <Badge variant="destructive">{pendingCount}</Badge>
-        )}
-      </div>
-      <CardDescription className="mt-1">{t('admin.coachMessages.description')}</CardDescription>
-    </div>
-  </div>
-  <div className="flex justify-end gap-2 mt-2 flex-wrap">
-    {/* History, New Message, Refresh buttons - unchanged */}
-  </div>
-  ...
-</CardHeader>
+### 1. Migration: adicionar coluna `end_date` à tabela `recurring_expenses`
+```sql
+ALTER TABLE recurring_expenses ADD COLUMN end_date date DEFAULT NULL;
 ```
+Quando `end_date` é `NULL`, a despesa gera indefinidamente (comportamento atual). Quando definida, para de gerar após esse mês.
 
-Mudanças: mover `CardDescription` para dentro do bloco de texto, adicionar `shrink-0` ao ícone, usar `flex-1 min-w-0` no container do texto. 1 ficheiro.
+### 2. Edge Function `generate-recurring-expenses/index.ts`
+No loop de meses, adicionar verificação: se `rec.end_date` existe, não gerar despesas para meses após essa data (comparar `y-m` com o ano/mês de `end_date`).
+
+### 3. Frontend `ExpensesCard.tsx`
+- Novo estado `recEndDate` (Date | null, default null)
+- Checkbox/toggle "Definir data de fim" que mostra/esconde o date picker de fim
+- Passar `end_date` nas mutations de create e update
+- Resetar `recEndDate` no `resetRecurringForm`
+- Carregar `end_date` no `handleEditRecurring`
+- Na tabela de listagem, mostrar coluna "Período" com formato "Set 2025 → Jun 2026" ou "Set 2025 → ∞"
+
+### 4. Traduções (`pt.json` e `en.json`)
+- `expenses.endDate`: "Data de Fim" / "End Date"
+- `expenses.indefinite`: "Indefinido" / "Indefinite"
+- `expenses.setEndDate`: "Definir data de fim" / "Set end date"
+- `expenses.period`: "Período" / "Period"
+
+## Detalhe técnico
+- A coluna `end_date` é nullable (NULL = sem fim)
+- O edge function compara: `if (rec.end_date) { const [eY, eM] = rec.end_date.split('-').map(Number); if (y > eY || (y === eY && m > eM)) break; }`
+- No formulário, o date picker de fim aparece apenas quando o checkbox está ativo
+- A coluna "Data Início" na tabela passa a "Período" mostrando ambas as datas
+
+5 ficheiros a editar: migration SQL, `generate-recurring-expenses/index.ts`, `ExpensesCard.tsx`, `pt.json`, `en.json`.
+
