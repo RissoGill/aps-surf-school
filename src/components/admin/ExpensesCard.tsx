@@ -347,6 +347,8 @@ export const ExpensesCard = () => {
   const [recSubSubcategory, setRecSubSubcategory] = useState("");
   const [recAmount, setRecAmount] = useState("");
   const [recStartDate, setRecStartDate] = useState<Date>(new Date(2025, 8, 1));
+  const [recEndDate, setRecEndDate] = useState<Date | null>(null);
+  const [recHasEndDate, setRecHasEndDate] = useState(false);
   const [generatingRecurring, setGeneratingRecurring] = useState(false);
   const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null);
 
@@ -364,7 +366,7 @@ export const ExpensesCard = () => {
   });
 
   const createRecurringMutation = useMutation({
-    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
+    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string; end_date: string | null }) => {
       const { error } = await supabase.from("recurring_expenses").insert(rec);
       if (error) throw error;
     },
@@ -399,7 +401,7 @@ export const ExpensesCard = () => {
   });
 
   const updateRecurringMutation = useMutation({
-    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
+    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string; end_date: string | null }) => {
       const { id, ...rest } = rec;
       const { error } = await supabase.from("recurring_expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -415,6 +417,8 @@ export const ExpensesCard = () => {
   const resetRecurringForm = () => {
     setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
     setRecStartDate(new Date(2025, 8, 1));
+    setRecEndDate(null);
+    setRecHasEndDate(false);
     setEditingRecurringId(null);
   };
 
@@ -426,6 +430,13 @@ export const ExpensesCard = () => {
     setRecSubSubcategory(rec.sub_subcategory || "");
     setRecAmount(String(rec.amount));
     setRecStartDate(rec.start_date ? new Date(rec.start_date + "T00:00:00") : new Date(2025, 8, 1));
+    if (rec.end_date) {
+      setRecHasEndDate(true);
+      setRecEndDate(new Date(rec.end_date + "T00:00:00"));
+    } else {
+      setRecHasEndDate(false);
+      setRecEndDate(null);
+    }
   };
 
   const handleGenerateRecurring = async () => {
@@ -450,6 +461,7 @@ export const ExpensesCard = () => {
     if (!recName.trim() || !recAmount) return;
     const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
     const startDateStr = format(recStartDate, "yyyy-MM-dd");
+    const endDateStr = recHasEndDate && recEndDate ? format(recEndDate, "yyyy-MM-dd") : null;
     if (editingRecurringId) {
       updateRecurringMutation.mutate({
         id: editingRecurringId,
@@ -459,6 +471,7 @@ export const ExpensesCard = () => {
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
         start_date: startDateStr,
+        end_date: endDateStr,
       });
     } else {
       createRecurringMutation.mutate({
@@ -468,6 +481,7 @@ export const ExpensesCard = () => {
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
         start_date: startDateStr,
+        end_date: endDateStr,
       });
     }
   };
@@ -912,6 +926,26 @@ export const ExpensesCard = () => {
                   </PopoverContent>
                 </Popover>
               </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={recHasEndDate} onCheckedChange={(checked) => { setRecHasEndDate(checked); if (!checked) setRecEndDate(null); }} />
+                <Label className="text-sm">{t("expenses.setEndDate")}</Label>
+              </div>
+              {recHasEndDate && (
+                <div>
+                  <Label>{t("expenses.endDate")}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !recEndDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {recEndDate ? format(recEndDate, "dd/MM/yyyy") : t("expenses.endDate")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={recEndDate || undefined} onSelect={(d) => d && setRecEndDate(d)} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
               <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
                 {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
                 {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
@@ -928,7 +962,7 @@ export const ExpensesCard = () => {
                      <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
-                    <TableHead>{t("expenses.startDate")}</TableHead>
+                    <TableHead>{t("expenses.period")}</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
@@ -939,7 +973,11 @@ export const ExpensesCard = () => {
                       <TableCell className="font-medium">{rec.name}</TableCell>
                       <TableCell>{[rec.category, rec.subcategory, rec.sub_subcategory].filter(Boolean).join(" → ") || "—"}</TableCell>
                       <TableCell>€{Number(rec.amount).toFixed(2)}</TableCell>
-                      <TableCell>{rec.start_date ? format(new Date(rec.start_date + "T00:00:00"), "dd/MM/yyyy") : "01/09/2025"}</TableCell>
+                      <TableCell>
+                        {rec.start_date ? format(new Date(rec.start_date + "T00:00:00"), "MMM yyyy") : "Set 2025"}
+                        {" → "}
+                        {rec.end_date ? format(new Date(rec.end_date + "T00:00:00"), "MMM yyyy") : "∞"}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Switch
