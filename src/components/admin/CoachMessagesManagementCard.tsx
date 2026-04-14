@@ -332,16 +332,21 @@ export const CoachMessagesManagementCard = () => {
   return (
     <Card className="mb-6">
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-primary" />
-          <CardTitle className="text-xl">{t('admin.coachMessages.title')}</CardTitle>
-          {pendingCount > 0 && (
-            <Badge variant="destructive" className="ml-2">
-              {pendingCount}
-            </Badge>
-          )}
+        <div className="flex items-start gap-3">
+          <MessageSquare className="h-5 w-5 text-primary shrink-0 mt-1" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-xl">{t('admin.coachMessages.title')}</CardTitle>
+              {pendingCount > 0 && (
+                <Badge variant="destructive">
+                  {pendingCount}
+                </Badge>
+              )}
+            </div>
+            <CardDescription className="mt-1">{t('admin.coachMessages.description')}</CardDescription>
+          </div>
         </div>
-        <div className="flex justify-end gap-2 mt-2">
+        <div className="flex justify-end gap-2 mt-2 flex-wrap">
             <Button
               variant={showHistory ? "secondary" : "outline"}
               size="sm"
@@ -365,7 +370,6 @@ export const CoachMessagesManagementCard = () => {
               <RefreshCw className="h-4 w-4" />
             </Button>
         </div>
-        <CardDescription>{t('admin.coachMessages.description')}</CardDescription>
         
         {/* New Message Form */}
         {showNewMessageForm && (
