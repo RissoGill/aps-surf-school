@@ -1,34 +1,22 @@
 
 
-# Adicionar opção de ver histórico nos Alertas e Mensagens dos Treinadores
+# Corrigir texto sobreposto nos cartões de Alertas e Mensagens
 
 ## Problema
-Atualmente, ambos os cartões mostram todos os registos (ativos + resolvidos) misturados. O utilizador quer poder ver apenas os ativos por defeito e ter um botão/toggle para ver o histórico (resolvidos).
+Os headers dos cartões usam `flex justify-between` mas não permitem wrap adequado, causando sobreposição de texto com os botões em viewports médios.
 
 ## Solução
 
-### 1. `AlertsManagementCard.tsx`
-- Adicionar estado `showHistory` (default: `false`)
-- Por defeito, filtrar apenas alertas com `is_resolved === false` (ativos/pendentes)
-- Adicionar botão "Ver Histórico" / "Ocultar Histórico" no header do cartão
-- Quando `showHistory === true`, mostrar todos os alertas (incluindo resolvidos)
-- Atualizar texto "Sem alertas ativos" para refletir o contexto
+### 1. `AlertsManagementCard.tsx` (linha 278)
+- Mudar o div do header de `flex items-center justify-between` para `flex items-start justify-between flex-wrap gap-3`
+- Mover os botões ("Show History" + "New Alert") para um container separado abaixo do título/descrição em vez de inline, usando layout empilhado
 
-### 2. `CoachMessagesManagementCard.tsx`
-- O filtro de status já existe (`all`/`pending`/`resolved`), mas o default é `all`
-- Mudar o default de `statusFilter` de `"all"` para `"pending"`
-- Adicionar botão "Ver Histórico" que alterna para mostrar todos/resolvidos
-- Ou simplesmente: adicionar um botão toggle que alterna entre mostrar apenas pendentes e mostrar tudo (incluindo resolvidos)
-
-### 3. Traduções (`pt.json` e `en.json`)
-- Adicionar chaves: `admin.alerts.showHistory`, `admin.alerts.hideHistory`
-- Adicionar chaves: `admin.coachMessages.showHistory`, `admin.coachMessages.hideHistory`
+### 2. `CoachMessagesManagementCard.tsx` (linha 335)
+- O wrapper já tem `flex-wrap gap-2` mas os botões competem com o título
+- Mover os botões ("Show History", "New Message", Refresh) para uma linha separada abaixo do título
 
 ## Detalhe técnico
+Em ambos os cartões, separar o bloco de título/descrição do bloco de botões em divs distintos com `flex-wrap`, garantindo que os botões passem para uma nova linha em vez de sobrepor o texto. Usar `w-full` ou layout em coluna no CardHeader para forçar a separação.
 
-**AlertsManagementCard**: Novo estado `showHistory`. Filtrar `alerts` com `.filter(a => showHistory || !a.is_resolved)` antes de renderizar. Botão com ícone `History` do lucide-react.
-
-**CoachMessagesManagementCard**: Novo estado `showHistory` (default false). Quando false, forçar `statusFilter` a "pending". Quando true, mostrar o filtro existente com todas as opções. Botão toggle com ícone `History`.
-
-4 ficheiros a editar: `AlertsManagementCard.tsx`, `CoachMessagesManagementCard.tsx`, `pt.json`, `en.json`.
+2 ficheiros a editar.
 
