@@ -347,6 +347,8 @@ export const ExpensesCard = () => {
   const [recSubSubcategory, setRecSubSubcategory] = useState("");
   const [recAmount, setRecAmount] = useState("");
   const [recStartDate, setRecStartDate] = useState<Date>(new Date(2025, 8, 1));
+  const [recEndDate, setRecEndDate] = useState<Date | null>(null);
+  const [recHasEndDate, setRecHasEndDate] = useState(false);
   const [generatingRecurring, setGeneratingRecurring] = useState(false);
   const [editingRecurringId, setEditingRecurringId] = useState<string | null>(null);
 
@@ -364,7 +366,7 @@ export const ExpensesCard = () => {
   });
 
   const createRecurringMutation = useMutation({
-    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
+    mutationFn: async (rec: { name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string; end_date: string | null }) => {
       const { error } = await supabase.from("recurring_expenses").insert(rec);
       if (error) throw error;
     },
@@ -399,7 +401,7 @@ export const ExpensesCard = () => {
   });
 
   const updateRecurringMutation = useMutation({
-    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string }) => {
+    mutationFn: async (rec: { id: string; name: string; category: string | null; subcategory: string | null; sub_subcategory: string | null; amount: number; start_date: string; end_date: string | null }) => {
       const { id, ...rest } = rec;
       const { error } = await supabase.from("recurring_expenses").update(rest).eq("id", id);
       if (error) throw error;
@@ -415,6 +417,8 @@ export const ExpensesCard = () => {
   const resetRecurringForm = () => {
     setRecName(""); setRecCategory(""); setRecSubcategory(""); setRecCustomSubcategory(""); setRecSubSubcategory(""); setRecAmount("");
     setRecStartDate(new Date(2025, 8, 1));
+    setRecEndDate(null);
+    setRecHasEndDate(false);
     setEditingRecurringId(null);
   };
 
@@ -426,6 +430,13 @@ export const ExpensesCard = () => {
     setRecSubSubcategory(rec.sub_subcategory || "");
     setRecAmount(String(rec.amount));
     setRecStartDate(rec.start_date ? new Date(rec.start_date + "T00:00:00") : new Date(2025, 8, 1));
+    if (rec.end_date) {
+      setRecHasEndDate(true);
+      setRecEndDate(new Date(rec.end_date + "T00:00:00"));
+    } else {
+      setRecHasEndDate(false);
+      setRecEndDate(null);
+    }
   };
 
   const handleGenerateRecurring = async () => {
@@ -450,6 +461,7 @@ export const ExpensesCard = () => {
     if (!recName.trim() || !recAmount) return;
     const resolvedSub = recSubcategory === "Outro" ? recCustomSubcategory.trim() : recSubcategory;
     const startDateStr = format(recStartDate, "yyyy-MM-dd");
+    const endDateStr = recHasEndDate && recEndDate ? format(recEndDate, "yyyy-MM-dd") : null;
     if (editingRecurringId) {
       updateRecurringMutation.mutate({
         id: editingRecurringId,
@@ -459,6 +471,7 @@ export const ExpensesCard = () => {
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
         start_date: startDateStr,
+        end_date: endDateStr,
       });
     } else {
       createRecurringMutation.mutate({
@@ -468,6 +481,7 @@ export const ExpensesCard = () => {
         sub_subcategory: recSubSubcategory || null,
         amount: parseFloat(recAmount),
         start_date: startDateStr,
+        end_date: endDateStr,
       });
     }
   };
