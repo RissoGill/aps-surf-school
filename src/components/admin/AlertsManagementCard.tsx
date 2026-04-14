@@ -409,7 +409,6 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
               </DialogContent>
             </Dialog>
           )}
-          </div>
         </div>
       </CardHeader>
       <CardContent>
