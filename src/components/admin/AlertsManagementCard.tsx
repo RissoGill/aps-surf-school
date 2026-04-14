@@ -275,18 +275,17 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
-              <Bell className="h-6 w-6 text-destructive" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">{t('admin.alerts.title')}</CardTitle>
-              <CardDescription>{t('admin.alerts.description')}</CardDescription>
-            </div>
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+            <Bell className="h-6 w-6 text-destructive" />
           </div>
-          <div className="flex items-center gap-2">
-            <Button
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg">{t('admin.alerts.title')}</CardTitle>
+            <CardDescription>{t('admin.alerts.description')}</CardDescription>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-2">
+          <Button
               variant={showHistory ? "secondary" : "outline"}
               size="sm"
               className="gap-2"
@@ -410,7 +409,6 @@ const AlertsManagementCard = ({ userRole, currentUser }: AlertsManagementCardPro
               </DialogContent>
             </Dialog>
           )}
-          </div>
         </div>
       </CardHeader>
       <CardContent>
