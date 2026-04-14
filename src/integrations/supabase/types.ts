@@ -721,6 +721,7 @@ export type Database = {
           amount: number
           category: string | null
           created_at: string
+          end_date: string | null
           id: string
           is_active: boolean
           name: string
@@ -732,6 +733,7 @@ export type Database = {
           amount: number
           category?: string | null
           created_at?: string
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -743,6 +745,7 @@ export type Database = {
           amount?: number
           category?: string | null
           created_at?: string
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
