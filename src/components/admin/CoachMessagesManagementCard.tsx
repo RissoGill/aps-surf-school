@@ -332,17 +332,16 @@ export const CoachMessagesManagementCard = () => {
   return (
     <Card className="mb-6">
       <CardHeader>
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <CardTitle className="text-xl">{t('admin.coachMessages.title')}</CardTitle>
-            {pendingCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {pendingCount}
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-primary" />
+          <CardTitle className="text-xl">{t('admin.coachMessages.title')}</CardTitle>
+          {pendingCount > 0 && (
+            <Badge variant="destructive" className="ml-2">
+              {pendingCount}
+            </Badge>
+          )}
+        </div>
+        <div className="flex justify-end gap-2 mt-2">
             <Button
               variant={showHistory ? "secondary" : "outline"}
               size="sm"
