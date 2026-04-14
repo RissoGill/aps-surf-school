@@ -926,6 +926,26 @@ export const ExpensesCard = () => {
                   </PopoverContent>
                 </Popover>
               </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={recHasEndDate} onCheckedChange={(checked) => { setRecHasEndDate(checked); if (!checked) setRecEndDate(null); }} />
+                <Label className="text-sm">{t("expenses.setEndDate")}</Label>
+              </div>
+              {recHasEndDate && (
+                <div>
+                  <Label>{t("expenses.endDate")}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !recEndDate && "text-muted-foreground")}>
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {recEndDate ? format(recEndDate, "dd/MM/yyyy") : t("expenses.endDate")}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={recEndDate || undefined} onSelect={(d) => d && setRecEndDate(d)} initialFocus className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )
               <Button size="sm" onClick={handleAddRecurring} disabled={!recName.trim() || !recAmount || createRecurringMutation.isPending || updateRecurringMutation.isPending}>
                 {editingRecurringId ? null : <Plus className="h-4 w-4 mr-1" />}
                 {editingRecurringId ? t("expenses.saveRecurring") : t("expenses.addRecurring")}
@@ -942,7 +962,7 @@ export const ExpensesCard = () => {
                      <TableHead>{t("expenses.name")}</TableHead>
                     <TableHead>{t("expenses.category")}</TableHead>
                     <TableHead>{t("expenses.amount")}</TableHead>
-                    <TableHead>{t("expenses.startDate")}</TableHead>
+                    <TableHead>{t("expenses.period")}</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
