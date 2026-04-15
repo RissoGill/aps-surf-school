@@ -176,37 +176,48 @@ const InvoiceViewer = () => {
 
     const normalizedType = contentType || fileBlob.type || inferContentType(fileName);
     const resolvedFileName = getDownloadName(fileName, normalizedType);
-    const shareNavigator = navigator as Navigator & {
-      canShare?: (data: ShareData) => boolean;
-      share?: (data: ShareData) => Promise<void>;
-    };
-    const downloadableFile = new File([fileBlob], resolvedFileName, { type: normalizedType });
 
-    if (shareNavigator.canShare?.({ files: [downloadableFile] }) && shareNavigator.share) {
-      try {
-        await shareNavigator.share({ files: [downloadableFile], title: resolvedFileName });
+    // 1. Try direct <a download> first (works on desktop & Android)
+    try {
+      const downloadUrl = URL.createObjectURL(fileBlob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = resolvedFileName;
+      anchor.rel = "noopener noreferrer";
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      // Give the browser a moment to start the download before revoking
+      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 3000);
+
+      // On iOS Safari, <a download> is ignored — detect and fall through
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (!isIOS) return;
+    } catch {
+      // Fall through to next strategy
+    }
+
+    // 2. Try Web Share API (best for iOS)
+    try {
+      const downloadableFile = new File([fileBlob], resolvedFileName, { type: normalizedType });
+      const shareNav = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean;
+        share?: (data: ShareData) => Promise<void>;
+      };
+      if (shareNav.canShare?.({ files: [downloadableFile] }) && shareNav.share) {
+        await shareNav.share({ files: [downloadableFile], title: resolvedFileName });
         return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
       }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      // Fall through to final fallback
     }
 
-    const downloadUrl = blobUrl || URL.createObjectURL(fileBlob);
-    const shouldRevoke = !blobUrl;
-    const anchor = document.createElement("a");
-
-    anchor.href = downloadUrl;
-    anchor.download = resolvedFileName;
-    anchor.rel = "noopener noreferrer";
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-
-    if (shouldRevoke) {
-      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
-    }
+    // 3. Final fallback — open blob in new tab so user can save manually
+    const fallbackUrl = blobUrl || URL.createObjectURL(fileBlob);
+    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
   }, [blobUrl, contentType, fileBlob, fileName, openFile]);
 
   useEffect(() => {
