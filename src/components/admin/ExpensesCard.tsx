@@ -59,6 +59,30 @@ export const ExpensesCard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const handleViewInvoice = (url: string) => {
+    const isPdf = url.toLowerCase().includes('.pdf');
+    if (isPdf) {
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Invoice</title>
+            <style>body{margin:0;overflow:hidden}iframe{border:none;width:100%;height:100%}</style>
+          </head>
+          <body>
+            <iframe src="${url}"></iframe>
+          </body>
+          </html>
+        `);
+        newWindow.document.close();
+      }
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
   // Create dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -683,10 +707,10 @@ export const ExpensesCard = () => {
                           <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                           <TableCell>
                             {expense.invoice_url ? (
-                              <a href={expense.invoice_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                              <button onClick={() => handleViewInvoice(expense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
                                 <ExternalLink className="h-3 w-3" />
                                 {t("expenses.viewInvoice")}
-                              </a>
+                              </button>
                             ) : (
                               <span className="text-muted-foreground text-xs">—</span>
                             )}
@@ -800,10 +824,10 @@ export const ExpensesCard = () => {
               {editingExpense?.invoice_url && !editFile && (
                 <p className="text-xs text-muted-foreground mt-1 mb-1">
                   {t("expenses.currentInvoice")}:{" "}
-                  <a href={editingExpense.invoice_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
+                  <button onClick={() => handleViewInvoice(editingExpense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
                     <ExternalLink className="h-3 w-3" />
                     {t("expenses.viewInvoice")}
-                  </a>
+                  </button>
                 </p>
               )}
               <div className="flex gap-2 mt-1">
