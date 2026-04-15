@@ -1,64 +1,69 @@
 
-Diagnóstico:
-- O screenshot mostra que a nova rota `/invoice-viewer` abriu corretamente, mas o `<object data={src}>` falhou a renderização do PDF remoto.
-- O botão Download também falha porque hoje usa um `<a download>` direto para um URL cross-origin do Supabase; muitos browsers ignoram `download` nesse cenário.
-- Ou seja: o problema já não é a navegação. O problema está em continuar a depender do URL remoto diretamente para preview e download.
+Objetivo: corrigir definitivamente o fluxo de visualização/download das faturas, porque neste momento há dois problemas ao mesmo tempo.
 
-Plano de correção:
-1. Refazer o `InvoiceViewer` para carregar o ficheiro por `fetch()`
-- Buscar o `src` remoto no `useEffect`.
-- Converter a resposta em `Blob`.
-- Criar um `blob:` URL local com `URL.createObjectURL(blob)`.
-- Guardar também o `content-type` real devolvido pela resposta.
+Diagnóstico
+- O screenshot mais recente mostra o texto “Não foi possível pré-visualizar o PDF.”.
+- Esse texto já não existe no código atual de `src/pages/InvoiceViewer.tsx`, que agora mostra “Não foi possível carregar a fatura.”.
+- Isto indica fortemente que o utilizador está a abrir uma versão antiga em cache do frontend, por isso parte das correções anteriores nem está a ser carregada.
+- Além disso, mesmo na versão nova, o viewer ainda depende demasiado do URL público do ficheiro. Para este caso, a abordagem mais robusta é descarregar o ficheiro via Supabase Storage SDK e só depois criar o `blob:` local.
 
-2. Usar o `blob:` URL local para a pré-visualização
-- PDF: renderizar com `<iframe>` ou `<object>` usando o `blob:` URL local, não o URL remoto.
-- Imagem: renderizar `<img src={blobUrl}>`.
-- Isto contorna limitações de embedding e headers do ficheiro remoto.
+Plano de correção
+1. Corrigir cache busting da app
+- Atualizar de forma consistente os marcadores de versão em:
+  - `index.html` (`/src/main.tsx?v=...`)
+  - `src/App.tsx` (`APP_VERSION`)
+- Garantir que a nova aba do viewer também recebe sempre a versão atual, para evitar abrir bundles antigos em cache.
 
-3. Corrigir o Download
-- O botão Download deve descarregar o `Blob` já obtido por `fetch`, criando um `<a href={blobUrl} download="nome-do-ficheiro">`.
-- Se o fetch falhar, fazer fallback para abrir o original.
-- Extrair o nome do ficheiro a partir do URL ou usar um nome seguro por defeito.
+2. Tornar a abertura do viewer explícita e estável
+- Em `src/components/admin/ExpensesCard.tsx`, abrir o viewer com URL absoluta da própria app e incluir um parâmetro de versão/cache.
+- Exemplo lógico: `/invoice-viewer?src=...&v=...`
+- Isto evita que a nova aba reutilize um HTML antigo em cache.
 
-4. Adicionar estados claros no viewer
-- Estado “a carregar ficheiro”
-- Estado de erro “não foi possível carregar a fatura”
-- Manter botões “Abrir original” e “Download” como fallback visível
+3. Refazer o `InvoiceViewer` para usar Supabase Storage download
+- Em `src/pages/InvoiceViewer.tsx`, quando o `src` pertencer ao bucket `expense-invoices`, extrair o path do ficheiro e usar:
+  - `supabase.storage.from("expense-invoices").download(path)`
+- Converter o resultado para `blob:` com `URL.createObjectURL(...)`.
+- Usar esse `blob:` tanto para preview como para download.
+- Manter `fetch(src)` apenas como fallback para URLs antigas/externas.
 
-5. Melhorar uploads futuros em `ExpensesCard`
-- No `uploadFile`, enviar `contentType: fileToUpload.type` explicitamente no `.upload(...)`.
-- Isto ajuda o Supabase a servir PDFs/imagens com metadata correta nas próximas faturas carregadas.
+4. Corrigir o botão Download
+- O botão deve descarregar sempre a partir do Blob local já obtido.
+- Se não houver Blob, fazer fallback controlado para abrir o original.
+- Isto evita o problema do atributo `download` ser ignorado em links cross-origin.
 
-6. Traduções
-- Se necessário, adicionar chaves i18n para:
-  - “A carregar fatura…”
-  - “Não foi possível carregar a fatura.”
-  - “Abrir original”
-  - “Download”
-- Reutilizar chaves existentes onde fizer sentido para evitar duplicação.
+5. Melhorar o estado de erro
+- Mostrar mensagens diferentes para:
+  - erro ao obter o ficheiro do storage
+  - tipo de ficheiro não suportado
+  - ausência de URL
+- Assim conseguimos distinguir cache antiga de falha real do ficheiro.
 
-Ficheiros a alterar:
-- `src/pages/InvoiceViewer.tsx`
+Ficheiros a alterar
+- `index.html`
+- `src/App.tsx`
 - `src/components/admin/ExpensesCard.tsx`
-- opcionalmente `src/i18n/translations/pt.json`
-- opcionalmente `src/i18n/translations/en.json`
+- `src/pages/InvoiceViewer.tsx`
 
-Detalhe técnico:
-- O viewer atual ainda usa o URL remoto diretamente:
-  - preview: `<object data={src}>`
-  - download: `<a href={src} download>`
-- A correção passa por este fluxo:
+Detalhe técnico
 ```text
-URL público do Supabase
-  -> fetch()
+ExpensesCard
+  -> abre /invoice-viewer?src=...&v=...
+
+InvoiceViewer
+  -> se URL for do bucket expense-invoices:
+       supabase.storage.from("expense-invoices").download(path)
+     senão:
+       fetch(src) como fallback
   -> Blob
   -> URL.createObjectURL(blob)
   -> preview local + download local
 ```
-- Também vou limpar o `blob:` URL com `URL.revokeObjectURL(...)` no cleanup para evitar leaks.
 
-Resultado esperado:
-- PDFs antigos já carregados passam a abrir no viewer sem depender do embedding direto do Supabase.
-- O botão Download passa a funcionar mesmo em browsers que ignoram `download` em links cross-origin.
-- Novas faturas ficam melhor servidas por causa do `contentType` explícito no upload.
+Validação após implementação
+- Confirmar que a nova aba já mostra o texto novo do viewer (prova de que a cache antiga deixou de ser usada).
+- Testar uma fatura PDF antiga já existente.
+- Testar uma imagem.
+- Confirmar:
+  - deixa de aparecer página em branco
+  - o botão Download funciona
+  - o fallback “Abrir original” continua disponível
