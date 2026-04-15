@@ -1,47 +1,64 @@
 
 Diagnóstico:
-- O problema já não parece ser o upload; a falha está na forma de abrir a fatura.
-- O `ExpensesCard.tsx` usa `window.open('', '_blank')` + `document.write()` + `<iframe src="URL-do-PDF">`.
-- Esse padrão funciona para HTML gerado internamente, mas continua frágil para PDFs remotos do Supabase, sobretudo em Safari/WebKit. O screenshot (“A problem repeatedly occurred…”) é compatível com esse crash.
+- O screenshot mostra que a nova rota `/invoice-viewer` abriu corretamente, mas o `<object data={src}>` falhou a renderização do PDF remoto.
+- O botão Download também falha porque hoje usa um `<a download>` direto para um URL cross-origin do Supabase; muitos browsers ignoram `download` nesse cenário.
+- Ou seja: o problema já não é a navegação. O problema está em continuar a depender do URL remoto diretamente para preview e download.
 
 Plano de correção:
-1. Substituir a abertura atual por um viewer dedicado dentro da app
-- Criar uma nova página/rota de visualização de faturas.
-- Em vez de injetar HTML com `document.write`, o botão “Ver” abre algo como `/invoice-viewer?src=...`.
-- Isto evita o fluxo atual com nova janela vazia + escrita manual de HTML.
+1. Refazer o `InvoiceViewer` para carregar o ficheiro por `fetch()`
+- Buscar o `src` remoto no `useEffect`.
+- Converter a resposta em `Blob`.
+- Criar um `blob:` URL local com `URL.createObjectURL(blob)`.
+- Guardar também o `content-type` real devolvido pela resposta.
 
-2. Fazer o viewer tratar PDF e imagem de forma diferente
-- PDF: mostrar um viewer em ecrã completo com `<object>` ou `<iframe>` dentro da própria página.
-- Imagem: mostrar `<img>` responsiva.
-- Em ambos os casos, incluir fallback visível:
-  - botão “Abrir original”
-  - botão “Descarregar”
-- Assim, mesmo que o browser não renderize inline, o utilizador deixa de ficar preso numa página branca.
+2. Usar o `blob:` URL local para a pré-visualização
+- PDF: renderizar com `<iframe>` ou `<object>` usando o `blob:` URL local, não o URL remoto.
+- Imagem: renderizar `<img src={blobUrl}>`.
+- Isto contorna limitações de embedding e headers do ficheiro remoto.
 
-3. Tornar a deteção do tipo de ficheiro mais robusta
-- Em vez de só usar `url.includes('.pdf')`, analisar o pathname do URL com mais segurança.
-- Preparar fallback para links sem extensão clara.
+3. Corrigir o Download
+- O botão Download deve descarregar o `Blob` já obtido por `fetch`, criando um `<a href={blobUrl} download="nome-do-ficheiro">`.
+- Se o fetch falhar, fazer fallback para abrir o original.
+- Extrair o nome do ficheiro a partir do URL ou usar um nome seguro por defeito.
 
-4. Melhorar a UX nos links de fatura
-- Manter “Ver” a abrir o viewer dedicado.
-- Adicionar também ação de download direto ao lado de “Ver”, para não depender apenas da pré-visualização.
+4. Adicionar estados claros no viewer
+- Estado “a carregar ficheiro”
+- Estado de erro “não foi possível carregar a fatura”
+- Manter botões “Abrir original” e “Download” como fallback visível
 
-5. QA focado no cenário real
-- Testar com uma fatura PDF já carregada.
-- Testar também uma imagem.
-- Confirmar:
-  - deixa de aparecer página branca/crash
-  - o PDF abre no viewer ou, no pior caso, o download funciona
-  - o fluxo funciona em desktop e Safari/mobile
+5. Melhorar uploads futuros em `ExpensesCard`
+- No `uploadFile`, enviar `contentType: fileToUpload.type` explicitamente no `.upload(...)`.
+- Isto ajuda o Supabase a servir PDFs/imagens com metadata correta nas próximas faturas carregadas.
+
+6. Traduções
+- Se necessário, adicionar chaves i18n para:
+  - “A carregar fatura…”
+  - “Não foi possível carregar a fatura.”
+  - “Abrir original”
+  - “Download”
+- Reutilizar chaves existentes onde fizer sentido para evitar duplicação.
 
 Ficheiros a alterar:
+- `src/pages/InvoiceViewer.tsx`
 - `src/components/admin/ExpensesCard.tsx`
-- `src/App.tsx`
-- novo ficheiro tipo `src/pages/InvoiceViewer.tsx`
-- `src/i18n/translations/pt.json`
-- `src/i18n/translations/en.json`
+- opcionalmente `src/i18n/translations/pt.json`
+- opcionalmente `src/i18n/translations/en.json`
 
 Detalhe técnico:
-- Não vou reutilizar `document.write()` para PDFs remotos.
-- O viewer passa a ser uma rota React normal, com layout estável e fallback explícito.
-- Se o motor do browser falhar ao embutir PDF, o utilizador verá a interface de fallback em vez de uma página em branco.
+- O viewer atual ainda usa o URL remoto diretamente:
+  - preview: `<object data={src}>`
+  - download: `<a href={src} download>`
+- A correção passa por este fluxo:
+```text
+URL público do Supabase
+  -> fetch()
+  -> Blob
+  -> URL.createObjectURL(blob)
+  -> preview local + download local
+```
+- Também vou limpar o `blob:` URL com `URL.revokeObjectURL(...)` no cleanup para evitar leaks.
+
+Resultado esperado:
+- PDFs antigos já carregados passam a abrir no viewer sem depender do embedding direto do Supabase.
+- O botão Download passa a funcionar mesmo em browsers que ignoram `download` em links cross-origin.
+- Novas faturas ficam melhor servidas por causa do `contentType` explícito no upload.
