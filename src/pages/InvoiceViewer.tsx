@@ -2,6 +2,21 @@ import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink, FileText, Loader2, AlertCircle } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+const BUCKET_NAME = "expense-invoices";
+
+function extractStoragePath(url: string): string | null {
+  try {
+    const marker = `/object/public/${BUCKET_NAME}/`;
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    const pathWithQuery = url.substring(idx + marker.length);
+    return decodeURIComponent(pathWithQuery.split("?")[0]);
+  } catch {
+    return null;
+  }
+}
 
 const InvoiceViewer = () => {
   const [searchParams] = useSearchParams();
@@ -25,23 +40,60 @@ const InvoiceViewer = () => {
     if (!src) { setLoading(false); return; }
 
     let cancelled = false;
-    const load = async () => {
+
+    const loadViaStorage = async (path: string): Promise<boolean> => {
+      try {
+        const { data, error: dlError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .download(path);
+        if (dlError || !data) return false;
+        if (cancelled) return true;
+        const ct = data.type || "";
+        const url = URL.createObjectURL(data);
+        blobUrlRef.current = url;
+        setBlobUrl(url);
+        setContentType(ct);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const loadViaFetch = async (): Promise<boolean> => {
       try {
         const res = await fetch(src);
-        if (!res.ok) throw new Error("fetch failed");
+        if (!res.ok) return false;
         const blob = await res.blob();
+        if (cancelled) return true;
         const ct = blob.type || res.headers.get("content-type") || "";
-        if (cancelled) return;
         const url = URL.createObjectURL(blob);
         blobUrlRef.current = url;
         setBlobUrl(url);
         setContentType(ct);
+        return true;
       } catch {
-        if (!cancelled) setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
+        return false;
       }
     };
+
+    const load = async () => {
+      const storagePath = extractStoragePath(src);
+      let ok = false;
+
+      if (storagePath) {
+        ok = await loadViaStorage(storagePath);
+      }
+
+      if (!ok && !cancelled) {
+        ok = await loadViaFetch();
+      }
+
+      if (!cancelled) {
+        if (!ok) setError(true);
+        setLoading(false);
+      }
+    };
+
     load();
 
     return () => {
@@ -54,13 +106,16 @@ const InvoiceViewer = () => {
   const isImage = contentType.startsWith("image/");
 
   const handleDownload = () => {
-    const url = blobUrl || src;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    if (blobUrl) {
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      window.open(src, "_blank");
+    }
   };
 
   if (!src) {
@@ -91,6 +146,10 @@ const InvoiceViewer = () => {
               <ExternalLink className="h-4 w-4 mr-1" />
               Abrir Original
             </a>
+          </Button>
+          <Button variant="outline" onClick={handleDownload}>
+            <Download className="h-4 w-4 mr-1" />
+            Download
           </Button>
         </div>
       </div>
