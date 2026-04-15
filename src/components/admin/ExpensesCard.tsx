@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink, Camera, Upload, Pencil, ChevronDown, RefreshCw, Settings } from "lucide-react";
+import { Plus, Trash2, FileText, Calendar as CalendarIcon, Euro, ExternalLink, Camera, Upload, Pencil, ChevronDown, RefreshCw, Settings, Download } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -59,8 +59,24 @@ export const ExpensesCard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const getInvoiceViewerUrl = useCallback((url: string, download = false) => {
+    const viewerUrl = new URL("/invoice-viewer", window.location.origin);
+    viewerUrl.searchParams.set("src", url);
+    viewerUrl.searchParams.set("v", "20260415-pdfjs");
+
+    if (download) {
+      viewerUrl.searchParams.set("download", "1");
+    }
+
+    return viewerUrl.toString();
+  }, []);
+
   const handleViewInvoice = (url: string) => {
-    window.open(`/invoice-viewer?src=${encodeURIComponent(url)}`, '_blank');
+    window.open(getInvoiceViewerUrl(url), "_blank", "noopener,noreferrer");
+  };
+
+  const handleDownloadInvoice = (url: string) => {
+    window.open(getInvoiceViewerUrl(url, true), "_blank", "noopener,noreferrer");
   };
 
   // Create dialog state
@@ -687,10 +703,16 @@ export const ExpensesCard = () => {
                           <TableCell>€{Number(expense.amount).toFixed(2)}</TableCell>
                           <TableCell>
                             {expense.invoice_url ? (
-                              <button onClick={() => handleViewInvoice(expense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
-                                <ExternalLink className="h-3 w-3" />
-                                {t("expenses.viewInvoice")}
-                              </button>
+                              <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
+                                <button onClick={() => handleViewInvoice(expense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
+                                  <ExternalLink className="h-3 w-3" />
+                                  {t("expenses.viewInvoice")}
+                                </button>
+                                <button onClick={() => handleDownloadInvoice(expense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
+                                  <Download className="h-3 w-3" />
+                                  Download
+                                </button>
+                              </div>
                             ) : (
                               <span className="text-muted-foreground text-xs">—</span>
                             )}
@@ -804,10 +826,16 @@ export const ExpensesCard = () => {
               {editingExpense?.invoice_url && !editFile && (
                 <p className="text-xs text-muted-foreground mt-1 mb-1">
                   {t("expenses.currentInvoice")}:{" "}
-                  <button onClick={() => handleViewInvoice(editingExpense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
-                    <ExternalLink className="h-3 w-3" />
-                    {t("expenses.viewInvoice")}
-                  </button>
+                  <span className="inline-flex flex-wrap items-center gap-3 align-middle">
+                    <button onClick={() => handleViewInvoice(editingExpense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
+                      <ExternalLink className="h-3 w-3" />
+                      {t("expenses.viewInvoice")}
+                    </button>
+                    <button onClick={() => handleDownloadInvoice(editingExpense.invoice_url!)} className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
+                      <Download className="h-3 w-3" />
+                      Download
+                    </button>
+                  </span>
                 </p>
               )}
               <div className="flex gap-2 mt-1">
