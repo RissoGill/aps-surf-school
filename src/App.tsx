@@ -30,7 +30,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const APP_VERSION = '20241210-v1';
+const APP_VERSION = '20260415-v1';
 
 const App = () => {
   useEffect(() => {
