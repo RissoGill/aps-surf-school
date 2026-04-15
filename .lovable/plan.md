@@ -1,35 +1,62 @@
 
+Objetivo: fazer o download funcionar de forma fiável, agora que a visualização já funciona.
 
-## Diagnóstico
+Diagnóstico
+- O problema já não está no carregamento do ficheiro nem no PDF.js.
+- O ponto frágil atual é o fluxo de download:
+  1. no `ExpensesCard`, o botão “Download” abre uma nova aba com `download=1`
+  2. nessa nova aba o download é disparado automaticamente no `useEffect`
+- Esse auto-download perde o contexto de gesto do utilizador e muitos browsers bloqueiam ou ignoram esse trigger.
+- Mesmo dentro do `InvoiceViewer`, o download ainda depende de clique programático num `<a>`, que é menos fiável do que um link real clicável pelo utilizador.
 
-O utilizador confirma que já consegue **ver** a fatura (o PDF.js canvas viewer funciona). O problema restante é apenas o **download**.
+Plano de correção
+1. Remover o auto-download em nova aba
+- Em `src/components/admin/ExpensesCard.tsx`, o botão “Download” deixa de abrir `/invoice-viewer?download=1`.
+- Em vez disso, passa a descarregar diretamente a partir do clique do utilizador no próprio dashboard.
 
-A causa mais provável: em mobile Safari/WebKit, o `navigator.canShare({ files: [...] })` retorna `true`, mas o `navigator.share()` falha silenciosamente ou é bloqueado pelo browser quando chamado a partir de uma nova aba. O código atual tenta o Web Share API primeiro e só faz fallback para o `<a>` click se o share falhar — mas em certos cenários o share "consome" a ação sem resultado visível.
+2. Extrair uma função partilhada para obter o ficheiro
+- Criar uma utility para:
+  - extrair o path do bucket `expense-invoices`
+  - fazer `supabase.storage.from(...).download(path)`
+  - fallback para `fetch(src)` se necessário
+  - devolver `blob`, `blobUrl`, `contentType` e nome final
+- Isto evita duplicação entre `ExpensesCard` e `InvoiceViewer`.
 
-Além disso, o clique programático num `<a download>` com blob URL dentro de uma aba aberta por `window.open` é frequentemente bloqueado em Safari.
+3. Tornar o download do dashboard realmente direto
+- No `ExpensesCard`, ao clicar em “Download”:
+  - obter o Blob
+  - criar um `<a href=blobUrl download=...>` temporário
+  - clicar no mesmo ciclo do gesto do utilizador
+  - fallback para `navigator.share()` em iOS
+  - fallback final para abrir o ficheiro/manual save
+- Resultado: o utilizador consegue descarregar sem passar por uma nova aba intermédia.
 
-## Plano de correção
+4. Tornar o botão do viewer mais robusto
+- Em `src/pages/InvoiceViewer.tsx`, substituir a ação principal de download por uma abordagem mais explícita:
+  - preferir um link real com `href={blobUrl}` + `download={resolvedFileName}` quando possível
+  - manter botão secundário de fallback para `share/open`
+- Assim, dentro do viewer o browser recebe um download iniciado por interação real do utilizador.
 
-### 1. Reordenar a lógica de download em `InvoiceViewer.tsx`
+5. Remover dependência do parâmetro `download=1`
+- Eliminar o auto-trigger por `useEffect`, porque é a parte mais provável de estar a ser bloqueada.
+- O viewer continua a servir para ver e para descarregar manualmente, mas não para “forçar” download ao abrir.
 
-- **Primeiro tentar o `<a download>` direto** (funciona na maioria dos browsers desktop e Android).
-- **Só tentar Web Share API como fallback** se o `<a>` não funcionar (detectável por user agent ou por tentativa).
-- **Fallback final**: `window.open(blobUrl)` — abre o blob num novo tab, onde o utilizador pode guardar manualmente. Isto funciona sempre.
+Ficheiros a alterar
+- `src/components/admin/ExpensesCard.tsx`
+- `src/pages/InvoiceViewer.tsx`
+- novo util partilhado, por exemplo:
+  - `src/utils/invoiceFile.ts`
 
-### 2. Adicionar botão "Guardar" mais visível
+Resultado esperado
+- “Ver” continua a abrir o viewer.
+- “Download” no dashboard passa a descarregar diretamente.
+- “Download” dentro do viewer passa a ser mais fiável.
+- Mesmo quando o browser bloquear download automático, continua a existir fallback manual funcional.
 
-- Tornar o botão Download mais proeminente no header do viewer (cor primária em vez de outline).
-- Adicionar texto de ajuda se o download falhar: "Mantenha premido na imagem para guardar" (para mobile).
-
-### 3. Mudança concreta no `handleDownload`
-
-```text
-handleDownload:
-  1. Criar <a href=blobUrl download=filename>, appendChild, click, remove
-  2. Se falhar ou se estiver em iOS → navigator.share({ files })
-  3. Se tudo falhar → window.open(blobUrl) como último recurso
-```
-
-### Ficheiro a alterar
-- `src/pages/InvoiceViewer.tsx` — lógica do `handleDownload` e estilo do botão
-
+Validação após implementação
+- Testar o botão “Download” diretamente em `ExpensesCard`.
+- Testar o botão “Download” dentro do `InvoiceViewer`.
+- Confirmar em PDF e imagem que:
+  - visualiza corretamente
+  - descarrega sem abrir página branca
+  - existe fallback manual utilizável se o browser bloquear o download
