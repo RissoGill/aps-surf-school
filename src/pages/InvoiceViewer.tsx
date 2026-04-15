@@ -1,26 +1,63 @@
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Download, ExternalLink, FileText } from "lucide-react";
+import { Download, ExternalLink, FileText, Loader2, AlertCircle } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
 
 const InvoiceViewer = () => {
   const [searchParams] = useSearchParams();
   const src = searchParams.get("src") || "";
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [contentType, setContentType] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const blobUrlRef = useRef<string | null>(null);
 
-  const isPdf = (() => {
+  const fileName = (() => {
     try {
-      const pathname = new URL(src).pathname.toLowerCase();
-      return pathname.endsWith(".pdf");
+      const pathname = new URL(src).pathname;
+      return pathname.split("/").pop() || "fatura";
     } catch {
-      return src.toLowerCase().includes(".pdf");
+      return "fatura";
     }
   })();
 
+  useEffect(() => {
+    if (!src) { setLoading(false); return; }
+
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error("fetch failed");
+        const blob = await res.blob();
+        const ct = blob.type || res.headers.get("content-type") || "";
+        if (cancelled) return;
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        setBlobUrl(url);
+        setContentType(ct);
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+
+    return () => {
+      cancelled = true;
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, [src]);
+
+  const isPdf = contentType.includes("pdf");
+  const isImage = contentType.startsWith("image/");
+
   const handleDownload = () => {
+    const url = blobUrl || src;
     const a = document.createElement("a");
-    a.href = src;
-    a.download = "";
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
+    a.href = url;
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -29,7 +66,33 @@ const InvoiceViewer = () => {
   if (!src) {
     return (
       <div className="flex items-center justify-center h-screen bg-background text-foreground">
-        <p>No file to display.</p>
+        <p>Nenhum ficheiro para apresentar.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">A carregar fatura…</p>
+      </div>
+    );
+  }
+
+  if (error || !blobUrl) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background text-foreground gap-4 p-8 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <p className="text-muted-foreground">Não foi possível carregar a fatura.</p>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <a href={src} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Abrir Original
+            </a>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -56,37 +119,29 @@ const InvoiceViewer = () => {
       </div>
       <div className="flex-1 min-h-0">
         {isPdf ? (
-          <object
-            data={src}
-            type="application/pdf"
-            className="w-full h-full"
-          >
-            <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-              <FileText className="h-16 w-16 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                Não foi possível pré-visualizar o PDF.
-              </p>
-              <div className="flex gap-2">
-                <Button onClick={handleDownload}>
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href={src} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    Abrir Original
-                  </a>
-                </Button>
-              </div>
-            </div>
-          </object>
-        ) : (
+          <iframe
+            src={blobUrl}
+            className="w-full h-full border-0"
+            title="Invoice PDF"
+          />
+        ) : isImage ? (
           <div className="flex items-center justify-center h-full p-4 bg-muted/30">
             <img
-              src={src}
+              src={blobUrl}
               alt="Invoice"
               className="max-w-full max-h-full object-contain"
             />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
+            <FileText className="h-16 w-16 text-muted-foreground" />
+            <p className="text-muted-foreground">
+              Pré-visualização não disponível para este tipo de ficheiro.
+            </p>
+            <Button onClick={handleDownload}>
+              <Download className="h-4 w-4 mr-1" />
+              Download
+            </Button>
           </div>
         )}
       </div>
