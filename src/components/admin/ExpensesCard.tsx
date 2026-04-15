@@ -251,7 +251,7 @@ export const ExpensesCard = () => {
     const filePath = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
     const { error: uploadError } = await supabase.storage
       .from("expense-invoices")
-      .upload(filePath, fileToUpload);
+      .upload(filePath, fileToUpload, { contentType: fileToUpload.type });
 
     if (uploadError) {
       toast({ title: t("expenses.uploadError"), variant: "destructive" });
