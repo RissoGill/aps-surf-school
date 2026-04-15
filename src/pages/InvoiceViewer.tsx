@@ -281,7 +281,7 @@ const InvoiceViewer = () => {
           <span className="truncate">{fileName}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleDownload}>
+          <Button size="sm" onClick={handleDownload}>
             <Download className="h-4 w-4 mr-1" />
             Download
           </Button>
