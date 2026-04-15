@@ -18,6 +18,13 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import {
+  isIOSDevice,
+  loadInvoiceFile,
+  revokeInvoiceBlobUrl,
+  shareInvoiceFile,
+  triggerInvoiceDownload,
+} from "@/utils/invoiceFile";
 
 interface Expense {
   id: string;
@@ -59,14 +66,10 @@ export const ExpensesCard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const getInvoiceViewerUrl = useCallback((url: string, download = false) => {
+  const getInvoiceViewerUrl = useCallback((url: string) => {
     const viewerUrl = new URL("/invoice-viewer", window.location.origin);
     viewerUrl.searchParams.set("src", url);
     viewerUrl.searchParams.set("v", "20260415-pdfjs");
-
-    if (download) {
-      viewerUrl.searchParams.set("download", "1");
-    }
 
     return viewerUrl.toString();
   }, []);
@@ -75,9 +78,38 @@ export const ExpensesCard = () => {
     window.open(getInvoiceViewerUrl(url), "_blank", "noopener,noreferrer");
   };
 
-  const handleDownloadInvoice = (url: string) => {
-    window.open(getInvoiceViewerUrl(url, true), "_blank", "noopener,noreferrer");
-  };
+  const handleDownloadInvoice = useCallback(async (url: string) => {
+    try {
+      const file = await loadInvoiceFile(url);
+
+      if (!isIOSDevice()) {
+        triggerInvoiceDownload(file.blobUrl, file.downloadName);
+        window.setTimeout(() => revokeInvoiceBlobUrl(file.blobUrl), 3000);
+        return;
+      }
+
+      const shared = await shareInvoiceFile(file.blob, file.downloadName, file.contentType);
+
+      if (shared) {
+        revokeInvoiceBlobUrl(file.blobUrl);
+        return;
+      }
+
+      window.open(file.blobUrl, "_blank", "noopener,noreferrer");
+      window.setTimeout(() => revokeInvoiceBlobUrl(file.blobUrl), 60000);
+      toast({
+        title: "Abra o ficheiro para guardar manualmente",
+        description: "Se o browser não descarregar automaticamente, use a opção Guardar do dispositivo.",
+      });
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+      toast({
+        variant: "destructive",
+        title: "Não foi possível descarregar a fatura",
+        description: "A fatura foi aberta para que a possa guardar manualmente.",
+      });
+    }
+  }, [toast]);
 
   // Create dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
