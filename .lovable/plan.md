@@ -1,69 +1,62 @@
 
-Objetivo: corrigir definitivamente o fluxo de visualização/download das faturas, porque neste momento há dois problemas ao mesmo tempo.
+Objetivo: resolver de forma fiável a visualização e o download das faturas, sem depender do viewer nativo de PDF do browser.
 
 Diagnóstico
-- O screenshot mais recente mostra o texto “Não foi possível pré-visualizar o PDF.”.
-- Esse texto já não existe no código atual de `src/pages/InvoiceViewer.tsx`, que agora mostra “Não foi possível carregar a fatura.”.
-- Isto indica fortemente que o utilizador está a abrir uma versão antiga em cache do frontend, por isso parte das correções anteriores nem está a ser carregada.
-- Além disso, mesmo na versão nova, o viewer ainda depende demasiado do URL público do ficheiro. Para este caso, a abordagem mais robusta é descarregar o ficheiro via Supabase Storage SDK e só depois criar o `blob:` local.
+- O `InvoiceViewer.tsx` já faz `download()`/`fetch()` e cria `blobUrl`, por isso o ficheiro está provavelmente a ser obtido com sucesso.
+- O problema restante está na etapa final:
+  - preview PDF via `<iframe src={blobUrl}>`
+  - download via clique programático num `<a>`
+- Em mobile/Safari/WebKit este fluxo continua a falhar frequentemente: o PDF pode ficar em branco e o download pode ser ignorado.
 
-Plano de correção
-1. Corrigir cache busting da app
-- Atualizar de forma consistente os marcadores de versão em:
-  - `index.html` (`/src/main.tsx?v=...`)
-  - `src/App.tsx` (`APP_VERSION`)
-- Garantir que a nova aba do viewer também recebe sempre a versão atual, para evitar abrir bundles antigos em cache.
+Correção proposta
+1. Deixar de depender da renderização nativa do PDF no browser
+- Substituir o preview PDF atual por uma abordagem baseada em PDF.js dentro da app.
+- Assim o PDF é desenhado em HTML/canvas, evitando a “página branca” do `<iframe>`/`<object>`.
 
-2. Tornar a abertura do viewer explícita e estável
-- Em `src/components/admin/ExpensesCard.tsx`, abrir o viewer com URL absoluta da própria app e incluir um parâmetro de versão/cache.
-- Exemplo lógico: `/invoice-viewer?src=...&v=...`
-- Isto evita que a nova aba reutilize um HTML antigo em cache.
+2. Tornar o download realmente utilizável
+- Manter o Blob local, mas reforçar o fluxo de download.
+- Adicionar uma ação alternativa visível quando o browser bloquear o download:
+  - “Abrir ficheiro”
+  - “Download”
+  - fallback explícito para o URL original
+- Se necessário, abrir o Blob num novo tab como fallback manual em vez de depender só do `download`.
 
-3. Refazer o `InvoiceViewer` para usar Supabase Storage download
-- Em `src/pages/InvoiceViewer.tsx`, quando o `src` pertencer ao bucket `expense-invoices`, extrair o path do ficheiro e usar:
-  - `supabase.storage.from("expense-invoices").download(path)`
-- Converter o resultado para `blob:` com `URL.createObjectURL(...)`.
-- Usar esse `blob:` tanto para preview como para download.
-- Manter `fetch(src)` apenas como fallback para URLs antigas/externas.
+3. Melhorar o `InvoiceViewer`
+- Distinguir claramente 3 casos:
+  - PDF: render com PDF.js
+  - imagem: `<img>` responsiva
+  - ficheiro não suportado: interface com ações claras
+- Mostrar erro útil se o Blob vier vazio ou com content-type inesperado.
 
-4. Corrigir o botão Download
-- O botão deve descarregar sempre a partir do Blob local já obtido.
-- Se não houver Blob, fazer fallback controlado para abrir o original.
-- Isto evita o problema do atributo `download` ser ignorado em links cross-origin.
+4. Ajustar o fluxo em `ExpensesCard`
+- Manter o botão “Ver”, mas garantir que o viewer abre sempre com URL absoluta e parâmetro de versão.
+- Adicionar também botão/ação de download direto junto ao “Ver” para redundância funcional.
 
-5. Melhorar o estado de erro
-- Mostrar mensagens diferentes para:
-  - erro ao obter o ficheiro do storage
-  - tipo de ficheiro não suportado
-  - ausência de URL
-- Assim conseguimos distinguir cache antiga de falha real do ficheiro.
+5. Validação após implementação
+- Testar uma fatura PDF existente.
+- Testar uma imagem.
+- Confirmar:
+  - deixa de haver página branca
+  - o utilizador consegue ver o PDF dentro da app
+  - o download funciona ou, no pior caso, existe fallback manual funcional
 
 Ficheiros a alterar
-- `index.html`
-- `src/App.tsx`
-- `src/components/admin/ExpensesCard.tsx`
 - `src/pages/InvoiceViewer.tsx`
+- `src/components/admin/ExpensesCard.tsx`
+- `package.json` (para adicionar a dependência de PDF.js)
+- opcionalmente `src/i18n/translations/pt.json`
+- opcionalmente `src/i18n/translations/en.json`
 
 Detalhe técnico
 ```text
-ExpensesCard
-  -> abre /invoice-viewer?src=...&v=...
-
-InvoiceViewer
-  -> se URL for do bucket expense-invoices:
-       supabase.storage.from("expense-invoices").download(path)
-     senão:
-       fetch(src) como fallback
+Supabase Storage URL
+  -> download/fetch
   -> Blob
-  -> URL.createObjectURL(blob)
-  -> preview local + download local
+  -> PDF.js render (PDF) / img src blob (imagem)
+  -> ações visíveis: Download / Abrir original / Abrir ficheiro
 ```
 
-Validação após implementação
-- Confirmar que a nova aba já mostra o texto novo do viewer (prova de que a cache antiga deixou de ser usada).
-- Testar uma fatura PDF antiga já existente.
-- Testar uma imagem.
-- Confirmar:
-  - deixa de aparecer página em branco
-  - o botão Download funciona
-  - o fallback “Abrir original” continua disponível
+Porque esta abordagem
+- As tentativas anteriores já corrigiram rota, cache e obtenção do ficheiro.
+- O ponto frágil que sobra é o viewer nativo do browser.
+- Para garantir “tem que existir possibilidade de ver e fazer download”, a solução mais robusta agora é tirar a renderização PDF das mãos do browser e fazê-la diretamente na app.
