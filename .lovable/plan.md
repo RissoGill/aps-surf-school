@@ -1,24 +1,47 @@
 
+Diagnóstico:
+- O problema já não parece ser o upload; a falha está na forma de abrir a fatura.
+- O `ExpensesCard.tsx` usa `window.open('', '_blank')` + `document.write()` + `<iframe src="URL-do-PDF">`.
+- Esse padrão funciona para HTML gerado internamente, mas continua frágil para PDFs remotos do Supabase, sobretudo em Safari/WebKit. O screenshot (“A problem repeatedly occurred…”) é compatível com esse crash.
 
-# Corrigir visualização de faturas (página em branco)
+Plano de correção:
+1. Substituir a abertura atual por um viewer dedicado dentro da app
+- Criar uma nova página/rota de visualização de faturas.
+- Em vez de injetar HTML com `document.write`, o botão “Ver” abre algo como `/invoice-viewer?src=...`.
+- Isto evita o fluxo atual com nova janela vazia + escrita manual de HTML.
 
-## Problema
-O link da fatura abre um novo separador com `target="_blank"`, mas o browser mostra uma página em branco. Isto acontece porque muitos browsers (especialmente móveis) não renderizam PDFs diretamente via URL de storage, ou o sandbox do iframe bloqueia a abertura.
+2. Fazer o viewer tratar PDF e imagem de forma diferente
+- PDF: mostrar um viewer em ecrã completo com `<object>` ou `<iframe>` dentro da própria página.
+- Imagem: mostrar `<img>` responsiva.
+- Em ambos os casos, incluir fallback visível:
+  - botão “Abrir original”
+  - botão “Descarregar”
+- Assim, mesmo que o browser não renderize inline, o utilizador deixa de ficar preso numa página branca.
 
-## Solução
-Em vez de abrir o URL diretamente, fazer **download direto** do ficheiro usando `window.location.href` ou criar um botão de download. Para PDFs, podemos também abrir numa página HTML intermédia com um `<iframe>` ou `<embed>` que mostre o PDF.
+3. Tornar a deteção do tipo de ficheiro mais robusta
+- Em vez de só usar `url.includes('.pdf')`, analisar o pathname do URL com mais segurança.
+- Preparar fallback para links sem extensão clara.
 
-A abordagem mais fiável (e consistente com o padrão já usado no projeto para PDFs - ver memória `pdf-view-handling`):
+4. Melhorar a UX nos links de fatura
+- Manter “Ver” a abrir o viewer dedicado.
+- Adicionar também ação de download direto ao lado de “Ver”, para não depender apenas da pré-visualização.
 
-1. **Para PDFs**: abrir novo separador e escrever HTML com um `<iframe>` a apontar para o URL do ficheiro
-2. **Para imagens**: abrir novo separador com a imagem directamente
-3. **Fallback**: botão de download direto
+5. QA focado no cenário real
+- Testar com uma fatura PDF já carregada.
+- Testar também uma imagem.
+- Confirmar:
+  - deixa de aparecer página branca/crash
+  - o PDF abre no viewer ou, no pior caso, o download funciona
+  - o fluxo funciona em desktop e Safari/mobile
 
-### Alterações em `ExpensesCard.tsx`
-- Criar função `handleViewInvoice(url)` que:
-  - Deteta se é PDF (pela extensão no URL)
-  - Se PDF: abre novo tab com `window.open()` e escreve HTML contendo `<iframe src="url" width="100%" height="100%">`
-  - Se imagem: abre directamente com `window.open(url)`
-- Substituir os 2 links `<a href={url} target="_blank">` por `<button onClick={() => handleViewInvoice(url)}>`
+Ficheiros a alterar:
+- `src/components/admin/ExpensesCard.tsx`
+- `src/App.tsx`
+- novo ficheiro tipo `src/pages/InvoiceViewer.tsx`
+- `src/i18n/translations/pt.json`
+- `src/i18n/translations/en.json`
 
-1 ficheiro a editar.
+Detalhe técnico:
+- Não vou reutilizar `document.write()` para PDFs remotos.
+- O viewer passa a ser uma rota React normal, com layout estável e fallback explícito.
+- Se o motor do browser falhar ao embutir PDF, o utilizador verá a interface de fallback em vez de uma página em branco.
