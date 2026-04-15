@@ -60,27 +60,7 @@ export const ExpensesCard = () => {
   const queryClient = useQueryClient();
 
   const handleViewInvoice = (url: string) => {
-    const isPdf = url.toLowerCase().includes('.pdf');
-    if (isPdf) {
-      const newWindow = window.open('', '_blank');
-      if (newWindow) {
-        newWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>Invoice</title>
-            <style>body{margin:0;overflow:hidden}iframe{border:none;width:100%;height:100%}</style>
-          </head>
-          <body>
-            <iframe src="${url}"></iframe>
-          </body>
-          </html>
-        `);
-        newWindow.document.close();
-      }
-    } else {
-      window.open(url, '_blank');
-    }
+    window.open(`/invoice-viewer?src=${encodeURIComponent(url)}`, '_blank');
   };
 
   // Create dialog state

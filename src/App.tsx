@@ -25,6 +25,7 @@ import AccountingManagement from "./pages/admin/AccountingManagement";
 import AthletesList from "./pages/attendance/AthletesList";
 import AttendanceRecords from "./pages/attendance/AttendanceRecords";
 import UserManual from "./pages/UserManual";
+import InvoiceViewer from "./pages/InvoiceViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +89,9 @@ const App = () => {
           <Route path="/attendance/athletes" element={<AthletesList />} />
           <Route path="/attendance/records" element={<AttendanceRecords />} />
           
+          {/* Invoice Viewer */}
+          <Route path="/invoice-viewer" element={<InvoiceViewer />} />
+
           {/* User Manual */}
           <Route path="/manual" element={<UserManual />} />
           
