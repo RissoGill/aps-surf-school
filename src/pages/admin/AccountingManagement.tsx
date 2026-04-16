@@ -6,6 +6,7 @@ import AppHeader from "@/components/shared/AppHeader";
 import AppFooter from "@/components/shared/AppFooter";
 import { ExpensesCard } from "@/components/admin/ExpensesCard";
 import { ExpenseReportsCard } from "@/components/admin/ExpenseReportsCard";
+import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useMemo } from "react";
@@ -18,6 +19,7 @@ const AccountingManagement = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [sessionValid, setSessionValid] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     const adminSessionStr = localStorage.getItem('adminSession');
@@ -27,7 +29,8 @@ const AccountingManagement = () => {
       return;
     }
     try {
-      JSON.parse(adminSessionStr);
+      const session = JSON.parse(adminSessionStr);
+      setUserRole(session.role || session.user_role || null);
       setSessionValid(true);
     } catch {
       localStorage.removeItem('adminSession');
@@ -271,6 +274,9 @@ const AccountingManagement = () => {
 
         {/* Expenses Management */}
         <ExpensesCard />
+
+        {/* Coach Payments */}
+        <CoachPaymentsCard userRole={userRole} />
 
         {/* Expense Reports */}
         <ExpenseReportsCard />

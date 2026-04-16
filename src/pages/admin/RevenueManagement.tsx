@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import AppHeader from "@/components/shared/AppHeader";
 import AppFooter from "@/components/shared/AppFooter";
-import { CoachPaymentsCard } from "@/components/admin/CoachPaymentsCard";
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -322,7 +322,7 @@ const RevenueManagement = () => {
             );
           })}
 
-          <CoachPaymentsCard userRole={userRole} />
+          
         </div>
       </main>
 
