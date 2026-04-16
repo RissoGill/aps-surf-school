@@ -1,19 +1,17 @@
 
 
-## Plano: Mostrar nome do atleta em vez do ID no Select
+## Plano: Mover CoachPaymentsCard para a página de Contabilidade
 
-Alteração simples no `src/components/admin/ProAccountTab.tsx`, linha 310.
+Mover o componente `CoachPaymentsCard` de `RevenueManagement.tsx` para `AccountingManagement.tsx`, posicionando-o depois do `ExpensesCard` e antes do `ExpenseReportsCard`.
 
-Mudar o label do `SelectItem` de:
-```
-{a.athlete_id} - {a.first_name} {a.last_name}
-```
-Para:
-```
-{a.first_name} {a.last_name}
-```
+### Alterações
 
-A lista já está ordenada por nome. O `value` interno continua a ser `a.athlete_id` (necessário para a lógica), mas o texto visível passa a mostrar apenas o nome.
+**1. `src/pages/admin/AccountingManagement.tsx`**
+- Importar `CoachPaymentsCard`
+- Obter `userRole` do `adminSession` no localStorage (já existe lógica de parsing)
+- Inserir `<CoachPaymentsCard userRole={userRole} />` entre `<ExpensesCard />` e `<ExpenseReportsCard />`
 
-Ficheiro a alterar: `src/components/admin/ProAccountTab.tsx` (linha 310).
+**2. `src/pages/admin/RevenueManagement.tsx`**
+- Remover o import de `CoachPaymentsCard`
+- Remover `<CoachPaymentsCard userRole={userRole} />` (linha 325)
 
