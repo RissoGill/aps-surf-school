@@ -307,7 +307,7 @@ const ProAccountTab = () => {
             <SelectContent>
               {(athletes || []).map((a) => (
                 <SelectItem key={a.athlete_id} value={a.athlete_id}>
-                  {a.athlete_id} - {a.first_name} {a.last_name}
+                  {a.first_name} {a.last_name}
                   {a.is_active === false && " (Inativo)"}
                 </SelectItem>
               ))}
