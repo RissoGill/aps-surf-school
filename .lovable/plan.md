@@ -1,17 +1,15 @@
 
+## Plano: Mover seletores de mês/ano para fora do collapsible
 
-## Plano: Mover CoachPaymentsCard para a página de Contabilidade
+O cartão de despesas já tem seletores de mês e ano, mas estão escondidos dentro do `CollapsibleContent` (linhas 691-711). O utilizador só os vê depois de expandir a lista.
 
-Mover o componente `CoachPaymentsCard` de `RevenueManagement.tsx` para `AccountingManagement.tsx`, posicionando-o depois do `ExpensesCard` e antes do `ExpenseReportsCard`.
+### Alteração
 
-### Alterações
+**`src/components/admin/ExpensesCard.tsx`**
 
-**1. `src/pages/admin/AccountingManagement.tsx`**
-- Importar `CoachPaymentsCard`
-- Obter `userRole` do `adminSession` no localStorage (já existe lógica de parsing)
-- Inserir `<CoachPaymentsCard userRole={userRole} />` entre `<ExpensesCard />` e `<ExpenseReportsCard />`
+1. Mover os dois `<Select>` (mês e ano) de dentro do `<CollapsibleContent>` (linhas 691-711) para **antes** do `<Collapsible>`, logo após a linha que mostra o total do mês (linha 680-682).
+2. Combinar o texto do total com os seletores numa linha compacta.
 
-**2. `src/pages/admin/RevenueManagement.tsx`**
-- Remover o import de `CoachPaymentsCard`
-- Remover `<CoachPaymentsCard userRole={userRole} />` (linha 325)
+Resultado: o utilizador vê e pode mudar o mês/ano sem precisar expandir a lista de despesas.
 
+Ficheiro a alterar: `src/components/admin/ExpensesCard.tsx` (linhas 680-712).
