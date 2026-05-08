@@ -503,10 +503,10 @@ export const ReportsCard = () => {
         const priorBalance = Number(athlete.pro_prior_balance || 0);
         
         const totalCredits = athleteEntries
-          .filter((e: any) => e.type === "prize_money" || e.type === "other")
+          .filter((e: any) => e.type === "prize_money")
           .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
         const totalDebits = athleteEntries
-          .filter((e: any) => e.type === "expense")
+          .filter((e: any) => e.type === "expense" || e.type === "other")
           .reduce((sum: number, e: any) => sum + Number(e.amount), 0);
         const athleteBalance = priorBalance + totalCredits - totalDebits;
         grandTotalBalance += athleteBalance;
