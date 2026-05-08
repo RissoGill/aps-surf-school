@@ -46,19 +46,36 @@ const EXPENSE_CATEGORIES = [
   "Devolução Sócios", "Custos Campeonatos", "Outros"
 ];
 
+const VAN_PLATES = ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"];
+
 const SUBCATEGORIES: Record<string, string[]> = {
   "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
   "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
-  "Carrinhas": ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"],
-  "Impostos": ["IVA", "IRS", "IRC"],
+  "Carrinhas": VAN_PLATES,
+  "Impostos": ["IVA", "IRS", "IRC", "IUC"],
   "Seguros": ["Cascos Marítimos", "Acidentes Pessoais"],
   "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
 };
 
 const FREETEXT_SUBCATEGORIES = ["Custos Campeonatos"];
 
+// Sub-subcategorias indexadas por categoria. Para casos onde dependem da subcategoria
+// (ex.: Impostos > IUC > matrícula), usar SUB_SUBCATEGORIES_BY_SUB.
 const SUB_SUBCATEGORIES: Record<string, string[]> = {
   "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"],
+};
+
+// Sub-subcategorias dependentes da combinação categoria + subcategoria.
+const SUB_SUBCATEGORIES_BY_SUB: Record<string, Record<string, string[]>> = {
+  "Impostos": {
+    "IUC": VAN_PLATES,
+  },
+};
+
+const getSubSubcategories = (category: string, subcategory: string): string[] | null => {
+  const bySub = SUB_SUBCATEGORIES_BY_SUB[category]?.[subcategory];
+  if (bySub) return bySub;
+  return SUB_SUBCATEGORIES[category] || null;
 };
 
 export const ExpensesCard = () => {
@@ -606,21 +623,24 @@ export const ExpensesCard = () => {
                   )}
                 </div>
               ) : null}
-              {SUB_SUBCATEGORIES[category] && subcategory && subcategory !== "Outro" && (
-                <div>
-                  <Label>{t("expenses.subSubcategory")}</Label>
-                  <Select value={subSubcategory} onValueChange={setSubSubcategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SUB_SUBCATEGORIES[category].map((sub) => (
-                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              {(() => {
+                const subSubs = getSubSubcategories(category, subcategory);
+                return subSubs && subcategory && subcategory !== "Outro" && (
+                  <div>
+                    <Label>{t("expenses.subSubcategory")}</Label>
+                    <Select value={subSubcategory} onValueChange={setSubSubcategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subSubs.map((sub) => (
+                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })()}
               <div>
                 <Label>{t("expenses.date")}</Label>
                 <Popover>
@@ -831,21 +851,24 @@ export const ExpensesCard = () => {
                 )}
               </div>
             ) : null}
-            {SUB_SUBCATEGORIES[editCategory] && editSubcategory && editSubcategory !== "Outro" && (
-              <div>
-                <Label>{t("expenses.subSubcategory")}</Label>
-                <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUB_SUBCATEGORIES[editCategory].map((sub) => (
-                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {(() => {
+              const subSubs = getSubSubcategories(editCategory, editSubcategory);
+              return subSubs && editSubcategory && editSubcategory !== "Outro" && (
+                <div>
+                  <Label>{t("expenses.subSubcategory")}</Label>
+                  <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subSubs.map((sub) => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })()}
             <div>
               <Label>{t("expenses.amount")}</Label>
               <div className="relative">
@@ -960,21 +983,24 @@ export const ExpensesCard = () => {
                     )}
                   </div>
                 ) : null}
-                {SUB_SUBCATEGORIES[recCategory] && recSubcategory && recSubcategory !== "Outro" && (
-                  <div>
-                    <Label>{t("expenses.subSubcategory")}</Label>
-                    <Select value={recSubSubcategory} onValueChange={setRecSubSubcategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60 overflow-y-auto">
-                        {SUB_SUBCATEGORIES[recCategory].map((sub) => (
-                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {(() => {
+                  const subSubs = getSubSubcategories(recCategory, recSubcategory);
+                  return subSubs && recSubcategory && recSubcategory !== "Outro" && (
+                    <div>
+                      <Label>{t("expenses.subSubcategory")}</Label>
+                      <Select value={recSubSubcategory} onValueChange={setRecSubSubcategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {subSubs.map((sub) => (
+                            <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <Label>{t("expenses.startDate")}</Label>
