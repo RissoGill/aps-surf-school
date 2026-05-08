@@ -533,13 +533,14 @@ export const ReportsCard = () => {
           `;
         } else {
           athleteEntries.forEach((entry: any) => {
-            const isCredit = entry.type === "prize_money" || entry.type === "other";
+            const isCredit = entry.type === "prize_money";
             const amountColor = isCredit ? "color: #16a34a;" : "color: #dc2626;";
             const sign = isCredit ? "+" : "-";
+            const typeLabel = entry.type === "prize_money" ? "Credit" : entry.type === "other" ? "Other" : "Expense";
             tableRows += `
               <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.entry_date)}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${isCredit ? "Credit" : "Expense"}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${typeLabel}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.category)}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.description) || "-"}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${escapeHtml(entry.invoice_number) || "-"}</td>
