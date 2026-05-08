@@ -983,21 +983,24 @@ export const ExpensesCard = () => {
                     )}
                   </div>
                 ) : null}
-                {SUB_SUBCATEGORIES[recCategory] && recSubcategory && recSubcategory !== "Outro" && (
-                  <div>
-                    <Label>{t("expenses.subSubcategory")}</Label>
-                    <Select value={recSubSubcategory} onValueChange={setRecSubSubcategory}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60 overflow-y-auto">
-                        {SUB_SUBCATEGORIES[recCategory].map((sub) => (
-                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {(() => {
+                  const subSubs = getSubSubcategories(recCategory, recSubcategory);
+                  return subSubs && recSubcategory && recSubcategory !== "Outro" && (
+                    <div>
+                      <Label>{t("expenses.subSubcategory")}</Label>
+                      <Select value={recSubSubcategory} onValueChange={setRecSubSubcategory}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {subSubs.map((sub) => (
+                            <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })()}
               </div>
               <div>
                 <Label>{t("expenses.startDate")}</Label>
