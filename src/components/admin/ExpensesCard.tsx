@@ -851,21 +851,24 @@ export const ExpensesCard = () => {
                 )}
               </div>
             ) : null}
-            {SUB_SUBCATEGORIES[editCategory] && editSubcategory && editSubcategory !== "Outro" && (
-              <div>
-                <Label>{t("expenses.subSubcategory")}</Label>
-                <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUB_SUBCATEGORIES[editCategory].map((sub) => (
-                      <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {(() => {
+              const subSubs = getSubSubcategories(editCategory, editSubcategory);
+              return subSubs && editSubcategory && editSubcategory !== "Outro" && (
+                <div>
+                  <Label>{t("expenses.subSubcategory")}</Label>
+                  <Select value={editSubSubcategory} onValueChange={setEditSubSubcategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subSubs.map((sub) => (
+                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              );
+            })()}
             <div>
               <Label>{t("expenses.amount")}</Label>
               <div className="relative">
