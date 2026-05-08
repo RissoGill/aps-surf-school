@@ -623,21 +623,24 @@ export const ExpensesCard = () => {
                   )}
                 </div>
               ) : null}
-              {SUB_SUBCATEGORIES[category] && subcategory && subcategory !== "Outro" && (
-                <div>
-                  <Label>{t("expenses.subSubcategory")}</Label>
-                  <Select value={subSubcategory} onValueChange={setSubSubcategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SUB_SUBCATEGORIES[category].map((sub) => (
-                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              {(() => {
+                const subSubs = getSubSubcategories(category, subcategory);
+                return subSubs && subcategory && subcategory !== "Outro" && (
+                  <div>
+                    <Label>{t("expenses.subSubcategory")}</Label>
+                    <Select value={subSubcategory} onValueChange={setSubSubcategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("expenses.subSubcategoryPlaceholder")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subSubs.map((sub) => (
+                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })()}
               <div>
                 <Label>{t("expenses.date")}</Label>
                 <Popover>
