@@ -55,6 +55,7 @@ const SUBCATEGORIES: Record<string, string[]> = {
   "Impostos": ["IVA", "IRS", "IRC", "IUC"],
   "Seguros": ["Cascos Marítimos", "Acidentes Pessoais"],
   "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
+  "Material Técnico": ["Pranchas", "Fatos", "Fins", "Wax", "Licra", "Boardbag", "Leash"],
 };
 
 const FREETEXT_SUBCATEGORIES = ["Custos Campeonatos"];
