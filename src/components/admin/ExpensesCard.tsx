@@ -51,7 +51,7 @@ const VAN_PLATES = ["85-QD-72", "85-QD-73", "21-XA-53", "21-XA-61", "26-DB-02"];
 const SUBCATEGORIES: Record<string, string[]> = {
   "Despesas Bancárias": ["Manutenção", "Imposto de Selo", "Avales e Garantias", "Juros"],
   "Salários": ["Nuno Telmo", "David", "Danilo", "Gustavo", "Aaron", "Zé Pinho", "Outro"],
-  "Carrinhas": VAN_PLATES,
+  "Carrinhas": [...VAN_PLATES, "Carro Nuno", "Carro David"],
   "Impostos": ["IVA", "IRS", "IRC", "IUC"],
   "Seguros": ["Cascos Marítimos", "Acidentes Pessoais"],
   "Licenças": ["CMC", "Capitania", "Federação", "RNNAT"],
