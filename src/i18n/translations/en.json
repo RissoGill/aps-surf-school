@@ -3,6 +3,9 @@
     "title": "Welcome to APS",
     "subtitle": "Choose your profile to access your personalized dashboard"
   },
+  "news": {
+    "title": "News"
+  },
   "roles": {
     "coach": {
       "title": "Coach",

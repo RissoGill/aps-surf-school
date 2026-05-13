@@ -3,6 +3,9 @@
     "title": "Bem-vindo à APS",
     "subtitle": "Escolha o seu perfil para aceder ao seu painel personalizado"
   },
+  "news": {
+    "title": "Notícias"
+  },
   "roles": {
     "coach": {
       "title": "Treinador",

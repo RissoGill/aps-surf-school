@@ -5,6 +5,7 @@ import { Users, Trophy, Heart, Settings, BookOpen } from "lucide-react";
 import AppHeader from "@/components/shared/AppHeader";
 import SponsorBanner from "@/components/shared/SponsorBanner";
 import AppFooter from "@/components/shared/AppFooter";
+import NewsCarousel from "@/components/shared/NewsCarousel";
 import ProcessedLogo from "@/components/ProcessedLogo";
 import { useLanguage } from "@/i18n/LanguageContext";
 
@@ -64,6 +65,9 @@ const WelcomePage = () => {
             {t('welcome.subtitle')}
           </p>
         </div>
+
+        {/* News Carousel */}
+        <NewsCarousel />
 
         {/* Role Selection */}
         <div className="grid grid-cols-2 gap-4 mb-4">
