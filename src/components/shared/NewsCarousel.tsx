@@ -38,7 +38,22 @@ const NewsCarousel = () => {
       });
   }, []);
 
-  if (!loaded || items.length === 0) return null;
+  if (!loaded) return null;
+
+  if (items.length === 0) {
+    return (
+      <section className="mb-6" aria-label={t("news.title")}>
+        <h2 className="text-lg font-semibold text-foreground mb-3">
+          {t("news.title")}
+        </h2>
+        <Card>
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            {t("news.empty")}
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   const formatDate = (d: string) =>
     new Date(d + "T00:00:00").toLocaleDateString(
