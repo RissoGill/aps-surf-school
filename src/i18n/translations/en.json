@@ -4,7 +4,8 @@
     "subtitle": "Choose your profile to access your personalized dashboard"
   },
   "news": {
-    "title": "News"
+    "title": "News",
+    "empty": "No news at the moment"
   },
   "roles": {
     "coach": {

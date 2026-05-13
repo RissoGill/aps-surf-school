@@ -4,7 +4,8 @@
     "subtitle": "Escolha o seu perfil para aceder ao seu painel personalizado"
   },
   "news": {
-    "title": "Notícias"
+    "title": "Notícias",
+    "empty": "Sem notícias de momento"
   },
   "roles": {
     "coach": {
