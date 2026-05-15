@@ -60,14 +60,14 @@ const WelcomePage = () => {
             />
             <h1 className="text-3xl font-bold text-foreground">{t('welcome.title')}</h1>
           </div>
-
-          <p className="text-muted-foreground">
-            {t('welcome.subtitle')}
-          </p>
         </div>
 
         {/* News Carousel */}
         <NewsCarousel />
+
+        <p className="text-center text-muted-foreground mb-4">
+          {t('welcome.subtitle')}
+        </p>
 
         {/* Role Selection */}
         <div className="grid grid-cols-2 gap-4 mb-4">
