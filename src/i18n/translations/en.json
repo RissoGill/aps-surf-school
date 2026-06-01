@@ -5,7 +5,40 @@
   },
   "news": {
     "title": "News",
-    "empty": "No news at the moment"
+    "empty": "No news at the moment",
+    "manage": {
+      "title": "News Management",
+      "subtitle": "Create, edit and delete news shown on the home page",
+      "newButton": "New news",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "saveButton": "Save",
+      "cancelButton": "Cancel",
+      "fields": {
+        "title": "Title",
+        "newsDate": "Date",
+        "expiresAt": "Expires at (optional)",
+        "linkUrl": "Link (optional)",
+        "imageUrl": "Image URL",
+        "uploadFlyer": "Upload flyer",
+        "isActive": "Active",
+        "sortOrder": "Order"
+      },
+      "createTitle": "New news",
+      "editTitle": "Edit news",
+      "noNews": "No news yet",
+      "deleteConfirmTitle": "Delete news?",
+      "deleteConfirmDesc": "This action cannot be undone.",
+      "deleteConfirm": "Delete",
+      "toast": {
+        "created": "News created",
+        "updated": "News updated",
+        "deleted": "News deleted",
+        "uploadError": "Flyer upload failed",
+        "saveError": "Save failed",
+        "deleteError": "Delete failed"
+      }
+    }
   },
   "roles": {
     "coach": {
