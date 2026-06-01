@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw, ArrowRight } from "lucide-react";
+import { Settings, Users, Euro, Calendar, UserPlus, User, RefreshCw, ArrowRight, Newspaper } from "lucide-react";
 import { ReportsCard } from "@/components/admin/ReportsCard";
 
 import AlertsManagementCard from "@/components/admin/AlertsManagementCard";
@@ -812,6 +812,22 @@ const AdministrationDashboard = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-normal">{t('admin.management.accounting')}</CardTitle>
+              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* News Management Card */}
+        <Card 
+          className="shadow-medium mb-6 cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate("/admin/news")}
+        >
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-normal flex items-center gap-2">
+                <Newspaper className="h-5 w-5" />
+                {t('news.manage.title')}
+              </CardTitle>
               <ArrowRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
