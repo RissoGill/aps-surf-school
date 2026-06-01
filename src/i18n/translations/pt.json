@@ -5,7 +5,40 @@
   },
   "news": {
     "title": "Notícias",
-    "empty": "Sem notícias de momento"
+    "empty": "Sem notícias de momento",
+    "manage": {
+      "title": "Gestão de Notícias",
+      "subtitle": "Criar, editar e eliminar notícias mostradas na página inicial",
+      "newButton": "Nova notícia",
+      "editButton": "Editar",
+      "deleteButton": "Eliminar",
+      "saveButton": "Guardar",
+      "cancelButton": "Cancelar",
+      "fields": {
+        "title": "Título",
+        "newsDate": "Data",
+        "expiresAt": "Expira em (opcional)",
+        "linkUrl": "Link (opcional)",
+        "imageUrl": "URL da imagem",
+        "uploadFlyer": "Carregar flyer",
+        "isActive": "Ativa",
+        "sortOrder": "Ordem"
+      },
+      "createTitle": "Nova notícia",
+      "editTitle": "Editar notícia",
+      "noNews": "Ainda não existem notícias",
+      "deleteConfirmTitle": "Eliminar notícia?",
+      "deleteConfirmDesc": "Esta ação não pode ser desfeita.",
+      "deleteConfirm": "Eliminar",
+      "toast": {
+        "created": "Notícia criada",
+        "updated": "Notícia atualizada",
+        "deleted": "Notícia eliminada",
+        "uploadError": "Erro no upload do flyer",
+        "saveError": "Erro ao guardar",
+        "deleteError": "Erro ao eliminar"
+      }
+    }
   },
   "roles": {
     "coach": {
