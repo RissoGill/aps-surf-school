@@ -1,9 +1,26 @@
-Mover o subtítulo ("Choose your profile to access your personalized dashboard" / "Escolhe o teu perfil...") para aparecer **depois** do `NewsCarousel`, em vez de logo abaixo do título.
+## Gestão de Notícias na administração
 
-## Alterações
+Nova sub-página `/admin/news` acedida por um card no dashboard admin (mesmo padrão que Daily Management, Revenue, Accounting).
 
-**`src/pages/WelcomePage.tsx`**
-- Remover o `<p>{t('welcome.subtitle')}</p>` de dentro do bloco hero (atualmente logo após o `<h1>`).
-- Inserir esse mesmo `<p>` entre o `<NewsCarousel />` e o grid de roles, mantendo as classes existentes (`text-muted-foreground`) e adicionando margem/centralização adequadas (ex.: `text-center mb-4`) para coerência visual.
+### Alterações
 
-Sem outras alterações (sem mexer no carousel, traduções, ou lógica).
+**1. `src/pages/admin/NewsManagement.tsx` (nova)**
+- Validação de sessão admin via `localStorage.adminSession`.
+- Lista todas as notícias (ordenadas por `news_date desc`, `.limit(10000)`).
+- Botão "Nova notícia" + `Dialog` com formulário: `title`, `news_date`, `expires_at` (opcional), `link_url` (opcional), `is_active` (Switch), `sort_order`, upload de flyer para bucket `news-flyers` (ou URL manual).
+- Validação com `zod`.
+- Cada item: thumbnail + título + data + estado + botões **Editar** e **Eliminar** (com `AlertDialog`).
+- TanStack Query para sincronizar com `NewsCarousel` da home.
+
+**2. `src/pages/admin/AdministrationDashboard.tsx`**
+- Card "Gestão de Notícias" (ícone `Newspaper`) → `navigate("/admin/news")`.
+
+**3. `src/App.tsx`**
+- Rota `/admin/news`.
+
+**4. Traduções (`pt.json`, `en.json`)**
+- Chaves para título, formulário, botões, toasts, confirmação de eliminação, label do card.
+
+**5. Migração SQL**
+- RLS PERMISSIVE em `news` para INSERT/UPDATE/DELETE (legacy auth: `USING (true) WITH CHECK (true)`).
+- Storage policies PERMISSIVE para INSERT/UPDATE/DELETE no bucket `news-flyers`.
