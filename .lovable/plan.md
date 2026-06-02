@@ -1,26 +1,17 @@
-## Gestão de Notícias na administração
+## Plano
 
-Nova sub-página `/admin/news` acedida por um card no dashboard admin (mesmo padrão que Daily Management, Revenue, Accounting).
+1. Corrigir permissões do Supabase Storage para o bucket `news-flyers`:
+   - adicionar políticas permissivas de `INSERT`, `UPDATE` e `DELETE` em `storage.objects` para o bucket `news-flyers`, compatíveis com a autenticação legacy/localStorage do projeto.
+   - manter `SELECT` público para as imagens continuarem visíveis no carrossel.
 
-### Alterações
+2. Corrigir permissões da tabela `news` se necessário:
+   - adicionar políticas permissivas de `INSERT`, `UPDATE` e `DELETE` em `public.news`, porque a gestão admin usa legacy auth e não Supabase Auth.
+   - garantir grants adequados para `anon`, `authenticated` e `service_role` conforme o padrão do projeto.
 
-**1. `src/pages/admin/NewsManagement.tsx` (nova)**
-- Validação de sessão admin via `localStorage.adminSession`.
-- Lista todas as notícias (ordenadas por `news_date desc`, `.limit(10000)`).
-- Botão "Nova notícia" + `Dialog` com formulário: `title`, `news_date`, `expires_at` (opcional), `link_url` (opcional), `is_active` (Switch), `sort_order`, upload de flyer para bucket `news-flyers` (ou URL manual).
-- Validação com `zod`.
-- Cada item: thumbnail + título + data + estado + botões **Editar** e **Eliminar** (com `AlertDialog`).
-- TanStack Query para sincronizar com `NewsCarousel` da home.
+3. Melhorar o upload no frontend em `NewsManagement.tsx`:
+   - preservar/extender corretamente ficheiros `.png`.
+   - enviar `contentType: file.type` no upload para evitar problemas de MIME type.
+   - validar que só imagens são aceites e mostrar uma mensagem de erro clara quando o upload falhar.
 
-**2. `src/pages/admin/AdministrationDashboard.tsx`**
-- Card "Gestão de Notícias" (ícone `Newspaper`) → `navigate("/admin/news")`.
-
-**3. `src/App.tsx`**
-- Rota `/admin/news`.
-
-**4. Traduções (`pt.json`, `en.json`)**
-- Chaves para título, formulário, botões, toasts, confirmação de eliminação, label do card.
-
-**5. Migração SQL**
-- RLS PERMISSIVE em `news` para INSERT/UPDATE/DELETE (legacy auth: `USING (true) WITH CHECK (true)`).
-- Storage policies PERMISSIVE para INSERT/UPDATE/DELETE no bucket `news-flyers`.
+4. Validar:
+   - confirmar que o código compila pelo harness e que o fluxo usa o bucket `news-flyers` com URL pública após upload.
