@@ -34,6 +34,7 @@
         "created": "Notícia criada",
         "updated": "Notícia atualizada",
         "deleted": "Notícia eliminada",
+        "invalidImage": "Selecione um ficheiro de imagem válido",
         "uploadError": "Erro no upload do flyer",
         "saveError": "Erro ao guardar",
         "deleteError": "Erro ao eliminar"
