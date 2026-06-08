@@ -119,13 +119,23 @@ const NewsManagement = () => {
   };
 
   const handleUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("news.manage.toast.invalidImage"));
+      return;
+    }
+
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
+      const fileExt = file.name.split(".").pop()?.toLowerCase();
+      const mimeExt = file.type.split("/").pop()?.toLowerCase();
+      const ext = fileExt || mimeExt || "jpg";
       const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage
         .from("news-flyers")
-        .upload(path, file, { upsert: false });
+        .upload(path, file, {
+          contentType: file.type,
+          upsert: false,
+        });
       if (error) throw error;
       const { data } = supabase.storage.from("news-flyers").getPublicUrl(path);
       setForm((f) => ({ ...f, image_url: data.publicUrl }));

@@ -34,6 +34,7 @@
         "created": "News created",
         "updated": "News updated",
         "deleted": "News deleted",
+        "invalidImage": "Please select a valid image file",
         "uploadError": "Flyer upload failed",
         "saveError": "Save failed",
         "deleteError": "Delete failed"
