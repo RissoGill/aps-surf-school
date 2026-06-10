@@ -24,11 +24,9 @@ const NewsCarousel = () => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
     (supabase.from("news" as any) as any)
-      .select("id,title,news_date,image_url,link_url,expires_at,is_active,sort_order")
+      .select("id,title,news_date,image_url,link_url,is_active,sort_order")
       .eq("is_active", true)
-      .or(`expires_at.is.null,expires_at.gte.${today}`)
       .order("news_date", { ascending: false })
       .order("sort_order", { ascending: true })
       .limit(10000)
