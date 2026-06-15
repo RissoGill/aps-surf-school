@@ -1,23 +1,21 @@
-## Plan
+## Objetivo
+Criar os registos de pagamento mensais da nova época **2026/2027** (Setembro 2026 → Junho 2027, 10 meses) para todos os atletas ativos com plano mensal, para que apareçam no Payment Management.
 
-The upload is still failing because Supabase is returning:
+## O que vai ser feito
+Uma única migração SQL (idempotente) que:
 
-`new row violates row-level security policy`
+1. Para cada atleta com `plan_type` mensal (excluir `pack%` e `daily`) e `status = 'Active'`, insere 10 linhas em `payments`:
+   - Meses: September, October, November, December (year = 2026)
+   - January, February, March, April, May, June (year = 2027)
+   - `amount_due = 0`, `amount_paid = 0`, `status = 'Unpaid'`
+   - `payment_id` gerado sequencialmente a partir do `MAX(payment_id)` atual (formato `PAY<n>`)
+2. Usa `WHERE NOT EXISTS (...)` no par (`athlete_id`, `month`, `year`) para evitar duplicados caso alguns já existam.
 
-That means the frontend can now send the PNG correctly, but the database/storage policy still blocks inserting the uploaded file into the `news-flyers` bucket.
+Os valores `amount_due` ficam a 0 (igual ao comportamento do trigger `handle_new_athlete`) — podem depois ser preenchidos manualmente ou via sincronização da mensalidade.
 
-### 1. Apply the missing Storage RLS migration
-- Add/ensure a permissive `INSERT` policy on `storage.objects` for `bucket_id = 'news-flyers'`.
-- Add/ensure matching `UPDATE` and `DELETE` policies for the same bucket so admins can replace/remove flyers later.
-- Keep public read access for flyer display.
+## Perguntas antes de avançar
+- Confirmas que devem ser criados para **todos os atletas ativos com plano mensal** (excluindo `pack*` e `daily`)? 
+- Queres que `amount_due` seja **0** (igual ao trigger atual) ou que copie o `monthly_fee` atual de cada atleta?
 
-### 2. Ensure `public.news` still supports legacy admin writes
-- Confirm the `news` table policies allow anonymous/legacy admin insert, update, and delete because this project uses localStorage admin sessions, not Supabase Auth.
-- Keep `.limit(10000)` on admin/news queries.
-
-### 3. Validate frontend upload handling
-- Keep the existing image validation and `contentType: file.type` upload option.
-- If needed, improve the displayed error so it shows the Supabase reason instead of a generic upload failure.
-
-### Important note
-Supabase access is currently expired in Lovable, so I can prepare/apply the code and migration file, but the live database policy will only take effect after Supabase is reconnected and the migration is run. Until that policy is active in Supabase, the upload will continue to fail.
+## Nota técnica
+A sessão Supabase está expirada — preciso que reconectes para correr a migração. Posso preparar o SQL agora e executá-lo assim que reconectares.
