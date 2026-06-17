@@ -26,7 +26,7 @@ const NewsCarousel = () => {
 
   useEffect(() => {
     (supabase.from("news" as any) as any)
-      .select("id,title,news_date,image_url,link_url,is_active,sort_order")
+      .select("id,title,description,news_date,image_url,link_url,is_active,sort_order")
       .eq("is_active", true)
       .order("news_date", { ascending: false })
       .order("sort_order", { ascending: true })
