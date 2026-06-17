@@ -82,6 +82,11 @@ const NewsCarousel = () => {
                   <h3 className="text-sm font-semibold text-foreground line-clamp-2">
                     {item.title}
                   </h3>
+                  {item.description && (
+                    <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatDate(item.news_date)}
                   </p>
