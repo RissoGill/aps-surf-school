@@ -291,6 +291,16 @@ const NewsManagement = () => {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </div>
+            <div>
+              <Label>{t("news.manage.fields.description")}</Label>
+              <Textarea
+                value={(form.description as string) || ""}
+                maxLength={300}
+                rows={2}
+                placeholder={t("news.manage.fields.descriptionPlaceholder")}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{t("news.manage.fields.newsDate")}</Label>
