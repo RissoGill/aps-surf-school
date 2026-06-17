@@ -11,6 +11,7 @@ import AppFooter from "@/components/shared/AppFooter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,6 +36,7 @@ import {
 interface NewsItem {
   id: string;
   title: string;
+  description: string | null;
   news_date: string;
   image_url: string;
   link_url: string | null;
@@ -45,6 +47,7 @@ interface NewsItem {
 
 const newsSchema = z.object({
   title: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(300).optional().nullable(),
   news_date: z.string().min(1),
   expires_at: z.string().optional().nullable(),
   link_url: z.string().trim().url().optional().or(z.literal("")).nullable(),
@@ -55,6 +58,7 @@ const newsSchema = z.object({
 
 const emptyForm = (): Partial<NewsItem> => ({
   title: "",
+  description: "",
   news_date: new Date().toISOString().slice(0, 10),
   expires_at: "",
   link_url: "",
@@ -112,6 +116,7 @@ const NewsManagement = () => {
     setEditing(item);
     setForm({
       ...item,
+      description: item.description || "",
       expires_at: item.expires_at || "",
       link_url: item.link_url || "",
     });
@@ -152,6 +157,7 @@ const NewsManagement = () => {
     mutationFn: async () => {
       const payload = {
         title: (form.title || "").trim(),
+        description: form.description ? (form.description as string).trim() : null,
         news_date: form.news_date!,
         expires_at: form.expires_at ? form.expires_at : null,
         link_url: form.link_url ? form.link_url : null,
@@ -283,6 +289,16 @@ const NewsManagement = () => {
                 value={form.title || ""}
                 maxLength={200}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>{t("news.manage.fields.description")}</Label>
+              <Textarea
+                value={(form.description as string) || ""}
+                maxLength={300}
+                rows={2}
+                placeholder={t("news.manage.fields.descriptionPlaceholder")}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">

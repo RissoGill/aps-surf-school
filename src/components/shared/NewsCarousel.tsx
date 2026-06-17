@@ -13,6 +13,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 interface NewsItem {
   id: string;
   title: string;
+  description: string | null;
   news_date: string;
   image_url: string;
   link_url: string | null;
@@ -25,7 +26,7 @@ const NewsCarousel = () => {
 
   useEffect(() => {
     (supabase.from("news" as any) as any)
-      .select("id,title,news_date,image_url,link_url,is_active,sort_order")
+      .select("id,title,description,news_date,image_url,link_url,is_active,sort_order")
       .eq("is_active", true)
       .order("news_date", { ascending: false })
       .order("sort_order", { ascending: true })
@@ -81,6 +82,11 @@ const NewsCarousel = () => {
                   <h3 className="text-sm font-semibold text-foreground line-clamp-2">
                     {item.title}
                   </h3>
+                  {item.description && (
+                    <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {formatDate(item.news_date)}
                   </p>

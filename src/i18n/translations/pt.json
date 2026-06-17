@@ -16,6 +16,8 @@
       "cancelButton": "Cancelar",
       "fields": {
         "title": "Título",
+        "description": "Descrição curta",
+        "descriptionPlaceholder": "Breve descrição (até 300 caracteres)",
         "newsDate": "Data",
         "expiresAt": "Expira em (opcional)",
         "linkUrl": "Link (opcional)",
