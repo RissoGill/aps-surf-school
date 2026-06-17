@@ -35,6 +35,7 @@ import {
 interface NewsItem {
   id: string;
   title: string;
+  description: string | null;
   news_date: string;
   image_url: string;
   link_url: string | null;
@@ -45,6 +46,7 @@ interface NewsItem {
 
 const newsSchema = z.object({
   title: z.string().trim().min(1).max(200),
+  description: z.string().trim().max(300).optional().nullable(),
   news_date: z.string().min(1),
   expires_at: z.string().optional().nullable(),
   link_url: z.string().trim().url().optional().or(z.literal("")).nullable(),
@@ -55,6 +57,7 @@ const newsSchema = z.object({
 
 const emptyForm = (): Partial<NewsItem> => ({
   title: "",
+  description: "",
   news_date: new Date().toISOString().slice(0, 10),
   expires_at: "",
   link_url: "",
