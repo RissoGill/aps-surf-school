@@ -13,6 +13,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 interface NewsItem {
   id: string;
   title: string;
+  description: string | null;
   news_date: string;
   image_url: string;
   link_url: string | null;
