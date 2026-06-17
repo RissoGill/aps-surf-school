@@ -156,6 +156,7 @@ const NewsManagement = () => {
     mutationFn: async () => {
       const payload = {
         title: (form.title || "").trim(),
+        description: form.description ? (form.description as string).trim() : null,
         news_date: form.news_date!,
         expires_at: form.expires_at ? form.expires_at : null,
         link_url: form.link_url ? form.link_url : null,
