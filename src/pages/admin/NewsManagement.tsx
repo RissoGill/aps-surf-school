@@ -115,6 +115,7 @@ const NewsManagement = () => {
     setEditing(item);
     setForm({
       ...item,
+      description: item.description || "",
       expires_at: item.expires_at || "",
       link_url: item.link_url || "",
     });
