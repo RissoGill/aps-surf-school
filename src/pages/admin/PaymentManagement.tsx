@@ -283,6 +283,128 @@ const PaymentManagement = () => {
     enabled: !!selectedAthlete
   });
 
+  // Available seasons (from existing data + current and next season)
+  const { data: seasonOptions = [] } = useQuery({
+    queryKey: ['payment-seasons'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('year')
+        .limit(10000);
+      if (error) throw error;
+
+      const seasons = new Set<number>();
+      const current = getCurrentSeasonStart();
+      seasons.add(current);
+      seasons.add(current + 1);
+      (data || []).forEach((row: any) => {
+        const y = Number(row.year);
+        if (!y) return;
+        seasons.add(y - 1);
+        seasons.add(y);
+      });
+      return Array.from(seasons).sort((a, b) => b - a);
+    }
+  });
+
+  const SEASON_MONTHS: { name: string; monthNumber: number }[] = [
+    { name: 'September', monthNumber: 9 },
+    { name: 'October', monthNumber: 10 },
+    { name: 'November', monthNumber: 11 },
+    { name: 'December', monthNumber: 12 },
+    { name: 'January', monthNumber: 1 },
+    { name: 'February', monthNumber: 2 },
+    { name: 'March', monthNumber: 3 },
+    { name: 'April', monthNumber: 4 },
+    { name: 'May', monthNumber: 5 },
+    { name: 'June', monthNumber: 6 },
+    { name: 'July', monthNumber: 7 },
+    { name: 'August', monthNumber: 8 },
+  ];
+
+  const handleGenerateSeason = async () => {
+    if (userRole !== 'super_admin') return;
+    const seasonLabel = `${selectedSeason}/${selectedSeason + 1}`;
+    if (!window.confirm(t('admin.paymentManagement.generateSeasonConfirm').replace('{season}', seasonLabel))) {
+      return;
+    }
+
+    setIsGeneratingSeason(true);
+    try {
+      const [athletesRes, existingRes, allPaymentsRes] = await Promise.all([
+        supabase.from('atletas').select('athlete_id, plan_type, is_active').eq('is_active', true).limit(10000),
+        supabase.from('payments').select('athlete_id, month, year').in('year', [selectedSeason, selectedSeason + 1]).limit(10000),
+        supabase.from('payments').select('payment_id').limit(10000),
+      ]);
+
+      if (athletesRes.error) throw athletesRes.error;
+      if (existingRes.error) throw existingRes.error;
+      if (allPaymentsRes.error) throw allPaymentsRes.error;
+
+      const monthlyAthletes = (athletesRes.data || []).filter((a: any) => {
+        const plan = (a.plan_type || '').toLowerCase().trim();
+        return plan === '' || (!plan.startsWith('pack') && plan !== 'daily');
+      });
+
+      const normalize = (s?: string) =>
+        (s || '').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+
+      const existingKeys = new Set(
+        (existingRes.data || []).map((p: any) => `${p.athlete_id}|${normalize(p.month)}|${Number(p.year)}`)
+      );
+
+      let nextId = (allPaymentsRes.data || []).reduce((max: number, p: any) => {
+        const n = parseInt(String(p.payment_id || '').replace(/^\D+/, ''), 10);
+        return Number.isFinite(n) && n > max ? n : max;
+      }, 0) + 1;
+
+      const rows: any[] = [];
+      monthlyAthletes.forEach((a: any) => {
+        SEASON_MONTHS.forEach(({ name, monthNumber }) => {
+          const year = monthNumber >= 9 ? selectedSeason : selectedSeason + 1;
+          const key = `${a.athlete_id}|${normalize(name)}|${year}`;
+          if (existingKeys.has(key)) return;
+          rows.push({
+            payment_id: `PAY${nextId++}`,
+            athlete_id: a.athlete_id,
+            month: name,
+            year,
+            amount_due: 0,
+            amount_paid: 0,
+            status: 'Unpaid',
+          });
+        });
+      });
+
+      if (rows.length === 0) {
+        toast({ title: t('admin.paymentManagement.generateSeasonNothing').replace('{season}', seasonLabel) });
+        return;
+      }
+
+      for (let i = 0; i < rows.length; i += 500) {
+        const { error } = await supabase.from('payments').insert(rows.slice(i, i + 500));
+        if (error) throw error;
+      }
+
+      toast({
+        title: t('admin.paymentManagement.generateSeasonSuccess')
+          .replace('{count}', String(rows.length))
+          .replace('{season}', seasonLabel)
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['athlete-payments'] });
+      queryClient.invalidateQueries({ queryKey: ['payment-seasons'] });
+      queryClient.invalidateQueries({ queryKey: ['all-payments-summary'] });
+    } catch (error: any) {
+      console.error('Error generating season payments:', error);
+      toast({ title: t('admin.paymentManagement.generateSeasonError'), description: error?.message, variant: 'destructive' });
+    } finally {
+      setIsGeneratingSeason(false);
+    }
+  };
+
+
+
   // Check if selected athlete has a pack payment without pack record
   const { data: packRecords } = useQuery({
     queryKey: ['athlete-packs', selectedAthlete?.athlete_id],
