@@ -252,8 +252,8 @@ const PaymentManagement = () => {
           .replace(/\p{Diacritic}/gu, '');
 
       const toSerial = (y: number, m: number) => y * 12 + m;
-      const startSerial = toSerial(2025, 9); // Sep 2025
-      const endSerial = toSerial(2026, 9);   // Sep 2026
+      const startSerial = toSerial(selectedSeason, 9);       // September (season start year)
+      const endSerial = toSerial(selectedSeason + 1, 8);     // August (season end year)
 
       const filteredData = (data || []).filter((p: any) => {
         const y = Number(p.year);
