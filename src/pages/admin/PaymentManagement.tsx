@@ -214,7 +214,7 @@ const PaymentManagement = () => {
 
   // Fetch payments for selected athlete
   const { data: payments = [], isLoading } = useQuery({
-    queryKey: ['athlete-payments', selectedAthlete?.athlete_id],
+    queryKey: ['athlete-payments', selectedAthlete?.athlete_id, selectedSeason],
     queryFn: async () => {
       if (!selectedAthlete) return [];
 
