@@ -70,6 +70,13 @@ const PaymentManagement = () => {
   const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
   const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string>('admin');
+  const getCurrentSeasonStart = () => {
+    const now = new Date();
+    return now.getMonth() + 1 >= 9 ? now.getFullYear() : now.getFullYear() - 1;
+  };
+  const [selectedSeason, setSelectedSeason] = useState<number>(getCurrentSeasonStart());
+  const [isGeneratingSeason, setIsGeneratingSeason] = useState(false);
+
   const [editForm, setEditForm] = useState<{
     amount_due: string;
     amount_paid: string;
