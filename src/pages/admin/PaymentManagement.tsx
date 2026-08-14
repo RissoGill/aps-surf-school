@@ -799,14 +799,23 @@ const PaymentManagement = () => {
               {userRole === 'super_admin' && (
                 <Button
                   variant="outline"
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto justify-center"
                   onClick={handleGenerateSeason}
                   disabled={isGeneratingSeason}
-                >
-                  <Calendar className="h-4 w-4" />
-                  {isGeneratingSeason
+                  title={isGeneratingSeason
                     ? t('admin.paymentManagement.generateSeasonLoading')
                     : t('admin.paymentManagement.generateSeason')}
+                >
+                  {isGeneratingSeason ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Calendar className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {isGeneratingSeason
+                      ? t('admin.paymentManagement.generateSeasonLoading')
+                      : t('admin.paymentManagement.generateSeason')}
+                  </span>
                 </Button>
               )}
             </div>
