@@ -921,42 +921,8 @@ const PaymentManagement = () => {
                 <CardDescription>
                   {t('admin.paymentManagement.paymentHistory').replace('{athleteName}', `${selectedAthlete.first_name} ${selectedAthlete.last_name}`)}
                 </CardDescription>
-                <div className="flex flex-col sm:flex-row sm:items-end gap-3 pt-4">
-                  <div className="flex-1 min-w-[180px]">
-                    <label className="text-sm font-medium text-muted-foreground">
-                      {t('admin.paymentManagement.season')}
-                    </label>
-                    <Select
-                      value={String(selectedSeason)}
-                      onValueChange={(value) => setSelectedSeason(Number(value))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {seasonOptions.map((year) => (
-                          <SelectItem key={year} value={String(year)}>
-                            {year}/{year + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {userRole === 'super_admin' && (
-                    <Button
-                      variant="outline"
-                      className="gap-2"
-                      onClick={handleGenerateSeason}
-                      disabled={isGeneratingSeason}
-                    >
-                      <Calendar className="h-4 w-4" />
-                      {isGeneratingSeason
-                        ? t('admin.paymentManagement.generateSeasonLoading')
-                        : t('admin.paymentManagement.generateSeason')}
-                    </Button>
-                  )}
-                </div>
               </CardHeader>
+
 
               
               <CardContent>
