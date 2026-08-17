@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.generate-recurring-expenses]
 verify_jwt = false
+
+[functions.generate-season]
+verify_jwt = false
