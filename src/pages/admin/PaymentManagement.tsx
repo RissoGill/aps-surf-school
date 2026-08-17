@@ -331,66 +331,31 @@ const PaymentManagement = () => {
 
     setIsGeneratingSeason(true);
     try {
-      const [athletesRes, existingRes, allPaymentsRes] = await Promise.all([
-        supabase.from('atletas').select('athlete_id, plan_type, is_active').eq('is_active', true).limit(10000),
-        supabase.from('payments').select('athlete_id, month, year').in('year', [selectedSeason, selectedSeason + 1]).limit(10000),
-        supabase.from('payments').select('payment_id').limit(10000),
-      ]);
-
-      if (athletesRes.error) throw athletesRes.error;
-      if (existingRes.error) throw existingRes.error;
-      if (allPaymentsRes.error) throw allPaymentsRes.error;
-
-      const monthlyAthletes = (athletesRes.data || []).filter((a: any) => {
-        const plan = (a.plan_type || '').toLowerCase().trim();
-        return plan === '' || (!plan.startsWith('pack') && plan !== 'daily');
-      });
-
-      const normalize = (s?: string) =>
-        (s || '').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
-
-      const existingKeys = new Set(
-        (existingRes.data || []).map((p: any) => `${p.athlete_id}|${normalize(p.month)}|${Number(p.year)}`)
-      );
-
-      let nextId = (allPaymentsRes.data || []).reduce((max: number, p: any) => {
-        const n = parseInt(String(p.payment_id || '').replace(/^\D+/, ''), 10);
-        return Number.isFinite(n) && n > max ? n : max;
-      }, 0) + 1;
-
-      const rows: any[] = [];
-      monthlyAthletes.forEach((a: any) => {
-        SEASON_MONTHS.forEach(({ name, monthNumber }) => {
-          const year = monthNumber >= 9 ? selectedSeason : selectedSeason + 1;
-          const key = `${a.athlete_id}|${normalize(name)}|${year}`;
-          if (existingKeys.has(key)) return;
-          rows.push({
-            payment_id: `PAY${nextId++}`,
-            athlete_id: a.athlete_id,
-            month: name,
-            year,
-            amount_due: 0,
-            amount_paid: 0,
-            status: 'Unpaid',
-          });
-        });
-      });
-
-      if (rows.length === 0) {
-        toast({ title: t('admin.paymentManagement.generateSeasonNothing').replace('{season}', seasonLabel) });
+      const session = getNormalizedAdminSession();
+      if (!session?.resolvedUserId) {
+        toast({ title: t('login.sessionExpired'), variant: 'destructive' });
+        navigate('/login/administration');
         return;
       }
 
-      for (let i = 0; i < rows.length; i += 500) {
-        const { error } = await supabase.from('payments').insert(rows.slice(i, i + 500));
-        if (error) throw error;
-      }
-
-      toast({
-        title: t('admin.paymentManagement.generateSeasonSuccess')
-          .replace('{count}', String(rows.length))
-          .replace('{season}', seasonLabel)
+      const { data, error } = await supabase.functions.invoke('generate-season', {
+        body: { userId: session.resolvedUserId, seasonStart: selectedSeason },
       });
+
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || 'Unknown error');
+
+      const created = Number(data.created) || 0;
+
+      if (created === 0) {
+        toast({ title: t('admin.paymentManagement.generateSeasonNothing').replace('{season}', seasonLabel) });
+      } else {
+        toast({
+          title: t('admin.paymentManagement.generateSeasonSuccess')
+            .replace('{count}', String(created))
+            .replace('{season}', seasonLabel)
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ['athlete-payments'] });
       queryClient.invalidateQueries({ queryKey: ['payment-seasons'] });
