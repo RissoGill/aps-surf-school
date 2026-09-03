@@ -740,8 +740,8 @@ const PaymentManagement = () => {
             </div>
 
             {/* Season selector */}
-            <div className="flex flex-col sm:flex-row sm:items-end gap-3">
-              <div className="flex-1 min-w-[180px]">
+            <div className="flex w-full min-w-0 flex-col gap-3">
+              <div className="w-full min-w-0">
                 <label className="text-sm font-medium text-muted-foreground">
                   {t('admin.paymentManagement.season')}
                 </label>
@@ -749,7 +749,7 @@ const PaymentManagement = () => {
                   value={String(selectedSeason)}
                   onValueChange={(value) => setSelectedSeason(Number(value))}
                 >
-                  <SelectTrigger className="mt-1">
+                  <SelectTrigger className="mt-1 w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -764,7 +764,7 @@ const PaymentManagement = () => {
               {userRole === 'super_admin' && (
                 <Button
                   variant="outline"
-                  className="gap-2 w-full sm:w-auto justify-center"
+                  className="w-full min-w-0 justify-center gap-2"
                   onClick={handleGenerateSeason}
                   disabled={isGeneratingSeason}
                   title={isGeneratingSeason
@@ -776,7 +776,7 @@ const PaymentManagement = () => {
                   ) : (
                     <Calendar className="h-4 w-4" />
                   )}
-                  <span className="hidden sm:inline">
+                  <span className="min-w-0 truncate">
                     {isGeneratingSeason
                       ? t('admin.paymentManagement.generateSeasonLoading')
                       : t('admin.paymentManagement.generateSeason')}
