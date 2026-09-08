@@ -781,6 +781,8 @@
       }
     },
     "priorBalancePayments": {
+      "historicPart": "histórico",
+      "previousSeasonsPart": "de épocas anteriores",
       "registerPayment": "Registar Pagamento",
       "dialogDescription": "Registar um pagamento total ou parcial do saldo anterior",
       "amount": "Valor",
