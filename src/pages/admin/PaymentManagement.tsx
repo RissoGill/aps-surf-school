@@ -905,12 +905,16 @@ const PaymentManagement = () => {
               <PriorBalanceCard
                 athleteId={selectedAthlete.athlete_id}
                 priorBalance={priorBalance}
+                priorBalanceTotal={priorBalanceTotal}
+                preSeasonOutstanding={preSeasonOutstanding}
                 userRole={userRole}
                 onBalanceUpdated={() => {
                   queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
                   queryClient.invalidateQueries({ queryKey: ['athlete-payments', selectedAthlete?.athlete_id] });
+                  queryClient.invalidateQueries({ queryKey: ['athlete-all-payments', selectedAthlete?.athlete_id] });
                 }}
               />
+
 
               {/* Row 2: Total Outstanding + Next Payment */}
               <div className="grid grid-cols-2 gap-4">

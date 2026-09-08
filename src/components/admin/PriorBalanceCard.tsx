@@ -49,6 +49,8 @@ interface PriorBalancePayment {
 interface PriorBalanceCardProps {
   athleteId: string;
   priorBalance: number;
+  priorBalanceTotal?: number;
+  preSeasonOutstanding?: number;
   userRole: string;
   onBalanceUpdated: () => void;
 }
@@ -56,9 +58,13 @@ interface PriorBalanceCardProps {
 const PriorBalanceCard = ({ 
   athleteId, 
   priorBalance, 
+  priorBalanceTotal,
+  preSeasonOutstanding = 0,
   userRole,
   onBalanceUpdated 
 }: PriorBalanceCardProps) => {
+  const displayBalance = priorBalanceTotal ?? priorBalance;
+
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
