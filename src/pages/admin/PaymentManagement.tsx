@@ -285,7 +285,7 @@ const PaymentManagement = () => {
 
   // All payments for the athlete (no season filter) — used for accumulated prior balance
   const { data: allAthletePayments = [] } = useQuery({
-    queryKey: ['athlete-all-payments', selectedAthlete?.athlete_id],
+    queryKey: ['athlete-all-payments', selectedAthlete?.athlete_id, selectedSeason],
     queryFn: async () => {
       if (!selectedAthlete) return [];
       const { data, error } = await supabase
@@ -296,7 +296,9 @@ const PaymentManagement = () => {
       if (error) throw error;
       return data || [];
     },
-    enabled: !!selectedAthlete
+    enabled: !!selectedAthlete,
+    staleTime: 0,
+    refetchOnMount: 'always'
   });
 
 
