@@ -283,6 +283,24 @@ const PaymentManagement = () => {
     enabled: !!selectedAthlete
   });
 
+  // All payments for the athlete (no season filter) — used for accumulated prior balance
+  const { data: allAthletePayments = [] } = useQuery({
+    queryKey: ['athlete-all-payments', selectedAthlete?.athlete_id],
+    queryFn: async () => {
+      if (!selectedAthlete) return [];
+      const { data, error } = await supabase
+        .from('payments')
+        .select('month, year, amount_due, amount_paid')
+        .eq('athlete_id', selectedAthlete.athlete_id)
+        .limit(10000);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!selectedAthlete
+  });
+
+
+
   // Available seasons (from existing data + current and next season)
   const { data: seasonOptions = [] } = useQuery({
     queryKey: ['payment-seasons'],
@@ -665,13 +683,53 @@ const PaymentManagement = () => {
       }, 0);
   };
 
-  // Get prior balance from selected athlete
-  const priorBalance = selectedAthlete?.prior_balance || 0;
+  // Outstanding from all seasons BEFORE the selected season
+  const calculatePreSeasonOutstanding = () => {
+    const monthMap: Record<string, number> = {
+      january: 1, jan: 1, janeiro: 1,
+      february: 2, feb: 2, fevereiro: 2,
+      march: 3, mar: 3, marco: 3, 'março': 3,
+      april: 4, apr: 4, abril: 4,
+      may: 5, mai: 5, maio: 5,
+      june: 6, jun: 6, junho: 6,
+      july: 7, jul: 7, julho: 7,
+      august: 8, aug: 8, agosto: 8,
+      september: 9, sep: 9, sept: 9, setembro: 9,
+      october: 10, oct: 10, outubro: 10,
+      november: 11, nov: 11, novembro: 11,
+      december: 12, dec: 12, dezembro: 12,
+    };
 
-  // Calculate total outstanding (prior balance + current season)
-  const calculateTotalOutstanding = () => {
-    return priorBalance + calculateCurrentSeasonOutstanding();
+    const normalize = (s?: string) =>
+      (s || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '');
+
+    const seasonStartSerial = selectedSeason * 12 + 9; // September of season start
+
+    return (allAthletePayments || []).reduce((sum: number, p: any) => {
+      const y = Number(p.year);
+      const m = monthMap[normalize(p.month)] || 0;
+      if (!y || !m) return sum;
+      const serial = y * 12 + m;
+      if (serial >= seasonStartSerial) return sum;
+      const remaining = (p.amount_due || 0) - (p.amount_paid || 0);
+      return sum + (remaining > 0 ? remaining : 0);
+    }, 0);
   };
+
+  // Historic balance stored on the athlete record (editable)
+  const priorBalance = selectedAthlete?.prior_balance || 0;
+  const preSeasonOutstanding = calculatePreSeasonOutstanding();
+  const priorBalanceTotal = priorBalance + preSeasonOutstanding;
+
+  // Calculate total outstanding (accumulated prior balance + current season)
+  const calculateTotalOutstanding = () => {
+    return priorBalanceTotal + calculateCurrentSeasonOutstanding();
+  };
+
 
   // Calculate Next Payment (following month)
   const calculateNextPayment = () => {
