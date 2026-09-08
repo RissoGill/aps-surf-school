@@ -488,8 +488,8 @@ const PriorBalanceCard = ({
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className={`text-xl font-medium ${priorBalance > 0 ? 'text-destructive' : 'text-success'}`}>
-                  €{priorBalance.toFixed(2)}
+                <p className={`text-xl font-medium ${displayBalance > 0 ? 'text-destructive' : 'text-success'}`}>
+                  €{displayBalance.toFixed(2)}
                 </p>
                 {canEdit && (
                   <Button
@@ -506,7 +506,13 @@ const PriorBalanceCard = ({
               <p className="text-xs text-muted-foreground">
                 {t('admin.paymentManagement.priorBalance')}
               </p>
+              {preSeasonOutstanding > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  €{priorBalance.toFixed(2)} {t('admin.priorBalancePayments.historicPart')} + €{preSeasonOutstanding.toFixed(2)} {t('admin.priorBalancePayments.previousSeasonsPart')}
+                </p>
+              )}
             </div>
+
           </div>
 
           {/* Register Payment Button - separate line */}
