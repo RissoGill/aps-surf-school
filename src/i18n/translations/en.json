@@ -781,6 +781,8 @@
       }
     },
     "priorBalancePayments": {
+      "historicPart": "historic",
+      "previousSeasonsPart": "from previous seasons",
       "registerPayment": "Register Payment",
       "dialogDescription": "Register a full or partial payment against the prior balance",
       "amount": "Amount",
