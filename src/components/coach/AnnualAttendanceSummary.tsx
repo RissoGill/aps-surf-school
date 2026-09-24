@@ -28,7 +28,7 @@ interface AnnualSummary {
 
 export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryProps) => {
   const { t, language } = useLanguage();
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Group attendance by year - keep original status for display, but count separately
@@ -59,6 +59,16 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
 
     return acc;
   }, {} as Record<number, AnnualSummary>);
+
+  // Ensure the current year always exists (top of the list), even with no records
+  const currentYear = new Date().getFullYear();
+  if (!annualSummaries[currentYear]) {
+    annualSummaries[currentYear] = {
+      year: currentYear,
+      statusCounts: {},
+      total: 0
+    };
+  }
 
   // Sort by year descending (most recent first)
   const sortedSummaries = Object.values(annualSummaries)
