@@ -61,15 +61,25 @@ export const MonthlyAttendanceSummary = ({ attendance }: MonthlyAttendanceSummar
     return acc;
   }, {} as Record<string, MonthlySummary>);
 
+  // Ensure the current month always exists (top of the list), even with no records
+  const now = new Date();
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (!monthlySummaries[currentMonthKey]) {
+    monthlySummaries[currentMonthKey] = {
+      month: now.toLocaleDateString(language === 'pt' ? 'pt-PT' : 'en-GB', { month: 'long', year: 'numeric' }),
+      year: now.getFullYear(),
+      statusCounts: {},
+      total: 0
+    };
+  }
+
   // Sort by year-month descending (most recent first)
   const sortedSummaries = Object.entries(monthlySummaries)
     .sort(([a], [b]) => b.localeCompare(a))
     .map(([key, summary]) => ({ key, ...summary }));
 
-  // State for selected month - default to most recent
-  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(
-    sortedSummaries[0]?.key || ''
-  );
+  // State for selected month - default to the current month
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(currentMonthKey);
   const [isExpanded, setIsExpanded] = useState(false); // Only show details when expanded
 
   const handleMonthChange = (value: string) => {
