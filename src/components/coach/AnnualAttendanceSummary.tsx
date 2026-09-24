@@ -78,11 +78,6 @@ export const AnnualAttendanceSummary = ({ attendance }: AnnualAttendanceSummaryP
     return null;
   }
 
-  // Set default selected year to most recent
-  if (!selectedYear && sortedSummaries.length > 0) {
-    setSelectedYear(sortedSummaries[0].year.toString());
-  }
-
   // Filter attendance records for selected year
   const selectedYearRecords = attendance.filter(record => {
     if (!record.date || !selectedYear) return false;
