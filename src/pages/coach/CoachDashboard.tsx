@@ -1010,7 +1010,18 @@ const CoachDashboard = () => {
       }
     });
     
-    return filtered;
+    // Order months (and days within each month) from most recent to oldest
+    const sorted: typeof filtered = {};
+    Object.keys(filtered)
+      .sort((a, b) => b.localeCompare(a))
+      .forEach(month => {
+        const days: typeof filtered[string] = {};
+        Object.keys(filtered[month])
+          .sort((a, b) => b.localeCompare(a))
+          .forEach(k => { days[k] = filtered[month][k]; });
+        sorted[month] = days;
+      });
+    return sorted;
   }, [trainingSessionsByMonth, historyDateRange, historyAthleteFilter, historyBeachFilter, historySearchQuery]);
 
   // Extract unique athletes for filter dropdown
