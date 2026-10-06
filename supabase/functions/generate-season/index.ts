@@ -97,10 +97,18 @@ Deno.serve(async (req) => {
       (existingRes.data || []).map((p) => `${p.athlete_id}|${normalize(p.month as string)}|${Number(p.year)}`),
     );
 
-    let nextId = (allPaymentsRes.data || []).reduce((max: number, p) => {
-      const n = parseInt(String(p.payment_id || '').replace(/^\D+/, ''), 10);
-      return Number.isFinite(n) && n > max ? n : max;
-    }, 0) + 1;
+    // Paginate to bypass the 1000-row API cap when finding the max payment id
+    let maxId = 0;
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabaseAdmin.from('payments').select('payment_id').range(from, from + 999);
+      if (error) throw error;
+      for (const p of data || []) {
+        const n = parseInt(String(p.payment_id || '').replace(/^\D+/, ''), 10);
+        if (Number.isFinite(n) && n > maxId) maxId = n;
+      }
+      if (!data || data.length < 1000) break;
+    }
+    let nextId = maxId + 1;
 
     const rows: Record<string, unknown>[] = [];
     for (const a of monthlyAthletes) {
