@@ -74,28 +74,30 @@ Deno.serve(async (req) => {
       return json({ ok: false, error: 'Forbidden: super_admin role required' }, 403);
     }
 
-    const [athletesRes, existingRes, allPaymentsRes] = await Promise.all([
-      supabaseAdmin.from('atletas').select('athlete_id, plan_type').eq('is_active', true).limit(10000),
-      supabaseAdmin
-        .from('payments')
-        .select('athlete_id, month, year')
-        .in('year', [seasonStart, seasonStart + 1])
-        .limit(10000),
-      supabaseAdmin.from('payments').select('payment_id').limit(10000),
-    ]);
-
+    const athletesRes = await supabaseAdmin
+      .from('atletas').select('athlete_id, plan_type').eq('is_active', true).limit(10000);
     if (athletesRes.error) throw athletesRes.error;
-    if (existingRes.error) throw existingRes.error;
-    if (allPaymentsRes.error) throw allPaymentsRes.error;
 
     const monthlyAthletes = (athletesRes.data || []).filter((a) => {
       const plan = (a.plan_type || '').toLowerCase().trim();
       return plan === '' || (!plan.startsWith('pack') && plan !== 'daily');
     });
 
-    const existingKeys = new Set(
-      (existingRes.data || []).map((p) => `${p.athlete_id}|${normalize(p.month as string)}|${Number(p.year)}`),
-    );
+    // Paginate: the API caps each read at 1000 rows, and a season has more
+    const existingKeys = new Set<string>();
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabaseAdmin
+        .from('payments')
+        .select('athlete_id, month, year')
+        .in('year', [seasonStart, seasonStart + 1])
+        .order('payment_id')
+        .range(from, from + 999);
+      if (error) throw error;
+      for (const p of data || []) {
+        existingKeys.add(`${p.athlete_id}|${normalize(p.month as string)}|${Number(p.year)}`);
+      }
+      if (!data || data.length < 1000) break;
+    }
 
     // Paginate to bypass the 1000-row API cap when finding the max payment id
     let maxId = 0;
