@@ -290,7 +290,7 @@ const PaymentManagement = () => {
       if (!selectedAthlete) return [];
       const { data, error } = await supabase
         .from('payments')
-        .select('month, year, amount_due, amount_paid')
+        .select('payment_id, month, year, amount_due, amount_paid, notes')
         .eq('athlete_id', selectedAthlete.athlete_id)
         .limit(10000);
       if (error) throw error;

@@ -51,6 +51,7 @@ interface PriorBalanceCardProps {
   priorBalance: number;
   priorBalanceTotal?: number;
   preSeasonOutstanding?: number;
+  preSeasonUnpaid?: { payment_id: string; amount_due: number; amount_paid: number; notes: string | null; remaining: number }[];
   userRole: string;
   onBalanceUpdated: () => void;
 }
@@ -60,6 +61,7 @@ const PriorBalanceCard = ({
   priorBalance, 
   priorBalanceTotal,
   preSeasonOutstanding = 0,
+  preSeasonUnpaid = [],
   userRole,
   onBalanceUpdated 
 }: PriorBalanceCardProps) => {
@@ -134,7 +136,7 @@ const PriorBalanceCard = ({
   const handlePayFullAmount = () => {
     setPaymentForm(prev => ({
       ...prev,
-      amount: priorBalance.toFixed(2)
+      amount: displayBalance.toFixed(2)
     }));
   };
 
@@ -151,7 +153,7 @@ const PriorBalanceCard = ({
       return;
     }
 
-    if (amount > priorBalance) {
+    if (amount > displayBalance + 0.004) {
       toast({
         title: t('admin.paymentManagement.validationError'),
         description: t('admin.priorBalancePayments.amountExceedsBalance'),
@@ -198,14 +200,37 @@ const PriorBalanceCard = ({
 
       if (insertError) throw insertError;
 
-      // 3. Update athlete's prior_balance using CURRENT value from DB
-      const newBalance = currentBalance - amount;
-      const { error: updateError } = await supabase
-        .from('atletas')
-        .update({ prior_balance: newBalance })
-        .eq('athlete_id', athleteId);
+      // 3. Apply first to stored historical balance, remainder to unpaid months of past seasons (oldest first)
+      const toHistoric = Math.min(amount, Math.max(currentBalance, 0));
+      let remaining = Math.round((amount - toHistoric) * 100) / 100;
 
-      if (updateError) throw updateError;
+      if (toHistoric > 0) {
+        const { error: updateError } = await supabase
+          .from('atletas')
+          .update({ prior_balance: Math.round((currentBalance - toHistoric) * 100) / 100 })
+          .eq('athlete_id', athleteId);
+        if (updateError) throw updateError;
+      }
+
+      const [yy, mm, dd] = paymentForm.payment_date.split('-');
+      const note = `Pago via saldo anterior (${dd}/${mm}/${yy})`;
+      for (const p of preSeasonUnpaid) {
+        if (remaining <= 0.004) break;
+        const apply = Math.min(remaining, p.remaining);
+        const newPaid = Math.round((p.amount_paid + apply) * 100) / 100;
+        const full = newPaid >= p.amount_due - 0.004;
+        const { error: payErr } = await supabase
+          .from('payments')
+          .update({
+            amount_paid: newPaid,
+            status: full ? 'Paid' : 'Partial',
+            payment_date: paymentForm.payment_date,
+            notes: p.notes ? `${p.notes} | ${note}` : note,
+          })
+          .eq('payment_id', p.payment_id);
+        if (payErr) throw payErr;
+        remaining = Math.round((remaining - apply) * 100) / 100;
+      }
 
       // 3. Success
       toast({
