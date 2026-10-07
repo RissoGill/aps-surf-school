@@ -290,7 +290,7 @@ const PaymentManagement = () => {
       if (!selectedAthlete) return [];
       const { data, error } = await supabase
         .from('payments')
-        .select('month, year, amount_due, amount_paid')
+        .select('payment_id, month, year, amount_due, amount_paid, notes')
         .eq('athlete_id', selectedAthlete.athlete_id)
         .limit(10000);
       if (error) throw error;
@@ -727,6 +727,29 @@ const PaymentManagement = () => {
   const preSeasonOutstanding = calculatePreSeasonOutstanding();
   const priorBalanceTotal = priorBalance + preSeasonOutstanding;
 
+  // Unpaid monthly payments from previous seasons (oldest first) so prior-balance payments settle them
+  const preSeasonUnpaid = (() => {
+    const mm: Record<string, number> = {
+      january: 1, jan: 1, janeiro: 1, february: 2, feb: 2, fevereiro: 2,
+      march: 3, mar: 3, marco: 3, april: 4, apr: 4, abril: 4,
+      may: 5, mai: 5, maio: 5, june: 6, jun: 6, junho: 6,
+      july: 7, jul: 7, julho: 7, august: 8, aug: 8, agosto: 8,
+      september: 9, sep: 9, sept: 9, setembro: 9, october: 10, oct: 10, outubro: 10,
+      november: 11, nov: 11, novembro: 11, december: 12, dec: 12, dezembro: 12,
+    };
+    const norm = (s?: string) => (s || '').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    const start = selectedSeason * 12 + 9;
+    return (allAthletePayments || [])
+      .map((p: any) => {
+        const m = mm[norm(p.month)] || 0;
+        const serial = Number(p.year) * 12 + m;
+        const remaining = (Number(p.amount_due) || 0) - (Number(p.amount_paid) || 0);
+        return { payment_id: p.payment_id as string, amount_due: Number(p.amount_due) || 0, amount_paid: Number(p.amount_paid) || 0, notes: (p.notes ?? null) as string | null, serial, remaining, valid: !!m && !!Number(p.year) };
+      })
+      .filter((p) => p.valid && p.serial < start && p.remaining > 0.004)
+      .sort((a, b) => a.serial - b.serial);
+  })();
+
   // Calculate total outstanding (accumulated prior balance + current season)
   const calculateTotalOutstanding = () => {
     return priorBalanceTotal + calculateCurrentSeasonOutstanding();
@@ -909,6 +932,7 @@ const PaymentManagement = () => {
                 priorBalance={priorBalance}
                 priorBalanceTotal={priorBalanceTotal}
                 preSeasonOutstanding={preSeasonOutstanding}
+                preSeasonUnpaid={preSeasonUnpaid}
                 userRole={userRole}
                 onBalanceUpdated={() => {
                   queryClient.invalidateQueries({ queryKey: ['athletes-search'] });
