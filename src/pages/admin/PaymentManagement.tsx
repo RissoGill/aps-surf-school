@@ -40,6 +40,7 @@ interface Athlete {
   first_name: string;
   last_name: string;
   prior_balance: number | null;
+  surf_level?: string | null;
 }
 
 interface AdminSession {
@@ -193,7 +194,7 @@ const PaymentManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('atletas')
-        .select('athlete_id, first_name, last_name, prior_balance')
+        .select('athlete_id, first_name, last_name, prior_balance, surf_level')
         .order('first_name')
         .limit(10000);
       
