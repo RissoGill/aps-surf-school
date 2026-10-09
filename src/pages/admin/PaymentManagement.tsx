@@ -261,6 +261,9 @@ const PaymentManagement = () => {
         const m = monthMap[mName];
         if (!y || !m) return false;
         const serial = toSerial(y, m);
+        // Learning athletes pay September to June only: hide empty July/August
+        const isLearning = (selectedAthlete?.surf_level || '').toLowerCase().trim() === 'learning';
+        if (isLearning && (m === 7 || m === 8) && !Number(p.amount_due) && !Number(p.amount_paid)) return false;
         return serial >= startSerial && serial <= endSerial;
       });
 
