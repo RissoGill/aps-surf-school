@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     const athletesRes = await supabaseAdmin
-      .from('atletas').select('athlete_id, plan_type').eq('is_active', true).limit(10000);
+      .from('atletas').select('athlete_id, plan_type, surf_level').eq('is_active', true).limit(10000);
     if (athletesRes.error) throw athletesRes.error;
 
     const monthlyAthletes = (athletesRes.data || []).filter((a) => {
@@ -114,7 +114,10 @@ Deno.serve(async (req) => {
 
     const rows: Record<string, unknown>[] = [];
     for (const a of monthlyAthletes) {
+      const isLearning = (a.surf_level || '').toLowerCase().trim() === 'learning';
       for (const { name, monthNumber } of SEASON_MONTHS) {
+        // Learning athletes pay September to June only
+        if (isLearning && (monthNumber === 7 || monthNumber === 8)) continue;
         const year = monthNumber >= 9 ? seasonStart : seasonStart + 1;
         const key = `${a.athlete_id}|${normalize(name)}|${year}`;
         if (existingKeys.has(key)) continue;

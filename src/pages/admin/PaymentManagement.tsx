@@ -40,6 +40,7 @@ interface Athlete {
   first_name: string;
   last_name: string;
   prior_balance: number | null;
+  surf_level?: string | null;
 }
 
 interface AdminSession {
@@ -193,7 +194,7 @@ const PaymentManagement = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('atletas')
-        .select('athlete_id, first_name, last_name, prior_balance')
+        .select('athlete_id, first_name, last_name, prior_balance, surf_level')
         .order('first_name')
         .limit(10000);
       
@@ -261,6 +262,9 @@ const PaymentManagement = () => {
         const m = monthMap[mName];
         if (!y || !m) return false;
         const serial = toSerial(y, m);
+        // Learning athletes pay September to June only: hide empty July/August
+        const isLearning = (selectedAthlete?.surf_level || '').toLowerCase().trim() === 'learning';
+        if (isLearning && (m === 7 || m === 8) && !Number(p.amount_due) && !Number(p.amount_paid)) return false;
         return serial >= startSerial && serial <= endSerial;
       });
 
