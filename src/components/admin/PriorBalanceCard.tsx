@@ -540,8 +540,8 @@ const PriorBalanceCard = ({
 
           </div>
 
-          {/* Register Payment Button - separate line */}
-          {canEdit && priorBalance > 0 && (
+          {/* Register Payment Button - separate line (shown whenever there is any prior debt, incl. unpaid months of past seasons) */}
+          {canEdit && displayBalance > 0.004 && (
             <div className="mt-3">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -840,6 +840,11 @@ const PriorBalanceCard = ({
               {t('admin.priorBalancePayments.editBalanceDescription')}
             </DialogDescription>
           </DialogHeader>
+          {preSeasonOutstanding > 0 && (
+            <p className="text-sm rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive">
+              {t('admin.priorBalancePayments.editBalanceWarning').replace('{amount}', `€${preSeasonOutstanding.toFixed(2)}`)}
+            </p>
+          )}
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="newBalance">{t('admin.priorBalancePayments.newBalanceValue')}</Label>
