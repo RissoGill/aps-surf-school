@@ -35,6 +35,7 @@ import { PaymentsTab } from "@/components/coach/PaymentsTab";
 import AlertsCard from "@/components/shared/AlertsCard";
 import { useLanguage } from "@/i18n/LanguageContext";
 import CoachMessagesCard from "@/components/coach/CoachMessagesCard";
+import CoachDocumentsCard from "@/components/coach/CoachDocumentsCard";
 
 interface AttendanceRecord {
   id: string;
@@ -1393,6 +1394,11 @@ const CoachDashboard = () => {
         {/* Alerts Card - Always First */}
         {coachData?.coach_id && (
           <AlertsCard userType="coach" userId={coachData.coach_id} />
+        )}
+
+        {/* Documents Card - Before Messages */}
+        {coachData?.coach_id && (
+          <CoachDocumentsCard coachId={coachData.coach_id} />
         )}
 
         {/* Messages Card - After Alerts */}

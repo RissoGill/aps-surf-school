@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import AppHeader from "@/components/shared/AppHeader";
 import AppFooter from "@/components/shared/AppFooter";
 import CoachTrainingManagement from "@/components/admin/CoachTrainingManagement";
+import CoachDocumentsManagementCard from "@/components/admin/CoachDocumentsManagementCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/i18n/LanguageContext";
@@ -119,6 +120,8 @@ const DailyManagement = () => {
               </Card>
             );
           })}
+
+        <CoachDocumentsManagementCard />
 
         <CoachTrainingManagement userRole={userRole} athletes={athletes || []} />
       </main>
