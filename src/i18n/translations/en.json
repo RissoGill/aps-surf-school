@@ -603,6 +603,15 @@
         "adjustFilters": "Try adjusting your filters",
         "recordsWillAppear": "Payment records will appear here once added"
       }
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Licenses, insurance and other documents provided by the administration.",
+      "general": "General documents",
+      "mine": "My documents",
+      "empty": "No documents available.",
+      "view": "View",
+      "download": "Download"
     }
   },
   "admin": {
@@ -1144,6 +1153,28 @@
       "confirmDeleteMessage": "This will permanently delete {count} invalid attendance records. This action cannot be undone. Make sure you exported the CSV first.",
       "confirmDelete": "Yes, Delete",
       "allClear": "All Clear"
+    },
+    "documents": {
+      "title": "Coach Documents",
+      "description": "Upload and manage documents (licenses, insurance, regulations) visible on the coaches' dashboard.",
+      "add": "Add document",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete the document",
+      "empty": "No documents yet.",
+      "docTitle": "Title",
+      "docTitlePlaceholder": "E.g.: FPS License 2026",
+      "category": "Category",
+      "coach": "Coach",
+      "allCoaches": "All coaches",
+      "file": "File (PDF or image)",
+      "keepFile": "Current file (kept if you don't choose another)",
+      "save": "Save",
+      "saved": "Document saved.",
+      "deleted": "Document deleted.",
+      "saveError": "Could not save the document.",
+      "titleRequired": "Title must have at least 3 characters.",
+      "fileRequired": "Please choose a file to upload."
     }
   },
   "athlete": {
