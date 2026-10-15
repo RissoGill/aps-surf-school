@@ -603,6 +603,15 @@
         "adjustFilters": "Tente ajustar os filtros",
         "recordsWillAppear": "Os registos de pagamento aparecerão aqui quando adicionados"
       }
+    },
+    "documents": {
+      "title": "Documentos",
+      "description": "Licenças, seguros e outros documentos disponibilizados pela administração.",
+      "general": "Documentos gerais",
+      "mine": "Os meus documentos",
+      "empty": "Sem documentos disponíveis.",
+      "view": "Ver",
+      "download": "Descarregar"
     }
   },
   "admin": {
@@ -1144,6 +1153,28 @@
       "confirmDeleteMessage": "Isto irá eliminar permanentemente {count} registos de presença inválidos. Esta ação não pode ser desfeita. Certifique-se de que exportou o CSV primeiro.",
       "confirmDelete": "Sim, Eliminar",
       "allClear": "Tudo Limpo"
+    },
+    "documents": {
+      "title": "Documentos dos Treinadores",
+      "description": "Carregar e gerir documentos (licenças, seguros, regulamentos) visíveis no painel dos treinadores.",
+      "add": "Adicionar documento",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "deleteConfirm": "Tem a certeza que pretende eliminar o documento",
+      "empty": "Ainda não existem documentos.",
+      "docTitle": "Título",
+      "docTitlePlaceholder": "Ex.: Licença FPS 2026",
+      "category": "Categoria",
+      "coach": "Treinador",
+      "allCoaches": "Todos os treinadores",
+      "file": "Ficheiro (PDF ou imagem)",
+      "keepFile": "Ficheiro atual (mantido se não escolher outro)",
+      "save": "Guardar",
+      "saved": "Documento guardado.",
+      "deleted": "Documento eliminado.",
+      "saveError": "Não foi possível guardar o documento.",
+      "titleRequired": "O título deve ter pelo menos 3 caracteres.",
+      "fileRequired": "Escolha um ficheiro para carregar."
     }
   },
   "athlete": {

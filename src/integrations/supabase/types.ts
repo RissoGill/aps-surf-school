@@ -299,6 +299,42 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_documents: {
+        Row: {
+          category: string
+          coach_id: string | null
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          category?: string
+          coach_id?: string | null
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          category?: string
+          coach_id?: string | null
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       coach_message_replies: {
         Row: {
           content: string
