@@ -63,7 +63,7 @@ const FREETEXT_SUBCATEGORIES = ["Custos Campeonatos"];
 // Sub-subcategorias indexadas por categoria. Para casos onde dependem da subcategoria
 // (ex.: Impostos > IUC > matrícula), usar SUB_SUBCATEGORIES_BY_SUB.
 const SUB_SUBCATEGORIES: Record<string, string[]> = {
-  "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas"],
+  "Carrinhas": ["Gasóleo", "Oficinas", "AdBlue", "Leasing", "IUC", "Seguros", "Multas", "Aluguer"],
 };
 
 // Sub-subcategorias dependentes da combinação categoria + subcategoria.
